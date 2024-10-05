@@ -1,0 +1,13 @@
+{
+  "bibleAPI": {
+    "version": {
+      "en": [
+        {"name": "American Standard Version","key": "685d1470fe4d5c3b-01",
+        "name": "King James (Authorised) Version", "key": "de4e12af7f28f599-01"}
+      ],
+      "zh": [{"name": "","ket": "a6e06d2c5b90ad89-01"}]
+    },
+    "url": "https://api.scripture.api.bible/v1",
+    "key": "ed68c8af6809cedb2721efc6098347aa"
+  }
+}
