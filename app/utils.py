@@ -6,7 +6,8 @@ import re
 import xml.etree.ElementTree as ET
 
 def search_songs(keyword):
-    con = sqlite3.connect(r"..\db\en.sqlite")
+    path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+    con = sqlite3.connect(os.path.join(path, 'db', 'en.sqlite'))
     cur = con.cursor()
     sql = "select s.id as id, title, file_name from songs s left join media_files m on s.id = m.song_id where search_title like ?"
     keyword = "%" + keyword +"%"
@@ -30,7 +31,8 @@ def search_bible(keyword):
         return "Wrong", 400
 
 def get_song_by_id(id):
-    con = sqlite3.connect(r"..\db\en.sqlite")
+    path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+    con = sqlite3.connect(os.path.join(path, 'db', 'en.sqlite'))
     cur = con.cursor()
     sql = "select s.id as id, sb.name as bookname, title, lyrics, copyright, ccli_number, song_number, file_name from songs s left join song_books sb on s.song_book_id = sb.id left join media_files m on s.id = m.song_id where s.id = ?"
     result = cur.execute(sql, [id]).fetchall()
@@ -41,7 +43,7 @@ def get_lyrics(content):
     tree = ET.fromstring(content)
     lyrics = []
     for verse in tree.findall('./lyrics/verse'):
-        tag = re.sub(r'([^[]+)?(\[([^]]+)\]([^\s]+)\s?)', '<span class="lyric">\\1</span><span class="lyric" data-chord="\\3">\\4</span>', verse.text)
+        tag = re.sub(r'\[([^]]+)\]([^\s]+)\s?', '<div class="chord-letter"><span class="chord">\\1</span>\\2</div>', verse.text)
         text = re.sub(r'(\[[^]]+\])', '', verse.text)
         lyrics.append({'label': verse.attrib["label"], 'type': verse.attrib["type"], 'lyrics_tag': tag, 'lyrics': text})
     return lyrics

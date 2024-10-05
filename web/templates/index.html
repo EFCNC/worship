@@ -40,6 +40,24 @@
             text-align: right;
             padding: 10px;
         }
+        .line {
+            display: flex;
+            align-items: flex-end;
+            flex-wrap: wrap;
+        }
+
+        .chord-letter {
+            display: flex;
+            flex-direction: column;
+            padding: 0 5px;
+            align-items: center; /* center chord */
+        }
+
+        .chord {
+            font-style: italic;
+            font-weight: bold;
+            font-size: 25px;
+        }
 </style>
 </head>
 <body>
@@ -133,7 +151,7 @@ $(document).ready(function () {
 
     function display_song(data) {
         html = '';
-        html += "<p>Title: " + data["title"] + "<input type='checkbox' id='chord_chk' value='chord'><label for='chord_chk'>Chord</label></p><hr/><div id='verses'>";
+        html += "<p>Title: " + data["title"] + "<input type='checkbox' id='chord_chk' value='chord'><label for='chord_chk'>Chord</label></p><hr/><div id='verses' class='line'>";
         for(var i=0;i<data["lyrics"].length;i++) {
             lyrics += data["lyrics"][i]["lyrics"];
             lyrics_tag += data["lyrics"][i]["lyrics_tag"];
