@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>File List</title>
+</head>
+<body>
+<h3>Available Worship EasySlides</h3>
+{% for f in files %}
+    <a href="API/download/{{ f.filename }}">{{ f.filename }}</a><br/>
+{% endfor %}
+</body>
+</html>
