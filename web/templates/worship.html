@@ -1,0 +1,318 @@
+{% include 'header.html' %}
+
+<style>
+.worship_container {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+.worship_container > div {
+  min-width: 220px;
+  margin: 10px;
+  text-align: center;
+  font-size: 14px;
+}
+
+@media (max-width: 600px) {
+  .worship_container {
+    flex-direction: column;
+    flex: 100%;
+  }
+}
+
+.worship-card {
+  background-color: transparent;
+  width: 300px;
+  height: 300px;
+  perspective: 1000px;
+}
+
+.card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+}
+
+.worship-card:hover .card-inner {
+  transform: rotateY(180deg);
+}
+
+.card-front, .card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  border-radius: 5px;
+}
+
+.card-front {
+  background-color: #8FBC8F;
+  color: #556B2F;
+}
+
+.card-back {
+  background-color: #009688;
+  color: #fff;
+  transform: rotateY(180deg);
+}
+
+.overlay_btns {
+    position: absolute ;
+    bottom: 10px;
+    right: 10px;
+    font-size: 12px;
+}
+
+.edit_btn {
+border:none;display:inline-block;padding:8px 16px;vertical-align:middle;overflow:hidden;text-decoration:none;color:inherit;background-color:inherit;text-align:center;cursor:pointer;white-space:nowrap;    border-radius: 50px;
+}
+
+.ui-dialog-titlebar {
+    background-color: #008CBA;
+    color: #fff;
+}
+
+</style>
+</head>
+<body>
+<div class="worship_container">
+{% for w in worship %}
+    <div class="worship-card">
+        <div class="card-inner" date="{{ w.date }}">
+
+        <div class="card-front">
+            <h3>{{ w.date }}</h3>
+    {% if w.worship %}
+        Sermon: {{ w.worship.sermon_title }}<br/>
+        Speaker: {{ w.worship.speaker }}<br/>
+        </div>
+            <div class="card-back" name="{{ w.worship.worship_id }}">
+            <b>Worship Team</b><br/>
+                {% for team in w.worship.content %}
+                    {% if team.user_name != '' %}
+                        {{ team.role }}:&nbsp;{{ team.user_name }}<br/>
+                    {% endif %}
+                {% endfor %}
+            <div class="overlay_btns"><button id="song_btn" name="{{ w.worship.worship_id }}">Songs</button>&nbsp;<button id="team_btn" name="{{ w.worship.worship_id }}">Teams</button></div>
+        </div>
+    {% else %}
+            </div>
+      <div class="card-back">
+            <div class="overlay_btns"><button id="song_btn" name="{{ w.worship.worship_id }}">Songs</button>&nbsp;<button id="team_btn" name="{{ w.worship.worship_id }}">Teams</button></div>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endfor %}
+</div>
+<div id="roster"></div>
+</body>
+<script>
+let teams = [];
+let teams_temp;
+let taken_role;
+let available;
+let worship_id = -1;
+
+function check_availability(teams) {
+    temp = teams_temp.map(x=>x.user_id);
+    _teams = [...teams];
+    for(i in teams) {
+        if(temp.indexOf(teams[i].id) >= 0) {
+            _teams.splice(_teams.indexOf(teams[i]),1);
+        }
+    }
+    return _teams;
+}
+
+function pop_role(name) {
+    for(i in taken_role) {
+        if(taken_role[i].name == name) {
+            taken_role.splice(i,1);
+            break;
+        }
+    }
+}
+
+function get_roster(id, date) {
+    $("#roster").empty();
+    url = 'API/inst_team/'+id;
+    $.when( $.ajax( url ) ).then(function( response, textStatus, jqXHR ) {
+        if(response) {
+            taken_role = response['inst'];
+            $.each(response['roster'], function() {
+                p = document.createElement('p');
+                team_list = setOption(response['team'], this.user_id);
+                p.innerHTML = this.inst_name + ' => ';
+                p.append(team_list);
+                br = document.createElement('br');
+                $("#roster").append(p);
+                pop_role(this.inst_name);
+                teams.push({'id': this.id, 'user_id': this.user_id});
+            });
+            teams_temp = [...teams];
+            p = document.createElement('p');
+            p.setAttribute('class', 'addition');
+            button = document.createElement('button');
+            button.setAttribute('class', 'additional_role_btn');
+            button.setAttribute('title', 'Click to add team member');
+            button.innerHTML = ' > ';
+            p.append(button);
+            $("#roster").append(p);
+            $("#roster").dialog({
+                title: "Assign Worship Team (" + date + ")",
+                width: 'auto',
+                buttons: [
+	                {
+	                    id: "button-add",
+                        text : "OK",
+                        click: function() {
+                            $( this ).dialog( "close" );
+                            location.reload();
+                        }
+                    }
+                ]
+            });
+        }
+    });
+}
+
+function setOption(team, value) {
+    team_list = document.createElement('select');
+    seen = [];
+    console.log(team)
+    $.each(team, function() {
+        if (seen.indexOf(this.id) < 0) {
+            o = document.createElement('option');
+            o.text = this.name + '(' + this.name_2 + ')';
+            o.value = this.id;
+            if (this.id == value) {
+                o.selected = true;
+            }
+            team_list.append(o);
+            seen.push(this.id)
+        }
+    });
+    return team_list;
+}
+
+function setRoleOption(user){
+    select_role = document.createElement('select');
+    select_role.setAttribute('class', 'additional_role');
+    for(role of taken_role) {
+        if(user.roles.indexOf(role.id) >= 0) {
+            option_role = document.createElement('option');
+            option_role.text = role.name
+            option_role.value = role.id
+            select_role.append(option_role)
+        }
+    }
+    return select_role;
+}
+
+$(document).on('click', '.additional_add_btn', function () {
+    parent = $(this).parent()
+    console.log( parent.children('additional_role').val())
+    role_id = Number(parent.children('.additional_role').val());
+    user_id = Number(parent.children('.additional_member').val());
+    data = JSON.stringify({'worship_id': worship_id, 'role_id': role_id, 'user_id': user_id});
+    url = 'API/roles/' + date;
+    $.ajax({
+        type: "post",
+        url: url,
+	    data: data,
+        complete: function(response) {
+          	if(response.status==200) {
+           	    // Refresh Team dialog
+           	    get_roster(worship_id, date);
+    	    }
+            else {
+                alert(response);
+		    }
+        },
+        contentType: "application/json",
+        dataType: 'json'
+    });
+
+
+});
+
+$(document).on('click', '.additional_role_btn', function () {
+    parent = $(this).parent();
+    $(this).remove();
+    url = 'API/roles/' + date;
+    $.when( $.ajax( url ) ).then(function( response, textStatus, jqXHR ) {
+        if(response) {
+            available = check_availability(response);
+            if (available.length > 0) {
+                init_id = available[0];
+                select = document.createElement('select');
+                select.setAttribute('class', 'additional_member');
+                $.each(available, function() {
+                    option = document.createElement('option');
+                    option.text = this.name
+                    option.value = this.id
+                    select.append(option)
+                });
+                parent.append(select);
+                select_role = setRoleOption(init_id);
+                if (select_role.length > 0) {
+                    parent.append(select_role);
+                    parent.children('.additional_role').after('<button class="additional_add_btn" title="Add to Roster"> + </button>');
+                }
+                else {
+                    parent.children('.additional_member').after("<span class='msg'> Role have been taken...</span>");
+                }
+            }
+            else {
+                parent.html("No Available Team Member for this week!!");
+            }
+        }
+    });
+});
+
+$(document).on('change', '.additional_member', function() {
+    parent = $(this).parent();
+    parent.children('.msg').remove()
+    parent.children('.additional_role').remove();
+    parent.children('.additional_add_btn').remove()
+    user = available.filter(x=>x.id == $(this).val());
+    select = setRoleOption(user[0]);
+    if (select.length > 0) {
+        parent.append(select_role);
+        parent.children('.additional_role').after('<button class="additional_add_btn" title="Add to Roster"> + </button>');
+    }
+    else {
+        parent.children('.additional_member').after("<span class='msg'> Role have been taken...</span>");
+    }
+});
+
+$(document).ready(function () {
+    $(".overlay_btns button").on('click', function () {
+        id = $(this).attr('name');
+        date = $(this).parent().parent().parent().attr('date')
+        if(!id) {
+            $("#roster").html();
+        }
+        else {
+            worship_id = Number(id);
+            if (this.id == 'song_btn') {
+                window.location.href = '?id='+id;
+            }
+            else if (this.id == 'team_btn') {
+                get_roster(id, date);
+            }
+        }
+    });
+});
+
+</script>
+</html>
