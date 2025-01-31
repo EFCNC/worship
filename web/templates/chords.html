@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>EFCNC Worship Songs Database</title>
+      <link href="../static/jquery-ui.css" rel="stylesheet">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+	  <script src="../static/jquery-3.6.0.min.js"></script>
+       <script src="../static/jquery-ui.js"></script>
+       <script src="../static/jquery.weekpicker.js"></script>
+    <style>
+            #preview {
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-color: #000;
+        text-align: center;
+        font-size: 50px;
+        padding: 10px;
+        color: #fff;
+    }
+
+        .song_title {
+            cursor: pointer;
+        }
+        .highlighted {
+            font-weight: 400px;
+            color: red;
+        }
+        #popup {
+            background-color: #fff;
+            width: 300px;
+            border: 2px solid green;
+            padding: 50px;
+            margin: 20px;
+        }
+        .lyric {
+            display: inline-grid;
+            grid-template-columns: auto;
+            grid-template-rows: auto auto;
+            line-height: 1;
+        }
+        .lyric[data-chord] {
+            --chord: attr(data-chord);
+        }
+        .lyric:before {
+            content: var(--chord, '\00a0');
+        }
+        #chord_chk {
+            text-align: right;
+            padding: 10px;
+        }
+        .line {
+            display: flex;
+            align-items: flex-end;
+            flex-wrap: wrap;
+        }
+
+        .chord-letter {
+            display: flex;
+            flex-direction: column;
+            padding: 0 2px;
+            align-items: center; /* center chord */
+        }
+
+        .chord {
+            font-style: italic;
+            font-weight: bold;
+            font-size: 15px;
+        }
+    .split 1 {
+        height: 100%;
+    }
+
+</style>
+</head>
+<body>
+<div id="search_panel"><input id="keyword" type="text"></text>&nbsp;<button id="search_btn">Search</button>&nbsp;<button id="search_btn1">Search Bible</button></div>
+<hr/>
+<div id="preview" class="split 1"><div id="songs"></div>
+<div id="region"></div>
+</div>
+<div id="bible"></div>
+</body>
+<script>
+var lyrics = '';
+var lyrics_tag = '';
+$(document).ready(function () {
+    $("#search_btn").click(function() {
+        var keyword = $("#keyword").val();
+        if (keyword == '') {
+            $("#keyword").focus();
+            return false;
+        };
+        var url = '/API/search?keyword=' + keyword;
+        $.when( $.ajax( url ) ).then(function( data, textStatus, jqXHR ) {
+            // This returns dict with id, title and file
+            console.log(data)
+            var html = '';
+            for(var i=0;i<data['right'].length;i++) {
+                html += "<span class='song_title' id='song_" + data['right'][i]['id'] + "' onclick='get_song(this.id); return false'>" + highlight_keyword(keyword, data['right'][i]['title']) + "</span></a>";
+                /*if (data[i]['file']!=null) {
+                    html += "<a href='title?id=" + data['right'][i]['id'] + "'>" + data['right'][i]['file']+ "</a>";
+                }*/
+                html += "<br/>";
+            }
+            $("#songs").html(html);
+        });
+
+    });
+
+    $("#search_btn1").click(function() {
+        var keyword = $("#keyword").val();
+        if (keyword == '') {
+            $("#keyword").focus();
+            return false;
+        };
+        var url = '/API/search/bible?keyword=' + keyword;
+        $.when( $.ajax( url ) ).then(function( data, textStatus, jqXHR ) {
+            // This returns dict with id, title and file
+            console.log(jqXHR.status)
+            var html = '';
+            verses = data["data"]["verses"]
+            if(!data["data"]) {
+                $("#bible").html("No verses found!!");
+                return false;
+            }
+            for(var i=0;i<verses.length;i++) {
+                html += verses[i]["reference"] + ": " + highlight_keyword(keyword, verses[i]["text"]) + "<br/>";
+            }
+            $("#bible").html(html);
+        });
+    });
+
+    $(document).on("click", "#chord_chk", function(e) {
+        if(this.checked) {
+            $("#verses").html(lyrics_tag);
+        }
+        else {
+            $("#verses").html(lyrics);
+        }
+    });
+        /*$(document).on("mouseover", ".song_title", function(e) {
+            mouseX = e.pageX;
+            mouseY = e.pageY;
+            id = this;
+            console.log(e.pageX, e.pageY);
+            //$(this).css({position: 'relative'});
+            $("#popup").css({top: e.pageX, left: e.pageY, position:'absolute'});
+            $('#popup').toggle();
+        });
+
+        $(document).on("mouseout", ".song_title", function(e) {
+            $('#popup').toggle();
+        });*/
+});
+    function get_song(id) {
+        id = id.split('_')[1];
+        var url = '/API/song/' + id + '?data=1';
+        $("#songs").html('Loading...');
+        $.when( $.ajax( url ) ).then(function( data, textStatus, jqXHR ) {
+            html = display_song(data);
+            $("#songs").html(html);
+            $("#verses").html(lyrics);
+        });
+    }
+
+    function display_song(data) {
+        html = '';
+        lyrics = '';
+        lyrics_tag = '';
+        html += "<p>Title: " + data["title"] + "<input type='checkbox' id='chord_chk' value='chord'><label for='chord_chk'>Chord</label></p><hr/><div id='verses' class='line'>";
+        for(var i=0;i<data["content"].length;i++) {
+            lyrics += data["content"][i]["origin_text"];
+            lyrics_tag += data["content"][i]["origin_chord"];
+        }
+        html += "</div>";
+        return html;
+    }
+
+    function highlight_keyword(keyword, text) {
+        var regEx = new RegExp((keyword.trim()), "ig");
+        return text.replace(regEx, function(a){ return '<span class="highlighted">' + a + '</span>';});
+    }
+
+</script>
+</html>
