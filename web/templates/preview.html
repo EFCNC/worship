@@ -1,0 +1,25 @@
+<!--
+    This is a preview page to show how worship presentation will look like
+    param: id=worship_id, role=role_id
+    keypress: TODO
+-->
+
+{% include 'header.html' %}
+
+<style>
+    body, html {
+        height: 100%;
+    }
+</style>
+<body>
+    <div id="preview" class="split 1"></div>
+</body>
+<script src="../static/presentation.js"></script>
+<script>
+    presentation = {{ presentation|safe }};
+    worship_data = {{ w|safe }};
+
+    $(document).ready(function() {
+        load($('#preview'));
+    });
+</script>
