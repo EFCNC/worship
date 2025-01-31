@@ -228,6 +228,7 @@ $(document).ready(function () {
     console.log("Coming Sunday", sunday[0]);
     find_match_team(sunday[0]);
     $("#sundays").val(sunday[0]);
+    $("#btns").show('slow');
 
     $('#sundays').on('change', function() {
         s = $(this).val();
