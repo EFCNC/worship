@@ -1,0 +1,144 @@
+<style>
+.verses {
+    margin: 5px;
+    padding: 2px;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.bookname:hover {
+    cursor: pointer;
+}
+
+.bookname.old {
+    background: #a52a2a;
+    color: #fff;
+    border-radius: 5px;
+    padding: 5px;
+}
+
+.bookname.new {
+    background: #004040;
+    color: #fff;
+    border-radius: 5px;
+    padding: 5px;
+}
+
+#result-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+#result-container > div {
+//    width: 10%;
+}
+
+</style>
+<form id="content">
+    Notes:<br/>
+    <p><textarea name="mynotes" id="mynotes" rows="5" cols="40">{{ content.notes }}</textarea>
+    </p>
+    <input type="hidden" name="scheduled_date" value="{{ content.date }}"/>
+    <input name="bible_keywords" type="text"/>&nbsp;
+    <button id="search_bible_btn" onclick="search_bible();return false;">Search</button>
+    <input type="checkbox" id="old_book" checked>OT <input type="checkbox" id="new_book" checked>NT<br/>
+    <div id="result-container">
+    <div><button id="pre" style="display:none">&lt;</button></div><div id="result" style="width:80%">Search keywords to find bible verses</div><div><button id="next" style="display:none">&gt;</button></div>
+    </div>
+</form>
+<script>
+    var page = 0;
+    var total = 0;
+    var old_book = 'gen-mal';
+    var new_book = 'mat-rev';
+    var old_book_id = ['GEN', 'EXO', 'LEV', 'NUM', 'DEU', 'JOS', 'JDG', 'RUT', '1SA', '2SA', '1KI', '2KI', '1CH', '2CH', 'EZR', 'NEH', 'EST', 'JOB', 'PSA', 'PRO', 'ECC', 'SNG', 'ISA', 'JER', 'LAM', 'EZK', 'DAN', 'HOS', 'JOL', 'AMO', 'OBA', 'JON', 'MIC', 'NAM', 'HAB', 'ZEP', 'HAG', 'ZEC', 'MAL'];
+    var new_book_id = ['MAT', 'MRK', 'LUK', 'JHN', 'ACT', 'ROM', '1CO', '2CO', 'GAL', 'EPH', 'PHP', 'COL', '1TH', '2TH', '1TI', '2TI', 'TIT', 'PHM', 'HEB', 'JAS', '1PE', '2PE', '1JN', '2JN', '3JN', 'JUD', 'REV'];
+
+    function get_url() {
+        keywords = $('input[name="bible_keywords"]').val();
+        if (keywords) {
+            url = 'API/search/bible?keywords=' + keywords + '&page=' + page;
+            if($('#old_book').is(':checked') && $('#new_book').is(':checked')) {
+                url = url;
+            }
+            else if($('#old_book').is(':checked')) {
+                url += '&range=' + old_book;
+            }
+            else if($('#new_book').is(':checked')) {
+                url += '&range=' + new_book;
+            }
+            return url;
+        }
+    }
+
+    function search_bible() {
+        url = get_url();
+        if (url) {
+            $.when( $.ajax( url ) ).then(function( data, textStatus, jqXHR ) {
+                $("#pre").show();
+                $("#next").show();
+                html = '';
+                total = data.length;
+                if (total >= 10) {
+                    $("#next").attr('disabled', false);
+                    if (page == 0) {
+                        $("#pre").attr('disabled', true);
+                    }
+                    else {
+                        $("#pre").attr('disabled', false);
+                    }
+                }
+                else {
+                    $("#next").attr('disabled', true);
+                }
+
+                for(i=0;i<total;i++) {
+                    html += '<div class="verses">'
+                    if (old_book_id.indexOf(data[i].bookId)>=0) {
+                        html += '<span class="bookname old">';
+                    }
+                    else {
+                        html += '<span class="bookname new">';
+                    }
+                    html += data[i].reference + '</span> ' + data[i].text + '</div>';
+                }
+
+                $("#result").html(html);
+
+                $(".bookname").click(function() {
+                    note = $("#mynotes").val();
+                    if (note) {
+                        note += '\n'+$(this).parent().text();
+                    }
+                    else {
+                        note = $(this).parent().text();
+                    }
+                    $("#mynotes").val(note);
+                });
+            });
+                return false;
+        }
+    }
+
+    $("#next").click(function() {
+        page += 1;
+        search_bible();
+        return false;
+    });
+
+    $("#pre").click(function() {
+        page -= 1;
+        page = page<0?0:page;
+        search_bible();
+        return false;
+    });
+
+    $("#old_book").click(function() {
+        search_bible();
+    });
+
+    $("#new_book").click(function() {
+        search_bible();
+    });
+
+</script>
