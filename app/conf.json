@@ -2,12 +2,96 @@
   "bibleAPI": {
     "version": {
       "en": [
-        {"name": "American Standard Version","key": "685d1470fe4d5c3b-01",
-        "name": "King James (Authorised) Version", "key": "de4e12af7f28f599-01"}
+        {
+          "name": "American Standard Version",
+          "key": "685d1470fe4d5c3b-01"
+        },
+        {
+          "name": "King James (Authorised) Version",
+          "key": "de4e12af7f28f599-01"
+        }
       ],
-      "zh": [{"name": "","ket": "a6e06d2c5b90ad89-01"}]
+      "zh": [
+        {
+          "name": "",
+          "key": "a6e06d2c5b90ad89-01"
+        }
+      ]
     },
     "url": "https://api.scripture.api.bible/v1",
     "key": "ed68c8af6809cedb2721efc6098347aa"
+  },
+  "easyslides": {
+    "templates": {
+      "theme": [
+        "<ShowSongHeadings>3</ShowSongHeadings>\n<ShowSongHeadingsAlign>0</ShowSongHeadingsAlign>\n<DisplayRegions>2</DisplayRegions>\n<UseShadowFont>1</UseShadowFont>\n<ShowNotations>0</ShowNotations>\n<CapoZero>0</CapoZero>\n<UseOutlineFont>0</UseOutlineFont>\n<ScreenColour1>-16777056</ScreenColour1>\n<ScreenColour2>-16777056</ScreenColour2>\n<ScreenPatternStyle>0</ScreenPatternStyle>\n<FontColour1>-1</FontColour1>\n<FontColour2>-1</FontColour2>\n<FontAlign1>2</FontAlign1>\n<FontAlign2>2</FontAlign2>\n<FontRTL1>0</FontRTL1>\n<FontRTL1>0</FontRTL1>\n<FontVPosition1>0</FontVPosition1>\n<FontVPosition2>50</FontVPosition2>\n<BackgroundPicture>I;Images\\Paint Sweeps Blank.jpg</BackgroundPicture>\n<BackgroundPictureMode>3</BackgroundPictureMode>\n<VerticalAlign>1</VerticalAlign>\n<DisplayRegionsLayout>0</DisplayRegionsLayout>\n<ScreenLeftMargin>2</ScreenLeftMargin>\n<ScreenRightMargin>2</ScreenRightMargin>\n<ScreenBottomMargin>0</ScreenBottomMargin>\n<ShowItemTransition>0</ShowItemTransition>\n<ShowSlideTransition>0</ShowSlideTransition>\n<MediaOption>0</MediaOption>\n<MediaVolume>50</MediaVolume>\n<MediaBalance>0</MediaBalance>\n<MediaMute>0</MediaMute>\n<MediaRepeat>0</MediaRepeat>\n<MediaWidescreen>0</MediaWidescreen>\n<MediaCaptureDeviceNumber>1</MediaCaptureDeviceNumber>\n<PanelBackColour>-16777216</PanelBackColour>\n<PanelTextColour>-1</PanelTextColour>\n<PanelBackColourTransparent>1</PanelBackColourTransparent>\n<PanelTextColourAsRegion1>1</PanelTextColourAsRegion1>\n<PanelShowPanel>1</PanelShowPanel>\n<PanelSlides>0</PanelSlides>\n<PanelSongs>0</PanelSongs>\n<PanelTitle>1</PanelTitle>\n<PanelCopyright>1</PanelCopyright>\n<PanelPrevNext>0</PanelPrevNext>\n<PanelFontName>Microsoft Sans Serif</PanelFontName>\n<PanelFontBold>0</PanelFontBold>\n<PanelFontItalic>0</PanelFontItalic>\n<PanelFontUnderline>0</PanelFontUnderline>\n<PanelFontShadow>1</PanelFontShadow>\n<PanelFontOutline>0</PanelFontOutline>\n<PanelHeight>6</PanelHeight>\n<PublishItemNumberingStyle>0</PublishItemNumberingStyle>\n<PublishItemNumberingEncloseStyle>0</PublishItemNumberingEncloseStyle>\n<PublishScheduleStyle>0</PublishScheduleStyle>\n<PublishItemStyle>0</PublishItemStyle>\n<PBWordSettings>1;0;1;13;-16777216;1;1;0;0;11;-16777216;1;0;0;0;6;-16777216;1;0;0;0;11;-16777216;1;0;1;0;11;-16777216;1;0;0;0;11;-16777216;1;0;0;0;11;-16777216;1;0;0;0;11;-16777216;1;</PBWordSettings>\n<PBShowHeadings0>1</PBShowHeadings0>\n<PBShowHeadings1>1</PBShowHeadings1>\n<PBShowHeadings2>1</PBShowHeadings2>\n<PBShowHeadings3>1</PBShowHeadings3>\n<PBShowHeadings4>1</PBShowHeadings4>\n<PBShowHeadings5>1</PBShowHeadings5>\n<PBShowHeadings6>1</PBShowHeadings6>\n<PBShowCCLISongNumber>1</PBShowCCLISongNumber>\n<PBLyricsPattern>1</PBLyricsPattern>\n<PBIndexPage>2</PBIndexPage>\n<PBRepeatingChorus>1</PBRepeatingChorus>\n<PBPrinterSpaces>0</PBPrinterSpaces>\n<PBShowSection>2</PBShowSection>\n<PBShowColumns>2</PBShowColumns>\n<PBPageSize>0</PBPageSize>\n<PBSpacing1>0</PBSpacing1>\n<PBSpacing2>2</PBSpacing2>\n<PBShowScreenBreaks>1</PBShowScreenBreaks>\n<PBOneSongPerPage>0</PBOneSongPerPage>\n<PBCJKGroupStyle>0</PBCJKGroupStyle>\n<PBShowNotations>0</PBShowNotations>\n<PBShowTiming>0</PBShowTiming>\n<PBShowKey>0</PBShowKey>\n<PBShowCapo>0</PBShowCapo>\n<PBCapoZero>0</PBCapoZero>\n<PBPrinterSpaces>0</PBPrinterSpaces>\n<PBLeftMargin>20</PBLeftMargin>\n<PBTopMargin>20</PBTopMargin>\n<PBRightMargin>20</PBRightMargin>\n<PBBottomMargin>20</PBBottomMargin>\n<PBColumnGap>12</PBColumnGap>\n<PBFooterNoteOption>0</PBFooterNoteOption>\n<PBFooterNoteUserText />\n<PBFontOption>0</PBFontOption>\n<PBFontOptionFontname />"
+      ],
+      "song": [
+        "<SongNumber>0</SongNumber>\n<Capo>-1</Capo>\n<TransposeOffset>0</TransposeOffset>\n<FontShadowColour>-16777216</FontShadowColour>\n<FontOutlineColour>-16777216</FontOutlineColour>\n<FontShadowDepth>2</FontShadowDepth>\n<FontOutlineWidth>2</FontOutlineWidth>\n<FormatData>\n<ShowSongHeadings>3</ShowSongHeadings>\n<ShowSongHeadingsAlign>0</ShowSongHeadingsAlign>\n<UseShadowFont>1</UseShadowFont>\n<ShowNotations>0</ShowNotations>\n<CapoZero>0</CapoZero>\n<UseOutlineFont>0</UseOutlineFont>\n<DisplayRegions>2</DisplayRegions>\n<DisplayRegionsLayout>0</DisplayRegionsLayout>\n<ScreenColour1>-16777056</ScreenColour1>\n<ScreenColour2>-16777056</ScreenColour2>\n<ScreenPatternStyle>0</ScreenPatternStyle>\n<BackgroundPicture>I;Images\\Paint Sweeps Blank.jpg</BackgroundPicture>\n<BackgroundPictureMode>3</BackgroundPictureMode>\n<VerticalAlign>1</VerticalAlign>\n<ScreenLeftMargin>2</ScreenLeftMargin>\n<ScreenRightMargin>2</ScreenRightMargin>\n<ScreenBottomMargin>0</ScreenBottomMargin>\n<ShowItemTransition>0</ShowItemTransition>\n<ShowSlideTransition>0</ShowSlideTransition>\n<FontVPosition1>0</FontVPosition1>\n<FontVPosition2>50</FontVPosition2>\n<MediaOption>0</MediaOption>\n<MediaVolume>50</MediaVolume>\n<MediaBalance>0</MediaBalance>\n<MediaMute>0</MediaMute>\n<MediaRepeat>0</MediaRepeat>\n<MediaWidescreen>0</MediaWidescreen>\n<MediaCaptureDeviceNumber>1</MediaCaptureDeviceNumber>\n<HeadingFontFormat>1</HeadingFontFormat>\n<HeadingFontPercentSize>100</HeadingFontPercentSize>\n<HeadingFontBold>0</HeadingFontBold>\n<HeadingFontItalic>0</HeadingFontItalic>\n<HeadingFontUnderline>1</HeadingFontUnderline>\n<HeadingFontChorusItalic>0</HeadingFontChorusItalic>\n<FontBold1>0</FontBold1>\n<FontItalic1>0</FontItalic1>\n<FontUnderline1>0</FontUnderline1>\n<FontChorusBold1>0</FontChorusBold1>\n<FontChorusItalic1>0</FontChorusItalic1>\n<FontChorusUnderline1>0</FontChorusUnderline1>\n<FontBold2>0</FontBold2>\n<FontItalic2>0</FontItalic2>\n<FontUnderline2>0</FontUnderline2>\n<FontChorusBold2>0</FontChorusBold2>\n<FontChorusItalic2>0</FontChorusItalic2>\n<FontChorusUnderline2>0</FontChorusUnderline2>\n<FontName1>Arial</FontName1>\n<FontName2>Arial</FontName2>\n<FontSize1>40</FontSize1>\n<FontSize2>40</FontSize2>\n<FontColour1>-1</FontColour1>\n<FontColour2>-1</FontColour2>\n<FontRTL1>0</FontRTL1>\n<FontRTL2>0</FontRTL2>\n<FontAlign1>2</FontAlign1>\n<FontAlign2>2</FontAlign2>\n<KeyTransposeOffset>0</KeyTransposeOffset>\n<PreviousKeyTransposeOffset>0</PreviousKeyTransposeOffset>\n<ShowDataPanel>2</ShowDataPanel>\n<AutoTextOverflow>2</AutoTextOverflow>\n<UseLargestFontSize>2</UseLargestFontSize>\n<LineBetweenRegions>2</LineBetweenRegions>\n<WordWrapLeftAlignIndent>2</WordWrapLeftAlignIndent>\n</FormatData>\n<Image/>\n</Item>\n</Easyslides>"
+      ]
+    },
+    "path": "c:\\temp\\easyslides\\{}"
+  },
+  "db": {
+      "default": {
+        "name": "worship.db",
+        "search": {
+            "query": "select s.song_id, s.title, s.lang, s.lang_2, s.song_key, (select link from media m where m.song_id=s.song_id and m_type=0) as video, (select link from media m where m.song_id=s.song_id and m_type=1) as score from songs s where {} group by s.song_id",
+            "columns": [
+              "s.title",
+              "s.content"
+            ],
+            "condition": "or"
+        },
+          "get_song": "select s.title, s.author, s.lang, s.lang_2, s.song_key, s.sequence, s.bible_verse, s.lyricist, s.book, s.copyright, s.ccli, s.content, (select link from media m where m.song_id=s.song_id and m_type=0) as video, (select link from media m where m.song_id=s.song_id and m_type=1) as score, s.song_id as id from songs s where s.song_id = ?",
+          "enabled": 1
+      },
+      "imported": [
+        {
+          "name": "en.sqlite",
+          "lang": "en",
+          "table": "songs",
+          "search": {
+            "query": "select s.id as id, title, file_name from songs s left join media_files m on s.id = m.song_id where {}",
+            "columns": [
+              "s.search_title",
+              "s.search_lyrics"
+            ],
+            "condition": "or"
+          },
+          "get_song": "select s.id as id, title, sb.name as bookname, null as lang, lyrics, copyright, ccli_number, song_number, file_name from songs s left join song_books sb on s.song_book_id = sb.id left join media_files m on s.id = m.song_id where s.id = ?",
+          "enabled": 1
+        },
+        {
+          "name": "zh.sqlite",
+          "lang": "zh-CN",
+          "table": "songs",
+          "search": {
+            "query": "select s.id as id, title, file_name from songs s left join media_files m on s.id = m.song_id where {}",
+            "columns": [
+              "s.search_title",
+              "s.search_lyrics"
+            ],
+            "condition": "or"
+          },
+          "get_song": "select s.id as id, title, sb.name as bookname, null as lang, lyrics, copyright, ccli_number, song_number, file_name from songs s left join song_books sb on s.song_book_id = sb.id left join media_files m on s.id = m.song_id where s.id = ?",
+          "enabled": 1
+        },
+        {
+          "name": "stream_of_praise.db",
+          "lang": "zh-TW",
+          "table": "songs",
+          "search": {
+              "query": "select song_id, title, lang from songs where {}",
+              "columns": [
+                "title",
+                "content"
+              ],
+            "condition": "or"
+          },
+          "get_song": "select song_id, title, book, lang, content, copyright, ccli, song_number, author, lyricist, song_key from songs where song_id = ?",
+          "enabled": 1
+        }
+      ]
   }
 }
