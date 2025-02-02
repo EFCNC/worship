@@ -20,7 +20,7 @@
 
 
 ### Current imported song database
-. en.sqlite (Large amount of English hymns, not latest update)
-. zh.sqlite (Mostly from 迦南詩選)
-. stream_of_praise.db (讚美之泉, lyrics only in Chinese/Taiwanese)
-. Coming soon - 台語聖詩 
+* en.sqlite (Large amount of English hymns, not latest update)
+* zh.sqlite (Mostly from 迦南詩選)
+* stream_of_praise.db (讚美之泉, lyrics only in Chinese/Taiwanese)
+* Coming soon - 台語聖詩 
