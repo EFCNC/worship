@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Musician View</title>
+	<script src="../static/jquery-3.6.0.min.js"></script>
+    <script src="../static/socket.io.js"></script>
+    <script src="../static/worship.js"></script>
+    <link href="../static/musician_view.css" rel="stylesheet">
+    <style>
+        body, html {
+            height: 100%;
+        }
+    </style>
+    <script>
+
+    // init variables
+    let slides;
+    let presentation = {{ presentation|safe }};
+    slides_data = {{ pos|safe if pos else []}};
+    let pos = 0;
+    let order = 0;
+    if (slides_data) {
+        pos = slides_data[0];
+        order = slides_data[1];
+    }
+
+    // Socket conversation
+    var socket = io.connect('');
+    socket.on('connect', function () {
+        console.log('Connected to the server');
+    });
+
+    socket.on('response', function (data) {
+        console.log('Server sent: ' + data);
+        pos = data[0];
+        order = data[1];
+        load_watcher($('#slides'));
+    });
+
+    socket.on('reload', function (data) {
+        console.log('Server sent: ' + data);
+        presentation = data;
+        load_watcher($('#slides'));
+    });
+
+    socket.on('popup', function (data) {
+        console.log('Server sent: ' + data);
+    });
+
+    // load slides based on current pos, order
+    function load_watcher(elm) {
+        var set = document.createElement('div');
+        set.setAttribute('name', pos);
+        set.setAttribute('class', 'slide');
+        data = presentation[pos];
+        if (data.type == 'song') {
+            set.setAttribute('name', pos);
+            set.setAttribute('class', 'content');
+            set.innerHTML = '<span class="title"><b>' + data.title + '</b></span>';
+            l = data.content[order];
+            set.innerHTML += '<div class="song">' + l.origin_chord + '</div>';
+        }
+        else if(data.type == 'info') {
+            v = data.notes.match(/([^\[]+)\[[^\]]+\](.+)/i)
+            console.log(data.notes, v)
+            if(v) {
+                set.innerHTML += '<div class="notes_part">' + v[1] + '</div><div class="lyrics_part region 1">' + v[2] + '</div>';
+            }
+            else {
+                set.innerHTML += '<div class="notes_part">' + data.notes + '</div>';
+            }
+        }
+        elm.empty();
+        elm.append(set);
+    }
+
+    // Events listener
+    $(document).ready(function() {
+        slides = $('#slides');
+        elem = document.getElementById("slides");
+        $.when(load_watcher(slides)).then(function() {
+            go_full_screen();
+        });
+    });
+
+</script>
+</head>
+<body>
+<div id="slides"></div>
+</body>
+</html>
