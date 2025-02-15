@@ -1,4 +1,4 @@
-<h3>You are about to import songs to our worship database</h3>
+<h3>Song Editor</h3>
 <p>
     If you need to add translation to it, please add the tag '[region 2]' before it under each section.<br/>
     <b>ex: &lt;chorus&gt;...<br/>
@@ -8,20 +8,20 @@
 </p>
 <form id="content">
     Title: <input name="title" type="text" value="{{ content.title }}"/>
-    Book: <input name="book_name" type="text" value="{{ content.book_name }}"/>
-    Key: <input name="key" type="text" value="{{ content.key }}" style="width: 30px;"/>
+    Book: <input name="book" type="text" value="{{ content.book }}"/>
+    Key: <input name="song_key" type="text" value="{{ content.key }}" style="width: 30px;"/>
     lang: <input name="lang" type="text" value="{{ content.lang }}" style="width: 50px;"/>
-    lang2: <input name="lang2" type="text" value="" style="width: 50px;"/><br/>
+    lang2: <input name="lang_2" type="text" value="{{ content.lang_2 }}" style="width: 50px;"/><br/>
     Author: <input name="author" type="text" value="{{ content.author }}"/>
     Lyricist: <input name="lyricist" type="text" value="{{ content.lyricist }}"/>
     <br/>
     <p>Lyrics Sequence: <input name="sequence" type="text" value="{{ content.sequence }}"/> (sequence is comma separated without space)<br/>
-        <textarea rows="6" name="lyrics" cols="60">{{ content.lyrics }}</textarea>
+        <textarea rows="6" name="content" cols="60">{{ content.lyrics }}</textarea>
     </p>
     Copyright: <input name="copyright" type="text" value="{{ content.copyright }}"/>
     CCLI: <input name="ccli" type="text" value="{{ content.ccli }}"/>
     Bible: <input name="bible" type="text" value="{{ content.bible }}"/><br/>
-    Youtube: <input name="video" type="text" value=""/><button onclick="javascript:search_video('{{ content.title }}, {{ content.book_name }}'); title="(Search using title/book)">Find</button>
+    Youtube: <input name="video" type="text" value=""/><button onclick="javascript:search_video('{{ content.title }}, {{ content.book }}'); title="(Search using title/book)">Find</button>
     Score: <input name="score" type="text" value=""/>
     Other: <input name="file" type="text" value="{{ content.file }}"/>
 </form>

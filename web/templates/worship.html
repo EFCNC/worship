@@ -144,7 +144,7 @@ function pop_role(name) {
 
 function get_roster(id, date) {
     $("#roster").empty();
-    url = 'API/inst_team/'+id;
+    url = API_URL + 'inst_team/'+id;
     $.when( $.ajax( url ) ).then(function( response, textStatus, jqXHR ) {
         if(response) {
             taken_role = response['inst'];
@@ -224,7 +224,7 @@ $(document).on('click', '.additional_add_btn', function () {
     role_id = Number(parent.children('.additional_role').val());
     user_id = Number(parent.children('.additional_member').val());
     data = JSON.stringify({'worship_id': worship_id, 'role_id': role_id, 'user_id': user_id});
-    url = 'API/roles/' + date;
+    url = API_URL + 'roles/' + date;
     $.ajax({
         type: "post",
         url: url,
@@ -248,7 +248,7 @@ $(document).on('click', '.additional_add_btn', function () {
 $(document).on('click', '.additional_role_btn', function () {
     parent = $(this).parent();
     $(this).remove();
-    url = 'API/roles/' + date;
+    url = API_URL + 'roles/' + date;
     $.when( $.ajax( url ) ).then(function( response, textStatus, jqXHR ) {
         if(response) {
             available = check_availability(response);

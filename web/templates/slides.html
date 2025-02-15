@@ -1,0 +1,108 @@
+{% include 'header.html' %}
+    <script src="../static/socket.io.js"></script>
+    <script src="../static/presentation.js"></script>
+    <link href="../static/presentation.css" rel="stylesheet">
+    <style>
+        html {
+            height: 100%;
+            background-color: #000;
+        }
+
+        body {
+            overflow: hidden;
+        }
+    </style>
+    <script>
+
+    let preview;    // Declare target div for load() function
+
+    socket.on('connect', function () {
+        console.log('Lead View connected to the server');
+        socket.on('disconnected', function() {
+            socket.emit('disconnecting', {'mode': mode});
+        });
+    });
+
+    socket.on('response', function (data) {
+        console.log('Server sent: ' + data);
+        slides = data.data;
+        pos = data.pos[0];
+        order = data.pos[1];
+        msg = data.msg;
+        dynamic = data.dynamic;
+        key_change = data.key;
+        background = data.background;
+        load(preview);
+    });
+
+    // init data from flask
+    presentation = {{ presentation|safe }};
+    slides = presentation['data'];
+    pos = presentation['pos'][0];
+    order = presentation['pos'][1];
+    msg = presentation['msg'];
+
+    function show_msg(){
+        $('#top-right').html(msg);
+        if (msg != '') {
+            $('#top-right').show();
+        }
+        else {
+            $('#top-right').hide();
+        }
+    }
+
+    // function for lead view only
+    $(document).on('click', '#preview_div div', function(){
+        id = $(this).attr('id').split('_')[1];
+        id = Number(id)
+        move(1, id-order);
+    });
+
+    $(document).on('click', '#dynamic_btn button', function() {
+        msg = $(this).attr('title');
+        name = $(this).attr('name');
+        if (name=='transpose') {
+            socket.emit('control', {'type': 'key', 'value': $(this).attr('transpose')});
+        }
+        socket.emit('control', {'type': 'dynamic', 'value': msg});
+    });
+
+    // functions for init page
+    $(document).on('click', '#control_btn button', function() {
+        if (slides.length == 0) {
+            alert("No slide is currently running!!");
+            return false;
+        }
+        mode = $(this).attr('name');
+        $("#control_btn").hide();
+        $("#container").html(load_container());
+        preview = $('#preview');
+        elem = document.getElementById('preview');
+        //go_full_screen();
+        load(preview);
+    });
+
+    /*$(document).on('change', '#key', function (event) {
+        transpose = keys.indexOf(this.value)-keys.indexOf($(this).attr('init'));
+        socket.emit('control', {'type': 'key', 'value': transpose});
+    })*/
+
+    $(document).on('touchstart', '#preview', function (event) {
+        touchstartX = event.changedTouches[0].screenX;
+        touchstartY = event.changedTouches[0].screenY;
+    });
+
+    $(document).on('touchend', '#preview', function (event) {
+        touchendX = event.changedTouches[0].screenX;
+        touchendY = event.changedTouches[0].screenY;
+        handleGesture();
+    });
+
+</script>
+</head>
+<body>
+<div id="control_btn"><button name="view">View</button>&nbsp;<button name="lead">Lead</button>&nbsp;<button name="musician">Musician</button></div>
+<div id="container"></div>
+</body>
+</html>

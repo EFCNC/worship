@@ -2,12 +2,50 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>File List</title>
+    <title>Worship List</title>
 </head>
+<style>
+    #file_container {
+        display: grid;
+  		grid-template-areas:
+    		"esw json"
+  		grid-template-columns: 1fr 1fr;
+  		gap: 5px;
+        padding: 70px 0;
+	}
+
+ 	.container > div#esw {
+	  	grid-area: esw;
+	}
+
+	.container > div#json {
+  		grid-area: json;
+	}
+
+</style>
 <body>
-<h3>Available Worship EasySlides</h3>
-{% for f in files %}
-    <a href="API/download/{{ f.filename }}">{{ f.filename }}</a><br/>
-{% endfor %}
+<h3>Available Worship Format</h3>
+<div id="file_container">
+    <div id="esw">
+        <h3>EasySlides (Download)</h3>
+        {% for f in zip %}
+            <a href="API/download?file={{ f.path }}">{{ f.filename }}</a><br/>
+        {% endfor %}
+    </div>
+    <div id="json">
+        <h3>Online</h3>
+        <div>
+            json (Download)&nbsp;Presentation&nbsp;Worship Notes<br/>
+            <p>
+                {% for j in json %}
+                <a href="API/download?file={{ j.path }}">{{ j.date }} (Download)</a>&nbsp;
+                <a href="slides/admin?id={{ j.id }}">{{ j.date }} (Slide)</a>&nbsp;
+                <a href="worship/{{ j.id }}">{{ j.date }} (Notes)</a><br/>
+            {% endfor %}
+            </p>
+        </div>
+    </div>
+</div>
+
 </body>
 </html>

@@ -3,8 +3,63 @@ import re
 import os
 from datetime import date, timedelta, datetime
 from zipfile import ZipFile
+import json
 
 conf = Utils.conf
+
+def edit_worship_json(id, content, pos):
+    '''
+
+    :param id: worship id
+    :param content: content that's going to be added to the slides object
+    :param pos: current position of slide
+    :return: updated json
+    '''
+
+    json = get_worship_json(id)
+    type = content[0]
+    if type == 0:
+        json.push(content[1])
+    elif type == 1:
+        json.insert(pos, content[1])
+    return json
+
+def get_background_files(name=None):
+    if not name:
+        dir_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+        bg_path = os.path.join(dir_path, 'web', 'static', 'presentation', 'bg')
+        bg = []
+        if os.path.exists(bg_path):
+            bg = os.listdir(bg_path)
+            bg = ['../static/presentation/bg/{}'.format(x) for x in bg]
+        return bg
+
+def get_worship_json(id):
+    w = Utils.get_worship(id)
+    json_file = os.path.join(conf["worship"]["path"], '{}_{}.json'.format(w['date'], id))
+    if not os.path.exists(json_file):
+        return None
+    with open(json_file, 'r', encoding='utf8') as f:
+        slides = json.load(f)
+    return slides
+
+def list_worship_file():
+    path = conf["worship"]["path"]
+    files = os.listdir(path)
+    return [{'filename': x.split('.')[0].split('_')[0], 'id': x.split('.')[0].split('_')[1]} for x in files if os.path.isfile(os.path.join(path, x))]
+
+def create_json(id):
+    worship = Utils.get_worship_songs(id)
+    path = conf["worship"]["path"]
+    if not worship:
+        return None
+
+    if not os.path.exists(path):
+        os.makedirs(path, exist_ok=True)
+
+    with open(os.path.join(path, '{}_{}.json'.format(worship[0]["date"], id)), "w", encoding="utf-8") as f:
+        json.dump(worship, f, ensure_ascii=False)
+
 def create_xml(worship):
     theme = '<?xml version="1.0" encoding="utf-8"?>\n<Easyslides>\n<ListItem>\n<ListHeader>\n<FormatData>\n'
     theme += conf["easyslides"]["templates"]["theme"][0]

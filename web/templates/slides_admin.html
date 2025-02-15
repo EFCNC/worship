@@ -1,0 +1,128 @@
+<!--
+    This is a preview page to show how worship presentation will look like
+    param: id=worship_id, role=role_id
+    keypress: TODO
+-->
+
+{% include 'header.html' %}
+    <script src="../static/socket.io.js"></script>
+    <script src="../static/presentation.js"></script>
+    <link href="../static/presentation.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<style>
+        html {
+            height: 100%;
+            background-color: #000;
+        }
+
+        body {
+            overflow: hidden;
+        }
+
+        .material-icons {
+            font-size: 70px;
+            padding: 20px;
+        }
+
+        i:hover {
+            cursor: pointer;
+        }
+</style>
+<body>
+<div class="admin_container"><div id="preview"></div>
+    <div id="menu">
+        <div id="control_panel">
+            <br/><textarea id="content" rows="5" cols="60"></textarea>
+            <button name="0">Send msg</button><button name="-1">Clean msg</button><br/><!--<button name="2">Add after current slide</button><button name="3">Add slide to the end</button>-->
+        </div>
+        <div id="notes"></div>
+    </div>
+    <div id="control_div">
+        <div id="control_btn"><i id="first" class="material-icons" title="First Topic">&#xe5dc;</i><i id="pre" class="material-icons" title="Previous Topic">&#xe5c4;</i><i id="up" class="material-icons" title="Previous Slide">&#xe5d8;</i><i id="down" class="material-icons" title="Next Slide">&#xe5db;</i><i id="next" class="material-icons" title="Next Topic">&#xe5c8;</i><i id="last" class="material-icons" title="Last Topic">&#xe5dd;</i></div>
+    </div>
+</div>
+</body>
+<script>
+        let preview = $('#preview');    // Declare target div for load() function
+        mode = 'admin';                 // Set mode to lead
+
+        socket.on('connect', function () {
+            console.log('Admin connected to the server');
+        });
+
+        socket.on('response', function (data) {
+            console.log('Server sent: ' + data);
+            slides = data.data;
+            pos = data.pos[0];
+            order = data.pos[1];
+            msg = data.msg;
+            dynamic = data.dynamic;
+            load(preview);
+        });
+
+        presentation = {{ presentation|safe }};
+        slides = presentation['data'];
+        pos = presentation['pos'][0];
+        order = presentation['pos'][1];
+
+        function send_msg(data) {
+            socket.emit('control', {'type': 'msg', 'value': data});
+        }
+
+        $(document).ready(function() {
+            load(preview);
+        });
+
+        $("#control_btn i").click(function() {
+            name = $(this).attr('id');
+            switch(name) {
+                case 'pre':
+                    move(0, -1);
+                    break;
+                case 'next':
+                    move(0, 1);
+                    break;
+                case 'up':
+                    move(1, -1);
+                    break;
+                case 'down':
+                    move(1, 1);
+                    break;
+                case 'first':
+                    pos = 0;
+                    order = 0;
+                    break;
+                case 'last':
+                    pos = slides.length-1
+                    order = slides[slides.length-1].content.length-1;
+                    break;
+            }
+
+        });
+
+        $("#control_panel button").click(function() {
+            data = $("#content").val();
+            name = $(this).attr('name');
+            if (data) {
+                switch(name) {
+                    case '-1':
+                        $("#content").val('');
+                        send_msg('');
+                        break;
+                    case '0':
+                        send_msg(data);
+                        break;
+                    case '1':
+                        break;
+                }
+            }
+        });
+
+        $(document).on('click', '#preview_div div', function(){
+            id = $(this).attr('id').split('_')[1];
+            id = Number(id)
+            console.log(id)
+            move(1, id-order);
+        });
+
+</script>

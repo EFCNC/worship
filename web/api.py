@@ -1,0 +1,170 @@
+from flask import Blueprint, request, send_file
+from app import utils as Utils
+from app import tools as Tools
+import os
+
+api = Blueprint('api', __name__, template_folder='templates')
+
+# Worship section
+@api.route("/worship/<id>/edit", methods=["POST"])
+def edit_worship(id):
+    '''
+    :param id: worship_id
+    :return: dB result
+    '''
+
+    content = request.get_json()
+    if content:
+        result = Utils.edit_songset(int(id), content)
+        Tools.create_json(int(id))
+        return result
+    Tools.create_json(int(id))
+    return "", 200
+
+@api.route("/worship/<id>/export")
+def export(id):
+    '''
+    :param id: worship_id
+    :return: return zip file name when done
+    '''
+
+    try:
+        result = Tools.create_xml(Utils.get_worship_songs(id))
+        return result, 200
+    except Exception as e:
+        return e, 500
+
+@api.route("/worship/<id>/preview")
+def preview(id):
+    slides = Utils.get_worship_songs(id)
+    return slides
+
+
+@api.route("/download")
+def download():
+    file = request.args.get('file', None)
+    #base = Utils.conf["easyslides"]["path"].format('')
+    return send_file(file, as_attachment=True)
+
+# Song section
+@api.route("/song/<id>")
+def get_song(id):
+    '''
+    :param id: song_id
+    :return: return song content
+    '''
+    content = Utils.get_song_by_id(id)
+    return content
+
+@api.route("/song/<id>/edit", methods=["POST"])
+def edit_song(id):
+    '''
+    :param id: song_id
+    :return: 200 when song is updated successfully. error message with 500
+    :POST: content of edited song
+    '''
+
+    song = request.get_json()
+    result = Utils.edit_song(id, song)
+    return result
+
+@api.route("/song/add", methods=["POST"])
+def add_song():
+    '''
+    :param song: Form data of song content
+    :return: 400 when title already in current dB
+    TODO: return add_song message
+    '''
+
+    song = request.get_json()
+    title = next((x['value'] for x in song if x['name'] == '`title'), None)
+    result = Utils.get_song_by_title(title)
+    if result:
+        return result, 400
+    return Utils.add_song(song)
+
+@api.route("/search/song")
+def search_song():
+    '''
+    :param keywords: search keywords
+    :return: dict with matched song results. left=songs from imported dB, right=songs from current dB
+    '''
+
+    keywords = request.args.get('keywords', None)
+    print(keywords)
+    if keywords is None:
+        return {"No keyword provided!"}, 400
+    right = Utils.search_song_efcnc(keywords)
+    left = Utils.search_songs(keywords)
+    print(left)
+    return {'left': left, 'right': right}, 200
+
+@api.route("/notes", methods=["POST"])
+def edit_notes():
+    '''
+    TODO
+    :return: content of bible or None
+    '''
+    pass
+
+# BibleAPI section
+@api.route("/bible/books")
+def list_book():
+    '''
+    :return: bible books
+    '''
+
+    result = Utils.bible_book()
+    return result
+
+@api.route("/search/bible")
+def search_bible():
+    '''
+    :param keywords: search keywords
+    :param page: pagination
+    :param range: search range (OT, NT)
+    :return: bible verses in dict list
+    '''
+
+    keywords = request.args.get('keywords', None)
+    page = request.args.get('page', 0)
+    range = request.args.get('range', None)
+    page = int(page)*10
+    result = Utils.search_bible(keywords, page, range)
+    if result[1] != 200:
+        return result
+    verses = result[0]["data"]["verses"]
+    return verses
+
+# Team section
+@api.route("/inst_team/<id>")
+def arrange_team(id):
+    '''
+    :param id: worship_id
+    :return: available team member, role, and current roster
+    '''
+
+    content = Utils.get_worship_teams(id)
+    return {'team': content[0], 'inst': content[1], 'roster': content[2]}
+
+@api.route("/roles/<date>", methods=["POST", "GET"])
+def get_roles(date):
+    '''
+    :param date: date for matching the availability of each team
+    :return: available team on provided date
+    :POST: update team/role/date
+    '''
+
+    if request.method == 'POST':
+        content = request.get_json()
+        result = Utils.edit_role(date, [content], delete=False)
+        return result
+    team = Utils.list_team(date)
+    return team, 200
+
+@api.route("/roles/edit/<date>", methods=["POST"])
+def edit_role(date):
+    content = request.get_json()
+    result = Utils.edit_role(date, content)
+    return result
+

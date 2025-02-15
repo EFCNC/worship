@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1" charset="utf-8">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<style>
+span.chunk {
+    position:relative;
+}
+
+span.chunk:before {
+    font-size:65%;
+    content:attr(data-chord);
+    position:absolute;
+    top:-120%;
+}
+
+.song_chord {
+    line-height: 200%;
+}
+
+.song_block {
+    text-align: center;
+    background-color: #e0e0e0;
+    width:50%;
+    position: relative;
+    color: #000;
+    margin: 5 5 5 5;
+}
+
+.song_block > span {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+}
+
+.notes {
+    text-align: center;
+}
+
+.lang_en {
+  border: 4px solid #009698;
+  background-color: #009698;
+  color: #fff;
+  border-radius: 50px 20px;
+}
+
+.lang_zh {
+  border: 4px solid #8b0000;
+  background-color: #8b0000;
+  color: #fff;
+  border-radius: 50px 20px;
+}
+
+.lang_zhTW {
+  border: 4px solid #556b2f;
+  background-color: #556b2f;
+  color: #fff;
+  border-radius: 50px 20px;
+}
+
+.lang_zhpingyin {
+  border: 4px solid #856088;
+  background-color: #856088;
+  color: #fff;
+  border-radius: 50px 20px;
+}
+
+.info {
+    border: 2px solid #856088;
+    color: #000;
+    border-radius: 5px;
+}
+
+.songs {
+    border: 2px solid #556b2f;
+    color: #000;
+    border-radius: 5px;
+}
+
+.view {
+  background-color: white;
+  color: black;
+  border: 2px solid #04AA6D;
+}
+
+.view.on {
+  background-color: #04AA6D;
+  color: white;
+}
+
+.view:hover {
+  background-color: #04AA6D;
+  color: white;
+}
+
+.chord {
+  background-color: white;
+  color: black;
+  border: 2px solid #008CBA;
+}
+
+.chord.on {
+  background-color: #008CBA;
+  color: white;
+}
+
+.chord:hover {
+  background-color: #008CBA;
+  color: white;
+}
+
+.bi {
+  background-color: white;
+  color: black;
+  border: 2px solid #555555;
+}
+
+.bi.on {
+  background-color: #555555;
+  color: white;
+}
+
+.bi:hover {
+  background-color: #555555;
+  color: white;
+}
+</style>
+</head>
+<body>
+    <h3> {{ w.date }} 敬拜筆記 (Worship Notes):</h3>
+    <p><b>Title: {{ w.sermon_title }}<br/>
+        Speaker: {{ w.speaker }}<br/>
+        Bible: {{ w.bible }}<br/>
+        Outline: {{ w.outline }}</b>
+    </p>
+    <p>
+        {% for team in w.content %}
+            {{ team.role }}: {{ team.user_name }}<br/>
+        {% endfor %}
+    </p>
+    <p><pre>{{ w.notes }}</pre></p>
+
+    <!-- Container of worship songs -->
+    <button class="view" onclick="javascript:load(0, this.className)">View</button><button class="chord" onclick="javascript:load(1, this.className)">Chord</button><button class="bi" onclick="javascript:load(2, this.className)">Bilingual</button>
+    <hr/>
+    <div id="worship">
+    </div>
+
+</body>
+<script>
+    let presentation = {{ songs|safe }};
+
+    function lang_tag(lang) {
+        if(lang == '') { return ''; }
+        tags = {'en': '<span class="lang_en" title="English">en</span>', 'zh': '<span class="lang_zh" title="Chinese">zh</span>', 'zh-TW': '<span class="lang_zhTW" title="Taiwanese">tw</span>', 'zh-pingyin': '<span class="lang_zhpingyin" title="Zh PingYin">zh</span>', 'others': '<span class="others">na</span>'}
+        if (lang in tags) {
+            return tags[lang];
+        }
+        return tags['others'];
+    }
+
+    function clicked(name) {
+        buttons = document.getElementsByTagName('button')
+        for (b of buttons) {
+            if (b.className == name) {
+                b.className += ' on';
+            }
+            else {
+                b.className = b.className.split(' ')[0];
+            }
+        }
+    }
+
+    function load(mode, name) {
+        clicked(name);
+        html = ''
+        for (data of presentation) {
+            if (data.type == 'info') {
+                html += '<div class="info">' + data.notes.replace('\n', '<br/>') + '</div>';
+            }
+            else {
+                html += '<div class="songs"><div class="reference">' + data.title + ' (' + data.key + ') ' + lang_tag(data.lang) + ' ' + lang_tag(data.lang_2) + ' [' + data.sequence + ']';
+
+                if (data.score) {
+                    html += '&nbsp;&nbsp;<a href="' + data.score + '" target="new"><i style="font-size:24px" class="fa" title="Sheet Music">&#xf1c7;</i></a>';
+                }
+                if (data.video) {
+                    html += '&nbsp;&nbsp;<a href="' + data.video + '" target="new"><i class="fa fa-play-circle" style="font-size:24px" title="Youtube Video"></i></a>';
+                }
+                html += '</div><table width="100%"><tr><td class="song_block">';
+                ll = []
+                for (l of data.content) {
+                    if(ll.indexOf(l.name) >= 0) {
+                        continue;
+                    }
+                    html += '<div><span>' + l.name + '</span>';
+                    if (mode == 0) {
+                        html += '<div class="song">' + l.origin_text.replace('\n', '<br/>');
+                    }
+                    else if (mode == 1) {
+                        html += '<div class="song_chord">' + l.origin_chord.replace('\n', '<br/>');
+                    }
+                    else if (mode == 2) {
+                        html += '<div class="song"><div class="origin">' + l.origin_text.replace('\n', '<br/>') + '</div><div class="region">' + l.region + '</div>';
+                    }
+                    ll.push(l.name);
+                    html += '</div><br/>';
+                }
+                html += '</td><td class="notes">' + data.notes.replace('\n', '<br/>') + '</td></tr></table>';
+            }
+        }
+        target = document.getElementById("worship");
+        target.innerHTML = html;
+    }
+
+    load(0, 'view');
+</script>
+</html>

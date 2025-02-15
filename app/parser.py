@@ -30,26 +30,40 @@ def parse_lyrics(content, sequence):
     #lyrics = re.findall('<(\w+)>([^<]+)<\/\w+>', content)
     lyrics = re.findall('<([0-9a-zA-Z\-]+)>([^<]+)<\/[0-9a-zA-Z\-]+>', content)
     for l in lyrics:
-        c = re.sub('\\n', '<br>', l[1])
-        region = re.search('\[region 2\](.+)', c, flags=re.IGNORECASE)
-        cc = re.sub('\[region 2\].+', '', c, flags=re.IGNORECASE)
+        c = re.sub('\r\n', '<br/>', l[1])
+        origin = re.sub('\[region 2\].+', '', c, flags=re.IGNORECASE)
+        origin = re.sub('(^<br\/?>)|(<br\/?>$)', '', origin)
+        region = re.sub('.+\[region 2\]', '', c, flags=re.IGNORECASE)
+        region = re.sub('(^<br\/?>)|(<br\/?>$)', '', region)
+        #c = re.sub('^(\\r\\n)*', '', l[1])
+        #c = re.sub('\\r\\n', '\\1<br>\\2', c)
+        #region = re.search('\[region 2\](.+)', c, flags=re.IGNORECASE)
+        #region = re.search('\[region 2\](\\r\\n(.+))+', l[1], flags=re.IGNORECASE)
+        #cc = re.sub('\[region 2\].+', '', c, flags=re.IGNORECASE)
         s = l[0]
         if re.match('.+\d', s):
             s = s[0]+s[-1]
         else:
             s = s[0]
-        lyrics_.append({'name': s, 'origin': cc, 'region': region[1] if region else '',
-                        'origin_text': re.sub('(\[[^]]+\])', '', cc),
-                        'region_text': re.sub('(\[[^]]+\])', '', region[0]) if region else '',
-                        'origin_chord': parse_chord(cc)})
+        lyrics_.append({'name': s, 'origin': origin, 'region': region if region else '',
+                        'origin_text': re.sub('(\[[^]]+\])', '', origin),
+                        'region_text': re.sub('(\[[^]]+\])', '', region) if region else '',
+                        'origin_chord': parse_chord(origin)})
     sequence = sequence.split(',')
     sequence = [next((y for y in lyrics_ if y['name'].lower() == x.lower()), '') for x in sequence]
     return sequence
 
 def parse_chord(content):
-    chords = re.sub(r'\[([^]]+)\](\s?\w+)?\s?', '<div class="chord-letter"><span class="chord">\\1</span>\\2</div>', content)
+    #chords = re.sub(r'\[([^]]+)\](\s?\w+)?\s?', '<div class="chord-letter"><span class="chord">\\1</span>\\2</div>', content)
     # inline approach
     #chords = re.sub(r'\[([^]]+)\](\s?\w+)?\s?', '<span class="chord"><span class="inline">\\1</span></span>\\2', content)
     # chunk approach
-    #chords = re.sub(r'\[([^]]+)\](\s?\w+)?\s?', '<div class="chunk"><span class="chord">\\1</span><span class="lyric">\\2</span>', content)
+    chords = re.sub(r'\[([^]]+)\](\s?\w+)?(\s?)', '<span class="chunk" data-chord="\\1">\\2</span>\\3', content)
+    chords = re.sub('">([^<]*)<\/span>', add_space, chords)
     return chords
+
+def add_space(obj):
+    l = len(obj[1])
+    if l < 2:
+        return obj[0]+"&nbsp;&nbsp;"*(2-l)
+    return obj[0]

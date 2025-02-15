@@ -32,18 +32,21 @@
     },
     "path": "c:\\temp\\easyslides\\{}"
   },
+  "worship": {
+    "path": "c:\\temp\\worship"
+  },
   "db": {
       "default": {
         "name": "worship.db",
         "search": {
-            "query": "select s.song_id, s.title, s.lang, s.lang_2, s.song_key, (select link from media m where m.song_id=s.song_id and m_type=0) as video, (select link from media m where m.song_id=s.song_id and m_type=1) as score from songs s where {} group by s.song_id",
+            "query": "select s.song_id, s.title, s.lang, s.lang_2, s.song_key, (select link from media m where m.song_id=s.song_id and m_type='video') as video, (select link from media m where m.song_id=s.song_id and m_type='score') as score from songs s where {} group by s.song_id",
             "columns": [
               "s.title",
               "s.content"
             ],
             "condition": "or"
         },
-          "get_song": "select s.title, s.author, s.lang, s.lang_2, s.song_key, s.sequence, s.bible_verse, s.lyricist, s.book, s.copyright, s.ccli, s.content, (select link from media m where m.song_id=s.song_id and m_type=0) as video, (select link from media m where m.song_id=s.song_id and m_type=1) as score, s.song_id as id from songs s where s.song_id = ?",
+          "get_song": "select s.title, s.author, s.lang, s.lang_2, s.song_key, s.sequence, s.bible_verse, s.lyricist, s.book, s.copyright, s.ccli, s.content, (select link from media m where m.song_id=s.song_id and m_type='video') as video, (select link from media m where m.song_id=s.song_id and m_type='score') as score, s.song_id as id from songs s where s.song_id = ?",
           "enabled": 1
       },
       "imported": [
@@ -90,6 +93,21 @@
             "condition": "or"
           },
           "get_song": "select song_id, title, book, lang, content, copyright, ccli, song_number, author, lyricist, song_key from songs where song_id = ?",
+          "enabled": 1
+        },
+        {
+          "name": "tw_hymn.db",
+          "lang": "zh-TW",
+          "table": "songs",
+          "search": {
+              "query": "select song_id, title, lang from songs where {}",
+              "columns": [
+                "title",
+                "content"
+              ],
+            "condition": "or"
+          },
+          "get_song": "select song_id, title, book, lang, content, null as copyright, null asccli, number, author, lyricist, song_key from songs where song_id = ?",
           "enabled": 1
         }
       ]

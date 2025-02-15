@@ -46,7 +46,6 @@ def insert(sql, para, db_name="worship.db"):
         cur = con.cursor()
         cur.execute(sql, para)
         song_id = cur.lastrowid
-        print(song_id)
         con.commit()
         return song_id, 200
     except Exception as e:

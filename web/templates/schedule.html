@@ -1,11 +1,5 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Team Calendar</title>
-      <link href="../static/jquery-ui.css" rel="stylesheet">
-	  <script src="../static/jquery-3.6.0.min.js"></script>
-       <script src="../static/jquery-ui.js"></script>
+{% include 'header.html' %}
+
 <style>
 .team_container {
   display: flex;
@@ -193,7 +187,7 @@ $('#submit').click(function() {
             new_role.push(role);
         }
     }
-    url = 'API/role/edit/' + s;
+    url = API_URL + 'roles/edit/' + s;
     data = JSON.stringify(new_role);
     $.ajax({
         type: "post",
