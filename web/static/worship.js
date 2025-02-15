@@ -201,6 +201,6 @@ console.log(id, num)
     function export_file(id) {
         url = API_URL + 'worship/' + id + '/export';
         $.when( $.ajax( url ) ).then(function( data, textStatus, jqXHR ) {
-            window.location.href = 'API/download/' + data;
+            window.location.href = 'API/download?file=' + data;
         });
     }

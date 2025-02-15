@@ -43,7 +43,6 @@ def preview(id):
 @api.route("/download")
 def download():
     file = request.args.get('file', None)
-    #base = Utils.conf["easyslides"]["path"].format('')
     return send_file(file, as_attachment=True)
 
 # Song section

@@ -162,10 +162,10 @@ def file_list():
 	:return: Return a list of easyslides zip file that's been exported
 	'''
 
-	path = Utils.conf["easyslides"]["path"].format('')
-	files = os.listdir(os.path.dirname(path))
+	path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'files', 'xml')
+	files = os.listdir(path)
 	files = [{'filename': x, 'path': os.path.join(path, x)} for x in files if os.path.isfile(os.path.join(path, x))]
-	worship_path = Utils.conf["worship"]["path"]
+	worship_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'files', 'json')
 	json_files = os.listdir(worship_path)
 	json_files = [{'date': x.split('_')[0], 'id': x.split('_')[1].split('.')[0], 'path': os.path.join(worship_path, x)} for x in json_files]
 	return render_template('files.html', zip=files, json=json_files)

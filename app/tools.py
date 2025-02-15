@@ -36,7 +36,7 @@ def get_background_files(name=None):
 
 def get_worship_json(id):
     w = Utils.get_worship(id)
-    json_file = os.path.join(conf["worship"]["path"], '{}_{}.json'.format(w['date'], id))
+    json_file = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'files', 'json', '{}_{}.json'.format(w['date'], id))
     if not os.path.exists(json_file):
         return None
     with open(json_file, 'r', encoding='utf8') as f:
@@ -50,7 +50,7 @@ def list_worship_file():
 
 def create_json(id):
     worship = Utils.get_worship_songs(id)
-    path = conf["worship"]["path"]
+    path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'files', 'json')
     if not worship:
         return None
 
@@ -64,7 +64,7 @@ def create_xml(worship):
     theme = '<?xml version="1.0" encoding="utf-8"?>\n<Easyslides>\n<ListItem>\n<ListHeader>\n<FormatData>\n'
     theme += conf["easyslides"]["templates"]["theme"][0]
     theme += "</FormatData>\n<Notes />\n</ListHeader>\n"
-    path = conf["easyslides"]["path"].format(worship[0]["date"])
+    path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'files', 'xml', worship[0]["date"])
     if not os.path.exists(path):
         os.makedirs(path, exist_ok=True)
     itemNo = 1
@@ -85,9 +85,7 @@ def create_xml(worship):
             song_theme += "<CurItemNo>" + str(itemNo) + "</CurItemNo>\n<Contents>[1]" + w["notes"] + "</Contents>"
             song_theme += "<Copyright>" + w["version"] + "</Copyright>"
         song_theme += conf["easyslides"]["templates"]["song"][0]
-        print(song_theme)
         song_theme = re.sub('(\n)+', '\n', song_theme)
-        print(song_theme)
         itemNo += 1
         with open(os.path.join(path, '{}.esi'.format(filename)), "w", encoding="utf_8_sig") as f:
             f.write(song_theme)
@@ -110,7 +108,7 @@ def zip_file(path):
                     zipObj.write(filepath, arcname=os.path.join(root, filename))
     except Exception as e:
         print(e)
-    return os.path.basename(zip_file_name)
+    return zip_file_name
 
 def allsundays():
     now = datetime.now()
