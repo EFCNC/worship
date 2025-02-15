@@ -279,7 +279,7 @@
             function to load presentation, it will display the content based on current pos and order
             params div: target div to load presentation
         */
-console.log('mode', mode)
+
         if (msg) {
             $("#top-right").html(msg);
             $("#top-right").fadeIn();
@@ -308,6 +308,7 @@ console.log('mode', mode)
                 chords = l.origin_chord;
                 if (key_change != 0) {
                     if(last_order != order) {
+                        $("#top-left").fadeOut();
                         chords = chords.replace(/(data-chord=")([^"]+)/g, (match, g1, g2) => {return g1+parse_chord(g2, key_change);});
                     }
                 }
@@ -328,25 +329,32 @@ console.log('mode', mode)
                 if (l) {
                     slide.innerHTML += show_lyrics(reversed, l, data.lang, data.lang_2);
                 }
-                if(mode=='admin' || mode=='lead') {     // for admin and lead, show slide notes
-                    $('#key_change').html(get_transpose(data.key, data.transpose))
-                    html = '<div class="' + mode + ' notes" ';
-                    html += show_notes(data.notes);
-                    $("#notes").html(html);
-                    preview_btn(data.content);
-                }
             }
         }
         else if (data.type == 'info') {     // If slide type is info, display data.notes. TODO: info slide will be treated the same way song is displayed
+            $("#bottom-left").html(data.title);
+            $("#bottom-right").html(data.book);
             html = '<div class="' + mode + ' notes" '
             html += show_notes(data.notes);
             slide.innerHTML += html;
         }
+
+        if(mode=='admin' || mode=='lead') {     // for admin and lead, show slide notes
+            $('#key_change').html(get_transpose(data.key, data.transpose))
+            html = '<div class="' + mode + ' notes" ';
+            html += show_notes(data.notes);
+            $("#notes").html(html);
+            preview_btn(data.content);
+        }
+
         div.empty();
         div.append(slide);
 
         if (data.background) {
             div.css('background-image', 'url(' + data.background + ')');
+            if(data.type == 'image') {
+                div.css('background-size', 'contain');
+            }
         }
         else if (background.length>0) {
             i = Math.floor(Math.random() * background.length);
