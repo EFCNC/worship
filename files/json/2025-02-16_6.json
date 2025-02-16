@@ -1,8 +1,8 @@
 [
   {
-    "type": "info",
+    "type": "image",
     "title": "Welcome",
-    "background": "../static/presentation/bg/ember_light_shine.jpg",
+    "background": "../static/presentation/bg/welcome_page.png",
     "author": "",
     "lang": "",
     "lang_2": "",
@@ -23,7 +23,7 @@
       0
     ],
     "alt_sequence": "",
-    "notes": "主日禮拜即將開始\n請安靜預備心\nPlease be prepared as the service is about to start\n\n歡迎您參加今日的主日崇拜\nWelcome to worship with us",
+    "notes": "",
     "version": ""
   },
   {
@@ -50,6 +50,33 @@
     ],
     "alt_sequence": "",
     "notes": "<ul><li>二月請弟兄小組打掃</li><li>爾博全家他們昨晚開車到南卡海邊度假，2/19在南卡約了三個孩子申請美國公民的約，結束後會開車回北卡，2/20早上六點的飛機全家飛回台。感謝神對他們一家在北卡的祝福，恩典滿滿，上帝繼續帶領他們全家回台灣的一切</li><li>今日講道完廖忠信傳道將帶領聯合主日學</li><li>蔡東旭牧師全家預訂於3/21-3/24來訪，執事會與聘牧委員已安排來訪時的行程，請大家將時間保留下來，一起參與</li></ul>",
+    "version": ""
+  },
+  {
+    "type": "image",
+    "background": "../static/presentation/image/gilbert_farewell.jpg",
+    "title": "",
+    "author": "",
+    "lang": "",
+    "lang_2": "",
+    "key": "",
+    "sequence": "",
+    "bible": "",
+    "lyricist": "",
+    "book": "",
+    "copyright": "",
+    "ccli": "",
+    "lyrics_raw": "",
+    "content": "",
+    "video": "",
+    "score": "",
+    "date": "2025-02-16",
+    "id": 47,
+    "transpose": [
+      0
+    ],
+    "alt_sequence": "",
+    "notes": "",
     "version": ""
   },
   {
@@ -348,7 +375,7 @@
     "id": 51,
     "transpose": [0],
     "alt_sequence": "",
-    "notes": "主日證道\nSermon\n\n持守這個為美,那個也不鬆手(二)\n但以理\n廖忠信傳道",
+    "notes": "主日證道\nSermon\n\n持守這個為美,那個也不鬆手(二)\n但以理書第二章\n廖忠信傳道",
     "version": ""
   },
   {
@@ -407,6 +434,33 @@
     ],
     "alt_sequence": "",
     "notes": "<ul><li>二月請弟兄小組打掃</li><li>爾博全家他們昨晚開車到南卡海邊度假，2/19在南卡約了三個孩子申請美國公民的約，結束後會開車回北卡，2/20早上六點的飛機全家飛回台。感謝神對他們一家在北卡的祝福，恩典滿滿，上帝繼續帶領他們全家回台灣的一切</li><li>今日講道完廖忠信傳道將帶領聯合主日學</li><li>蔡東旭牧師全家預訂於3/21-3/24來訪，執事會與聘牧委員已安排來訪時的行程，請大家將時間保留下來，一起參與</li></ul>",
+    "version": ""
+  },
+  {
+    "type": "image",
+    "background": "../static/presentation/image/gilbert_farewell.jpg",
+    "title": "",
+    "author": "",
+    "lang": "",
+    "lang_2": "",
+    "key": "",
+    "sequence": "",
+    "bible": "",
+    "lyricist": "",
+    "book": "",
+    "copyright": "",
+    "ccli": "",
+    "lyrics_raw": "",
+    "content": "",
+    "video": "",
+    "score": "",
+    "date": "2025-02-16",
+    "id": 47,
+    "transpose": [
+      0
+    ],
+    "alt_sequence": "",
+    "notes": "",
     "version": ""
   },
   {
