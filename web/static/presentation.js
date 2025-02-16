@@ -144,7 +144,9 @@
         load(preview);
 
         // Send data back to socket server
-        socket.emit('control', {'type': 'pos', 'value': [pos, order]});
+        if (mode == 'admin' || mode == 'lead') {
+            socket.emit('control', {'type': 'pos', 'value': [pos, order]});
+        }
     }
 
     function preview_btn(data) {
@@ -289,8 +291,10 @@
         }
 
         if (dynamic) {
-            $("#top-left").html(dynamic);
-            $("#top-left").fadeIn();
+            if (mode == "musician") {
+                $("#top-left").html(dynamic);
+                $("#top-left").fadeIn();
+            }
         }
         else {
             $("#top-left").fadeOut();

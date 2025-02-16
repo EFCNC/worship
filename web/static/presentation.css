@@ -13,7 +13,7 @@
         }
 
         #bottom-left {
-             position:fixed;
+             position:absolute;
              font-size: 20px;
              bottom:130;
              left:10;
@@ -31,13 +31,13 @@
         }
 
         #top-left {
-             position:fixed;
-             font-size: 35x;
+             position:absolute;
+             font-size: 3vw;
              top:340;
              left:20;
              padding: 5px;
              color: #ffd800;
-             background-color: #c0c0c0;
+             background-color: #404040;
              display: none;
         }
 
