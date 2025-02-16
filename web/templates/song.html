@@ -1,4 +1,5 @@
 {% include 'header.html' %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
 <style>
     #songs { text-align:left; list-style-type: none; margin: 0; padding: 0; width: 95%; }
@@ -150,7 +151,7 @@ li {
         <button class="save_btn" onclick="javascript:save({{ id }})">Save</button>
             <button class="export_btn" onclick="javascript:export_file({{ id }})">Export</button>
             <button class="reset_btn" onclick="javascript:reset()">Reset</button>
-            <button id="preview_btn">Preview</button>
+            <button id="preview_btn">Present</button>
             <button id="home">Home</button>
         </div>
     <div id="worship">
@@ -660,7 +661,8 @@ li {
     });*/
 
     $("#preview_btn").click(function() {
-        presentation();
+        window.location.href = 'slides/admin?id={{ id }}';
+        //presentation();
     });
 
     $("#home").click(function() {

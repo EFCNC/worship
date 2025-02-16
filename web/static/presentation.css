@@ -25,7 +25,7 @@
              position:fixed;
              font-size: 20px;
              bottom:130;
-             left:90%;
+             right:0;
              padding: 10px;
              color: #fff;
         }

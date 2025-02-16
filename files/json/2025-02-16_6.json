@@ -49,7 +49,7 @@
       0
     ],
     "alt_sequence": "",
-    "notes": "<ul><li>二月請弟兄小組打掃</li><li>恭喜Penny姐妹2/7凌晨生下baby boy母子均安，已於上周日中午出院，請代禱母親孩子平安順利成長</li><li>恭喜映玉和三個孩子在2/7 收到綠卡通知，目前在南卡等候公民面試，也為他們全家前面的道路代禱，求神預備</li><li>今日講道完廖忠信傳道將帶領聯合主日學</li><li>蔡東旭牧師全家預訂於3/21-3/24來訪，執事會與聘牧委員已安排來訪時的行程，請大家將時間保留下來，一起參與</li></ul>",
+    "notes": "<ul><li>二月請弟兄小組打掃</li><li>爾博全家他們昨晚開車到南卡海邊度假，2/19在南卡約了三個孩子申請美國公民的約，結束後會開車回北卡，2/20早上六點的飛機全家飛回台。感謝神對他們一家在北卡的祝福，恩典滿滿，上帝繼續帶領他們全家回台灣的一切</li><li>今日講道完廖忠信傳道將帶領聯合主日學</li><li>蔡東旭牧師全家預訂於3/21-3/24來訪，執事會與聘牧委員已安排來訪時的行程，請大家將時間保留下來，一起參與</li></ul>",
     "version": ""
   },
   {
@@ -305,7 +305,7 @@
   },
   {
     "type": "info",
-    "title": "阮佇天裡的父，願祢的",
+    "title": "主禱文",
     "author": "",
     "lang": "",
     "lang_2": "",
@@ -313,7 +313,7 @@
     "sequence": "",
     "bible": "",
     "lyricist": "",
-    "book": "",
+    "book": "The Lord's Prayer",
     "copyright": "",
     "ccli": "",
     "lyrics_raw": "",
@@ -325,6 +325,30 @@
     "transpose": [0],
     "alt_sequence": "",
     "notes": "阮佇天裡的父，願祢的名聖。\n祢的國臨到，祢的旨意得成，\n佇地裡親像佇天裡。\n阮的日食，今仔日給阮。\n赦免阮的辜負，親像阮也有赦免辜負阮的人。\n勿得導阮入於試，著救阮脫離彼個惡的。\n因為國、權能、榮光攏是祢所有，代代無盡。\n阿們。\nOur Father in heaven, hallowed be your name,\nyour kingdom come, your will be done, on earth as it is in heaven.\nGive us today our daily bread. \nAnd forgive us our debts, as we also have forgiven our debtors.\nAnd lead us not into temptation, but deliver us from the evil one.\nfor yours is the kingdom and the power and the glory forever. Amen.",
+    "version": ""
+  },
+{
+    "type": "info",
+    "title": "主日信息",
+    "author": "",
+    "lang": "",
+    "lang_2": "",
+    "key": "",
+    "sequence": "",
+    "bible": "",
+    "lyricist": "",
+    "book": "Sunday Sermon",
+    "copyright": "",
+    "ccli": "",
+    "lyrics_raw": "",
+    "content": "",
+    "video": "",
+    "score": "",
+    "date": "2025-02-16",
+    "id": 51,
+    "transpose": [0],
+    "alt_sequence": "",
+    "notes": "主日證道\nSermon\n\n持守這個為美,那個也不鬆手(二)\n但以理\n廖忠信傳道",
     "version": ""
   },
   {
@@ -382,7 +406,34 @@
       0
     ],
     "alt_sequence": "",
-    "notes": "<ul><li>二月請弟兄小組打掃</li><li>恭喜Penny姐妹2/7凌晨生下baby boy母子均安，已於上周日中午出院，請代禱母親孩子平安順利成長</li><li>恭喜映玉和三個孩子在2/7 收到綠卡通知，目前在南卡等候公民面試，也為他們全家前面的道路代禱，求神預備</li><li>今日講道完廖忠信傳道將帶領聯合主日學</li><li>蔡東旭牧師全家預訂於3/21-3/24來訪，執事會與聘牧委員已安排來訪時的行程，請大家將時間保留下來，一起參與</li></ul>",
+    "notes": "<ul><li>二月請弟兄小組打掃</li><li>爾博全家他們昨晚開車到南卡海邊度假，2/19在南卡約了三個孩子申請美國公民的約，結束後會開車回北卡，2/20早上六點的飛機全家飛回台。感謝神對他們一家在北卡的祝福，恩典滿滿，上帝繼續帶領他們全家回台灣的一切</li><li>今日講道完廖忠信傳道將帶領聯合主日學</li><li>蔡東旭牧師全家預訂於3/21-3/24來訪，執事會與聘牧委員已安排來訪時的行程，請大家將時間保留下來，一起參與</li></ul>",
+    "version": ""
+  },
+  {
+    "type": "image",
+    "background": "../static/presentation/image/pastor_tsai_trip_plan.png",
+    "title": "",
+    "author": "",
+    "lang": "",
+    "lang_2": "",
+    "key": "",
+    "sequence": "",
+    "bible": "",
+    "lyricist": "",
+    "book": "",
+    "copyright": "",
+    "ccli": "",
+    "lyrics_raw": "",
+    "content": "",
+    "video": "",
+    "score": "",
+    "date": "2025-02-16",
+    "id": 47,
+    "transpose": [
+      0
+    ],
+    "alt_sequence": "",
+    "notes": "",
     "version": ""
   },
   {
