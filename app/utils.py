@@ -6,7 +6,7 @@ import requests
 import json
 import os
 import re
-import opencc
+#import opencc
 from app import db as dB
 from app import parser as Parser
 import hanzidentifier
@@ -23,9 +23,9 @@ def search_songs(keyword, match=None):
         # Split keywords from space
         new_keyword = keyword.split(' ')
         if db["enabled"] == 1:
-            if db["lang"] == 'zh-CN':  # covert traditional chinese to simplified
-                converter = opencc.OpenCC('t2s.json')
-                new_keyword = [converter.convert(x) for x in new_keyword]
+            #if db["lang"] == 'zh-CN':  # covert traditional chinese to simplified
+            #    converter = opencc.OpenCC('t2s.json')
+            #    new_keyword = [converter.convert(x) for x in new_keyword]
             para = {
                 "name": db["name"],
                 "sql": db["search"]["query"],
@@ -138,11 +138,11 @@ def get_song_by_id_(id, db_name):
     lang = db[0]["lang"]
     x = dB.run_para(sql, id, db_name)[0]
     content = Parser.parse_lyrics_for_import(x[4]) # index 4: lyrics
-    if lang == "zh-CN":
-        converter = opencc.OpenCC('s2t.json')
+    #if lang == "zh-CN":
+        #converter = opencc.OpenCC('s2t.json')
         # convert title, bookname, lyrics, copyright to traditional chinese
-        song = {'id': x[0], 'book': converter.convert(x[2]) if x[2] else '', 'title': converter.convert(x[1]), 'lyrics': converter.convert(content[0]), 'sequence': content[1], 'copyright': converter.convert(x[5]) if x[4] else '', 'ccli': x[6] if x[6] else '', 'song_number': x[7], 'file': x[8] if x[8] else ''}
-    elif lang == 'en':
+        #song = {'id': x[0], 'book': converter.convert(x[2]) if x[2] else '', 'title': converter.convert(x[1]), 'lyrics': converter.convert(content[0]), 'sequence': content[1], 'copyright': converter.convert(x[5]) if x[4] else '', 'ccli': x[6] if x[6] else '', 'song_number': x[7], 'file': x[8] if x[8] else ''}
+    if lang == 'en':
         song = {'id': x[0], 'book': x[2] if x[2] else '', 'title': x[1], 'lyrics': content[0], 'sequence': content[1], 'copyright': x[5] if x[5] else '', 'ccli': x[6] if x[6] else '', 'song_number': x[7], 'file': x[8] if x[8] else ''}
     else:  # stream_of_song
         song = {'id': x[0], 'book': x[2] if x[2] else '', 'title': x[1], 'lyrics': content[0], 'sequence': content[1], 'copyright': x[5] if x[5] else '', 'ccli': x[6] if x[6] else '', 'song_number': x[7], 'lang': x[3] if x[3] else '', 'author': x[8] if x[8] else '', 'lyricist': x[9] if x[9] else '', 'key': x[10] if x[10] else ''}
