@@ -30,7 +30,7 @@ def parse_lyrics(content, sequence):
     #lyrics = re.findall('<(\w+)>([^<]+)<\/\w+>', content)
     lyrics = re.findall('<([0-9a-zA-Z\-]+)>([^<]+)<\/[0-9a-zA-Z\-]+>', content)
     for l in lyrics:
-        c = re.sub('\r\n', '<br/>', l[1])
+        c = re.sub('\r?\n', '<br/>', l[1])
         origin = re.sub('\[region 2\].+', '', c, flags=re.IGNORECASE)
         origin = re.sub('(^<br\/?>)|(<br\/?>$)', '', origin)
         region = re.sub('.+\[region 2\]', '', c, flags=re.IGNORECASE)
