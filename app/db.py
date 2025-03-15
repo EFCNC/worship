@@ -20,7 +20,7 @@ def search(query):
     for col in cols:
         temp.append([col] * len(keywords))
     condition = 'or'    #
-    temp = ['({})'.format(' {} '.join(x).format(condition)) for x in temp]
+    temp = ['({})'.format(' {} '.format(condition).join(x)) for x in temp]
     sql = sql.format(' {} '.join(temp).format(result))
     return run_para(sql, params, db)
 
@@ -47,7 +47,7 @@ def insert(sql, para, db_name="worship.db"):
         cur.execute(sql, para)
         song_id = cur.lastrowid
         con.commit()
-        return song_id, 200
+        return song_id
     except Exception as e:
         print("error", e)
         return e, 500
