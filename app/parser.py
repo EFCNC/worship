@@ -6,7 +6,6 @@ def parse_lyrics_for_import(content):
         tree = ET.fromstring(content)
         lyrics = []
         verses = tree.findall('./lyrics/verse')
-        #verses = sorted(verses, key=lambda d: (d.attrib['type'], d.attrib['label']))
         converted = ''
         sequence = []
         for verse in verses:
@@ -27,7 +26,6 @@ def parse_lyrics_for_import(content):
 
 def parse_lyrics(content, sequence):
     lyrics_ = []
-    #lyrics = re.findall('<(\w+)>([^<]+)<\/\w+>', content)
     lyrics = re.findall('<([0-9a-zA-Z\-]+)>([^<]+)<\/[0-9a-zA-Z\-]+>', content)
     for l in lyrics:
         c = re.sub('\r?\n', '<br/>', l[1])
@@ -35,11 +33,6 @@ def parse_lyrics(content, sequence):
         origin = re.sub('(^<br\/?>)|(<br\/?>$)', '', origin)
         region = re.sub('.+\[region 2\]', '', c, flags=re.IGNORECASE)
         region = re.sub('(^<br\/?>)|(<br\/?>$)', '', region)
-        #c = re.sub('^(\\r\\n)*', '', l[1])
-        #c = re.sub('\\r\\n', '\\1<br>\\2', c)
-        #region = re.search('\[region 2\](.+)', c, flags=re.IGNORECASE)
-        #region = re.search('\[region 2\](\\r\\n(.+))+', l[1], flags=re.IGNORECASE)
-        #cc = re.sub('\[region 2\].+', '', c, flags=re.IGNORECASE)
         s = l[0]
         if re.match('.+\d', s):
             s = s[0]+s[-1]
@@ -54,9 +47,6 @@ def parse_lyrics(content, sequence):
     return sequence
 
 def parse_chord(content):
-    #chords = re.sub(r'\[([^]]+)\](\s?\w+)?\s?', '<div class="chord-letter"><span class="chord">\\1</span>\\2</div>', content)
-    # inline approach
-    #chords = re.sub(r'\[([^]]+)\](\s?\w+)?\s?', '<span class="chord"><span class="inline">\\1</span></span>\\2', content)
     # chunk approach
     chords = re.sub(r'\[([^]]+)\](\s?\w+)?(\s?)', '<span class="chunk" data-chord="\\1">\\2</span>\\3', content)
     chords = re.sub('">([^<]*)<\/span>', add_space, chords)

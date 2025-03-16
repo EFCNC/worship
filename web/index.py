@@ -119,6 +119,25 @@ def get_notes():
 		content = Utils.get_bible_by_id(id)
 	return render_template("notes.html", content=content)
 
+@app.route("/song/list")
+def get_songs():
+	'''
+	:param: none
+	:return: all song
+	'''
+	songs = Utils.get_songs()
+	return render_template('songs.html', songs=songs)
+
+@app.route("/sheet/<id>")
+def get_song_sheet(id):
+	'''
+	:param id: song_id
+	:return: ABC content
+	'''
+	sheet = {}
+	sheet['abc'] = Utils.get_song_sheet(id)
+	return render_template('sheet.html', sheets=sheet)
+
 @app.route("/song/<id>")
 def get_song_by_id(id):
 	'''
