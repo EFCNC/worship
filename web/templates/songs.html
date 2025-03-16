@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1" charset="utf-8">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<script src="../static/jquery-3.6.0.min.js"></script>
+<link href="../static/datatables.min.css" rel="stylesheet">
+<script src="../static/datatables.min.js"></script>
+<style>
+. lyrics {
+    position: absolute;
+    background: #c0c0c0;
+}
+
+span.chunk {
+    position:relative;
+}
+
+span.chunk:before {
+    font-size:65%;
+    content:attr(data-chord);
+    position:absolute;
+    top:-120%;
+}
+
+.song_chord {
+    line-height: 200%;
+}
+
+.song_block {
+    text-align: center;
+    background-color: #e0e0e0;
+    width:50%;
+    position: relative;
+    color: #000;
+    margin: 5 5 5 5;
+}
+
+.song_block > span {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+}
+
+.notes {
+    text-align: center;
+}
+
+.lang_en {
+  border: 4px solid #009698;
+  background-color: #009698;
+  color: #fff;
+  border-radius: 50px 20px;
+}
+
+.lang_zh {
+  border: 4px solid #8b0000;
+  background-color: #8b0000;
+  color: #fff;
+  border-radius: 50px 20px;
+}
+
+.lang_zhTW {
+  border: 4px solid #556b2f;
+  background-color: #556b2f;
+  color: #fff;
+  border-radius: 50px 20px;
+}
+
+.lang_zhpingyin {
+  border: 4px solid #856088;
+  background-color: #856088;
+  color: #fff;
+  border-radius: 50px 20px;
+}
+
+.info {
+    border: 2px solid #856088;
+    color: #000;
+    border-radius: 5px;
+}
+
+.songs {
+    border: 2px solid #556b2f;
+    color: #000;
+    border-radius: 5px;
+}
+
+.view {
+  background-color: white;
+  color: black;
+  border: 2px solid #04AA6D;
+}
+
+.view.on {
+  background-color: #04AA6D;
+  color: white;
+}
+
+.view:hover {
+  background-color: #04AA6D;
+  color: white;
+}
+
+.chord {
+  background-color: white;
+  color: black;
+  border: 2px solid #008CBA;
+}
+
+.chord.on {
+  background-color: #008CBA;
+  color: white;
+}
+
+.chord:hover {
+  background-color: #008CBA;
+  color: white;
+}
+
+.bi {
+  background-color: white;
+  color: black;
+  border: 2px solid #555555;
+}
+
+.bi.on {
+  background-color: #555555;
+  color: white;
+}
+
+.bi:hover {
+  background-color: #555555;
+  color: white;
+}
+</style>
+</head>
+<body>
+<div id="filters">
+    <div id="lang"></div>
+    <div id="key"></div>
+</div>
+    <!-- Container for songs -->
+<table id="songs" class="display" width="100%">
+            <thead>
+            <tr>
+                <th>Title</th>
+                <th>Key</th>
+                <th>Lang</th>
+                <th>Lang2</th>
+                <th>Score</th>
+                <th>Video</th>
+            </tr>
+        </thead>
+        <tfoot>
+            <tr>
+                <th>Title</th>
+                <th>Key</th>
+                <th>Lang</th>
+                <th>Lang2</th>
+                <th>Score</th>
+                <th>Video</th>
+            </tr>
+        </tfoot>
+
+</table>
+
+</body>
+<script>
+    let songs = {{ songs|safe }};
+    let langs = [];
+    let keys = [];
+    let keys1 = []
+    for (song of songs) {
+        if (keys.indexOf(song.key) < 0) {
+            keys.push(song.key);
+        }
+
+        if (langs.indexOf(song.lang) < 0) {
+            langs.push(song.lang);
+        }
+        if (langs.indexOf(song.lang_2) < 0) {
+            langs.push(song.lang_2);
+        }
+    }
+    langs.sort();
+    keys.sort();
+    keys1 = keys.includes('A')? keys.splice(keys.indexOf('A'),1):keys1;
+    keys1 = keys.includes('Ab')?keys1.concat(keys.splice(keys.indexOf('Ab'),1)):keys1;
+    keys1 = keys.includes('B')?keys1.concat(keys.splice(keys.indexOf('B'),1)):keys1;
+    keys1 = keys.includes('Bb')?keys1.concat(keys.splice(keys.indexOf('Bb'),1)):keys1;
+    keys1.sort();
+    keys = keys.concat(keys1);
+
+    div = 'Key: ';
+    for (key of keys) {
+        div += '<input class="keys" type="checkbox" checked value="' + key + '">' + key + '</input>';
+    }
+    $('#key').html(div);
+
+    /*div = 'Language: ';
+    for (lang of langs) {
+        if (lang != '') {
+            div += '<input class="langs" type="checkbox" checked value="' + lang + '">' + lang_tag(lang) + '</input>';
+        }
+    }
+    $('#lang').html(div);*/
+
+    let table = new DataTable('#songs', {
+		data: songs,
+		columns: [
+		    { data: null,
+		        render: (data, type, row) => show_lyrics(data)
+		    },
+		    { data: 'key' },
+		    { data: null,
+		        render: (data, type, row) => lang_tag(data.lang, row)
+		    },
+		    { data: null,
+		        render: (data, type, row) => lang_tag(data.lang_2, row)
+		    },
+		    { data: null,
+		        render: (data, type, row) => get_score(data, row)
+		    },
+		    { data: null,
+		        render: (data, type, row) => get_video(data.video, row)
+		    }
+		],
+		"lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
+		"pageLength": 25
+    });
+
+    function show_lyrics(data) {
+        html = data.title + '<span class="lyrics" style="display:none">';
+        for (l of data.content) {
+            html += l.origin_chord;
+        }
+        html += '</span>';
+        return html;
+    }
+
+    function get_score(data) {
+        html = '';
+        for (s of data.score) {
+            html += '<a href="' + s + '" target="new"><i style="font-size:24px" class="fa" title="Sheet Music">&#xf0f6;</i></a>&nbsp;&nbsp;';
+        }
+        if (data.abc) {
+            html += '<a href="../sheet/' + data.id + '" target="new"><i style="font-size:24px" class="fa" title="Interacted Sheet Music">&#xf1c7;</i></a>';
+        }
+        return html;
+    }
+
+    function get_video(links) {
+        html = '';
+        for (v of links) {
+            html += '<a href="' + v + '" target="new"><i class="fa fa-play-circle" style="font-size:24px" title="Youtube Video"></i></a>&nbsp;&nbsp;';
+        }
+        return html;
+    }
+
+    function lang_tag(lang) {
+        if(lang == '') { return ''; }
+        tags = {'en': '<span class="lang_en" title="English">en</span>', 'zh': '<span class="lang_zh" title="Chinese">zh</span>', 'zh-TW': '<span class="lang_zhTW" title="Taiwanese">tw</span>', 'zh-pingyin': '<span class="lang_zhpingyin" title="Zh PingYin">zh</span>', 'others': '<span class="others">na</span>'}
+        if (lang in tags) {
+            return tags[lang];
+        }
+        return tags['others'];
+    }
+
+    $('.keys').click(function() {
+        var temp = [];
+        $('.keys').each(function() {
+            if(this.checked) {
+                temp.push(this.value);
+            }
+        });
+        table.column(1).search((d) => temp.includes(d)).draw();
+    });
+
+    /*$('td').hover(function() {
+    console.log(this);
+        $(this).find('.lyrics').toggle();
+    });*/
+
+    $('.langs').click(function() {
+        var temp = [];
+        $('.langs').each(function() {
+            if(this.checked) {
+                temp.push(this.value);
+            }
+        });
+        console.log(temp)
+        table.column(2).search((d) => temp.includes(d)).draw();
+        table.column(2).search(function(d) {
+        console.log(d)
+        });
+
+    });
+
+        /*<table width="100%"><tr><td class="song_block">';
+            ll = []
+                for (l of data.content) {
+                    if(ll.indexOf(l.name) >= 0) {
+                        continue;
+                    }
+                    html += '<div><span>' + l.name + '</span>';
+                    content = l.origin_text;
+                    if (filter.chord) {
+                        content = l.origin_chord;
+                        html += '<div class="song_chord">' + l.origin_chord.replace('\n', '<br/>');
+                    }
+                    if (filter.bilingual) {
+                        content = l.origin_text + '</div><div class="region">' + l.region
+                    }
+                    else if (mode == 2) {
+                        html += '<div class="song">' + .replace('\n', '<br/>');
+                    }
+                    ll.push(l.name);
+                    html += '</div><br/>';
+                }
+                html += '</td><td class="notes">' + data.notes.replace('\n', '<br/>') + '</td></tr></table>';
+        }
+        target = document.getElementById("songs");
+        target.innerHTML = html;
+    }*/
+
+</script>
+</html>
