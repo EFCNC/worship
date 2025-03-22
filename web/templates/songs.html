@@ -4,12 +4,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" charset="utf-8">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <script src="../static/jquery-3.6.0.min.js"></script>
+<script src="../static/jquery-ui.js"></script>
 <link href="../static/datatables.min.css" rel="stylesheet">
+<link href="../static/jquery-ui.css" rel="stylesheet">
 <script src="../static/datatables.min.js"></script>
 <style>
-. lyrics {
-    position: absolute;
-    background: #c0c0c0;
+#dialog {
+    padding:5px;
+    line-height: 200%;
+}
+
+.title:hover {
+    cursor: pointer;
 }
 
 span.chunk {
@@ -146,6 +152,7 @@ span.chunk:before {
             <tr>
                 <th>Title</th>
                 <th>Key</th>
+                <th>Book</th>
                 <th>Lang</th>
                 <th>Lang2</th>
                 <th>Score</th>
@@ -156,6 +163,7 @@ span.chunk:before {
             <tr>
                 <th>Title</th>
                 <th>Key</th>
+                <th>Book</th>
                 <th>Lang</th>
                 <th>Lang2</th>
                 <th>Score</th>
@@ -164,7 +172,7 @@ span.chunk:before {
         </tfoot>
 
 </table>
-
+<div id="dialog"></div>
 </body>
 <script>
     let songs = {{ songs|safe }};
@@ -196,6 +204,8 @@ span.chunk:before {
     for (key of keys) {
         div += '<input class="keys" type="checkbox" checked value="' + key + '">' + key + '</input>';
     }
+    div += '<input class="all_keys" type="checkbox" checked>All</input>';
+
     $('#key').html(div);
 
     /*div = 'Language: ';
@@ -207,12 +217,13 @@ span.chunk:before {
     $('#lang').html(div);*/
 
     let table = new DataTable('#songs', {
-		data: songs,
+        data: songs,
 		columns: [
-		    { data: null,
-		        render: (data, type, row) => show_lyrics(data)
+		    { data: null, className: 'title',
+		        render: (data, type, row) => show_lyrics(data, row)
 		    },
 		    { data: 'key' },
+		    { data: 'book' },
 		    { data: null,
 		        render: (data, type, row) => lang_tag(data.lang, row)
 		    },
@@ -231,7 +242,7 @@ span.chunk:before {
     });
 
     function show_lyrics(data) {
-        html = data.title + '<span class="lyrics" style="display:none">';
+        html = '<span>' + data.title + '</span>&nbsp;<i style="display:none" style="font-size:14px" class="fa" title="Edit Song" id="' + data.id + '" name="' + data.title + '">&#xf044;</i><span class="lyrics" style="display:none">';
         for (l of data.content) {
             html += l.origin_chord;
         }
@@ -267,6 +278,67 @@ span.chunk:before {
         return tags['others'];
     }
 
+    function show(title, content) {
+        $("#dialog").html(content).dialog({ title: title}).dialog("open");
+    }
+
+    $(document).ready(function() {
+	    $("#dialog").dialog({
+  		    autoOpen: false,
+  		    hide: { effect: "fade", duration: 800 },
+  		    show: { effect: "fade", duration: 800 },
+  		    width: 'auto',
+  		    buttons: [
+  		        {
+                    text: 'OK',
+                    click: function() {
+                        if ($("#content").text() != '') {
+                            data = JSON.stringify($("#content").serializeArray());
+                        }
+                        $( this ).dialog( "close" );
+                    }
+                }
+            ],
+            modal: true
+	    });
+    });
+
+    $(document).on('mouseover', '.title', function() {
+        $(this).find('i').show();
+    });
+
+    $(document).on('mouseout', '.title', function() {
+        $(this).find('i').hide();
+    });
+
+    $(document).on('click', '.title span', function() {
+        $('#dialog').dialog({
+            'title': $(this).text()
+        });
+        $("#dialog").html($(this).siblings("span").html()).dialog("open");
+    });
+
+    $(document).on('click', '.title i', function() {
+        var url = this.id;
+        $('#dialog').dialog({
+            'title': $(this).attr('name')
+        });
+        $("#dialog").load(url).dialog("open");
+    });
+
+    $('.all_keys').click(function() {
+        var checked = this.checked;
+        $('.keys').each(function() {
+            this.checked = checked;
+        });
+        if(checked) {
+            table.column(1).search((d) => keys.includes(d)).draw();
+        }
+        else {
+            table.column(1).search((d) => d==-1).draw();
+        }
+    });
+
     $('.keys').click(function() {
         var temp = [];
         $('.keys').each(function() {
@@ -289,10 +361,8 @@ span.chunk:before {
                 temp.push(this.value);
             }
         });
-        console.log(temp)
         table.column(2).search((d) => temp.includes(d)).draw();
         table.column(2).search(function(d) {
-        console.log(d)
         });
 
     });
