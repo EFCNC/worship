@@ -7,6 +7,7 @@ from app import utils as Utils
 from app import tools as Tools
 from web.api import api
 import json
+import requests
 
 app = Flask(__name__)
 # register blueprint of API
@@ -77,7 +78,11 @@ def sildes_admin():
 	id = request.args.get('id', None)
 	bg = request.args.get('bg', None)
 	if id:
-		slides = Tools.get_worship_json(id)
+		headers = {'Content-Type': 'application/json; charset=utf-8'}
+		response = requests.get("http://150.136.54.210/API/worship/{}/preview".format(id), headers=headers)
+		if response.status_code == 200:
+			slides = response.json()
+		#slides = Tools.get_worship_json(id)
 		if slides is None:
 			return "Worship slides not found!!", 400
 		bg_files = []
@@ -160,7 +165,6 @@ def get_song_by_id(id):
 		return render_template('song_editor.html', content=content)
 	else:
 		content = Utils.get_song_by_id(id)
-		print(content)
 		content["lyrics"] = content["lyrics_raw"]  # add key lyrics to be used by song_editor
 		return render_template('song_editor.html', content=content)
 
