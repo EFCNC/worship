@@ -5,8 +5,9 @@ from flask import Flask, render_template, request
 from flask_socketio import SocketIO, emit
 from app import utils as Utils
 from app import tools as Tools
-from api import api
+from web.api import api
 import json
+import requests
 
 app = Flask(__name__)
 # register blueprint of API
@@ -77,7 +78,11 @@ def sildes_admin():
 	id = request.args.get('id', None)
 	bg = request.args.get('bg', None)
 	if id:
-		slides = Tools.get_worship_json(id)
+		headers = {'Content-Type': 'application/json; charset=utf-8'}
+		response = requests.get("http://150.136.54.210/API/worship/{}/preview".format(id), headers=headers)
+		if response.status_code == 200:
+			slides = response.json()
+		#slides = Tools.get_worship_json(id)
 		if slides is None:
 			return "Worship slides not found!!", 400
 		bg_files = []
@@ -119,6 +124,25 @@ def get_notes():
 		content = Utils.get_bible_by_id(id)
 	return render_template("notes.html", content=content)
 
+@app.route("/song/list")
+def get_songs():
+	'''
+	:param: none
+	:return: all song
+	'''
+	songs = Utils.get_songs()
+	return render_template('songs.html', songs=songs)
+
+@app.route("/sheet/<id>")
+def get_song_sheet(id):
+	'''
+	:param id: song_id
+	:return: ABC content
+	'''
+	sheet = {}
+	sheet['abc'] = Utils.get_song_sheet(id)
+	return render_template('sheet.html', sheets=sheet)
+
 @app.route("/song/<id>")
 def get_song_by_id(id):
 	'''
@@ -140,7 +164,7 @@ def get_song_by_id(id):
 			content["bible"] = ''
 		return render_template('song_editor.html', content=content)
 	else:
-		content = Utils.get_song_by_id(id)[0]
+		content = Utils.get_song_by_id(id)
 		content["lyrics"] = content["lyrics_raw"]  # add key lyrics to be used by song_editor
 		return render_template('song_editor.html', content=content)
 
@@ -162,10 +186,10 @@ def file_list():
 	:return: Return a list of easyslides zip file that's been exported
 	'''
 
-	path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'files', 'xml')
-	files = os.listdir(path)
+	path = Utils.conf["easyslides"]["path"].format('')
+	files = os.listdir(os.path.dirname(path))
 	files = [{'filename': x, 'path': os.path.join(path, x)} for x in files if os.path.isfile(os.path.join(path, x))]
-	worship_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'files', 'json')
+	worship_path = Utils.conf["worship"]["path"]
 	json_files = os.listdir(worship_path)
 	json_files = [{'date': x.split('_')[0], 'id': x.split('_')[1].split('.')[0], 'path': os.path.join(worship_path, x)} for x in json_files]
 	return render_template('files.html', zip=files, json=json_files)

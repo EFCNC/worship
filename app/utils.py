@@ -6,7 +6,7 @@ import requests
 import json
 import os
 import re
-import opencc
+#import opencc
 from app import db as dB
 from app import parser as Parser
 import hanzidentifier
@@ -23,9 +23,9 @@ def search_songs(keyword, match=None):
         # Split keywords from space
         new_keyword = keyword.split(' ')
         if db["enabled"] == 1:
-            if db["lang"] == 'zh-CN':  # covert traditional chinese to simplified
-                converter = opencc.OpenCC('t2s.json')
-                new_keyword = [converter.convert(x) for x in new_keyword]
+            #if db["lang"] == 'zh-CN':  # covert traditional chinese to simplified
+            #    converter = opencc.OpenCC('t2s.json')
+            #    new_keyword = [converter.convert(x) for x in new_keyword]
             para = {
                 "name": db["name"],
                 "sql": db["search"]["query"],
@@ -35,7 +35,7 @@ def search_songs(keyword, match=None):
                 "cols": db["search"]["columns"]
             }
             result = dB.search(para)
-        titles += [{'id': x[0], 'title': x[1], 'db': db["name"], 'lang': x[2] if x[2] else db["name"].split('.')[0]} for x in result if len(result)>0]
+            titles += [{'id': x[0], 'title': x[1], 'db': db["name"], 'lang': x[2] if x[2] else db["name"].split('.')[0]} for x in result if len(result)>0]
     return titles
 
 def search_song_efcnc(keyword):
@@ -138,30 +138,62 @@ def get_song_by_id_(id, db_name):
     lang = db[0]["lang"]
     x = dB.run_para(sql, id, db_name)[0]
     content = Parser.parse_lyrics_for_import(x[4]) # index 4: lyrics
-    if lang == "zh-CN":
-        converter = opencc.OpenCC('s2t.json')
+    #if lang == "zh-CN":
+        #converter = opencc.OpenCC('s2t.json')
         # convert title, bookname, lyrics, copyright to traditional chinese
-        song = {'id': x[0], 'book': converter.convert(x[2]) if x[2] else '', 'title': converter.convert(x[1]), 'lyrics': converter.convert(content[0]), 'sequence': content[1], 'copyright': converter.convert(x[5]) if x[4] else '', 'ccli': x[6] if x[6] else '', 'song_number': x[7], 'file': x[8] if x[8] else ''}
-    elif lang == 'en':
+        #song = {'id': x[0], 'book': converter.convert(x[2]) if x[2] else '', 'title': converter.convert(x[1]), 'lyrics': converter.convert(content[0]), 'sequence': content[1], 'copyright': converter.convert(x[5]) if x[4] else '', 'ccli': x[6] if x[6] else '', 'song_number': x[7], 'file': x[8] if x[8] else ''}
+    if lang == 'en':
         song = {'id': x[0], 'book': x[2] if x[2] else '', 'title': x[1], 'lyrics': content[0], 'sequence': content[1], 'copyright': x[5] if x[5] else '', 'ccli': x[6] if x[6] else '', 'song_number': x[7], 'file': x[8] if x[8] else ''}
     else:  # stream_of_song
         song = {'id': x[0], 'book': x[2] if x[2] else '', 'title': x[1], 'lyrics': content[0], 'sequence': content[1], 'copyright': x[5] if x[5] else '', 'ccli': x[6] if x[6] else '', 'song_number': x[7], 'lang': x[3] if x[3] else '', 'author': x[8] if x[8] else '', 'lyricist': x[9] if x[9] else '', 'key': x[10] if x[10] else ''}
 
     return song
 
+def get_songs():
+    sql = "select s.title, s.author, s.lang, s.lang_2, s.song_key, s.sequence, s.bible_verse, s.lyricist, s.book, s.copyright, s.ccli, s.content, m.link, m.m_type, m.abc, s.song_id as id from songs s left join media m on s.song_id = m.song_id order by s.song_id"
+    result = dB.run(sql)
+    songs = []
+    for r in result:
+        temp = next((x for x in songs if x['title'] == r[0]), None)
+        if temp:
+            if r[13] == 'video':
+                temp['video'].append(r[12])
+            elif r[13] == 'score':
+                temp['score'].append(r[12])
+            elif r[13] == 'abc':
+                temp['abc'] = r[14]
+        else:
+            songs.append({'type': 'song', 'title': r[0], 'author': r[1] if r[1] else '', 'lang': r[2] if r[2] else '', 'lang_2': r[3] if r[3] else '', 'key': r[4] if r[4] else '', 'sequence': r[5] if r[5] else '', 'bible': r[6] if r[6] else '', 'lyricist': r[7] if r[7] else '', 'book': r[8] if r[8] else '', 'copyright': r[9] if r[9] else '', 'ccli': r[10] if r[10] else '', 'lyrics_raw': r[11], 'content': Parser.parse_lyrics(r[11], r[5]), 'video': [r[12]] if r[13] == 'video' else [], 'score': [r[12]] if r[13] == 'score' else [], 'abc': r[14] if r[13] == 'abc' else '', 'id': r[15], 'notes': '', 'transpose': 0, 'alt_sequence': r[5] if r[5] else ''})
+    return songs
+
+def get_song_sheet(id):
+    sql = "select abc from media where song_id=?"
+    result = dB.run_para(sql, id)
+    if result:
+        return result[0][0]
+
 def get_song_by_id(id):
-    sql = "select s.title, s.author, s.lang, s.lang_2, s.song_key, s.sequence, s.bible_verse, s.lyricist, s.book, s.copyright, s.ccli, s.content, (select link from media m where m.song_id=s.song_id and m_type='video') as video, (select link from media m where m.song_id=s.song_id and m_type='score') as score, s.song_id as id from songs s where s.song_id = ?"
-    r = dB.run_para(sql, id)[0]
-    if r:
-        return {'type': 'song', 'title': r[0], 'author': r[1] if r[1] else '', 'lang': r[2] if r[2] else '', 'lang_2': r[3] if r[3] else '', 'key': r[4] if r[4] else '', 'sequence': r[5] if r[5] else '', 'bible': r[6] if r[6] else '', 'lyricist': r[7] if r[7] else '', 'book': r[8] if r[8] else '', 'copyright': r[9] if r[9] else '', 'ccli': r[10] if r[10] else '', 'lyrics_raw': r[11], 'content': Parser.parse_lyrics(r[11], r[5]), 'video': r[12] if r[12] else '', 'score': r[13] if r[13] else '', 'id': r[14], 'notes': '', 'transpose': 0, 'alt_sequence': r[5] if r[5] else ''}, 200
-    return r, 500
+    sql = "select s.title, s.author, s.lang, s.lang_2, s.song_key, s.sequence, s.bible_verse, s.lyricist, s.book, s.copyright, s.ccli, s.content, m.link, m.m_type, m.abc, s.song_id as id from songs s left join media m on s.song_id = m.song_id where s.song_id = ?"
+    songs = dB.run_para(sql, id)
+    video = []
+    score = []
+    abc = []
+    for s in songs:
+        if s[13] == 'video':
+            video.append(s[12])
+        elif s[13] == 'score':
+            score.append(s[12])
+        elif s[13] == 'abc':
+            abc.append(s[12])
+    if songs:
+        r = songs[0]
+        return {'type': 'song', 'title': r[0], 'author': r[1] if r[1] else '', 'lang': r[2] if r[2] else '', 'lang_2': r[3] if r[3] else '', 'key': r[4] if r[4] else '', 'sequence': r[5] if r[5] else '', 'bible': r[6] if r[6] else '', 'lyricist': r[7] if r[7] else '', 'book': r[8] if r[8] else '', 'copyright': r[9] if r[9] else '', 'ccli': r[10] if r[10] else '', 'lyrics_raw': r[11], 'content': Parser.parse_lyrics(r[11], r[5]), 'video': video, 'score': score, 'abc': abc, 'id': r[15], 'notes': '', 'transpose': 0, 'alt_sequence': r[5] if r[5] else ''}
+    return None
 
 def get_song_by_title(title):
     sql = "select song_id, title from songs where title = ?"
     result = dB.run_para(sql, title)
-    if result:
-        return "Found title {}".format(title)
-    return None
+    return result
 
 def add_song(content):
     content = [x for x in content if x['value'] != '']
@@ -176,8 +208,8 @@ def add_song(content):
     sql = sql[:-1] + ")"
     values = [x['value'] for x in content]
     song_id = dB.insert(sql, values)
-    if song_id[1] == 500:
-        return song_id[0]
+    if not song_id:
+        return None
     if len(media):
         sql = "insert into media(song_id, link, m_type) values"
         for m in media:

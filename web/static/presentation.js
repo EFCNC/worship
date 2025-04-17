@@ -69,12 +69,12 @@
         if (sharp.indexOf(init)>=0) {
     	    keys = sharp;
         }
-        for (key of transpose) {
-            if (key == 0) {
+        for (diff of transpose) {
+            if (diff == 0) {
                 continue;
             }
-            key = keys.indexOf(init)+key;
-            html += '<button name="transpose" title="Prepare to change Key to ' + keys[key] + '" transpose="' + key + '">Change Key to ' + keys[key] + '</button>';
+            key = keys.indexOf(init)+diff;
+            html += '<button name="transpose" title="Prepare to change Key to ' + keys[key] + '" transpose="' + diff + '">Change Key to ' + keys[key] + '</button>';
         }
         return html;
     }
