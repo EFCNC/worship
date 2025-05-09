@@ -30,10 +30,10 @@
         "<SongNumber>0</SongNumber>\n<Capo>-1</Capo>\n<TransposeOffset>0</TransposeOffset>\n<FontShadowColour>-16777216</FontShadowColour>\n<FontOutlineColour>-16777216</FontOutlineColour>\n<FontShadowDepth>2</FontShadowDepth>\n<FontOutlineWidth>2</FontOutlineWidth>\n<FormatData>\n<ShowSongHeadings>3</ShowSongHeadings>\n<ShowSongHeadingsAlign>0</ShowSongHeadingsAlign>\n<UseShadowFont>1</UseShadowFont>\n<ShowNotations>0</ShowNotations>\n<CapoZero>0</CapoZero>\n<UseOutlineFont>0</UseOutlineFont>\n<DisplayRegions>2</DisplayRegions>\n<DisplayRegionsLayout>0</DisplayRegionsLayout>\n<ScreenColour1>-16777056</ScreenColour1>\n<ScreenColour2>-16777056</ScreenColour2>\n<ScreenPatternStyle>0</ScreenPatternStyle>\n<BackgroundPicture>I;Images\\Paint Sweeps Blank.jpg</BackgroundPicture>\n<BackgroundPictureMode>3</BackgroundPictureMode>\n<VerticalAlign>1</VerticalAlign>\n<ScreenLeftMargin>2</ScreenLeftMargin>\n<ScreenRightMargin>2</ScreenRightMargin>\n<ScreenBottomMargin>0</ScreenBottomMargin>\n<ShowItemTransition>0</ShowItemTransition>\n<ShowSlideTransition>0</ShowSlideTransition>\n<FontVPosition1>0</FontVPosition1>\n<FontVPosition2>50</FontVPosition2>\n<MediaOption>0</MediaOption>\n<MediaVolume>50</MediaVolume>\n<MediaBalance>0</MediaBalance>\n<MediaMute>0</MediaMute>\n<MediaRepeat>0</MediaRepeat>\n<MediaWidescreen>0</MediaWidescreen>\n<MediaCaptureDeviceNumber>1</MediaCaptureDeviceNumber>\n<HeadingFontFormat>1</HeadingFontFormat>\n<HeadingFontPercentSize>100</HeadingFontPercentSize>\n<HeadingFontBold>0</HeadingFontBold>\n<HeadingFontItalic>0</HeadingFontItalic>\n<HeadingFontUnderline>1</HeadingFontUnderline>\n<HeadingFontChorusItalic>0</HeadingFontChorusItalic>\n<FontBold1>0</FontBold1>\n<FontItalic1>0</FontItalic1>\n<FontUnderline1>0</FontUnderline1>\n<FontChorusBold1>0</FontChorusBold1>\n<FontChorusItalic1>0</FontChorusItalic1>\n<FontChorusUnderline1>0</FontChorusUnderline1>\n<FontBold2>0</FontBold2>\n<FontItalic2>0</FontItalic2>\n<FontUnderline2>0</FontUnderline2>\n<FontChorusBold2>0</FontChorusBold2>\n<FontChorusItalic2>0</FontChorusItalic2>\n<FontChorusUnderline2>0</FontChorusUnderline2>\n<FontName1>Arial</FontName1>\n<FontName2>Arial</FontName2>\n<FontSize1>40</FontSize1>\n<FontSize2>40</FontSize2>\n<FontColour1>-1</FontColour1>\n<FontColour2>-1</FontColour2>\n<FontRTL1>0</FontRTL1>\n<FontRTL2>0</FontRTL2>\n<FontAlign1>2</FontAlign1>\n<FontAlign2>2</FontAlign2>\n<KeyTransposeOffset>0</KeyTransposeOffset>\n<PreviousKeyTransposeOffset>0</PreviousKeyTransposeOffset>\n<ShowDataPanel>2</ShowDataPanel>\n<AutoTextOverflow>2</AutoTextOverflow>\n<UseLargestFontSize>2</UseLargestFontSize>\n<LineBetweenRegions>2</LineBetweenRegions>\n<WordWrapLeftAlignIndent>2</WordWrapLeftAlignIndent>\n</FormatData>\n<Image/>\n</Item>\n</Easyslides>"
       ]
     },
-    "path": "c:\\temp\\easyslides\\{}"
+    "path": "C:\\temp\\worship\\xml\\{}"
   },
   "worship": {
-    "path": "c:\\temp\\worship"
+    "path": "C:\\temp\\worship\\json"
   },
   "db": {
       "default": {
@@ -63,7 +63,7 @@
             "condition": "or"
           },
           "get_song": "select s.id as id, title, sb.name as bookname, null as lang, lyrics, copyright, ccli_number, song_number, file_name from songs s left join song_books sb on s.song_book_id = sb.id left join media_files m on s.id = m.song_id where s.id = ?",
-          "enabled": 1
+          "enabled": 0
         },
         {
           "name": "zh.sqlite",
@@ -78,7 +78,7 @@
             "condition": "or"
           },
           "get_song": "select s.id as id, title, sb.name as bookname, null as lang, lyrics, copyright, ccli_number, song_number, file_name from songs s left join song_books sb on s.song_book_id = sb.id left join media_files m on s.id = m.song_id where s.id = ?",
-          "enabled": 1
+          "enabled": 0
         },
         {
           "name": "stream_of_praise.db",

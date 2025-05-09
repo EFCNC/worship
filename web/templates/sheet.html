@@ -1,0 +1,29 @@
+{% include 'header.html' %}
+<head>
+  <link rel="stylesheet" href="http://dev.music.free.fr/css/music.min.css" />
+  <script src="http://dev.music.free.fr/js/abc-ui-1.0.0.min.js"></script>
+</head>
+<body bgcolor="#fff">
+<div class="abc-source" id="sheet">
+</div>
+<script>
+let data = {{ sheets|safe }};
+function loadHTML(url) {
+  fetch(url)
+      .then(response => response.text())
+      .then(text => document.getElementById('sheet').innerHTML = text);
+}
+
+if (data.abc) {
+  $.when($(".abc-source").html(data.abc)).then(function() {
+    $ABC_UI.init();
+  });
+}
+else if (data.sheet) {
+//console.log(data.sheet)
+  loadHTML("https://grago.org/wp-content/uploads/2022/01/553-How-Great-Thou-Art.pdf");
+  //$('#sheet').load('http://localhost');
+//  $('#sheet').load('<object type="text/html" data="https://grago.org/wp-content/uploads/2022/01/553-How-Great-Thou-Art.pdf"></object>');
+}
+</script>
+</body>

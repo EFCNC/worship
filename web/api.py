@@ -76,11 +76,13 @@ def add_song():
     '''
 
     song = request.get_json()
-    title = next((x['value'] for x in song if x['name'] == '`title'), None)
+    title = next((x['value'] for x in song if x['name'] == 'title'), None)
     result = Utils.get_song_by_title(title)
     if result:
-        return result, 400
-    return Utils.add_song(song)
+        return "{} already exist".format(title), 400
+    result = Utils.add_song(song)
+    print('api', result)
+    return result[0]
 
 @api.route("/search/song")
 def search_song():
@@ -90,12 +92,12 @@ def search_song():
     '''
 
     keywords = request.args.get('keywords', None)
-    print(keywords)
     if keywords is None:
         return {"No keyword provided!"}, 400
     right = Utils.search_song_efcnc(keywords)
     left = Utils.search_songs(keywords)
-    print(left)
+    # remove title from left if it's already in current dB
+    left = [x for x in left if not any(y for y in right if y['title'] == x['title'])]
     return {'left': left, 'right': right}, 200
 
 @api.route("/notes", methods=["POST"])
