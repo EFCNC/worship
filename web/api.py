@@ -15,11 +15,11 @@ def edit_worship(id):
 
     content = request.get_json()
     if content:
-        result = Utils.edit_songset(int(id), content)
-        Tools.create_json(int(id))
-        return result
-    Tools.create_json(int(id))
-    return "", 200
+        Utils.edit_songset(int(id), content)
+        result = Tools.create_json(int(id))
+        return result, 200
+    result = Tools.create_json(int(id))
+    return result, 200
 
 @api.route("/worship/<id>/export")
 def export(id):
@@ -55,6 +55,11 @@ def get_song(id):
     content = Utils.get_song_by_id(id)
     return content
 
+@api.route("/songs")
+def list_song():
+    songs = Utils.get_songs()
+    return songs
+
 @api.route("/song/<id>/edit", methods=["POST"])
 def edit_song(id):
     '''
@@ -80,9 +85,9 @@ def add_song():
     result = Utils.get_song_by_title(title)
     if result:
         return "{} already exist".format(title), 400
-    result = Utils.add_song(song)
-    print('api', result)
-    return result[0]
+    song_id = Utils.add_song(song)
+    print(song_id)
+    return song_id, 200
 
 @api.route("/search/song")
 def search_song():
