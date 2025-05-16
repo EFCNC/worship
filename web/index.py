@@ -1,5 +1,14 @@
 #coding: utf-8
-import os.path
+import os
+import sys
+
+# Add the project root directory to sys.path
+# __file__ is the path to the current script (web/index.py)
+# os.path.dirname(__file__) is the directory of the current script (web/)
+# os.path.join(os.path.dirname(__file__), '..') is the parent directory (project root)
+# os.path.abspath(...) makes it an absolute path
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.insert(0, project_root)
 
 from flask import Flask, render_template, request
 from flask_socketio import SocketIO, emit
