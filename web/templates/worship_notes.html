@@ -149,7 +149,50 @@ span.chunk:before {
 
 </body>
 <script>
-    let presentation = {{ songs|safe }};
+    // init sharp and flat keys to be assigned to keys
+    let sharp = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+    let flat = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"];
+    let keys = flat;
+
+    // parse chord to different key by transpose number
+    function parse_chord(chord, diff) {
+        if (sharp.indexOf(chord)>=0) {
+    	    keys = sharp;
+        }
+	    diff = Number(diff);
+	    chord = chord.split('/');
+        new_chord = []
+        for(c in chord) {
+    	    if(chord[c][1] == 'b' || chord[c][1] == '#') {
+              	pos_ = keys.indexOf(chord[c].substring(0,2))+diff
+              	if(pos_>= keys.length) {
+          	    	pos_ = pos_-keys.length;
+                }
+                else if(pos_<0) {
+            	    pos_ = keys.length+pos_;
+                }
+            new_chord.push(keys[pos_]+chord[c].substring(2));
+        	chord[c] = chord[c].substring(0,2) + chord[c].substring(2);
+            }
+            else {
+			    pos_ = keys.indexOf(chord[c][0])+diff
+          	    if(pos_>= keys.length) {
+          		    pos_ = pos_-keys.length;
+                }
+                else if(pos_<0) {
+            	    pos_ = keys.length+pos_;
+                }
+                new_chord.push(keys[pos_]+chord[c].substring(1));
+                chord[c] = chord[c][0] + chord[c].substring(1);
+            }
+        }
+        if(diff) {
+    	    return new_chord.join('/');
+        }
+	    return chord.join('/');
+    }
+
+    let worship = {{ songs|safe }};
 
     function lang_tag(lang) {
         if(lang == '') { return ''; }
@@ -175,12 +218,12 @@ span.chunk:before {
     function load(mode, name) {
         clicked(name);
         html = ''
-        for (data of presentation) {
+        for (data of worship) {
             if (data.type == 'info') {
                 html += '<div class="info">' + data.notes.replace('\n', '<br/>') + '</div>';
             }
             else {
-                html += '<div class="songs"><div class="reference">' + data.title + ' (' + data.key + ') ' + lang_tag(data.lang) + ' ' + lang_tag(data.lang_2) + ' [' + data.sequence + ']';
+                html += '<div class="songs"><div class="reference">' + data.title + ' (' + parse_chord(data.key, parseInt(data.transpose)) + ') ' + lang_tag(data.lang) + ' ' + lang_tag(data.lang_2) + ' [' + data.sequence + ']';
 
                 if (data.score) {
                     html += '&nbsp;&nbsp;<a href="' + data.score + '" target="new"><i style="font-size:24px" class="fa" title="Sheet Music">&#xf1c7;</i></a>';
@@ -199,7 +242,12 @@ span.chunk:before {
                         html += '<div class="song">' + l.origin_text.replace('\n', '<br/>');
                     }
                     else if (mode == 1) {
-                        html += '<div class="song_chord">' + l.origin_chord.replace('\n', '<br/>');
+                        chords = l.origin_chord.replace('\n', '<br/>');
+                        if(data.transpose != '0') {
+                            key_change = parseInt(data.transpose);
+                            chords = chords.replace(/(data-chord=")([^"]+)/g, (match, g1, g2) => {return g1+parse_chord(g2, key_change);});
+                        }
+                        html += '<div class="song_chord">' + chords;
                     }
                     else if (mode == 2) {
                         html += '<div class="song"><div class="origin">' + l.origin_text.replace('\n', '<br/>') + '</div><div class="region">' + l.region + '</div>';
