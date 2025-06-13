@@ -23,12 +23,14 @@
     // init sharp and flat keys to be assigned to keys
     let sharp = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
     let flat = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"];
-    let keys = flat;
+    let keys = sharp;
+    let flat_keys = ["Db", "Eb", "F", "Ab", "Bb"];
 
     // parse chord to different key by transpose number
     function parse_chord(chord, diff) {
-        if (sharp.indexOf(chord)>=0) {
-    	    keys = sharp;
+        //if (sharp.indexOf(chord)>=0) {
+        if (flat_keys.indexOf(chord)>=0) {
+    	    keys = flat;
         }
 	    diff = Number(diff);
 	    chord = chord.split('/');
@@ -40,7 +42,7 @@
           	    	pos_ = pos_-keys.length;
                 }
                 else if(pos_<0) {
-            	    pos_ = keys.length+pos;
+            	    pos_ = keys.length+pos_;
                 }
             new_chord.push(keys[pos_]+chord[c].substring(2));
         	chord[c] = chord[c].substring(0,2) + chord[c].substring(2);
@@ -51,7 +53,7 @@
           		    pos_ = pos_-keys.length;
                 }
                 else if(pos_<0) {
-            	    pos_ = keys.length+pos;
+            	    pos_ = keys.length+pos_;
                 }
                 new_chord.push(keys[pos_]+chord[c].substring(1));
                 chord[c] = chord[c][0] + chord[c].substring(1);
@@ -107,6 +109,36 @@
             div.html(hr + ':' + min_txt + ':' + sec_txt);
         }, 1000);
     }
+
+    function move_remote(num) {
+        /*
+            function to move slide up and down, this will change the global variable for pos and order
+            params num: 1 or -1
+        */
+        order = order + num;
+        if (order >= slides[pos].content.length) {
+            pos += 1;
+            if(pos<=slides.length-1) {
+                order = 0;
+            }
+            else {
+                pos -= 1;
+                order -= 1;
+            }
+        }
+        else if (order < 0) {
+            pos -= 1;
+            if(pos<0) {
+                pos = 0;
+                order = 0;
+            }
+            else {
+                order = slides[pos].content.length-1;
+            }
+        }
+        socket.emit('control', {'type': 'pos', 'value': [pos, order]});
+    }
+
 
     function move(type, num) {
         /*
@@ -271,7 +303,8 @@
         container = {
             'view': '<div id="top-left"></div><div id="top-right"></div><div id="preview" class="preview view"></div><div id="bottom-left"></div><div id="bottom-right"></div>',
             'musician': '<div id="top-left"></div><div id="top-right"></div><div id="preview" class="preview view"></div><div id="bottom-left"></div><div id="bottom-right"></div>',
-            'lead': '<div id="top-right"></div><div class="preview_container"><div id="preview"></div><div id="menu"><div id="dynamic_btn"><br/><button name="dynamic" title="Intro">Intro</button><button name="dynamic" title="Interlude">Interlude</button><button name="dynamic" title="Ending">Ending</button><br/><button name="dynamic" title="Ready tp Build up">Build Up</button><button name="dynamic" title="Slow Down">Slow Down</button><button name="dynamic" title="Speed Up">Speed Up</button><br/><button name="dynamic" title="Acapella">Acapella</button><button name="dynamic" title="Repeat Chorus">Repeat Chorus</button><button name="dynamic" title="Last Sentence">Last Sentence</button><div id="key_change"></div></div><div id="notes"></div></div><div id="preview_div"></div></div>'
+            'lead': '<div id="top-right"></div><div class="preview_container"><div id="preview"></div><div id="menu"><div id="dynamic_btn"><br/><button name="dynamic" title="Intro">Intro</button><button name="dynamic" title="Interlude">Interlude</button><button name="dynamic" title="Ending">Ending</button><br/><button name="dynamic" title="Ready tp Build up">Build Up</button><button name="dynamic" title="Slow Down">Slow Down</button><button name="dynamic" title="Speed Up">Speed Up</button><br/><button name="dynamic" title="Acapella">Acapella</button><button name="dynamic" title="Repeat Chorus">Repeat Chorus</button><button name="dynamic" title="Last Sentence">Last Sentence</button><div id="key_change"></div></div><div id="notes"></div></div><div id="preview_div"></div></div>',
+            'remote': '<div id=buttons><button id="btn_previous">Up</button><button id="btn_next">Down</button></div>'
         }
         return container[mode]
     }
@@ -306,10 +339,13 @@
         slide.setAttribute('class', 'content');
         if (data.type == 'song') {
             l = data.content[order];
-
+            transpose = parseInt(data.transpose);
             reversed = data.reverse;
             if (mode=='musician') {     // musician mode will only show original lyrics with chord
                 chords = l.origin_chord;
+                if (transpose !=0) {
+                    chords = chords.replace(/(data-chord=")([^"]+)/g, (match, g1, g2) => {return g1+parse_chord(g2, transpose);});
+                }
                 if (key_change != 0) {
                     if(last_order != order) {
                         $("#top-left").fadeOut();
@@ -321,6 +357,9 @@
                 if (data.content[next]) {
                     n = data.content[next];
                     text = n.origin_chord.split('<br/>')[0]
+                    if (transpose !=0) {
+                        chords = chords.replace(/(data-chord=")([^"]+)/g, (match, g1, g2) => {return g1+parse_chord(g2, transpose);});
+                    }
                     if (key_change!=0) {
                         text = text.replace(/(data-chord=")([^"]+)/g, (match, g1, g2) => {return g1+parse_chord(g2, key_change);});
                     }
