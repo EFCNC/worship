@@ -13,6 +13,12 @@
         }
     </style>
     <script>
+    // Prevent windows back button
+
+    history.pushState(null, null, document.URL);
+    window.addEventListener('popstate', function () {
+        history.pushState(null, null, document.URL);
+    });
 
     let preview;    // Declare target div for load() function
 
@@ -51,6 +57,16 @@
             $('#top-right').hide();
         }
     }
+
+    // function for remote view only
+
+    $(document).on('click', '#btn_previous', function(){
+        move_remote(-1);
+    });
+
+    $(document).on('click', '#btn_next', function(){
+        move_remote(1);
+    });
 
     // function for lead view only
     $(document).on('click', '#preview_div div', function(){
@@ -102,7 +118,7 @@
 </script>
 </head>
 <body>
-<div id="control_btn"><button name="view">View</button>&nbsp;<button name="lead">Lead</button>&nbsp;<button name="musician">Musician</button></div>
+<div id="control_btn"><button name="view">View</button>&nbsp;<button name="lead">Lead</button>&nbsp;<button name="musician">Musician</button>&nbsp;<button name="remote">Remote</button></div>
 <div id="container"></div>
 </body>
 </html>
