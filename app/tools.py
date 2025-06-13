@@ -55,7 +55,7 @@ def list_worship_file():
     files = os.listdir(path)
     return [{'filename': x.split('.')[0].split('_')[0], 'id': x.split('.')[0].split('_')[1]} for x in files if os.path.isfile(os.path.join(path, x))]
 
-def create_json(id, worship):
+def create_json(id, worship=None):
     if not worship:
         worship = Utils.get_worship_songs(id)
         if not worship:
