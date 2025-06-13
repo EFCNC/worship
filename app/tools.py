@@ -4,8 +4,14 @@ import os
 from datetime import date, timedelta, datetime
 from zipfile import ZipFile
 import json
+import base64
 
 conf = Utils.conf
+
+def convert_image(file):
+    with open(file, 'rb') as image_file:
+        base64_bytes = base64.b64encode(image_file.read())
+        return base64_bytes
 
 def edit_worship_json(id, content, pos):
     '''
@@ -35,8 +41,9 @@ def get_background_files(name=None):
         return bg
 
 def get_worship_json(id):
-    w = Utils.get_worship(id)
-    json_file = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'files', 'json', '{}_{}.json'.format(w['date'], id))
+    w = Utils.get_worship_date(id)
+    #json_file = os.path.join(Utils.conf["worship"]["path"].format(''), '{}_{}.json'.format(w[0], id))
+    json_file = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'files', 'json', '{}_{}.json'.format(w[0], id))
     if not os.path.exists(json_file):
         return None
     with open(json_file, 'r', encoding='utf8') as f:
@@ -48,17 +55,21 @@ def list_worship_file():
     files = os.listdir(path)
     return [{'filename': x.split('.')[0].split('_')[0], 'id': x.split('.')[0].split('_')[1]} for x in files if os.path.isfile(os.path.join(path, x))]
 
-def create_json(id):
-    worship = Utils.get_worship_songs(id)
-    path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'files', 'json')
+def create_json(id, worship):
     if not worship:
-        return None
+        worship = Utils.get_worship_songs(id)
+        if not worship:
+            return None
 
+    path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'files', 'json')
     if not os.path.exists(path):
         os.makedirs(path, exist_ok=True)
 
-    with open(os.path.join(path, '{}_{}.json'.format(worship[0]["date"], id)), "w", encoding="utf-8") as f:
+    json_file = os.path.join(path, '{}_{}.json'.format(worship[0]["date"], id))
+    with open(json_file, "w", encoding="utf-8") as f:
         json.dump(worship, f, ensure_ascii=False)
+
+    return json_file
 
 def create_xml(worship):
     theme = '<?xml version="1.0" encoding="utf-8"?>\n<Easyslides>\n<ListItem>\n<ListHeader>\n<FormatData>\n'

@@ -59,6 +59,7 @@ let elem;
                 ul.setAttribute('class', 'lyrics')
                 ul.setAttribute('style', 'display:none');
                 for(let l of data.content) {
+                console.log(l)
                     var list_1 = document.createElement('li');
                     list_1.setAttribute('class', 'ui-state-default');
                     list_1.setAttribute('id', 'song-' + data.id + '_' + l.name);
@@ -90,7 +91,7 @@ let elem;
                     return true;
     	        }
                 else {
-                    alert(response);
+                    alert(response.responseText);
 		        }
             }
         });
@@ -113,10 +114,8 @@ let elem;
             num = 0
         }
         dialog_title = [{'title': 'Save Worship Song', 'text': 'Save', 'cancel': 'Cancel', 'action': 'edit'}, {'title': 'Add Worship Song', 'text': 'Add', 'cancel': 'Cancel', 'action': 'add'}]
-console.log(id, num)
         $.when( $.ajax( url ) ).then(function( response, textStatus, jqXHR ) {
             $("#dialog").html(response);
-            //theDialog.dialog("open");
             $("#dialog").dialog({
                 title: dialog_title[num]['title'],
                 width: 'auto',
@@ -131,7 +130,7 @@ console.log(id, num)
                             else {
                                 click_url = API_URL + 'song/' +  dialog_title[num]['action'];
                             }
-                            data = JSON.stringify($("#content").serializeArray());
+                            data = JSON.stringify($("#song_form").serializeArray());
                             $.ajax({
                                 type: "post",
                                 url: click_url,
@@ -143,7 +142,7 @@ console.log(id, num)
     	                            }
                                     else {
                                     console.log(response)
-                                        alert(response);
+                                        alert(response.responseText);
 		                            }
                                 },
                                 contentType: "application/json",

@@ -169,8 +169,9 @@ def get_songs():
 def get_song_sheet(id):
     sql = "select abc from media where song_id=?"
     result = dB.run_para(sql, id)
-    if result:
-        return result[0][0]
+    for r in result:
+        if r[0]:
+            return r[0]
 
 def get_song_by_id(id):
     sql = "select s.title, s.author, s.lang, s.lang_2, s.song_key, s.sequence, s.bible_verse, s.lyricist, s.book, s.copyright, s.ccli, s.content, m.link, m.m_type, m.abc, s.song_id as id from songs s left join media m on s.song_id = m.song_id where s.song_id = ?"
@@ -206,24 +207,24 @@ def add_song(content):
     for i in range(len(content)):
         sql += '?,'
     sql = sql[:-1] + ")"
-    values = [x['value'] for x in content]
+    values = [x['value'].replace("'", "''") for x in content]
     song_id = dB.insert(sql, values)
     if not song_id:
         return None
-    if len(media):
+    if len(media)>0:
         sql = "insert into media(song_id, link, m_type) values"
         for m in media:
             sql += "(?, ?, ?),"
         sql = sql[:-1]
         values = []
         for m in media:
-            values.append(song_id[0])
+            values.append(song_id)
             values.append(m['value'])
             values.append(m['name'])
 
         result = dB.insert(sql, values)
-        return result
-    return song_id, 200
+        return song_id
+    return song_id
 
 def edit_song(id, content):
     song_set_columns = ['bible']
@@ -321,7 +322,12 @@ def edit_songset(id, content):
 def get_worship(id):
     sql = "select notes, scheduled_date, s.title, s.speaker, s.bible_verse, s.outline from worship w inner join sermon s on w.scheduled_date = s.date where worship_id = ?"
     r = dB.run_para(sql, id)[0]
-    return {'date': r[1], 'title': r[2] if r[0] else '', 'notes': r[0] if r[0] else '', 'speaker': r[3] if r[3] else '', 'verse': r[4] if r[4] else '', 'outline': r[5] if r[5] else ''}
+    return {'date': r[1], 'title': r[2] if r[2] else '', 'notes': r[0] if r[0] else '', 'speaker': r[3] if r[3] else '', 'verse': r[4] if r[4] else '', 'outline': r[5] if r[5] else ''}
+
+def get_worship_date(id):
+    sql = "select scheduled_date from worship where worship_id = ?"
+    r = dB.run_para(sql, id)[0]
+    return r
 
 def get_worship_songs(id):
     #sql = "select s.title, s.author, s.lang, s.lang_2, s.song_key, s.sequence, s.bible_verse, s.lyricist, s.book, s.copyright, s.ccli, s.content, (select link from media m where m.song_id=s.song_id and m_type=0) as video, (select link from media m where m.song_id=s.song_id and m_type=1) as score, w.scheduled_date as date, se.song_id as id, se.transpose as transpose, se.sequence alt_sequence, se.notes as notese from song_set se left join songs s on s.song_id = se.song_id  inner join worship w on w.scheduled_date = se.scheduled_date where se.worship_id = ? group by s.song_id order by se.song_order"
