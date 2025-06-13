@@ -1,0 +1,47 @@
+{% include 'header.html' %}
+    <style>
+     textarea {
+        position: fixed;
+        left:10px; top:10px;
+        width:  calc(100vw - 50px);
+        height: calc(100vh - 50px);
+     }
+     button {
+        position: absolute;
+        top: 10px;
+     }
+    </style>
+<body>
+        <textarea name="content" id="content">{{ json }}</textarea>
+        <button id="btn">Submit</button>
+</body>
+<script>
+    $('#btn').click(function() {
+        json_data = $("#content").val();
+        try {
+            JSON.parse(json_data);
+            url = '/API/worship/{{ id }}/json';
+            console.log(url)
+            $.ajax({
+                type: "post",
+                url: url,
+	            data: json_data,
+                contentType: "application/json",
+                dataType: 'json',
+                complete: function(response) {
+          	        if(response.status==200) {
+                        location.reload();
+    	            }
+                    else {
+                        alert(response.responseText);
+	    	        }
+                }
+            });
+        } catch (e) {
+            alert(e);
+            return false;
+        }
+        return true;
+    });
+</script>
+</html>
