@@ -65,6 +65,13 @@ def index():
 
 @app.route("/worship/<id>")
 def worship_notes(id):
+	json_file = request.args.get('json', None)
+	if json_file:
+		json_file = Tools.get_worship_json(id)
+		if json_file:
+			return render_template('json.html', json=json.dumps(json_file, indent=2, ensure_ascii=False), id=id)
+		return "No Slides available", 400
+
 	songs = Utils.get_worship_songs(id)
 	w = Utils.worship_list(id)[0]
 	return render_template('worship_notes.html', songs=songs, id=id, w=w)
@@ -78,11 +85,11 @@ def sildes_admin():
 	id = request.args.get('id', None)
 	bg = request.args.get('bg', None)
 	if id:
-		headers = {'Content-Type': 'application/json; charset=utf-8'}
-		response = requests.get("http://150.136.54.210/API/worship/{}/preview".format(id), headers=headers)
-		if response.status_code == 200:
-			slides = response.json()
-		#slides = Tools.get_worship_json(id)
+		#headers = {'Content-Type': 'application/json; charset=utf-8'}
+		#response = requests.get("http://150.136.54.210/API/worship/{}/preview".format(id), headers=headers)
+		#if response.status_code == 200:
+		#	slides = response.json()
+		slides = Tools.get_worship_json(id)
 		if slides is None:
 			return "Worship slides not found!!", 400
 		bg_files = []
