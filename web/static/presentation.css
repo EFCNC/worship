@@ -187,3 +187,7 @@
         .next {
             opacity: 0.3;
         }
+
+        .view.lyrics.region {
+            color: yellow;
+        }
