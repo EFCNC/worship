@@ -1,0 +1,266 @@
+[
+   {
+      "type":"song",
+      "title":"求主充滿我",
+      "author":"游智婷",
+      "lang":"zh",
+      "lang_2":"en",
+      "key":"D",
+      "sequence":"1,c,1,c,1,c,c",
+      "bible":"詩105:4",
+      "lyricist":"游智婷",
+      "book":"深觸我心 敬拜讚美 (9)",
+      "copyright":"讚美之泉",
+      "ccli":"4300296",
+      "lyrics_raw":"<1>\r\n[D]主 我來[A/C#]尋求祢的[Bm]面\r\n求祢充滿[G]我 來充[A]滿[D]我\r\n[D]主 我渴[A/C#]慕祢的同[Bm]在\r\n求祢潔淨[G]我 來[A7]充滿[D]我\r\n[region 2]\r\nI humbly come to seek Your face\r\nCome and fill me up, come fill me up\r\nI long for Your dwelling place\r\nCleanse me from my sin, come fill me up\r\n</1>\r\n<chorus>\r\n耶[D]穌 耶[A/C#]穌 耶[G/B]穌 耶[D/A]穌\r\n[G]祢的寶[D/F#]血洗[E]淨[A7]我\r\n耶[D]穌 耶[A/C#]穌 耶[G/B]穌 耶[D/A]穌\r\n[G]祢以恩[D/F#]典 為[Em]我[A7]冠[D]冕\r\n[region 2]\r\nJesus my Lord, Jesus my King\r\nYour precious blood washes me\r\nJesus my joys, Jesus my peace\r\nGrace flows down and covers me\r\n</chorus>",
+      "content":[
+         {
+            "name":"1",
+            "origin":"[D]主 我來[A/C#]尋求祢的[Bm]面<br/>求祢充滿[G]我 來充[A]滿[D]我<br/>[D]主 我渴[A/C#]慕祢的同[Bm]在<br/>求祢潔淨[G]我 來[A7]充滿[D]我",
+            "region":"I humbly come to seek Your face<br/>Come and fill me up, come fill me up<br/>I long for Your dwelling place<br/>Cleanse me from my sin, come fill me up",
+            "origin_text":"主 我來尋求祢的面<br/>求祢充滿我 來充滿我<br/>主 我渴慕祢的同在<br/>求祢潔淨我 來充滿我",
+            "region_text":"I humbly come to seek Your face<br/>Come and fill me up, come fill me up<br/>I long for Your dwelling place<br/>Cleanse me from my sin, come fill me up",
+            "origin_chord":"<span class=\"chunk\" data-chord=\"D\">主</span>&nbsp;&nbsp; 我來<span class=\"chunk\" data-chord=\"A/C#\">尋求祢的</span><span class=\"chunk\" data-chord=\"Bm\">面</span>&nbsp;&nbsp;<br/>求祢充滿<span class=\"chunk\" data-chord=\"G\">我</span>&nbsp;&nbsp; 來充<span class=\"chunk\" data-chord=\"A\">滿</span>&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"D\">我</span>&nbsp;&nbsp;<br/><span class=\"chunk\" data-chord=\"D\">主</span>&nbsp;&nbsp; 我渴<span class=\"chunk\" data-chord=\"A/C#\">慕祢的同</span><span class=\"chunk\" data-chord=\"Bm\">在</span>&nbsp;&nbsp;<br/>求祢潔淨<span class=\"chunk\" data-chord=\"G\">我</span>&nbsp;&nbsp; 來<span class=\"chunk\" data-chord=\"A7\">充滿</span><span class=\"chunk\" data-chord=\"D\">我</span>&nbsp;&nbsp;"
+         },
+         {
+            "name":"c",
+            "origin":"耶[D]穌 耶[A/C#]穌 耶[G/B]穌 耶[D/A]穌<br/>[G]祢的寶[D/F#]血洗[E]淨[A7]我<br/>耶[D]穌 耶[A/C#]穌 耶[G/B]穌 耶[D/A]穌<br/>[G]祢以恩[D/F#]典 為[Em]我[A7]冠[D]冕",
+            "region":"Jesus my Lord, Jesus my King<br/>Your precious blood washes me<br/>Jesus my joys, Jesus my peace<br/>Grace flows down and covers me",
+            "origin_text":"耶穌 耶穌 耶穌 耶穌<br/>祢的寶血洗淨我<br/>耶穌 耶穌 耶穌 耶穌<br/>祢以恩典 為我冠冕",
+            "region_text":"Jesus my Lord, Jesus my King<br/>Your precious blood washes me<br/>Jesus my joys, Jesus my peace<br/>Grace flows down and covers me",
+            "origin_chord":"耶<span class=\"chunk\" data-chord=\"D\">穌</span>&nbsp;&nbsp; 耶<span class=\"chunk\" data-chord=\"A/C#\">穌</span>&nbsp;&nbsp; 耶<span class=\"chunk\" data-chord=\"G/B\">穌</span>&nbsp;&nbsp; 耶<span class=\"chunk\" data-chord=\"D/A\">穌</span>&nbsp;&nbsp;<br/><span class=\"chunk\" data-chord=\"G\">祢的寶</span><span class=\"chunk\" data-chord=\"D/F#\">血洗</span><span class=\"chunk\" data-chord=\"E\">淨</span>&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"A7\">我</span>&nbsp;&nbsp;<br/>耶<span class=\"chunk\" data-chord=\"D\">穌</span>&nbsp;&nbsp; 耶<span class=\"chunk\" data-chord=\"A/C#\">穌</span>&nbsp;&nbsp; 耶<span class=\"chunk\" data-chord=\"G/B\">穌</span>&nbsp;&nbsp; 耶<span class=\"chunk\" data-chord=\"D/A\">穌</span>&nbsp;&nbsp;<br/><span class=\"chunk\" data-chord=\"G\">祢以恩</span><span class=\"chunk\" data-chord=\"D/F#\">典</span>&nbsp;&nbsp; 為<span class=\"chunk\" data-chord=\"Em\">我</span>&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"A7\">冠</span>&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"D\">冕</span>&nbsp;&nbsp;"
+         },
+         {
+            "name":"1",
+            "origin":"[D]主 我來[A/C#]尋求祢的[Bm]面<br/>求祢充滿[G]我 來充[A]滿[D]我<br/>[D]主 我渴[A/C#]慕祢的同[Bm]在<br/>求祢潔淨[G]我 來[A7]充滿[D]我",
+            "region":"I humbly come to seek Your face<br/>Come and fill me up, come fill me up<br/>I long for Your dwelling place<br/>Cleanse me from my sin, come fill me up",
+            "origin_text":"主 我來尋求祢的面<br/>求祢充滿我 來充滿我<br/>主 我渴慕祢的同在<br/>求祢潔淨我 來充滿我",
+            "region_text":"I humbly come to seek Your face<br/>Come and fill me up, come fill me up<br/>I long for Your dwelling place<br/>Cleanse me from my sin, come fill me up",
+            "origin_chord":"<span class=\"chunk\" data-chord=\"D\">主</span>&nbsp;&nbsp; 我來<span class=\"chunk\" data-chord=\"A/C#\">尋求祢的</span><span class=\"chunk\" data-chord=\"Bm\">面</span>&nbsp;&nbsp;<br/>求祢充滿<span class=\"chunk\" data-chord=\"G\">我</span>&nbsp;&nbsp; 來充<span class=\"chunk\" data-chord=\"A\">滿</span>&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"D\">我</span>&nbsp;&nbsp;<br/><span class=\"chunk\" data-chord=\"D\">主</span>&nbsp;&nbsp; 我渴<span class=\"chunk\" data-chord=\"A/C#\">慕祢的同</span><span class=\"chunk\" data-chord=\"Bm\">在</span>&nbsp;&nbsp;<br/>求祢潔淨<span class=\"chunk\" data-chord=\"G\">我</span>&nbsp;&nbsp; 來<span class=\"chunk\" data-chord=\"A7\">充滿</span><span class=\"chunk\" data-chord=\"D\">我</span>&nbsp;&nbsp;"
+         },
+         {
+            "name":"c",
+            "origin":"耶[D]穌 耶[A/C#]穌 耶[G/B]穌 耶[D/A]穌<br/>[G]祢的寶[D/F#]血洗[E]淨[A7]我<br/>耶[D]穌 耶[A/C#]穌 耶[G/B]穌 耶[D/A]穌<br/>[G]祢以恩[D/F#]典 為[Em]我[A7]冠[D]冕",
+            "region":"Jesus my Lord, Jesus my King<br/>Your precious blood washes me<br/>Jesus my joys, Jesus my peace<br/>Grace flows down and covers me",
+            "origin_text":"耶穌 耶穌 耶穌 耶穌<br/>祢的寶血洗淨我<br/>耶穌 耶穌 耶穌 耶穌<br/>祢以恩典 為我冠冕",
+            "region_text":"Jesus my Lord, Jesus my King<br/>Your precious blood washes me<br/>Jesus my joys, Jesus my peace<br/>Grace flows down and covers me",
+            "origin_chord":"耶<span class=\"chunk\" data-chord=\"D\">穌</span>&nbsp;&nbsp; 耶<span class=\"chunk\" data-chord=\"A/C#\">穌</span>&nbsp;&nbsp; 耶<span class=\"chunk\" data-chord=\"G/B\">穌</span>&nbsp;&nbsp; 耶<span class=\"chunk\" data-chord=\"D/A\">穌</span>&nbsp;&nbsp;<br/><span class=\"chunk\" data-chord=\"G\">祢的寶</span><span class=\"chunk\" data-chord=\"D/F#\">血洗</span><span class=\"chunk\" data-chord=\"E\">淨</span>&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"A7\">我</span>&nbsp;&nbsp;<br/>耶<span class=\"chunk\" data-chord=\"D\">穌</span>&nbsp;&nbsp; 耶<span class=\"chunk\" data-chord=\"A/C#\">穌</span>&nbsp;&nbsp; 耶<span class=\"chunk\" data-chord=\"G/B\">穌</span>&nbsp;&nbsp; 耶<span class=\"chunk\" data-chord=\"D/A\">穌</span>&nbsp;&nbsp;<br/><span class=\"chunk\" data-chord=\"G\">祢以恩</span><span class=\"chunk\" data-chord=\"D/F#\">典</span>&nbsp;&nbsp; 為<span class=\"chunk\" data-chord=\"Em\">我</span>&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"A7\">冠</span>&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"D\">冕</span>&nbsp;&nbsp;"
+         },
+         {
+            "name":"1",
+            "origin":"[D]主 我來[A/C#]尋求祢的[Bm]面<br/>求祢充滿[G]我 來充[A]滿[D]我<br/>[D]主 我渴[A/C#]慕祢的同[Bm]在<br/>求祢潔淨[G]我 來[A7]充滿[D]我",
+            "region":"I humbly come to seek Your face<br/>Come and fill me up, come fill me up<br/>I long for Your dwelling place<br/>Cleanse me from my sin, come fill me up",
+            "origin_text":"主 我來尋求祢的面<br/>求祢充滿我 來充滿我<br/>主 我渴慕祢的同在<br/>求祢潔淨我 來充滿我",
+            "region_text":"I humbly come to seek Your face<br/>Come and fill me up, come fill me up<br/>I long for Your dwelling place<br/>Cleanse me from my sin, come fill me up",
+            "origin_chord":"<span class=\"chunk\" data-chord=\"D\">主</span>&nbsp;&nbsp; 我來<span class=\"chunk\" data-chord=\"A/C#\">尋求祢的</span><span class=\"chunk\" data-chord=\"Bm\">面</span>&nbsp;&nbsp;<br/>求祢充滿<span class=\"chunk\" data-chord=\"G\">我</span>&nbsp;&nbsp; 來充<span class=\"chunk\" data-chord=\"A\">滿</span>&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"D\">我</span>&nbsp;&nbsp;<br/><span class=\"chunk\" data-chord=\"D\">主</span>&nbsp;&nbsp; 我渴<span class=\"chunk\" data-chord=\"A/C#\">慕祢的同</span><span class=\"chunk\" data-chord=\"Bm\">在</span>&nbsp;&nbsp;<br/>求祢潔淨<span class=\"chunk\" data-chord=\"G\">我</span>&nbsp;&nbsp; 來<span class=\"chunk\" data-chord=\"A7\">充滿</span><span class=\"chunk\" data-chord=\"D\">我</span>&nbsp;&nbsp;"
+         },
+         {
+            "name":"c",
+            "origin":"耶[D]穌 耶[A/C#]穌 耶[G/B]穌 耶[D/A]穌<br/>[G]祢的寶[D/F#]血洗[E]淨[A7]我<br/>耶[D]穌 耶[A/C#]穌 耶[G/B]穌 耶[D/A]穌<br/>[G]祢以恩[D/F#]典 為[Em]我[A7]冠[D]冕",
+            "region":"Jesus my Lord, Jesus my King<br/>Your precious blood washes me<br/>Jesus my joys, Jesus my peace<br/>Grace flows down and covers me",
+            "origin_text":"耶穌 耶穌 耶穌 耶穌<br/>祢的寶血洗淨我<br/>耶穌 耶穌 耶穌 耶穌<br/>祢以恩典 為我冠冕",
+            "region_text":"Jesus my Lord, Jesus my King<br/>Your precious blood washes me<br/>Jesus my joys, Jesus my peace<br/>Grace flows down and covers me",
+            "origin_chord":"耶<span class=\"chunk\" data-chord=\"D\">穌</span>&nbsp;&nbsp; 耶<span class=\"chunk\" data-chord=\"A/C#\">穌</span>&nbsp;&nbsp; 耶<span class=\"chunk\" data-chord=\"G/B\">穌</span>&nbsp;&nbsp; 耶<span class=\"chunk\" data-chord=\"D/A\">穌</span>&nbsp;&nbsp;<br/><span class=\"chunk\" data-chord=\"G\">祢的寶</span><span class=\"chunk\" data-chord=\"D/F#\">血洗</span><span class=\"chunk\" data-chord=\"E\">淨</span>&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"A7\">我</span>&nbsp;&nbsp;<br/>耶<span class=\"chunk\" data-chord=\"D\">穌</span>&nbsp;&nbsp; 耶<span class=\"chunk\" data-chord=\"A/C#\">穌</span>&nbsp;&nbsp; 耶<span class=\"chunk\" data-chord=\"G/B\">穌</span>&nbsp;&nbsp; 耶<span class=\"chunk\" data-chord=\"D/A\">穌</span>&nbsp;&nbsp;<br/><span class=\"chunk\" data-chord=\"G\">祢以恩</span><span class=\"chunk\" data-chord=\"D/F#\">典</span>&nbsp;&nbsp; 為<span class=\"chunk\" data-chord=\"Em\">我</span>&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"A7\">冠</span>&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"D\">冕</span>&nbsp;&nbsp;"
+         },
+         {
+            "name":"c",
+            "origin":"耶[D]穌 耶[A/C#]穌 耶[G/B]穌 耶[D/A]穌<br/>[G]祢的寶[D/F#]血洗[E]淨[A7]我<br/>耶[D]穌 耶[A/C#]穌 耶[G/B]穌 耶[D/A]穌<br/>[G]祢以恩[D/F#]典 為[Em]我[A7]冠[D]冕",
+            "region":"Jesus my Lord, Jesus my King<br/>Your precious blood washes me<br/>Jesus my joys, Jesus my peace<br/>Grace flows down and covers me",
+            "origin_text":"耶穌 耶穌 耶穌 耶穌<br/>祢的寶血洗淨我<br/>耶穌 耶穌 耶穌 耶穌<br/>祢以恩典 為我冠冕",
+            "region_text":"Jesus my Lord, Jesus my King<br/>Your precious blood washes me<br/>Jesus my joys, Jesus my peace<br/>Grace flows down and covers me",
+            "origin_chord":"耶<span class=\"chunk\" data-chord=\"D\">穌</span>&nbsp;&nbsp; 耶<span class=\"chunk\" data-chord=\"A/C#\">穌</span>&nbsp;&nbsp; 耶<span class=\"chunk\" data-chord=\"G/B\">穌</span>&nbsp;&nbsp; 耶<span class=\"chunk\" data-chord=\"D/A\">穌</span>&nbsp;&nbsp;<br/><span class=\"chunk\" data-chord=\"G\">祢的寶</span><span class=\"chunk\" data-chord=\"D/F#\">血洗</span><span class=\"chunk\" data-chord=\"E\">淨</span>&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"A7\">我</span>&nbsp;&nbsp;<br/>耶<span class=\"chunk\" data-chord=\"D\">穌</span>&nbsp;&nbsp; 耶<span class=\"chunk\" data-chord=\"A/C#\">穌</span>&nbsp;&nbsp; 耶<span class=\"chunk\" data-chord=\"G/B\">穌</span>&nbsp;&nbsp; 耶<span class=\"chunk\" data-chord=\"D/A\">穌</span>&nbsp;&nbsp;<br/><span class=\"chunk\" data-chord=\"G\">祢以恩</span><span class=\"chunk\" data-chord=\"D/F#\">典</span>&nbsp;&nbsp; 為<span class=\"chunk\" data-chord=\"Em\">我</span>&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"A7\">冠</span>&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"D\">冕</span>&nbsp;&nbsp;"
+         }
+      ],
+      "video":"https://www.youtube.com/watch?v=xZ3-_Tx0Kfg",
+      "score":"https://jita.fun/imgs/jitapu_04/www.jita.fun_181400_vmet5rnubyz.webp",
+      "date":"2025-06-22",
+      "id":83,
+      "transpose":"0",
+      "alt_sequence":"1,c,1,c,1,c,c",
+      "notes":"Prayers x 2 - VC - Prayers - VC - VCC"
+   },
+   {
+      "type":"song",
+      "title":"咱今聚集",
+      "author":"謝鴻文",
+      "lang":"zh-TW",
+      "lang_2":"",
+      "key":"E",
+      "sequence":"1,c,1,c,1,c,c",
+      "bible":"",
+      "lyricist":"謝鴻文",
+      "book":"願祢的國降臨",
+      "copyright":"磐石現代樂團",
+      "ccli":"",
+      "lyrics_raw":"<1>\r\n[E]咱今聚集在祢[A]寶座前敬拜\r\n[B7]聖潔的主 祢與咱同[E]在\r\n[E]每一日祢攏賞賜[A]夠額的氣力\r\n[B7]引導阮走信心的山[E]谷[E7]\r\n</1>\r\n<chorus>\r\n[A]順境讚美 [E]逆境讚美\r\n[F#m]祢安排[B7]穩當定著 [E]勿會差[E7]錯\r\n[A]順境讚美 [E]逆境讚美\r\n[B7]我歡喜順趁走天[E]路\r\n</chorus>",
+      "content":[
+         {
+            "name":"1",
+            "origin":"[E]咱今聚集在祢[A]寶座前敬拜<br/>[B7]聖潔的主 祢與咱同[E]在<br/>[E]每一日祢攏賞賜[A]夠額的氣力<br/>[B7]引導阮走信心的山[E]谷[E7]",
+            "region":"",
+            "origin_text":"咱今聚集在祢寶座前敬拜<br/>聖潔的主 祢與咱同在<br/>每一日祢攏賞賜夠額的氣力<br/>引導阮走信心的山谷",
+            "region_text":"",
+            "origin_chord":"<span class=\"chunk\" data-chord=\"E\">咱今聚集在祢</span><span class=\"chunk\" data-chord=\"A\">寶座前敬拜</span><br/><span class=\"chunk\" data-chord=\"B7\">聖潔的主</span> 祢與咱同<span class=\"chunk\" data-chord=\"E\">在</span>&nbsp;&nbsp;<br/><span class=\"chunk\" data-chord=\"E\">每一日祢攏賞賜</span><span class=\"chunk\" data-chord=\"A\">夠額的氣力</span><br/><span class=\"chunk\" data-chord=\"B7\">引導阮走信心的山</span><span class=\"chunk\" data-chord=\"E\">谷</span>&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"E7\"></span>&nbsp;&nbsp;&nbsp;&nbsp;"
+         },
+         {
+            "name":"c",
+            "origin":"[A]順境讚美 [E]逆境讚美<br/>[F#m]祢安排[B7]穩當定著 [E]勿會差[E7]錯<br/>[A]順境讚美 [E]逆境讚美<br/>[B7]我歡喜順趁走天[E]路",
+            "region":"",
+            "origin_text":"順境讚美 逆境讚美<br/>祢安排穩當定著 勿會差錯<br/>順境讚美 逆境讚美<br/>我歡喜順趁走天路",
+            "region_text":"",
+            "origin_chord":"<span class=\"chunk\" data-chord=\"A\">順境讚美</span> <span class=\"chunk\" data-chord=\"E\">逆境讚美</span><br/><span class=\"chunk\" data-chord=\"F#m\">祢安排</span><span class=\"chunk\" data-chord=\"B7\">穩當定著</span> <span class=\"chunk\" data-chord=\"E\">勿會差</span><span class=\"chunk\" data-chord=\"E7\">錯</span>&nbsp;&nbsp;<br/><span class=\"chunk\" data-chord=\"A\">順境讚美</span> <span class=\"chunk\" data-chord=\"E\">逆境讚美</span><br/><span class=\"chunk\" data-chord=\"B7\">我歡喜順趁走天</span><span class=\"chunk\" data-chord=\"E\">路</span>&nbsp;&nbsp;"
+         },
+         {
+            "name":"1",
+            "origin":"[E]咱今聚集在祢[A]寶座前敬拜<br/>[B7]聖潔的主 祢與咱同[E]在<br/>[E]每一日祢攏賞賜[A]夠額的氣力<br/>[B7]引導阮走信心的山[E]谷[E7]",
+            "region":"",
+            "origin_text":"咱今聚集在祢寶座前敬拜<br/>聖潔的主 祢與咱同在<br/>每一日祢攏賞賜夠額的氣力<br/>引導阮走信心的山谷",
+            "region_text":"",
+            "origin_chord":"<span class=\"chunk\" data-chord=\"E\">咱今聚集在祢</span><span class=\"chunk\" data-chord=\"A\">寶座前敬拜</span><br/><span class=\"chunk\" data-chord=\"B7\">聖潔的主</span> 祢與咱同<span class=\"chunk\" data-chord=\"E\">在</span>&nbsp;&nbsp;<br/><span class=\"chunk\" data-chord=\"E\">每一日祢攏賞賜</span><span class=\"chunk\" data-chord=\"A\">夠額的氣力</span><br/><span class=\"chunk\" data-chord=\"B7\">引導阮走信心的山</span><span class=\"chunk\" data-chord=\"E\">谷</span>&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"E7\"></span>&nbsp;&nbsp;&nbsp;&nbsp;"
+         },
+         {
+            "name":"c",
+            "origin":"[A]順境讚美 [E]逆境讚美<br/>[F#m]祢安排[B7]穩當定著 [E]勿會差[E7]錯<br/>[A]順境讚美 [E]逆境讚美<br/>[B7]我歡喜順趁走天[E]路",
+            "region":"",
+            "origin_text":"順境讚美 逆境讚美<br/>祢安排穩當定著 勿會差錯<br/>順境讚美 逆境讚美<br/>我歡喜順趁走天路",
+            "region_text":"",
+            "origin_chord":"<span class=\"chunk\" data-chord=\"A\">順境讚美</span> <span class=\"chunk\" data-chord=\"E\">逆境讚美</span><br/><span class=\"chunk\" data-chord=\"F#m\">祢安排</span><span class=\"chunk\" data-chord=\"B7\">穩當定著</span> <span class=\"chunk\" data-chord=\"E\">勿會差</span><span class=\"chunk\" data-chord=\"E7\">錯</span>&nbsp;&nbsp;<br/><span class=\"chunk\" data-chord=\"A\">順境讚美</span> <span class=\"chunk\" data-chord=\"E\">逆境讚美</span><br/><span class=\"chunk\" data-chord=\"B7\">我歡喜順趁走天</span><span class=\"chunk\" data-chord=\"E\">路</span>&nbsp;&nbsp;"
+         },
+         {
+            "name":"1",
+            "origin":"[E]咱今聚集在祢[A]寶座前敬拜<br/>[B7]聖潔的主 祢與咱同[E]在<br/>[E]每一日祢攏賞賜[A]夠額的氣力<br/>[B7]引導阮走信心的山[E]谷[E7]",
+            "region":"",
+            "origin_text":"咱今聚集在祢寶座前敬拜<br/>聖潔的主 祢與咱同在<br/>每一日祢攏賞賜夠額的氣力<br/>引導阮走信心的山谷",
+            "region_text":"",
+            "origin_chord":"<span class=\"chunk\" data-chord=\"E\">咱今聚集在祢</span><span class=\"chunk\" data-chord=\"A\">寶座前敬拜</span><br/><span class=\"chunk\" data-chord=\"B7\">聖潔的主</span> 祢與咱同<span class=\"chunk\" data-chord=\"E\">在</span>&nbsp;&nbsp;<br/><span class=\"chunk\" data-chord=\"E\">每一日祢攏賞賜</span><span class=\"chunk\" data-chord=\"A\">夠額的氣力</span><br/><span class=\"chunk\" data-chord=\"B7\">引導阮走信心的山</span><span class=\"chunk\" data-chord=\"E\">谷</span>&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"E7\"></span>&nbsp;&nbsp;&nbsp;&nbsp;"
+         },
+         {
+            "name":"c",
+            "origin":"[A]順境讚美 [E]逆境讚美<br/>[F#m]祢安排[B7]穩當定著 [E]勿會差[E7]錯<br/>[A]順境讚美 [E]逆境讚美<br/>[B7]我歡喜順趁走天[E]路",
+            "region":"",
+            "origin_text":"順境讚美 逆境讚美<br/>祢安排穩當定著 勿會差錯<br/>順境讚美 逆境讚美<br/>我歡喜順趁走天路",
+            "region_text":"",
+            "origin_chord":"<span class=\"chunk\" data-chord=\"A\">順境讚美</span> <span class=\"chunk\" data-chord=\"E\">逆境讚美</span><br/><span class=\"chunk\" data-chord=\"F#m\">祢安排</span><span class=\"chunk\" data-chord=\"B7\">穩當定著</span> <span class=\"chunk\" data-chord=\"E\">勿會差</span><span class=\"chunk\" data-chord=\"E7\">錯</span>&nbsp;&nbsp;<br/><span class=\"chunk\" data-chord=\"A\">順境讚美</span> <span class=\"chunk\" data-chord=\"E\">逆境讚美</span><br/><span class=\"chunk\" data-chord=\"B7\">我歡喜順趁走天</span><span class=\"chunk\" data-chord=\"E\">路</span>&nbsp;&nbsp;"
+         },
+         {
+            "name":"c",
+            "origin":"[A]順境讚美 [E]逆境讚美<br/>[F#m]祢安排[B7]穩當定著 [E]勿會差[E7]錯<br/>[A]順境讚美 [E]逆境讚美<br/>[B7]我歡喜順趁走天[E]路",
+            "region":"",
+            "origin_text":"順境讚美 逆境讚美<br/>祢安排穩當定著 勿會差錯<br/>順境讚美 逆境讚美<br/>我歡喜順趁走天路",
+            "region_text":"",
+            "origin_chord":"<span class=\"chunk\" data-chord=\"A\">順境讚美</span> <span class=\"chunk\" data-chord=\"E\">逆境讚美</span><br/><span class=\"chunk\" data-chord=\"F#m\">祢安排</span><span class=\"chunk\" data-chord=\"B7\">穩當定著</span> <span class=\"chunk\" data-chord=\"E\">勿會差</span><span class=\"chunk\" data-chord=\"E7\">錯</span>&nbsp;&nbsp;<br/><span class=\"chunk\" data-chord=\"A\">順境讚美</span> <span class=\"chunk\" data-chord=\"E\">逆境讚美</span><br/><span class=\"chunk\" data-chord=\"B7\">我歡喜順趁走天</span><span class=\"chunk\" data-chord=\"E\">路</span>&nbsp;&nbsp;"
+         }
+      ],
+      "video":"https://www.youtube.com/watch?v=URRzqVg1PMo",
+      "score":"https://drive.google.com/file/d/1rGX8ErlYH75nQEnwVb7UXmi8Y_HXIUKB/view?usp=drive_link",
+      "date":"2025-06-22",
+      "id":84,
+      "transpose":"-2",
+      "alt_sequence":"1,c,1,c,1,c,c",
+      "notes":""
+   },
+   {
+      "type":"song",
+      "title":"在呼召我之處",
+      "author":"宋銀貞",
+      "lang":"zh",
+      "lang_2":"zh-TW",
+      "key":"D",
+      "sequence":"1,2,C,2,C,C,B,B,C,C",
+      "bible":"",
+      "lyricist":"金俊榮",
+      "book":"大衛帳幕的榮耀07-恢復榮耀",
+      "copyright":"約書亞樂團",
+      "ccli":"",
+      "lyrics_raw":"<1>\r\n[D]主溫柔的聖[G/A]靈 [D]讓我全心感[D7]受\r\n滲透[G]我的生命，賜下[F#m]平靜和安[Bm7]息\r\n[Em7]你使[G/A]我心得滿[Dmaj7]足\r\n[region 2]\r\n主溫柔的聖神 惦在我的內心\r\n陪伴我的一生　賞賜平靜和安息\r\n使我得滿足豐盛\r\n</1>\r\n<2>\r\n[D]主慈愛的真[G/A]理　[D]你榮光照向[D7]我\r\n包圍[G]我的身體　賜下[F#m]平靜和安[Bm7]息\r\n[Em7]讓我[A7]感受你的[Dmaj7]愛\r\n[region 2]\r\n主愛疼的真理　光照我攏無離\r\n我身軀你扶持　賞賜恩典和安慰\r\n你的愛真正甘甜\r\n</2>\r\n<chorus>\r\n在呼召我之[Gmaj7]處，我要獻上敬[F#m7]拜，\r\n[Bm7]無論遭遇何[Em7]事，依然[A7]揚聲歌[Dmaj7]唱\r\n[region 2]\r\n在呼召的所在　我欲歡喜吟詩\r\n無論環境好壞　猶原贊美敬拜\r\n</chorus>\r\n<bridge>\r\n在我[G]行走時成[G/A]為我道路\r\n[F#m7]活著時成[Bm7]為我生命\r\n就在[Em7]這地[A7] 獻上敬[D]拜[D7]\r\n在我[G]行走時成[G/A]為我道路\r\n[F#m7]活著時成[Bm7]為我生命\r\n就在[C]這地獻上敬[A]拜\r\n</bridge>",
+      "content":[
+         {
+            "name":"1",
+            "origin":"[D]主溫柔的聖[G/A]靈 [D]讓我全心感[D7]受<br/>滲透[G]我的生命，賜下[F#m]平靜和安[Bm7]息<br/>[Em7]你使[G/A]我心得滿[Dmaj7]足",
+            "region":"主溫柔的聖神 惦在我的內心<br/>陪伴我的一生　賞賜平靜和安息<br/>使我得滿足豐盛",
+            "origin_text":"主溫柔的聖靈 讓我全心感受<br/>滲透我的生命，賜下平靜和安息<br/>你使我心得滿足",
+            "region_text":"主溫柔的聖神 惦在我的內心<br/>陪伴我的一生　賞賜平靜和安息<br/>使我得滿足豐盛",
+            "origin_chord":"<span class=\"chunk\" data-chord=\"D\">主溫柔的聖</span><span class=\"chunk\" data-chord=\"G/A\">靈</span>&nbsp;&nbsp; <span class=\"chunk\" data-chord=\"D\">讓我全心感</span><span class=\"chunk\" data-chord=\"D7\">受</span>&nbsp;&nbsp;<br/>滲透<span class=\"chunk\" data-chord=\"G\">我的生命</span>，賜下<span class=\"chunk\" data-chord=\"F#m\">平靜和安</span><span class=\"chunk\" data-chord=\"Bm7\">息</span>&nbsp;&nbsp;<br/><span class=\"chunk\" data-chord=\"Em7\">你使</span><span class=\"chunk\" data-chord=\"G/A\">我心得滿</span><span class=\"chunk\" data-chord=\"Dmaj7\">足</span>&nbsp;&nbsp;"
+         },
+         {
+            "name":"2",
+            "origin":"[D]主慈愛的真[G/A]理　[D]你榮光照向[D7]我<br/>包圍[G]我的身體　賜下[F#m]平靜和安[Bm7]息<br/>[Em7]讓我[A7]感受你的[Dmaj7]愛",
+            "region":"主愛疼的真理　光照我攏無離<br/>我身軀你扶持　賞賜恩典和安慰<br/>你的愛真正甘甜",
+            "origin_text":"主慈愛的真理　你榮光照向我<br/>包圍我的身體　賜下平靜和安息<br/>讓我感受你的愛",
+            "region_text":"主愛疼的真理　光照我攏無離<br/>我身軀你扶持　賞賜恩典和安慰<br/>你的愛真正甘甜",
+            "origin_chord":"<span class=\"chunk\" data-chord=\"D\">主慈愛的真</span><span class=\"chunk\" data-chord=\"G/A\">理</span>&nbsp;&nbsp;　<span class=\"chunk\" data-chord=\"D\">你榮光照向</span><span class=\"chunk\" data-chord=\"D7\">我</span>&nbsp;&nbsp;<br/>包圍<span class=\"chunk\" data-chord=\"G\">我的身體</span>　賜下<span class=\"chunk\" data-chord=\"F#m\">平靜和安</span><span class=\"chunk\" data-chord=\"Bm7\">息</span>&nbsp;&nbsp;<br/><span class=\"chunk\" data-chord=\"Em7\">讓我</span><span class=\"chunk\" data-chord=\"A7\">感受你的</span><span class=\"chunk\" data-chord=\"Dmaj7\">愛</span>&nbsp;&nbsp;"
+         },
+         {
+            "name":"c",
+            "origin":"在呼召我之[Gmaj7]處，我要獻上敬[F#m7]拜，<br/>[Bm7]無論遭遇何[Em7]事，依然[A7]揚聲歌[Dmaj7]唱",
+            "region":"在呼召的所在　我欲歡喜吟詩<br/>無論環境好壞　猶原贊美敬拜",
+            "origin_text":"在呼召我之處，我要獻上敬拜，<br/>無論遭遇何事，依然揚聲歌唱",
+            "region_text":"在呼召的所在　我欲歡喜吟詩<br/>無論環境好壞　猶原贊美敬拜",
+            "origin_chord":"在呼召我之<span class=\"chunk\" data-chord=\"Gmaj7\">處</span>&nbsp;&nbsp;，我要獻上敬<span class=\"chunk\" data-chord=\"F#m7\">拜</span>&nbsp;&nbsp;，<br/><span class=\"chunk\" data-chord=\"Bm7\">無論遭遇何</span><span class=\"chunk\" data-chord=\"Em7\">事</span>&nbsp;&nbsp;，依然<span class=\"chunk\" data-chord=\"A7\">揚聲歌</span><span class=\"chunk\" data-chord=\"Dmaj7\">唱</span>&nbsp;&nbsp;"
+         },
+         {
+            "name":"2",
+            "origin":"[D]主慈愛的真[G/A]理　[D]你榮光照向[D7]我<br/>包圍[G]我的身體　賜下[F#m]平靜和安[Bm7]息<br/>[Em7]讓我[A7]感受你的[Dmaj7]愛",
+            "region":"主愛疼的真理　光照我攏無離<br/>我身軀你扶持　賞賜恩典和安慰<br/>你的愛真正甘甜",
+            "origin_text":"主慈愛的真理　你榮光照向我<br/>包圍我的身體　賜下平靜和安息<br/>讓我感受你的愛",
+            "region_text":"主愛疼的真理　光照我攏無離<br/>我身軀你扶持　賞賜恩典和安慰<br/>你的愛真正甘甜",
+            "origin_chord":"<span class=\"chunk\" data-chord=\"D\">主慈愛的真</span><span class=\"chunk\" data-chord=\"G/A\">理</span>&nbsp;&nbsp;　<span class=\"chunk\" data-chord=\"D\">你榮光照向</span><span class=\"chunk\" data-chord=\"D7\">我</span>&nbsp;&nbsp;<br/>包圍<span class=\"chunk\" data-chord=\"G\">我的身體</span>　賜下<span class=\"chunk\" data-chord=\"F#m\">平靜和安</span><span class=\"chunk\" data-chord=\"Bm7\">息</span>&nbsp;&nbsp;<br/><span class=\"chunk\" data-chord=\"Em7\">讓我</span><span class=\"chunk\" data-chord=\"A7\">感受你的</span><span class=\"chunk\" data-chord=\"Dmaj7\">愛</span>&nbsp;&nbsp;"
+         },
+         {
+            "name":"c",
+            "origin":"在呼召我之[Gmaj7]處，我要獻上敬[F#m7]拜，<br/>[Bm7]無論遭遇何[Em7]事，依然[A7]揚聲歌[Dmaj7]唱",
+            "region":"在呼召的所在　我欲歡喜吟詩<br/>無論環境好壞　猶原贊美敬拜",
+            "origin_text":"在呼召我之處，我要獻上敬拜，<br/>無論遭遇何事，依然揚聲歌唱",
+            "region_text":"在呼召的所在　我欲歡喜吟詩<br/>無論環境好壞　猶原贊美敬拜",
+            "origin_chord":"在呼召我之<span class=\"chunk\" data-chord=\"Gmaj7\">處</span>&nbsp;&nbsp;，我要獻上敬<span class=\"chunk\" data-chord=\"F#m7\">拜</span>&nbsp;&nbsp;，<br/><span class=\"chunk\" data-chord=\"Bm7\">無論遭遇何</span><span class=\"chunk\" data-chord=\"Em7\">事</span>&nbsp;&nbsp;，依然<span class=\"chunk\" data-chord=\"A7\">揚聲歌</span><span class=\"chunk\" data-chord=\"Dmaj7\">唱</span>&nbsp;&nbsp;"
+         },
+         {
+            "name":"c",
+            "origin":"在呼召我之[Gmaj7]處，我要獻上敬[F#m7]拜，<br/>[Bm7]無論遭遇何[Em7]事，依然[A7]揚聲歌[Dmaj7]唱",
+            "region":"在呼召的所在　我欲歡喜吟詩<br/>無論環境好壞　猶原贊美敬拜",
+            "origin_text":"在呼召我之處，我要獻上敬拜，<br/>無論遭遇何事，依然揚聲歌唱",
+            "region_text":"在呼召的所在　我欲歡喜吟詩<br/>無論環境好壞　猶原贊美敬拜",
+            "origin_chord":"在呼召我之<span class=\"chunk\" data-chord=\"Gmaj7\">處</span>&nbsp;&nbsp;，我要獻上敬<span class=\"chunk\" data-chord=\"F#m7\">拜</span>&nbsp;&nbsp;，<br/><span class=\"chunk\" data-chord=\"Bm7\">無論遭遇何</span><span class=\"chunk\" data-chord=\"Em7\">事</span>&nbsp;&nbsp;，依然<span class=\"chunk\" data-chord=\"A7\">揚聲歌</span><span class=\"chunk\" data-chord=\"Dmaj7\">唱</span>&nbsp;&nbsp;"
+         },
+         {
+            "name":"b",
+            "origin":"在我[G]行走時成[G/A]為我道路<br/>[F#m7]活著時成[Bm7]為我生命<br/>就在[Em7]這地[A7] 獻上敬[D]拜[D7]<br/>在我[G]行走時成[G/A]為我道路<br/>[F#m7]活著時成[Bm7]為我生命<br/>就在[C]這地獻上敬[A]拜",
+            "region":"在我[G]行走時成[G/A]為我道路<br/>[F#m7]活著時成[Bm7]為我生命<br/>就在[Em7]這地[A7] 獻上敬[D]拜[D7]<br/>在我[G]行走時成[G/A]為我道路<br/>[F#m7]活著時成[Bm7]為我生命<br/>就在[C]這地獻上敬[A]拜",
+            "origin_text":"在我行走時成為我道路<br/>活著時成為我生命<br/>就在這地 獻上敬拜<br/>在我行走時成為我道路<br/>活著時成為我生命<br/>就在這地獻上敬拜",
+            "region_text":"在我行走時成為我道路<br/>活著時成為我生命<br/>就在這地 獻上敬拜<br/>在我行走時成為我道路<br/>活著時成為我生命<br/>就在這地獻上敬拜",
+            "origin_chord":"在我<span class=\"chunk\" data-chord=\"G\">行走時成</span><span class=\"chunk\" data-chord=\"G/A\">為我道路</span><br/><span class=\"chunk\" data-chord=\"F#m7\">活著時成</span><span class=\"chunk\" data-chord=\"Bm7\">為我生命</span><br/>就在<span class=\"chunk\" data-chord=\"Em7\">這地</span><span class=\"chunk\" data-chord=\"A7\"> 獻上敬</span><span class=\"chunk\" data-chord=\"D\">拜</span>&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"D7\"></span>&nbsp;&nbsp;&nbsp;&nbsp;<br/>在我<span class=\"chunk\" data-chord=\"G\">行走時成</span><span class=\"chunk\" data-chord=\"G/A\">為我道路</span><br/><span class=\"chunk\" data-chord=\"F#m7\">活著時成</span><span class=\"chunk\" data-chord=\"Bm7\">為我生命</span><br/>就在<span class=\"chunk\" data-chord=\"C\">這地獻上敬</span><span class=\"chunk\" data-chord=\"A\">拜</span>&nbsp;&nbsp;"
+         },
+         {
+            "name":"b",
+            "origin":"在我[G]行走時成[G/A]為我道路<br/>[F#m7]活著時成[Bm7]為我生命<br/>就在[Em7]這地[A7] 獻上敬[D]拜[D7]<br/>在我[G]行走時成[G/A]為我道路<br/>[F#m7]活著時成[Bm7]為我生命<br/>就在[C]這地獻上敬[A]拜",
+            "region":"在我[G]行走時成[G/A]為我道路<br/>[F#m7]活著時成[Bm7]為我生命<br/>就在[Em7]這地[A7] 獻上敬[D]拜[D7]<br/>在我[G]行走時成[G/A]為我道路<br/>[F#m7]活著時成[Bm7]為我生命<br/>就在[C]這地獻上敬[A]拜",
+            "origin_text":"在我行走時成為我道路<br/>活著時成為我生命<br/>就在這地 獻上敬拜<br/>在我行走時成為我道路<br/>活著時成為我生命<br/>就在這地獻上敬拜",
+            "region_text":"在我行走時成為我道路<br/>活著時成為我生命<br/>就在這地 獻上敬拜<br/>在我行走時成為我道路<br/>活著時成為我生命<br/>就在這地獻上敬拜",
+            "origin_chord":"在我<span class=\"chunk\" data-chord=\"G\">行走時成</span><span class=\"chunk\" data-chord=\"G/A\">為我道路</span><br/><span class=\"chunk\" data-chord=\"F#m7\">活著時成</span><span class=\"chunk\" data-chord=\"Bm7\">為我生命</span><br/>就在<span class=\"chunk\" data-chord=\"Em7\">這地</span><span class=\"chunk\" data-chord=\"A7\"> 獻上敬</span><span class=\"chunk\" data-chord=\"D\">拜</span>&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"D7\"></span>&nbsp;&nbsp;&nbsp;&nbsp;<br/>在我<span class=\"chunk\" data-chord=\"G\">行走時成</span><span class=\"chunk\" data-chord=\"G/A\">為我道路</span><br/><span class=\"chunk\" data-chord=\"F#m7\">活著時成</span><span class=\"chunk\" data-chord=\"Bm7\">為我生命</span><br/>就在<span class=\"chunk\" data-chord=\"C\">這地獻上敬</span><span class=\"chunk\" data-chord=\"A\">拜</span>&nbsp;&nbsp;"
+         },
+         {
+            "name":"c",
+            "origin":"在呼召我之[Gmaj7]處，我要獻上敬[F#m7]拜，<br/>[Bm7]無論遭遇何[Em7]事，依然[A7]揚聲歌[Dmaj7]唱",
+            "region":"在呼召的所在　我欲歡喜吟詩<br/>無論環境好壞　猶原贊美敬拜",
+            "origin_text":"在呼召我之處，我要獻上敬拜，<br/>無論遭遇何事，依然揚聲歌唱",
+            "region_text":"在呼召的所在　我欲歡喜吟詩<br/>無論環境好壞　猶原贊美敬拜",
+            "origin_chord":"在呼召我之<span class=\"chunk\" data-chord=\"Gmaj7\">處</span>&nbsp;&nbsp;，我要獻上敬<span class=\"chunk\" data-chord=\"F#m7\">拜</span>&nbsp;&nbsp;，<br/><span class=\"chunk\" data-chord=\"Bm7\">無論遭遇何</span><span class=\"chunk\" data-chord=\"Em7\">事</span>&nbsp;&nbsp;，依然<span class=\"chunk\" data-chord=\"A7\">揚聲歌</span><span class=\"chunk\" data-chord=\"Dmaj7\">唱</span>&nbsp;&nbsp;"
+         },
+         {
+            "name":"c",
+            "origin":"在呼召我之[Gmaj7]處，我要獻上敬[F#m7]拜，<br/>[Bm7]無論遭遇何[Em7]事，依然[A7]揚聲歌[Dmaj7]唱",
+            "region":"在呼召的所在　我欲歡喜吟詩<br/>無論環境好壞　猶原贊美敬拜",
+            "origin_text":"在呼召我之處，我要獻上敬拜，<br/>無論遭遇何事，依然揚聲歌唱",
+            "region_text":"在呼召的所在　我欲歡喜吟詩<br/>無論環境好壞　猶原贊美敬拜",
+            "origin_chord":"在呼召我之<span class=\"chunk\" data-chord=\"Gmaj7\">處</span>&nbsp;&nbsp;，我要獻上敬<span class=\"chunk\" data-chord=\"F#m7\">拜</span>&nbsp;&nbsp;，<br/><span class=\"chunk\" data-chord=\"Bm7\">無論遭遇何</span><span class=\"chunk\" data-chord=\"Em7\">事</span>&nbsp;&nbsp;，依然<span class=\"chunk\" data-chord=\"A7\">揚聲歌</span><span class=\"chunk\" data-chord=\"Dmaj7\">唱</span>&nbsp;&nbsp;"
+         }
+      ],
+      "video":"https://youtu.be/31q8w6JpndA",
+      "score":"https://jita.fun/imgs/jitapu_04/www.jita.fun_354393_20171207144952559.webp",
+      "date":"2025-06-22",
+      "id":82,
+      "transpose":[0,2],
+      "alt_sequence":"1,2,c,2,c,c,b,b,c,c",
+      "notes":"V1 V2 C V2 C C B B (shift to E Maj) C C O"
+   }
+]
