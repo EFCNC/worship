@@ -45,9 +45,6 @@ def handle_control(data):
 def handle_announcement(data):
 	print("msg", data)
 	emit('announcement', data, brodcasr=True)
-	#json = Tools.edit_worship_json(id, content, slides_pos[0])
-	#if json:
-	#	emit('reload', json, broadcast=True)
 
 # Rendering interfaces
 
@@ -79,17 +76,14 @@ def worship_notes(id):
 @app.route("/slides/admin")
 def sildes_admin():
 	global client
-	#if client['admin'] == 0:
-	#	return "Only one Admin client can be connected!!"
-	#client['admin'] -= 1
 	id = request.args.get('id', None)
 	bg = request.args.get('bg', None)
 	if id:
-		#headers = {'Content-Type': 'application/json; charset=utf-8'}
-		#response = requests.get("http://150.136.54.210/API/worship/{}/preview".format(id), headers=headers)
-		#if response.status_code == 200:
-		#	slides = response.json()
-		slides = Tools.get_worship_json(id)
+		headers = {'Content-Type': 'application/json; charset=utf-8'}
+		response = requests.get("http://150.136.54.210/API/worship/{}/json".format(id), headers=headers)
+		if response.status_code == 200:
+			slides = response.json()
+		#slides = Tools.get_worship_json(id)
 		if slides is None:
 			return "Worship slides not found!!", 400
 		bg_files = []

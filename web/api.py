@@ -6,12 +6,14 @@ import os
 api = Blueprint('api', __name__, template_folder='templates')
 
 # Worship section
-@api.route("/worship/<id>/json", methods=["POST"])
+@api.route("/worship/<id>/json", methods=["GET", "POST"])
 def edit_worship_json(id):
     '''
     :param id: worship_id
     :return: none
     '''
+    if request.method == 'GET':
+        return Tools.get_worship_json(id)
     content = request.get_json()
     if content:
         result = Tools.create_json(int(id), content)

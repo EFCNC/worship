@@ -367,8 +367,9 @@
                 }
             }
             else {  // show both original and region content
-                $("#bottom-left").html(data.title + ' ' + data.author + ' ' + data.lyricist);
-                $("#bottom-right").html(data.book + ' ' + data.ccli + ' ' + data.copyright);
+                $("#bottom-left").html(data.title + ' (' + data.author + ')');
+                //$("#bottom-right").html(data.book + ' ' + data.ccli + ' ' + data.copyright);
+                $("#bottom-right").html(data.copyright + ' ' + data.ccli);
                 if (l) {
                     slide.innerHTML += show_lyrics(reversed, l, data.lang, data.lang_2);
                 }
@@ -379,6 +380,12 @@
             $("#bottom-right").html(data.book);
             html = '<div class="' + mode + ' notes" '
             html += show_notes(data.notes);
+            slide.innerHTML += html;
+        }
+        else if (data.type == 'link') {
+            $("#bottom-left").html(data.title);
+            $("#bottom-right").html(data.book);
+            html = '<div class="' + mode + ' link"><iframe src="' + data.content + '" frameborder="0" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true" onload="this.width=screen.width;this.height=screen.height;"></iframe>';
             slide.innerHTML += html;
         }
 
