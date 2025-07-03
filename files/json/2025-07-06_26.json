@@ -261,6 +261,17 @@
     "background": "../static/presentation/bg/desert_dawn.jpg"
   },
   {
+    "type": "link",
+    "title": "Sermon",
+    "lang": "",
+    "lang_2": "",
+    "bible": "",
+    "transpose": "0",
+    "content": "https://docs.google.com/presentation/d/e/2PACX-1vQ5g5CeoDZmg-egWaAGb6SLpBZbzDvx3YXZEqfR3Lb6DTML_tzkd-WDG5GQFp-FvQ/pubembed",
+    "notes": "Showing embedded sermon slides, please move the focus to the view mode.",
+    "version": ""
+  },
+  {
     "type": "song",
     "title": "我的性命獻予你",
     "author": "Wolfgang Amadeus Mozart",
@@ -292,17 +303,6 @@
     "alt_sequence": "4",
     "notes": "",
     "background": "../static/presentation/bg/WGSN-Coloro-Future-Dusk-1.jpg"
-  },
-  {
-    "type": "link",
-    "title": "Sermon",
-    "lang": "",
-    "lang_2": "",
-    "bible": "",
-    "transpose": "0",
-    "content": "https://docs.google.com/presentation/d/e/2PACX-1vQ5g5CeoDZmg-egWaAGb6SLpBZbzDvx3YXZEqfR3Lb6DTML_tzkd-WDG5GQFp-FvQ/pubembed",
-    "notes": "Showing embedded sermon slides, please move the focus to the view mode.",
-    "version": ""
   },
   {
     "type": "info",
