@@ -253,41 +253,44 @@
         return '>'+ text + '</div>';
     }
 
-    function set_info_font(len) {
+    function set_info_font(len, align) {
+        if (align) {
+            align = 'text-align:' + align + ';';
+        }
         if (len > 300) {
             if (mode=='admin' || mode=='lead') {
-                return 'style="font-size:1.5vw;line-height: 100%;">';
+                return 'style="font-size:1.5vw;line-height: 100%;' + align + '">';
             }
-            return 'style="font-size:2.5vw;line-height: 120%;">';
+            return 'style="font-size:2.5vw;line-height: 120%;' + align + '">';
         }
         else if (len > 200) {
             if (mode=='admin' || mode=='lead') {
-                return 'style="font-size:2vw;line-height: 100%;">';
+                return 'style="font-size:2vw;line-height: 100%;' + align + '">';
             }
-            return 'style="font-size:3.5vw;line-height: 130%;">';
+            return 'style="font-size:3.5vw;line-height: 130%;' + align + '">';
         }
         if (len < 100) {
             if (mode=='admin' || mode=='lead') {
-                return 'style="font-size:3vw;line-height: 100%;">';
+                return 'style="font-size:3vw;line-height: 100%;"' + align + '">';
             }
-            return 'style="font-size:5.5vw;line-height: 120%;">';
+            return 'style="font-size:5.5vw;line-height: 120%;"' + align + '">';
         }
         else {
             if (mode=='admin' || mode=='lead') {
-                return 'style="font-size:2.5vw;line-height: 100%;">';
+                return 'style="font-size:2.5vw;line-height: 100%;"' + align + '">';
             }
-            return 'style="font-size:4.5vw;line-height: 130%;">';
+            return 'style="font-size:4.5vw;line-height: 130%;"' + align + '">';
         }
     }
 
-    function show_info(content) {
+    function show_info(content, align) {
         text = content.origin_text;
         text = text.replaceAll('\n', '<br/>');
         len = text.length;
         if (mode=='admin' || mode=='lead') {
             len = len * 1.5;
         }
-        html = '<div class="' + mode + ' lyrics origin" ' + set_info_font(len) + text + '</div>';
+        html = '<div class="' + mode + ' info origin" ' + set_info_font(len, align) + text + '</div>';
         if (content.region_text) {
             text = content.region_text;
             text = text.replaceAll('\n', '<br/>');
@@ -295,7 +298,7 @@
             if (mode=='admin' || mode=='lead') {
                 len = len * 1.5;
             }
-        html += '<div class="' + mode + ' lyrics region" ' + set_info_font(len) + text + '</div>';
+        html += '<div class="' + mode + ' info region" ' + set_info_font(len, align) + text + '</div>';
         }
         return html;
     }
@@ -399,7 +402,7 @@
             $("#bottom-left").html(data.title);
             $("#bottom-right").html(data.book);
             //html = '<div class="' + mode + ' notes" '
-            html = show_info(data.content);
+            html = show_info(data.content, data.align);
             slide.innerHTML += html;
         }
         else if (data.type == 'link') {
