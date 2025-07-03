@@ -33,7 +33,8 @@
     <div id="menu">
         <div id="control_panel">
             <br/><textarea id="content" rows="5" cols="60"></textarea>
-            <button name="0">Send msg</button><button name="-1">Clean msg</button><br/><!--<button name="2">Add after current slide</button><button name="3">Add slide to the end</button>-->
+            <button name="0">Send msg</button><button name="-1">Clean msg</button><br/><!--<button name="1">Add a slide</button><button name="2">Add a google slide</button>
+            <input id="google_url" type="text" size="50" style="display:none"/>-->
         </div>
         <div id="notes"></div>
     </div>
@@ -64,6 +65,7 @@
         slides = presentation['data'];
         pos = presentation['pos'][0];
         order = presentation['pos'][1];
+        background = presentation['background'];
 
         function send_msg(data) {
             socket.emit('control', {'type': 'msg', 'value': data});
@@ -113,6 +115,10 @@
                         send_msg(data);
                         break;
                     case '1':
+                        add_slide();
+                        break;
+                    case '2':
+                        $('#google_url').show();
                         break;
                 }
             }

@@ -250,34 +250,54 @@
 
     function show_notes(text) {
         text = text.replaceAll('\n', '<br/>');
+        return '>'+ text + '</div>';
+    }
+
+    function set_info_font(len) {
+        if (len > 300) {
+            if (mode=='admin' || mode=='lead') {
+                return 'style="font-size:1.5vw;line-height: 100%;">';
+            }
+            return 'style="font-size:2.5vw;line-height: 120%;">';
+        }
+        else if (len > 200) {
+            if (mode=='admin' || mode=='lead') {
+                return 'style="font-size:2vw;line-height: 100%;">';
+            }
+            return 'style="font-size:3.5vw;line-height: 130%;">';
+        }
+        if (len < 100) {
+            if (mode=='admin' || mode=='lead') {
+                return 'style="font-size:3vw;line-height: 100%;">';
+            }
+            return 'style="font-size:5.5vw;line-height: 120%;">';
+        }
+        else {
+            if (mode=='admin' || mode=='lead') {
+                return 'style="font-size:2.5vw;line-height: 100%;">';
+            }
+            return 'style="font-size:4.5vw;line-height: 130%;">';
+        }
+    }
+
+    function show_info(content) {
+        text = content.origin_text;
+        text = text.replaceAll('\n', '<br/>');
         len = text.length;
         if (mode=='admin' || mode=='lead') {
             len = len * 1.5;
         }
-        if (len > 300) {
+        html = '<div class="' + mode + ' lyrics origin" ' + set_info_font(len) + text + '</div>';
+        if (content.region_text) {
+            text = content.region_text;
+            text = text.replaceAll('\n', '<br/>');
+            len = text.length;
             if (mode=='admin' || mode=='lead') {
-                return 'style="font-size:1.5vw;line-height: 100%;">'+ text + '</div>';
+                len = len * 1.5;
             }
-            return 'style="font-size:2.5vw;line-height: 120%;">'+ text + '</div>';
+        html += '<div class="' + mode + ' lyrics region" ' + set_info_font(len) + text + '</div>';
         }
-        else if (len > 200) {
-            if (mode=='admin' || mode=='lead') {
-                return 'style="font-size:2vw;line-height: 100%;">'+ text + '</div>';
-            }
-            return 'style="font-size:3.5vw;line-height: 130%;">'+ text + '</div>';
-        }
-        if (len < 100) {
-            if (mode=='admin' || mode=='lead') {
-                return 'style="font-size:3vw;line-height: 100%;">'+ text + '</div>';
-            }
-            return 'style="font-size:5.5vw;line-height: 120%;">'+ text + '</div>';
-        }
-        else {
-            if (mode=='admin' || mode=='lead') {
-                return 'style="font-size:2.5vw;line-height: 100%;">'+ text + '</div>';
-            }
-            return 'style="font-size:4.5vw;line-height: 130%;">'+ text + '</div>';
-        }
+        return html;
     }
 
     function show_lyrics(reversed, l, lang, lang_2) {
@@ -339,7 +359,7 @@
         slide.setAttribute('class', 'content');
         if (data.type == 'song') {
             l = data.content[order];
-            transpose = parseInt(data.transpose);
+            transpose = 'transpose' in data? parseInt(data.transpose): 0;
             reversed = data.reverse;
             if (mode=='musician') {     // musician mode will only show original lyrics with chord
                 chords = l.origin_chord;
@@ -378,19 +398,26 @@
         else if (data.type == 'info') {     // If slide type is info, display data.notes. TODO: info slide will be treated the same way song is displayed
             $("#bottom-left").html(data.title);
             $("#bottom-right").html(data.book);
-            html = '<div class="' + mode + ' notes" '
-            html += show_notes(data.notes);
+            //html = '<div class="' + mode + ' notes" '
+            html = show_info(data.content);
             slide.innerHTML += html;
         }
         else if (data.type == 'link') {
             $("#bottom-left").html(data.title);
             $("#bottom-right").html(data.book);
-            html = '<div class="' + mode + ' link"><iframe src="' + data.content + '" frameborder="0" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true" onload="this.width=screen.width;this.height=screen.height;"></iframe>';
+            if(mode=='admin' || mode=='lead') {
+                html = '<div class="' + mode + ' link"><iframe src="' + data.content + '" frameborder="0" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>';
+            }
+            else {
+                html = '<div class="' + mode + ' link"><iframe src="' + data.content + '" frameborder="0" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true" onload="this.width=screen.width;this.height=screen.height;"></iframe>';
+            }
             slide.innerHTML += html;
         }
 
         if(mode=='admin' || mode=='lead') {     // for admin and lead, show slide notes
-            $('#key_change').html(get_transpose(data.key, data.transpose))
+            if ('transpose' in data) {
+                $('#key_change').html(get_transpose(data.key, data.transpose))
+            }
             html = '<div class="' + mode + ' notes" ';
             html += show_notes(data.notes);
             $("#notes").html(html);
@@ -413,23 +440,18 @@
         else {
             div.css('background-image', '');
         }
-        // TODO: needs to figure out why animate not working
-        /*if (mode == 'musician') {
-            div.slideDown('slow')//.animate({'opacity': 'show', 'paddingTop': 0});
-        }
-        else {
-            div.fadeIn('slow');
-        }*/
         last_order = order;
     }
 
+    // When content div is clicked
+    $(document).on('click', '.admin.lyrics.origin', function(e) {
+        console.log(this.className)
+        $(this).attr('contentEditable', 'true');
+        console.log(slides)
+    });
+
     // Events listener for admin view only
     $(document).on('keyup',function(e) {
-
-        // If mode is not admin or lead, ignore them
-        if (mode != 'admin' || mode != 'lead') {
-            return false;
-        }
 
         // If the keyup is inside content box, ignore them
         if ($('#content').is(":focus")) {
