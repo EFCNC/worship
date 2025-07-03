@@ -31,8 +31,10 @@ def parse_lyrics(content, sequence):
         c = re.sub('\r?\n', '<br/>', l[1])
         origin = re.sub('\[region 2\].+', '', c, flags=re.IGNORECASE)
         origin = re.sub('(^<br\/?>)|(<br\/?>$)', '', origin)
-        region = re.sub('.+\[region 2\]', '', c, flags=re.IGNORECASE)
-        region = re.sub('(^<br\/?>)|(<br\/?>$)', '', region)
+        region = None
+        if re.search('.+\[region 2\]', c, flags=re.IGNORECASE):
+            region = re.sub('.+\[region 2\]', '', c, flags=re.IGNORECASE)
+            region = re.sub('(^<br\/?>)|(<br\/?>$)', '', region)
         s = l[0]
         if re.match('.+\d', s):
             s = s[0]+s[-1]
