@@ -188,6 +188,19 @@
             opacity: 0.3;
         }
 
-        .view.lyrics.region {
-            color: yellow;
+        .lyrics {
+            font-size: clamp(30px, 3.5vw, 50px);
+            line-height: 120%;
+            color: #fff;
+        }
+
+        .info {
+            font-size: clamp(30px, 3vw, 50px);
+            line-height: 120%;
+            color: #fff;
+            text-align: left;
+        }
+
+        .info.region, .lyrics.region {
+            color: #ffd800;
         }

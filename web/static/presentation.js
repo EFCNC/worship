@@ -208,7 +208,55 @@
             }
         }
         len = lang=='en'?len/1.6:len;
-        if (mode == 'lead' || mode == 'admin') {
+        /*if (mode == 'lead' || mode == 'admin') {
+            if (len > 30) {
+                return '';
+            }
+            else if (len < 10) {
+                return 'small';
+            }
+            else {
+                return 'small';
+            }
+        }*/
+        if (len > 37) {
+            return 'tiny';
+        }
+        else if (len > 30) {
+            return 'tiny';
+        }
+        else if (len > 25) {
+            return '';
+        }
+        else if (len >23) {
+            return 'small2';
+        }
+        else if (len >20) {
+            return 'small1';
+        }
+        else if (len >18) {
+            return 'medium2';
+        }
+        else if (len >16) {
+            return 'medium1';
+        }
+        else if (len >15) {
+            return 'large2';
+        }
+        else {
+            return 'large1';
+        }
+    }
+    function _set_font_size(text, lang) {
+        len = 0;
+        text = text.split('<br/>')
+        for (l of text) {
+            if (l.length> len) {
+                len = l.length;
+            }
+        }
+        len = lang=='en'?len/1.6:len;
+        /*if (mode == 'lead' || mode == 'admin') {
             if (len > 30) {
                 return 'font-size: 2vw;line-height: 120%;';
             }
@@ -218,7 +266,7 @@
             else {
                 return 'font-size: 2.5vw;line-height: 120%;';
             }
-        }
+        }*/
         if (len > 37) {
             return 'font-size: 2vw;line-height: 150%;';
         }
@@ -290,7 +338,8 @@
         if (mode=='admin' || mode=='lead') {
             len = len * 1.5;
         }
-        html = '<div class="' + mode + ' info origin" ' + set_info_font(len, align) + text + '</div>';
+        //html = '<div class="' + mode + ' info origin" ' + set_info_font(len, align) + text + '</div>';
+        html = '<div class="' + mode + ' info origin">'  + text + '</div>';
         if (content.region_text) {
             text = content.region_text;
             text = text.replaceAll('\n', '<br/>');
@@ -298,25 +347,22 @@
             if (mode=='admin' || mode=='lead') {
                 len = len * 1.5;
             }
-        html += '<div class="' + mode + ' info region" ' + set_info_font(len, align) + text + '</div>';
+        //html += '<div class="' + mode + ' info region" ' + set_info_font(len, align) + text + '</div>';
+        html += '<div class="' + mode + ' info region">'  + text + '</div>';
         }
         return html;
     }
 
-    function show_lyrics(reversed, l, lang, lang_2) {
-        if (reversed && l.region_text) {
-            html = '<div class="' + mode + ' lyrics origin" style="';
-            html += set_font_size(l.region_text, lang_2) + '">' + l.region_text + '</div>';
-            html += '<div class="' + mode + ' lyrics region" style="';
-            html += set_font_size(l.origin_text, lang) + '">' + l.origin_text + '</div>';
-        }
-        else {
-            html = '<div class="' + mode + ' lyrics origin" style="';
-            html += set_font_size(l.origin_text, lang) + '">' + l.origin_text + '</div>';
-            if (l.region_text) {
-                html += '<div class="' + mode + ' lyrics region" style="';
-                html += set_font_size(l.region_text, lang_2) + '">' + l.region_text + '</div>';
-            }
+    function show_lyrics(l, lang, lang_2) {
+        //html = '<div class="' + mode + ' lyrics origin" style="';
+        //html = '<div class="' + mode + ' lyrics origin ' + set_font_size(l.origin_text, lang) + '">' + l.origin_text + '</div>';
+        html = '<div class="' + mode + ' lyrics origin">' + l.origin_text + '</div>';
+        //html += set_font_size(l.origin_text, lang) + '">' + l.origin_text + '</div>';
+        if (l.region_text) {
+            //html += '<div class="' + mode + ' lyrics region ' + set_font_size(l.origin_text, lang) + '">' + l.region_text + '</div>';
+            html += '<div class="' + mode + ' lyrics region">' + l.region_text + '</div>';
+            //html += '<div class="' + mode + ' lyrics region" style="';
+            //html += set_font_size(l.region_text, lang_2) + '">' + l.region_text + '</div>';
         }
         return html;
     }
@@ -394,7 +440,7 @@
                 //$("#bottom-right").html(data.book + ' ' + data.ccli + ' ' + data.copyright);
                 $("#bottom-right").html(data.copyright + ' ' + data.ccli);
                 if (l) {
-                    slide.innerHTML += show_lyrics(reversed, l, data.lang, data.lang_2);
+                    slide.innerHTML += show_lyrics(l, data.lang, data.lang_2);
                 }
             }
         }
@@ -409,7 +455,7 @@
             $("#bottom-left").html(data.title);
             $("#bottom-right").html(data.book);
             if(mode=='admin' || mode=='lead') {
-                html = '<div class="' + mode + ' link"><iframe src="' + data.content + '" frameborder="0" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>';
+                html = '<div class="' + mode + ' link"><iframe src="' + data.content + '" frameborder="0" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe><br/><textarea row="5" cols="60" id="google_url">' + data.content + '</textarea>';
             }
             else {
                 html = '<div class="' + mode + ' link"><iframe src="' + data.content + '" frameborder="0" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true" onload="this.width=screen.width;this.height=screen.height;"></iframe>';
@@ -446,18 +492,77 @@
         last_order = order;
     }
 
-    // When content div is clicked
-    $(document).on('click', '.admin.lyrics.origin', function(e) {
-        console.log(this.className)
+    function update_json() {
+    data = JSON.stringify(slides);
+        $.ajax({
+            type: "post",
+            url: "/API/worship/" + w_id + "/json",
+            data: data,
+            contentType: "application/json",
+            dataType: 'json',
+            complete: function(response) {
+                if(response.status==200) {
+                    load(preview);
+                }
+            }
+        });
+    }
+
+    // contentEditable for origin and region
+    let div_content = {};
+    $(document).on('click', '.admin', function() {
         $(this).attr('contentEditable', 'true');
-        console.log(slides)
+        div_content[$(this).attr('class')] = $(this).html();
+    });
+
+    $(document).on('change', '#google_url', function() {
+        slides[pos].content = $(this).val();
+        update_json();
+    });
+
+    $(document).on('focusout', '.admin', function() {
+        temp = $(this).html();
+        current_elm = this;
+        if ($(this).attr('class') in div_content) {
+            if (temp != div_content[$(this).attr('class')]) {
+                // When notes div is changed
+                if ($(this).attr('class').match('notes')) {
+                    console.log("changed")
+                    slides[pos].notes = temp;
+                }
+                // When info div is changed
+                else if ($(this).attr('class').match('info')) {
+                    if ($(this).attr('class').match('origin')) {
+                        console.log("changed");
+                        slides[pos].content.origin_text = temp;
+                    }
+                    else if ($(this).attr('class').match('region')) {
+                        console.log("changed");
+                        slides[pos].content.region_text = temp;
+                    }
+                }
+                // When lyrics div is changed
+                else if ($(this).attr('class').match('lyrics')) {
+                    if ($(this).attr('class').match('origin')) {
+                        console.log("changed");
+                        slides[pos].content[order].origin_text = temp;
+                    }
+                    else if ($(this).attr('class').match('region')) {
+                        console.log("changed");
+                        slides[pos].content[order].region_text = temp;
+                    }
+                }
+                update_json()
+            }
+            div_content = {};
+        }
     });
 
     // Events listener for admin view only
     $(document).on('keyup',function(e) {
 
         // If the keyup is inside content box, ignore them
-        if ($('#content').is(":focus")) {
+        if (Object.keys(div_content).length > 0) {
             return false;
         }
 
@@ -469,7 +574,8 @@
            down=40, next slide;
            enter=13, next slide;
         */
-        key_code = [13, 32, 37, 38, 39, 40]; //remove 67 and 109 for now
+        //key_code = [13, 32, 37, 38, 39, 40]; //remove 67 and 109 for now
+        key_code = [37, 38, 39, 40]; //remove 13 and 32 for now
         if (key_code.indexOf(code)>=0) {
             switch(code) {
                 case 13:
