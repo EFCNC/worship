@@ -47,6 +47,19 @@
     pos = presentation['pos'][0];
     order = presentation['pos'][1];
     msg = presentation['msg'];
+    mode = '{{ mode }}';
+
+    function init() {
+        if (slides.length == 0) {
+            alert("No slide is currently running!!");
+            mode = '';
+            return false;
+        }
+        $("#control_btn").hide();
+        $("#container").html(load_container());
+        preview = $('#preview');
+        load(preview);
+    }
 
     function show_msg(){
         $('#top-right').html(msg);
@@ -86,17 +99,8 @@
 
     // functions for init page
     $(document).on('click', '#control_btn button', function() {
-        if (slides.length == 0) {
-            alert("No slide is currently running!!");
-            return false;
-        }
         mode = $(this).attr('name');
-        $("#control_btn").hide();
-        $("#container").html(load_container());
-        preview = $('#preview');
-        elem = document.getElementById('preview');
-        //go_full_screen();
-        load(preview);
+        init();
     });
 
     /*$(document).on('change', '#key', function (event) {
@@ -113,6 +117,12 @@
         touchendX = event.changedTouches[0].screenX;
         touchendY = event.changedTouches[0].screenY;
         handleGesture();
+    });
+
+    $(document).ready(function() {
+        if (mode) {
+            init();
+        }
     });
 
 </script>

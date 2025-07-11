@@ -20,11 +20,24 @@
         }
 
         .material-icons {
-            font-size: 70px;
-            padding: 20px;
+            font-size: 40px;
+            padding: 10px;
         }
 
         i:hover {
+            cursor: pointer;
+            color: #fff;
+            background-color: #000;
+        }
+
+        #image_icon img {
+            padding: 5px;
+            width: 50px;
+        }
+
+        #image_icon img:hover {
+            border: 1px solid #ddd;
+            border-radius: 4px;
             cursor: pointer;
         }
 </style>
@@ -32,23 +45,35 @@
 <div class="admin_container"><div id="preview"></div>
     <div id="menu">
         <div id="control_panel">
-            <br/><textarea id="content" rows="5" cols="60"></textarea>
-            <button name="0">Send msg</button><button name="-1">Clean msg</button><br/><!--<button name="1">Add a slide</button><button name="2">Add a google slide</button>
-            <input id="google_url" type="text" size="50" style="display:none"/>-->
+            <br/><textarea id="content" rows="3" cols="40"></textarea>
+            <br/><i class="material-icons" name="0" title="Send a message to view">&#xE163;</i><i class="material-icons" name="-1" title="Clear the message">&#xE14C;</i><i class="material-icons" name="1" title="Add a slide">&#xE24D;</i><i class="material-icons" name="2" title="Add a sermon link">&#xE250;</i><i class="material-icons" name="3" title="Add Background">&#xE3F4;</i>&nbsp;<i class="material-icons" name="one" title="Apply">&#xE876;</i><i class="material-icons" name="all" title="Apply All">&#xE877;</i>
+            <input id="google_url" type="text" size="50" style="display:none"/>
+            <div id="image_icon" style="display:none"></div>
         </div>
         <div id="notes"></div>
     </div>
     <div id="control_div">
-        <div id="control_btn"><i id="first" class="material-icons" title="First Topic">&#xe5dc;</i><i id="pre" class="material-icons" title="Previous Topic">&#xe5c4;</i><i id="up" class="material-icons" title="Previous Slide">&#xe5d8;</i><i id="down" class="material-icons" title="Next Slide">&#xe5db;</i><i id="next" class="material-icons" title="Next Topic">&#xe5c8;</i><i id="last" class="material-icons" title="Last Topic">&#xe5dd;</i></div>
+        <div id="control_btn"><!--<i id="first" class="material-icons" title="First Topic">&#xe5dc;</i>--><i id="pre" class="material-icons" title="Previous Slide">&#xe5c4;</i><i id="up" class="material-icons" title="Previous Page">&#xe5d8;</i><i id="down" class="material-icons" title="Next Page">&#xe5db;</i><i id="next" class="material-icons" title="Next Slide">&#xe5c8;</i><!--<i id="last" class="material-icons" title="Last Topic">&#xe5dd;</i>--><i id="save" class="material-icons" title="Export Slides to Html">&#xE161;</i><i id="present" class="material-icons" title="Casting View">&#xE30C;</i></div>
     </div>
 </div>
 </body>
 <script>
         let preview = $('#preview');    // Declare target div for load() function
         mode = 'admin';                 // Set mode to lead
+        bg_url = '';
+        a_type = '';
 
         socket.on('connect', function () {
             console.log('Admin connected to the server');
+        });
+
+        socket.on('reload', function (presentation) {
+            console.log('Admin reload json data');
+            slides = presentation['data'];
+            w_id = presentation['id'];
+            load(preview);
+            //pos = presentation['pos'][0];
+            //order = presentation['pos'][1];
         });
 
         socket.on('response', function (data) {
@@ -61,12 +86,71 @@
             load(preview);
         });
 
-        w_id = {{ id }};
         presentation = {{ presentation|safe }};
         slides = presentation['data'];
         pos = presentation['pos'][0];
         order = presentation['pos'][1];
         background = presentation['background'];
+        w_id = presentation['id'];
+
+        function add_background() {
+            $('#image_icon').toggle();
+            if ($('#image_icon').is(":visible")) {
+                var url = '/API/backgrounds';
+                $.when( $.ajax( url ) ).then(function( response, textStatus, jqXHR ) {
+                    var temp = '';
+                    for (var i=0;i<response.length;i++) {
+                        temp += '<img src="' + response[i] + '" title="' + response[i] + '"/>';
+                    }
+                    $('#image_icon').html(temp);
+                    a_type = 'bg';
+                });
+            }
+            else {
+                bg_url = '';
+                a_type = '';
+            }
+        }
+
+        function add_slide(num) {
+            if (num == 1) { // For adding sermon slide
+                if ($('#google_url').val() != '') {
+                }
+            }
+            else { // For adding info slide
+                origin_text = '輸入您的資訊';
+                region_text = 'Enter your extra language information here';
+                $("#preview").find('.content').html('<div id="info_origin" contentEditable="true">' + origin_text + '</div><div id="info_region" contentEditable="true">' + region_text + '</div>');
+                h = $("#preview").height()/2;
+                w = $("#preview").width();
+                $("#info_origin").css("width", w );
+                $("#info_origin").css("height", h );
+                $("#info_region").css("width", w );
+                $("#info_region").css("height", h );
+                $("#info_origin").click(function() {
+                    if($(this).html() == origin_text) {
+                        $(this).html('');
+                    }
+                });
+                $("#info_region").click(function() {
+                    if($(this).html() == region_text) {
+                        $(this).html('');
+                    }
+                });
+                $("#info_origin").focusout(function() {
+                    if($(this).html() == '') {
+                        $(this).html(origin_text);
+                    }
+                });
+                $("#info_region").focusout(function() {
+                    if($(this).html() == '') {
+                        $(this).html(region_text);
+                    }
+                });
+            }
+            a_type = 'info';
+            console.log(pos, order, w_id);
+        }
 
         function send_msg(data) {
             socket.emit('control', {'type': 'msg', 'value': data});
@@ -74,6 +158,11 @@
 
         $(document).ready(function() {
             load(preview);
+        });
+
+        $(document).on('click', '#image_icon img', function() {
+            $("#preview").css('background-image', 'url(' + this.src + ')');
+            bg_url = this.title;
         });
 
         $("#control_btn i").click(function() {
@@ -99,11 +188,39 @@
                     pos = slides.length-1
                     order = slides[slides.length-1].content.length-1;
                     break;
+                case 'present':
+                    window.open('/slides/view', '_blank');
+                    break;
+                case 'save':
+                    save_slides();
+                    break;
             }
 
         });
 
-        $("#control_panel button").click(function() {
+        function apply(name) {
+            if (a_type == 'bg') {
+                if (name == 'all') {
+                    for(var i=0;i<slides.length;i++) {
+                        slides[i].style.background = bg_url;
+                    }
+                }
+                else {
+                    slides[pos].style.background = bg_url;
+                }
+            }
+            else if (a_type == 'info') {
+                origin = $('#info_origin').html();
+                region = $('#info_region').html();
+                info = {"alt_sequence": "", "author": "", "style": {"align": "", "background": ""}, "bible": "", "book": "", "ccli": "", "content": {"origin_text": origin, "region_text": region}, "copyright": "", "date": "", "id": 115, "key": "", "lang": "", "lang_2": "", "lyricist": "", "lyrics_raw": "", "notes": "歡迎報告", "score": "", "sequence": "", "title": "歡迎報告", "transpose": "0", "type": "info", "version": "", "video": ""};
+                slides.splice(pos+1, 0, info);
+            }
+            //console.log(slides);
+            a_type = '';
+            update_json();
+        }
+
+        $("#control_panel i").click(function() {
             data = $("#content").val();
             name = $(this).attr('name');
             if (data) {
@@ -115,11 +232,24 @@
                     case '0':
                         send_msg(data);
                         break;
+                }
+            }
+            else {
+                switch(name) {
                     case '1':
-                        add_slide();
+                        add_slide(0);
                         break;
                     case '2':
-                        $('#google_url').show();
+                        add_slide(1);
+                        break;
+                    case '3':
+                        add_background();
+                        break;
+                    case 'one':
+                        apply('one');
+                        break;
+                    case 'all':
+                        apply('all');
                         break;
                 }
             }
@@ -128,7 +258,6 @@
         $(document).on('click', '#preview_div div', function(){
             id = $(this).attr('id').split('_')[1];
             id = Number(id)
-            console.log(id)
             move(1, id-order);
         });
 

@@ -1,5 +1,5 @@
         .content {
-            padding: 50px;
+            padding: 30px;
         }
 
         .preview.view {
@@ -59,7 +59,7 @@
   		    grid-template-areas:
     		    "preview menu"
     		    "control_div control_div";
-  		    grid-template-columns: 4fr 3fr;
+  		    grid-template-columns: 5fr 3fr;
   		    gap: 5px;
   		    background-color: #8c92ac;
 	    }
@@ -102,14 +102,20 @@
             flex-wrap: wrap;
 	    }
 
-        button {
+        #dynamic_btn button {
             padding: 32px 16px;
             width: 150px;
             margin: 5px;
         }
 
+        button {
+            padding: 5px 5px;
+            margin: 2px;
+            width: 100px;
+        }
+
         #notes {
-            font-size: 2.3vw;
+            font-size: 1.5vw;
         }
 
         .notes {
@@ -121,7 +127,7 @@
             justify-content: center;
             align-item: center;
             text-align: center;
-            min-height: 75vh;
+            height: 85vh;
             background-position: center;
             background-repeat: no-repeat;
             background-size: cover;
@@ -189,16 +195,18 @@
         }
 
         .lyrics {
-            font-size: clamp(30px, 3.5vw, 50px);
+            font-size: clamp(100%, 1rem + 3vw, 60px);
             line-height: 120%;
             color: #fff;
+            text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
         }
 
         .info {
-            font-size: clamp(30px, 3vw, 50px);
+            font-size: clamp(100%, 1rem + 2vw, 55px);
             line-height: 120%;
             color: #fff;
             text-align: left;
+            text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
         }
 
         .info.region, .lyrics.region {

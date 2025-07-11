@@ -33,16 +33,18 @@ def edit_worship_json(id, content, pos):
 def get_background_files(name=None):
     if not name:
         dir_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-        bg_path = os.path.join(dir_path, 'web', 'static', 'presentation', 'bg')
-        bg = []
-        if os.path.exists(bg_path):
-            bg = os.listdir(bg_path)
-            bg = ['../static/presentation/bg/{}'.format(x) for x in bg]
-        return bg
+        backgrounds = ['bg', 'bg1']
+        bgs = []
+        for bg in backgrounds:
+            bg_path = os.path.join(dir_path, 'web', 'static', 'presentation', bg)
+            if os.path.exists(bg_path):
+                temp = os.listdir(bg_path)
+                temp = ['../static/presentation/{}/{}'.format(bg, x) for x in temp]
+            bgs += temp
+        return bgs
 
 def get_worship_json(id):
     w = Utils.get_worship_date(id)
-    #json_file = os.path.join(Utils.conf["worship"]["path"].format(''), '{}_{}.json'.format(w[0], id))
     json_file = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'files', 'json', '{}_{}.json'.format(w[0], id))
     if not os.path.exists(json_file):
         return None
@@ -54,6 +56,23 @@ def list_worship_file():
     path = conf["worship"]["path"]
     files = os.listdir(path)
     return [{'filename': x.split('.')[0].split('_')[0], 'id': x.split('.')[0].split('_')[1]} for x in files if os.path.isfile(os.path.join(path, x))]
+
+def create_html(id):
+    slides = get_worship_json(id)
+    path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'files', 'html')
+    if not os.path.exists(path):
+        os.makedirs(path, exist_ok=True)
+
+    html_file = os.path.join(path, 'presentation_{}.html'.format(id))
+    temp = json.dumps(slides, indent=4, ensure_ascii=False)
+    #temp += ";function move(num){order=order+num;if(order>=slides[pos].content.length){pos+=1;if(pos<=slides.length-1){order=0}else{pos-=1;order-=1}}else if(order<0){pos-=1;if(pos<0){pos=0;order=0}else{order=slides[pos].content.length-1}}load()}function show_lyrics(l){html='<div class=\"'+mode+' lyrics origin\">'+l.origin_text+'</div>';if(l.region_text){html+='<div class=\"'+mode+' lyrics region\">'+l.region_text+'</div>'}return html}function show_info(content,align){text=content.origin_text;text=text.replaceAll('\\n','<br/>');len=text.length;html='<div class=\"'+mode+' info origin\">'+text+'</div>';if(content.region_text){text=content.region_text;text=text.replaceAll('\\n','<br/>');len=text.length;html+='<div class=\"'+mode+' info region\">'+text+'</div>'}return html}function load(){div=document.getElementById('preview');data=slides[pos];var slide=document.createElement('div');slide.setAttribute('name',pos);slide.setAttribute('class','content');if(data.type=='song'){document.getElementById(\"bottom-left\").innerHTML=data.title+' ('+data.author+ ')';document.getElementById(\"bottom-right\").innerHTML=data.copyright + ' ' + data.ccli;l=data.content[order];slide.innerHTML+=show_lyrics(l)}else if(data.type=='info'){document.getElementById(\"bottom-left\").innerHTML = data.title;document.getElementById(\"bottom-right\").innerHTML = data.book;html=show_info(data.content,data.style.align);slide.innerHTML+=html}else if(data.type=='link'){html='<div class=\"'+mode+' link\"><iframe src=\"'+data.content+'\" frameborder=\"0\" allowfullscreen=\"true\" mozallowfullscreen=\"true\" webkitallowfullscreen=\"true\" onload=\"this.width=screen.width;this.height=screen.height;\"></iframe>';slide.innerHTML+=html}div.innerHTML='';div.append(slide);if(data.style.background){div.css('background-image','url(\"'+data.style.background+'\")')}}document.onkeyup=function(e){e=e||window.event;switch(e.keyCode){case 38:move(-1);break;case 40:move(1);break}};load();"
+    temp += ";function move(num){order=order+num;if(order>=slides[pos].content.length){pos+=1;if(pos<=slides.length-1){order=0}else{pos-=1;order-=1}}else if(order<0){pos-=1;if(pos<0){pos=0;order=0}else{order=slides[pos].content.length-1}}load()}function show_lyrics(l){html='<div class=\"'+mode+' lyrics origin\">'+l.origin_text+'</div>';if(l.region_text){html+='<div class=\"'+mode+' lyrics region\">'+l.region_text+'</div>'}return html}function show_info(content,align){text=content.origin_text;text=text.replaceAll('\\n','<br/>');len=text.length;html='<div class=\"'+mode+' info origin\">'+text+'</div>';if(content.region_text){text=content.region_text;text=text.replaceAll('\\n','<br/>');len=text.length;html+='<div class=\"'+mode+' info region\">'+text+'</div>'}return html}function load(){div=document.getElementById('preview');data=slides[pos];var slide=document.createElement('div');slide.setAttribute('name',pos);slide.setAttribute('class','content');if(data.type=='song'){l=data.content[order];slide.innerHTML+=show_lyrics(l)}else if(data.type=='info'){html=show_info(data.content,data.style.align);slide.innerHTML+=html}else if(data.type=='link'){html='<div class=\"'+mode+' link\"><iframe src=\"'+data.content+'\" frameborder=\"0\" allowfullscreen=\"true\" mozallowfullscreen=\"true\" webkitallowfullscreen=\"true\" onload=\"this.width=screen.width;this.height=screen.height;\"></iframe>';slide.innerHTML+=html}div.innerHTML='';div.append(slide);if(data.style.background){div.css('background-image','url(\"'+data.style.background+'\")')}}document.onkeyup=function(e){e=e||window.event;switch(e.keyCode){case 38:move(-1);break;case 40:move(1);break}};load();"
+    style = '<style > html{height:100%;background-color:#000}body{overflow:hidden}#preview{display:flex;justify-content:center;align-item:center;text-align:center;height:85vh;background-position:center;background-repeat:no-repeat;background-size:cover}#preview_div{overflow:hidden}.lyrics{font-size:clamp(100%, 1rem + 3vw, 60px);line-height:120%;color:#fff;text-shadow:-1px 0 black, 0 1px black, 1px 0 black, 0 -1px black}.info{font-size:clamp(100%, 1rem + 2vw, 55px);line-height:120%;color:#fff;text-align:left;text-shadow:-1px 0 black, 0 1px black, 1px 0 black, 0 -1px black}.info.region,.lyrics.region{color:#ffd800}#bottom-left{position:absolute;font-size:20px;bottom:130;left:10;padding:10px;color:#fff}#bottom-right{position:fixed;font-size:20px;bottom:130;right:0;padding:10px;color:#fff}</style>'
+    html = '<html>' + style + '<body><div id="container"><div id="top-left"></div><div id="top-right"></div><div id="preview" class="preview view"></div><div id="bottom-left"></div><div id="bottom-right"></div></div></body><script>pos = 0;order = 0;mode = "view";slides=' + temp + ';</script></html>'
+    with open(html_file, "w", encoding="utf-8") as f:
+        f.write(html)
+
+    return html_file
 
 def create_json(id, worship=None):
     if not worship:
@@ -67,7 +86,7 @@ def create_json(id, worship=None):
 
     json_file = os.path.join(path, '{}_{}.json'.format(worship[0]["date"], id))
     with open(json_file, "w", encoding="utf-8") as f:
-        json.dump(worship, f, ensure_ascii=False)
+        json.dump(worship, f, indent=4, ensure_ascii=False)
 
     return json_file
 

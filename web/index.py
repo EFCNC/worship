@@ -20,6 +20,11 @@ client = {'admin': 1, 'lead': 1, 'musician': 10, 'view': 10}
 
 socketio = SocketIO(app)
 
+@socketio.on('reload')
+def reload_json():
+	print('Reloading json data')
+	emit('reload', slides_data, broadcast=True)
+
 @socketio.on('connect')
 def handle_connect():
     print('Client connected')
@@ -27,8 +32,6 @@ def handle_connect():
 @socketio.on('disconnecting')
 def handle_disconnect(data):
 	print('Client disconnected: {}'.format(data["mode"]))
-	#global client
-	#client[data["mode"]] -= 1 if client['admin'] > 0 else 0
 
 @socketio.on('control')
 def handle_control(data):
@@ -80,7 +83,7 @@ def sildes_admin():
 	bg = request.args.get('bg', None)
 	if id:
 		headers = {'Content-Type': 'application/json; charset=utf-8'}
-		response = requests.get("http://150.136.54.210/API/worship/{}/json".format(id), headers=headers)
+		response = requests.get("http://localhost/API/worship/{}/json".format(id), headers=headers)
 		if response.status_code == 200:
 			slides = response.json()
 		#slides = Tools.get_worship_json(id)
@@ -90,12 +93,13 @@ def sildes_admin():
 		if bg:
 			bg_files = Tools.get_background_files()
 		global slides_data
+		slides_data['id'] = id
 		slides_data['data'] = slides
 		slides_data['pos'] = [0, 0]
 		slides_data['msg'] = ''
 		slides_data['dynamic'] = ''
 		slides_data['background'] = bg_files
-		return render_template('slides_admin.html', presentation=slides_data, id=id)
+		return render_template('slides_admin.html', presentation=slides_data)
 	else:
 		files = Tools.list_worship_file()
 		return render_template('slides_admin.html', files=files)
@@ -103,13 +107,14 @@ def sildes_admin():
 @app.route("/slides")
 @app.route("/slides/<mode>")
 def slides_viewer(mode=None):
-	if mode:
-		global client
-		if client[mode] == 0:
-			return "No more seat for connection!!"
-		client[mode] -= 1
-		return slides_data
-	return render_template('slides.html', presentation=slides_data)
+	if not mode:
+		mode = ''
+		#global client
+		#if client[mode] == 0:
+		#	return "No more seat for connection!!"
+		#client[mode] -= 1
+		#return slides_data
+	return render_template('slides.html', presentation=slides_data, mode=mode)
 
 
 @app.route("/notes")
@@ -197,7 +202,7 @@ def file_list():
 
 @app.route("/1")
 def t():
-	return render_template('1.html')
+	return render_template('1.html', )
 
 @app.route("/playground/<name>")
 def playground(name):

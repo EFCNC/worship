@@ -43,7 +43,7 @@ def export(id):
     '''
 
     try:
-        result = Tools.create_xml(Utils.get_worship_songs(id))
+        result = Tools.create_html(id)
         return result, 200
     except Exception as e:
         return e, 500
@@ -118,6 +118,11 @@ def search_song():
     # remove title from left if it's already in current dB
     left = [x for x in left if not any(y for y in right if y['title'] == x['title'])]
     return {'left': left, 'right': right}, 200
+
+@api.route("/backgrounds")
+def list_bg():
+    bg_files = Tools.get_background_files()
+    return bg_files
 
 @api.route("/notes", methods=["POST"])
 def edit_notes():
