@@ -1,0 +1,275 @@
+[
+    {
+        "alt_sequence": "",
+        "author": "",
+        "bible": "",
+        "book": "",
+        "ccli": "",
+        "content": {
+            "origin_text": "<p>主日禮拜即將開始<br/>請安靜預備心<br/><br/>歡迎您參加今日的主日崇拜</p>",
+            "region_text": "<p>Please be prepared as the service is about to start<br/>Welcome to worship with us</p>"
+        },
+        "copyright": "",
+        "date": "2025-07-13",
+        "id": 0,
+        "key": "",
+        "lang": "",
+        "lang_2": "",
+        "lyricist": "",
+        "lyrics_raw": "",
+        "notes": "安靜心前奏",
+        "score": "",
+        "sequence": "",
+        "style": {
+            "align": "",
+            "background": "../static/presentation/bg/WGSN-Coloro-Future-Dusk-1.jpg"
+        },
+        "title": "安靜心",
+        "transpose": "0",
+        "type": "info",
+        "version": "",
+        "video": ""
+    },
+    {
+        "alt_sequence": "1,2,3,4",
+        "author": "曾祥怡 Grace Tseng",
+        "bible": "",
+        "book": "讚美之泉敬拜讚美專輯 (29) 「我能給你什麼」",
+        "ccli": "7238668",
+        "content": [
+            {
+                "name": "1",
+                "origin": "謝謝[C]你牽著我[C7]手<br/>高山[F]低谷陪我[F#dim]走 <br/>從不[C/E]放棄[Am]我<br/>真誠[Dm]愛我   接納[G]我",
+                "origin_chord": "謝謝<span class=\"chunk\" data-chord=\"C\">你牽著我</span><span class=\"chunk\" data-chord=\"C7\">手</span>&nbsp;&nbsp;<br/>高山<span class=\"chunk\" data-chord=\"F\">低谷陪我</span><span class=\"chunk\" data-chord=\"F#dim\">走</span>&nbsp;&nbsp; <br/>從不<span class=\"chunk\" data-chord=\"C/E\">放棄</span><span class=\"chunk\" data-chord=\"Am\">我</span>&nbsp;&nbsp;<br/>真誠<span class=\"chunk\" data-chord=\"Dm\">愛我</span>   接納<span class=\"chunk\" data-chord=\"G\">我</span>&nbsp;&nbsp;",
+                "origin_text": "謝謝你牽著我手<br/>高山低谷陪我走 <br/>從不放棄我<br/>真誠愛我   接納我",
+                "region": "Thank you for holding my hand<br/>Highs and lows, you walk with me<br/>You never gave up<br/>You accepted me with love",
+                "region_text": "Thank you for holding my hand<br/>Highs and lows, you walk with me<br/>You never gave up<br/>You accepted me with love"
+            },
+            {
+                "name": "2",
+                "origin": "一起[C]做夢   一起[C7]笑<br/>一起[F]敬拜和禱[F#dim]告<br/>一起[C/G]慶賀每[G]個生命的奇[C]蹟[C7]",
+                "origin_chord": "一起<span class=\"chunk\" data-chord=\"C\">做夢</span>   一起<span class=\"chunk\" data-chord=\"C7\">笑</span>&nbsp;&nbsp;<br/>一起<span class=\"chunk\" data-chord=\"F\">敬拜和禱</span><span class=\"chunk\" data-chord=\"F#dim\">告</span>&nbsp;&nbsp;<br/>一起<span class=\"chunk\" data-chord=\"C/G\">慶賀每</span><span class=\"chunk\" data-chord=\"G\">個生命的奇</span><span class=\"chunk\" data-chord=\"C\">蹟</span>&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"C7\"></span>&nbsp;&nbsp;&nbsp;&nbsp;",
+                "origin_text": "一起做夢   一起笑<br/>一起敬拜和禱告<br/>一起慶賀每個生命的奇蹟",
+                "region": "Together, we'll dream and laugh<br/>Pray and worship in accord<br/>All life's wonders are a joy to share with you",
+                "region_text": "Together, we'll dream and laugh<br/>Pray and worship in accord<br/>All life's wonders are a joy to share with you"
+            },
+            {
+                "name": "3",
+                "origin": "好喜歡[F]與你在一[G/F]起<br/>分享[Em]生活   分享[Am]愛   <br/>沒有[Dm]批判和論[G]斷<br/>心完[C]全敞[C7]開",
+                "origin_chord": "好喜歡<span class=\"chunk\" data-chord=\"F\">與你在一</span><span class=\"chunk\" data-chord=\"G/F\">起</span>&nbsp;&nbsp;<br/>分享<span class=\"chunk\" data-chord=\"Em\">生活</span>   分享<span class=\"chunk\" data-chord=\"Am\">愛</span>&nbsp;&nbsp;   <br/>沒有<span class=\"chunk\" data-chord=\"Dm\">批判和論</span><span class=\"chunk\" data-chord=\"G\">斷</span>&nbsp;&nbsp;<br/>心完<span class=\"chunk\" data-chord=\"C\">全敞</span><span class=\"chunk\" data-chord=\"C7\">開</span>&nbsp;&nbsp;",
+                "origin_text": "好喜歡與你在一起<br/>分享生活   分享愛   <br/>沒有批判和論斷<br/>心完全敞開",
+                "region": "I really love to be with you<br/>Sharing life and sharing grace<br/>We won't criticize or judge<br/>Hearts are open wide",
+                "region_text": "I really love to be with you<br/>Sharing life and sharing grace<br/>We won't criticize or judge<br/>Hearts are open wide"
+            },
+            {
+                "name": "4",
+                "origin": "好喜歡[F]與你在一[G/F]起<br/>像耶[Em]穌一[E/G#]樣地[Am]愛<br/>你我[Dm]不孤單<br/>這[F/G]裡[G]有[C]愛",
+                "origin_chord": "好喜歡<span class=\"chunk\" data-chord=\"F\">與你在一</span><span class=\"chunk\" data-chord=\"G/F\">起</span>&nbsp;&nbsp;<br/>像耶<span class=\"chunk\" data-chord=\"Em\">穌一</span><span class=\"chunk\" data-chord=\"E/G#\">樣地</span><span class=\"chunk\" data-chord=\"Am\">愛</span>&nbsp;&nbsp;<br/>你我<span class=\"chunk\" data-chord=\"Dm\">不孤單</span><br/>這<span class=\"chunk\" data-chord=\"F/G\">裡</span>&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"G\">有</span>&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"C\">愛</span>&nbsp;&nbsp;",
+                "origin_text": "好喜歡與你在一起<br/>像耶穌一樣地愛<br/>你我不孤單<br/>這裡有愛",
+                "region": "I really love to be with you<br/>Loving just as Christ would do<br/>We are not alone, because we love",
+                "region_text": "I really love to be with you<br/>Loving just as Christ would do<br/>We are not alone, because we love"
+            }
+        ],
+        "copyright": "© 2024 Stream of Praise Music / BMI",
+        "date": "2025-07-13",
+        "id": 73,
+        "key": "C",
+        "lang": "zh",
+        "lang_2": "en",
+        "lyricist": "曾祥怡 Grace Tseng",
+        "lyrics_raw": "<1>\r\n謝謝[C]你牽著我[C7]手\r\n高山[F]低谷陪我[F#dim]走 \r\n從不[C/E]放棄[Am]我\r\n真誠[Dm]愛我   接納[G]我\r\n[region 2]\r\nThank you for holding my hand\r\nHighs and lows, you walk with me\r\nYou never gave up\r\nYou accepted me with love\r\n</1>\r\n<2>\r\n一起[C]做夢   一起[C7]笑\r\n一起[F]敬拜和禱[F#dim]告\r\n一起[C/G]慶賀每[G]個生命的奇[C]蹟[C7]\r\n[region 2]\r\nTogether, we''ll dream and laugh\r\nPray and worship in accord\r\nAll life''s wonders are a joy to share with you\r\n</2>\r\n<3>\r\n好喜歡[F]與你在一[G/F]起\r\n分享[Em]生活   分享[Am]愛   \r\n沒有[Dm]批判和論[G]斷\r\n心完[C]全敞[C7]開\r\n[region 2]\r\nI really love to be with you\r\nSharing life and sharing grace\r\nWe won''t criticize or judge\r\nHearts are open wide\r\n</3>\r\n<4>\r\n好喜歡[F]與你在一[G/F]起\r\n像耶[Em]穌一[E/G#]樣地[Am]愛\r\n你我[Dm]不孤單\r\n這[F/G]裡[G]有[C]愛\r\n[region 2]\r\nI really love to be with you\r\nLoving just as Christ would do\r\nWe are not alone, because we love\r\n</4>",
+        "notes": "Swing style，兩次後請安，請安完昇到Key D，兩次後直接接下一首",
+        "score": "https://file.izanmei.net/store/2025/01/20/678e5d65e3e2a8e6700ec2f5.png",
+        "sequence": "1,2,3,4",
+        "style": {
+            "align": "",
+            "background": "../static/presentation/bg/WGSN-Coloro-Future-Dusk-1.jpg"
+        },
+        "title": "好喜歡與你在一起",
+        "transpose": "0",
+        "type": "song",
+        "video": "https://www.youtube.com/watch?v=mVqSmWIjoZU"
+    },
+    {
+        "alt_sequence": "1,2,3,4",
+        "author": "papachen",
+        "bible": "",
+        "book": "papa&mafille",
+        "ccli": "",
+        "content": [
+            {
+                "name": "1",
+                "origin": "來讚美[G]祂  [G7]同心做伙來吟[C]詩[Cm]<br/>來讚美[G]祂[D/F#]  [Em]無論快樂傷[Am]悲[D7]<br/>來讚美[G]祂  [G7]這是榮耀至[C]聖的日[Cm]子<br/>上帝的[G]子相佮聚[D]集  來讚美[G]祂",
+                "origin_chord": "來讚美<span class=\"chunk\" data-chord=\"G\">祂</span>&nbsp;&nbsp;  <span class=\"chunk\" data-chord=\"G7\">同心做伙來吟</span><span class=\"chunk\" data-chord=\"C\">詩</span>&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"Cm\"></span>&nbsp;&nbsp;&nbsp;&nbsp;<br/>來讚美<span class=\"chunk\" data-chord=\"G\">祂</span>&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"D/F#\"></span>&nbsp;&nbsp;&nbsp;&nbsp;  <span class=\"chunk\" data-chord=\"Em\">無論快樂傷</span><span class=\"chunk\" data-chord=\"Am\">悲</span>&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"D7\"></span>&nbsp;&nbsp;&nbsp;&nbsp;<br/>來讚美<span class=\"chunk\" data-chord=\"G\">祂</span>&nbsp;&nbsp;  <span class=\"chunk\" data-chord=\"G7\">這是榮耀至</span><span class=\"chunk\" data-chord=\"C\">聖的日</span><span class=\"chunk\" data-chord=\"Cm\">子</span>&nbsp;&nbsp;<br/>上帝的<span class=\"chunk\" data-chord=\"G\">子相佮聚</span><span class=\"chunk\" data-chord=\"D\">集</span>&nbsp;&nbsp;  來讚美<span class=\"chunk\" data-chord=\"G\">祂</span>&nbsp;&nbsp;",
+                "origin_text": "來讚美祂  同心做伙來吟詩<br/>來讚美祂  無論快樂傷悲<br/>來讚美祂  這是榮耀至聖的日子<br/>上帝的子相佮聚集  來讚美祂",
+                "region": "lâi o-ló i tâng-sim tsuè-hé lâi gîm-si<br/>lâi o-ló i bô-lūn khuài-lo̍k siong-pi<br/>lâi o-ló i tse sī îng-iāu tsì-sìng ê ji̍t-tsí<br/>Siōng-tè ê kiánn sann-kap tsū-tsi̍p lâi o-ló i",
+                "region_text": "lâi o-ló i tâng-sim tsuè-hé lâi gîm-si<br/>lâi o-ló i bô-lūn khuài-lo̍k siong-pi<br/>lâi o-ló i tse sī îng-iāu tsì-sìng ê ji̍t-tsí<br/>Siōng-tè ê kiánn sann-kap tsū-tsi̍p lâi o-ló i"
+            },
+            {
+                "name": "2",
+                "origin": "來讚美[G]祂  [G7]舉起雙手敬[C]拜祂[Cm]<br/>來讚美[G]祂[D/F#]  [Em]無論憂愁歡[Am]喜[D7]<br/>來讚美[G]祂 [G7]這是救主得[C]勝的日[Cm]子<br/>上帝的[G]名咱當高[D]舉  來敬拜[G]祂",
+                "origin_chord": "來讚美<span class=\"chunk\" data-chord=\"G\">祂</span>&nbsp;&nbsp;  <span class=\"chunk\" data-chord=\"G7\">舉起雙手敬</span><span class=\"chunk\" data-chord=\"C\">拜祂</span><span class=\"chunk\" data-chord=\"Cm\"></span>&nbsp;&nbsp;&nbsp;&nbsp;<br/>來讚美<span class=\"chunk\" data-chord=\"G\">祂</span>&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"D/F#\"></span>&nbsp;&nbsp;&nbsp;&nbsp;  <span class=\"chunk\" data-chord=\"Em\">無論憂愁歡</span><span class=\"chunk\" data-chord=\"Am\">喜</span>&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"D7\"></span>&nbsp;&nbsp;&nbsp;&nbsp;<br/>來讚美<span class=\"chunk\" data-chord=\"G\">祂</span>&nbsp;&nbsp; <span class=\"chunk\" data-chord=\"G7\">這是救主得</span><span class=\"chunk\" data-chord=\"C\">勝的日</span><span class=\"chunk\" data-chord=\"Cm\">子</span>&nbsp;&nbsp;<br/>上帝的<span class=\"chunk\" data-chord=\"G\">名咱當高</span><span class=\"chunk\" data-chord=\"D\">舉</span>&nbsp;&nbsp;  來敬拜<span class=\"chunk\" data-chord=\"G\">祂</span>&nbsp;&nbsp;",
+                "origin_text": "來讚美祂  舉起雙手敬拜祂<br/>來讚美祂  無論憂愁歡喜<br/>來讚美祂 這是救主得勝的日子<br/>上帝的名咱當高舉  來敬拜祂",
+                "region": "lâi o-ló i gia̍h-khí siang-tshiú kìng-pài i<br/>lâi o-ló i bô-lūn iu-tshiû huann-hí<br/>lâi o-ló i tse sī kiù-tsú tit-sìng ê ji̍t-tsí<br/>Siōng-tè ê miâ lán tio̍h ko-kú lâi kìng-pài i",
+                "region_text": "lâi o-ló i gia̍h-khí siang-tshiú kìng-pài i<br/>lâi o-ló i bô-lūn iu-tshiû huann-hí<br/>lâi o-ló i tse sī kiù-tsú tit-sìng ê ji̍t-tsí<br/>Siōng-tè ê miâ lán tio̍h ko-kú lâi kìng-pài i"
+            },
+            {
+                "name": "3",
+                "origin": "當你憂愁的[C]時[G/B]<br/>[Am]生命[D7]親像看[G]無[D/F#]光[Em]明<br/>你當大聲[C]開嘴  [Cm]煩惱攏欲消[Dsus]失[D7]<br/>當你讚美的[C]時[G/B]<br/>[Am]親像[D7]樹栽佇[G]溪[D/F#]水[Em]旁<br/>所以咱當[Am]吟詩  [D7]來讚美[G]祂",
+                "origin_chord": "當你憂愁的<span class=\"chunk\" data-chord=\"C\">時</span>&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"G/B\"></span>&nbsp;&nbsp;&nbsp;&nbsp;<br/><span class=\"chunk\" data-chord=\"Am\">生命</span><span class=\"chunk\" data-chord=\"D7\">親像看</span><span class=\"chunk\" data-chord=\"G\">無</span>&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"D/F#\">光</span>&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"Em\">明</span>&nbsp;&nbsp;<br/>你當大聲<span class=\"chunk\" data-chord=\"C\">開嘴</span>  <span class=\"chunk\" data-chord=\"Cm\">煩惱攏欲消</span><span class=\"chunk\" data-chord=\"Dsus\">失</span>&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"D7\"></span>&nbsp;&nbsp;&nbsp;&nbsp;<br/>當你讚美的<span class=\"chunk\" data-chord=\"C\">時</span>&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"G/B\"></span>&nbsp;&nbsp;&nbsp;&nbsp;<br/><span class=\"chunk\" data-chord=\"Am\">親像</span><span class=\"chunk\" data-chord=\"D7\">樹栽佇</span><span class=\"chunk\" data-chord=\"G\">溪</span>&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"D/F#\">水</span>&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"Em\">旁</span>&nbsp;&nbsp;<br/>所以咱當<span class=\"chunk\" data-chord=\"Am\">吟詩</span>  <span class=\"chunk\" data-chord=\"D7\">來讚美</span><span class=\"chunk\" data-chord=\"G\">祂</span>&nbsp;&nbsp;",
+                "origin_text": "當你憂愁的時<br/>生命親像看無光明<br/>你當大聲開嘴  煩惱攏欲消失<br/>當你讚美的時<br/>親像樹栽佇溪水旁<br/>所以咱當吟詩  來讚美祂",
+                "region": "tng lí iu-tshiû ê sî<br/>sìnn-miā tshin-tshiūnn khuànn-bô kong-bîng<br/>lí tio̍h tuā-siann khui-tshuì huân-ló lóng beh siau-sit<br/>tng lí o-ló ê sî tshin-tshiūnn tshiū tsai tī khe-tsuí pinn<br/>sóo-í lán tio̍h gîm-si lâi o-ló i",
+                "region_text": "tng lí iu-tshiû ê sî<br/>sìnn-miā tshin-tshiūnn khuànn-bô kong-bîng<br/>lí tio̍h tuā-siann khui-tshuì huân-ló lóng beh siau-sit<br/>tng lí o-ló ê sî tshin-tshiūnn tshiū tsai tī khe-tsuí pinn<br/>sóo-í lán tio̍h gîm-si lâi o-ló i"
+            },
+            {
+                "name": "4",
+                "origin": "當你軟弱的[C]時[G/B]<br/>[Am]人生[D7]親像找[G]無[D/F#]真[Em]理<br/>你當大聲開[C]嘴  [Cm]對敵欲來離[Dsus]開[D7]<br/>當你讚美的[C]時[G/B]<br/>[Am]親像[D7]樹栽佇[G]溪[D/F#]水[Em]旁<br/>所以咱當吟[Am]詩  [D7]來讚美[G]祂",
+                "origin_chord": "當你軟弱的<span class=\"chunk\" data-chord=\"C\">時</span>&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"G/B\"></span>&nbsp;&nbsp;&nbsp;&nbsp;<br/><span class=\"chunk\" data-chord=\"Am\">人生</span><span class=\"chunk\" data-chord=\"D7\">親像找</span><span class=\"chunk\" data-chord=\"G\">無</span>&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"D/F#\">真</span>&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"Em\">理</span>&nbsp;&nbsp;<br/>你當大聲開<span class=\"chunk\" data-chord=\"C\">嘴</span>&nbsp;&nbsp;  <span class=\"chunk\" data-chord=\"Cm\">對敵欲來離</span><span class=\"chunk\" data-chord=\"Dsus\">開</span>&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"D7\"></span>&nbsp;&nbsp;&nbsp;&nbsp;<br/>當你讚美的<span class=\"chunk\" data-chord=\"C\">時</span>&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"G/B\"></span>&nbsp;&nbsp;&nbsp;&nbsp;<br/><span class=\"chunk\" data-chord=\"Am\">親像</span><span class=\"chunk\" data-chord=\"D7\">樹栽佇</span><span class=\"chunk\" data-chord=\"G\">溪</span>&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"D/F#\">水</span>&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"Em\">旁</span>&nbsp;&nbsp;<br/>所以咱當吟<span class=\"chunk\" data-chord=\"Am\">詩</span>&nbsp;&nbsp;  <span class=\"chunk\" data-chord=\"D7\">來讚美</span><span class=\"chunk\" data-chord=\"G\">祂</span>&nbsp;&nbsp;",
+                "origin_text": "當你軟弱的時<br/>人生親像找無真理<br/>你當大聲開嘴  對敵欲來離開<br/>當你讚美的時<br/>親像樹栽佇溪水旁<br/>所以咱當吟詩  來讚美祂",
+                "region": "tng lí luán-jio̍k ê sî<br/>jîn-sing tshin-tshiūnn tshuē-bô tsin-lí<br/>lí tio̍h tuā-siann khui-tshuì tuì-ti̍k beh lâi lī-khui<br/>tng lí o-ló ê sî tshin-tshiūnn tshiū tsai tī khe-tsuí pinn<br/>sóo-í lán tio̍h gîm-si lâi o-ló i",
+                "region_text": "tng lí luán-jio̍k ê sî<br/>jîn-sing tshin-tshiūnn tshuē-bô tsin-lí<br/>lí tio̍h tuā-siann khui-tshuì tuì-ti̍k beh lâi lī-khui<br/>tng lí o-ló ê sî tshin-tshiūnn tshiū tsai tī khe-tsuí pinn<br/>sóo-í lán tio̍h gîm-si lâi o-ló i"
+            }
+        ],
+        "copyright": "papa&mafille",
+        "date": "2025-07-13",
+        "id": 61,
+        "key": "G",
+        "lang": "zh-TW",
+        "lang_2": "zh-pingyin",
+        "lyricist": "papachen",
+        "lyrics_raw": "<1>\r\n來讚美[G]祂  [G7]同心做伙來吟[C]詩[Cm]\r\n來讚美[G]祂[D/F#]  [Em]無論快樂傷[Am]悲[D7]\r\n來讚美[G]祂  [G7]這是榮耀至[C]聖的日[Cm]子\r\n上帝的[G]子相佮聚[D]集  來讚美[G]祂\r\n[region 2]\r\nlâi o-ló i tâng-sim tsuè-hé lâi gîm-si\r\nlâi o-ló i bô-lūn khuài-lo̍k siong-pi\r\nlâi o-ló i tse sī îng-iāu tsì-sìng ê ji̍t-tsí\r\nSiōng-tè ê kiánn sann-kap tsū-tsi̍p lâi o-ló i\r\n</1>\r\n<2>\r\n來讚美[G]祂  [G7]舉起雙手敬[C]拜祂[Cm]\r\n來讚美[G]祂[D/F#]  [Em]無論憂愁歡[Am]喜[D7]\r\n來讚美[G]祂 [G7]這是救主得[C]勝的日[Cm]子\r\n上帝的[G]名咱當高[D]舉  來敬拜[G]祂\r\n[region 2]\r\nlâi o-ló i gia̍h-khí siang-tshiú kìng-pài i\r\nlâi o-ló i bô-lūn iu-tshiû huann-hí\r\nlâi o-ló i tse sī kiù-tsú tit-sìng ê ji̍t-tsí\r\nSiōng-tè ê miâ lán tio̍h ko-kú lâi kìng-pài i\r\n</2>\r\n<3>\r\n當你憂愁的[C]時[G/B]\r\n[Am]生命[D7]親像看[G]無[D/F#]光[Em]明\r\n你當大聲[C]開嘴  [Cm]煩惱攏欲消[Dsus]失[D7]\r\n當你讚美的[C]時[G/B]\r\n[Am]親像[D7]樹栽佇[G]溪[D/F#]水[Em]旁\r\n所以咱當[Am]吟詩  [D7]來讚美[G]祂\r\n[region 2]\r\ntng lí iu-tshiû ê sî\r\nsìnn-miā tshin-tshiūnn khuànn-bô kong-bîng\r\nlí tio̍h tuā-siann khui-tshuì huân-ló lóng beh siau-sit\r\ntng lí o-ló ê sî tshin-tshiūnn tshiū tsai tī khe-tsuí pinn\r\nsóo-í lán tio̍h gîm-si lâi o-ló i\r\n</3>\r\n<4>\r\n當你軟弱的[C]時[G/B]\r\n[Am]人生[D7]親像找[G]無[D/F#]真[Em]理\r\n你當大聲開[C]嘴  [Cm]對敵欲來離[Dsus]開[D7]\r\n當你讚美的[C]時[G/B]\r\n[Am]親像[D7]樹栽佇[G]溪[D/F#]水[Em]旁\r\n所以咱當吟[Am]詩  [D7]來讚美[G]祂\r\n[region 2]\r\ntng lí luán-jio̍k ê sî\r\njîn-sing tshin-tshiūnn tshuē-bô tsin-lí\r\nlí tio̍h tuā-siann khui-tshuì tuì-ti̍k beh lâi lī-khui\r\ntng lí o-ló ê sî tshin-tshiūnn tshiū tsai tī khe-tsuí pinn\r\nsóo-í lán tio̍h gîm-si lâi o-ló i\r\n</4>",
+        "notes": "intermission, E. Guitar solo while reading the bible verse. Complete Finish in G",
+        "score": "https://musescore.com/user/40499541/scores/24194443/embed",
+        "sequence": "1,2,3,4",
+        "style": {
+            "align": "",
+            "background": "../static/presentation/bg/WGSN-Coloro-Future-Dusk-1.jpg"
+        },
+        "title": "來讚美祂",
+        "transpose": "0",
+        "type": "song",
+        "video": ""
+    },
+    {
+        "alt_sequence": "",
+        "author": "",
+        "style": {
+            "align": "",
+            "background": "../static/presentation/bg/WGSN-Coloro-Future-Dusk-1.jpg"
+        },
+        "bible": "",
+        "book": "",
+        "ccli": "",
+        "content": {
+            "origin_text": "<div>道成了肉身，住在我們中間，充充滿滿地有恩典有真理。</div><div>凡接待他的，就是信他名的人，他就賜他們權柄作神的兒女。</div><div>約翰福音 1:12,14</div><div>各人不要單顧自己的事，也要顧別人的事。 你們當以基督耶穌的心為心</div><div>腓立比書 2:4-5</div>",
+            "region_text": "<div>The Word became flesh and dwelt among us, and we have seen his glory, glory as of the only Son from the Father, full of grace and truth.</div><div>To all who did receive him, who believed in his name, he gave the right to become children of God.</div><div>John 1:12, 14 ESV</div><div><br></div><div>Let each of you look not only to his own interests, but also to the interests of others. Have this mind among yourselves, which is yours in Christ Jesus.</div><div>Philippians 2:4-5 ESV</div>"
+        },
+        "copyright": "",
+        "date": "",
+        "id": 115,
+        "key": "",
+        "lang": "",
+        "lang_2": "",
+        "lyricist": "",
+        "lyrics_raw": "",
+        "notes": "主呀，謝謝你賜給我們成為上帝兒女的名份，藉這你的寶血，也讓我們這群你的兒女，能夠成為教會，彼此學習相愛。我們在此向你認罪，因為我們常常忽視了這樣的名份，因為我們只顧自己的事，自己的感受，自己的想法，自己的神學觀。幫助我，更多的禱告，幫助我，更深的依靠。賜給我一顆如耶穌基督謙卑的心，能仔細查驗你的心意，能細心坅聽弟兄姊妹的需要。主呀，求你光照我們，讓我有一顆敬畏你的心，這是我們的禱告",
+        "score": "",
+        "sequence": "",
+        "title": "經文",
+        "transpose": "0",
+        "type": "info",
+        "version": "",
+        "video": ""
+    },
+    {
+        "alt_sequence": "1,1,c,c",
+        "author": "張靜雅",
+        "bible": "",
+        "book": "611 敬拜詩歌創作專輯1",
+        "ccli": "",
+        "content": [
+            {
+                "name": "1",
+                "origin": "求[D]你給我一顆[Bm]謙卑的心<br/>給[G]我一[D/F#]個受[Em]教的[A]靈<br/>好讓[G]我能走在[D]你的旨意[Bm]裡<br/>如[Em]同耶[E7/Ab]穌的生[A7]命",
+                "origin_chord": "求<span class=\"chunk\" data-chord=\"D\">你給我一顆</span><span class=\"chunk\" data-chord=\"Bm\">謙卑的心</span><br/>給<span class=\"chunk\" data-chord=\"G\">我一</span><span class=\"chunk\" data-chord=\"D/F#\">個受</span><span class=\"chunk\" data-chord=\"Em\">教的</span><span class=\"chunk\" data-chord=\"A\">靈</span>&nbsp;&nbsp;<br/>好讓<span class=\"chunk\" data-chord=\"G\">我能走在</span><span class=\"chunk\" data-chord=\"D\">你的旨意</span><span class=\"chunk\" data-chord=\"Bm\">裡</span>&nbsp;&nbsp;<br/>如<span class=\"chunk\" data-chord=\"Em\">同耶</span><span class=\"chunk\" data-chord=\"E7/Ab\">穌的生</span><span class=\"chunk\" data-chord=\"A7\">命</span>&nbsp;&nbsp;",
+                "origin_text": "求你給我一顆謙卑的心<br/>給我一個受教的靈<br/>好讓我能走在你的旨意裡<br/>如同耶穌的生命",
+                "region": "Lord I desire to be humble like You<br/>Give me a teachable spirit<br/>May Your way be done fullfilled in my life<br/>Just a the life of Jesus",
+                "region_text": "Lord I desire to be humble like You<br/>Give me a teachable spirit<br/>May Your way be done fullfilled in my life<br/>Just a the life of Jesus"
+            },
+            {
+                "name": "1",
+                "origin": "求[D]你給我一顆[Bm]謙卑的心<br/>給[G]我一[D/F#]個受[Em]教的[A]靈<br/>好讓[G]我能走在[D]你的旨意[Bm]裡<br/>如[Em]同耶[E7/Ab]穌的生[A7]命",
+                "origin_chord": "求<span class=\"chunk\" data-chord=\"D\">你給我一顆</span><span class=\"chunk\" data-chord=\"Bm\">謙卑的心</span><br/>給<span class=\"chunk\" data-chord=\"G\">我一</span><span class=\"chunk\" data-chord=\"D/F#\">個受</span><span class=\"chunk\" data-chord=\"Em\">教的</span><span class=\"chunk\" data-chord=\"A\">靈</span>&nbsp;&nbsp;<br/>好讓<span class=\"chunk\" data-chord=\"G\">我能走在</span><span class=\"chunk\" data-chord=\"D\">你的旨意</span><span class=\"chunk\" data-chord=\"Bm\">裡</span>&nbsp;&nbsp;<br/>如<span class=\"chunk\" data-chord=\"Em\">同耶</span><span class=\"chunk\" data-chord=\"E7/Ab\">穌的生</span><span class=\"chunk\" data-chord=\"A7\">命</span>&nbsp;&nbsp;",
+                "origin_text": "求你給我一顆謙卑的心<br/>給我一個受教的靈<br/>好讓我能走在你的旨意裡<br/>如同耶穌的生命",
+                "region": "Lord I desire to be humble like You<br/>Give me a teachable spirit<br/>May Your way be done fullfilled in my life<br/>Just a the life of Jesus",
+                "region_text": "Lord I desire to be humble like You<br/>Give me a teachable spirit<br/>May Your way be done fullfilled in my life<br/>Just a the life of Jesus"
+            },
+            {
+                "name": "c",
+                "origin": "幫助[D]我更多[Bm]的禱告<br/>幫助[G]我[D/F#]更深[Em]的倚[A7]靠<br/>單單[G]相信你  深深[D]敬畏[Bm]你<br/>一[Em]生要[A]跟隨[D]你",
+                "origin_chord": "幫助<span class=\"chunk\" data-chord=\"D\">我更多</span><span class=\"chunk\" data-chord=\"Bm\">的禱告</span><br/>幫助<span class=\"chunk\" data-chord=\"G\">我</span>&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"D/F#\">更深</span><span class=\"chunk\" data-chord=\"Em\">的倚</span><span class=\"chunk\" data-chord=\"A7\">靠</span>&nbsp;&nbsp;<br/>單單<span class=\"chunk\" data-chord=\"G\">相信你</span>  深深<span class=\"chunk\" data-chord=\"D\">敬畏</span><span class=\"chunk\" data-chord=\"Bm\">你</span>&nbsp;&nbsp;<br/>一<span class=\"chunk\" data-chord=\"Em\">生要</span><span class=\"chunk\" data-chord=\"A\">跟隨</span><span class=\"chunk\" data-chord=\"D\">你</span>&nbsp;&nbsp;",
+                "origin_text": "幫助我更多的禱告<br/>幫助我更深的倚靠<br/>單單相信你  深深敬畏你<br/>一生要跟隨你",
+                "region": "Help me Lord, pray unceasingly<br/>Help me Lord, put my trust in You<br/>I will trust You alone<br/>I will always honor You<br/>My life is in Your hand",
+                "region_text": "Help me Lord, pray unceasingly<br/>Help me Lord, put my trust in You<br/>I will trust You alone<br/>I will always honor You<br/>My life is in Your hand"
+            },
+            {
+                "name": "c",
+                "origin": "幫助[D]我更多[Bm]的禱告<br/>幫助[G]我[D/F#]更深[Em]的倚[A7]靠<br/>單單[G]相信你  深深[D]敬畏[Bm]你<br/>一[Em]生要[A]跟隨[D]你",
+                "origin_chord": "幫助<span class=\"chunk\" data-chord=\"D\">我更多</span><span class=\"chunk\" data-chord=\"Bm\">的禱告</span><br/>幫助<span class=\"chunk\" data-chord=\"G\">我</span>&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"D/F#\">更深</span><span class=\"chunk\" data-chord=\"Em\">的倚</span><span class=\"chunk\" data-chord=\"A7\">靠</span>&nbsp;&nbsp;<br/>單單<span class=\"chunk\" data-chord=\"G\">相信你</span>  深深<span class=\"chunk\" data-chord=\"D\">敬畏</span><span class=\"chunk\" data-chord=\"Bm\">你</span>&nbsp;&nbsp;<br/>一<span class=\"chunk\" data-chord=\"Em\">生要</span><span class=\"chunk\" data-chord=\"A\">跟隨</span><span class=\"chunk\" data-chord=\"D\">你</span>&nbsp;&nbsp;",
+                "origin_text": "幫助我更多的禱告<br/>幫助我更深的倚靠<br/>單單相信你  深深敬畏你<br/>一生要跟隨你",
+                "region": "Help me Lord, pray unceasingly<br/>Help me Lord, put my trust in You<br/>I will trust You alone<br/>I will always honor You<br/>My life is in Your hand",
+                "region_text": "Help me Lord, pray unceasingly<br/>Help me Lord, put my trust in You<br/>I will trust You alone<br/>I will always honor You<br/>My life is in Your hand"
+            }
+        ],
+        "copyright": "611靈糧堂",
+        "date": "2025-07-13",
+        "id": 18,
+        "key": "D",
+        "lang": "zh",
+        "lang_2": "en",
+        "lyricist": "張靜雅",
+        "lyrics_raw": "<1>\r\n求[D]你給我一顆[Bm]謙卑的心\r\n給[G]我一[D/F#]個受[Em]教的[A]靈\r\n好讓[G]我能走在[D]你的旨意[Bm]裡\r\n如[Em]同耶[E7/Ab]穌的生[A7]命\r\n[region 2]\r\nLord I desire to be humble like You\r\nGive me a teachable spirit\r\nMay Your way be done fullfilled in my life\r\nJust a the life of Jesus\r\n</1>\r\n<chorus>\r\n幫助[D]我更多[Bm]的禱告\r\n幫助[G]我[D/F#]更深[Em]的倚[A7]靠\r\n單單[G]相信你  深深[D]敬畏[Bm]你\r\n一[Em]生要[A]跟隨[D]你\r\n[region 2]\r\nHelp me Lord, pray unceasingly\r\nHelp me Lord, put my trust in You\r\nI will trust You alone\r\nI will always honor You\r\nMy life is in Your hand\r\n</chorus>",
+        "notes": "Start with prayer,  piano comes in with simple arpeggio",
+        "score": "https://drive.google.com/file/d/1n2k6x2Ld7JL8VsHbISb77GJWNe4cTBc4/view?usp=drive_link",
+        "sequence": "1,1,c,c",
+        "style": {
+            "align": "",
+            "background": "../static/presentation/bg/WGSN-Coloro-Future-Dusk-1.jpg"
+        },
+        "title": "一顆謙卑的心",
+        "transpose": "0",
+        "type": "song",
+        "video": "https://www.youtube.com/watch?v=1Ll1NoVu9A4"
+    },
+{
+   "alt_sequence":"",
+   "author":"",
+   "style": {
+       "align": "",
+       "background": "../static/presentation/bg/WGSN-Coloro-Future-Dusk-1.jpg"
+   },
+   "bible":"",
+   "book":"",
+   "ccli":"",
+   "content":{
+      "origin_text":"<p><i>願上帝賜福您</i></p>",
+      "region_text":"<p><i>May God bless you</i></p>"
+   },
+   "copyright":"",
+   "date":"2025-07-06",
+   "id":115,
+   "key":"",
+   "lang":"",
+   "lang_2":"",
+   "lyricist":"",
+   "lyrics_raw":"",
+   "notes":"祝禱",
+   "score":"",
+   "sequence":"",
+   "title":"祝禱 BENEDICTION",
+   "transpose":"0",
+   "type":"info",
+   "version":"",
+   "video":""
+}
+]
