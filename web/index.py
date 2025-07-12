@@ -21,9 +21,10 @@ client = {'admin': 1, 'lead': 1, 'musician': 10, 'view': 10}
 socketio = SocketIO(app)
 
 @socketio.on('reload')
-def reload_json():
+def reload_json(id):
 	print('Reloading json data')
-	emit('reload', slides_data, broadcast=True)
+	if __get_slide_json(id):
+		emit('reload', slides_data, broadcast=True)
 
 @socketio.on('connect')
 def handle_connect():
@@ -81,22 +82,10 @@ def sildes_admin():
 	global client
 	id = request.args.get('id', None)
 	if id:
-		headers = {'Content-Type': 'application/json; charset=utf-8'}
-		response = requests.get("http://localhost/API/worship/{}/json".format(id), headers=headers)
-		if response.status_code == 200:
-			slides = response.json()
-		#slides = Tools.get_worship_json(id)
-		if slides is None:
-			return "Worship slides not found!!", 400
-		global slides_data
-		slides_data['id'] = id
-		slides_data['data'] = slides
-		slides_data['pos'] = [0, 0]
-		if slides[0]['type'] == 'song':
-			slides_data['key'] = slides[0]['transpose'][0]
-		slides_data['msg'] = ''
-		slides_data['dynamic'] = ''
-		return render_template('slides_admin.html', presentation=slides_data)
+		slides = __get_slide_json(id)
+		if slides:
+			return render_template('slides_admin.html', presentation=slides_data)
+		return "Worship slides not found!!", 400
 	else:
 		files = Tools.list_worship_file()
 		return render_template('slides_admin.html', files=files)
@@ -208,6 +197,22 @@ def playground(name):
 	:param name:  name
 	'''
 	return render_template(name+'.html')
+
+def __get_slide_json(id):
+	headers = {'Content-Type': 'application/json; charset=utf-8'}
+	response = requests.get("http://localhost/API/worship/{}/json".format(id), headers=headers)
+	print(response)
+	if response.status_code == 200:
+		slides = response.json()
+		global slides_data
+		slides_data['id'] = id
+		slides_data['data'] = slides
+		slides_data['pos'] = [0, 0]
+		if slides[0]['type'] == 'song':
+			slides_data['key'] = slides[0]['transpose'][0]
+		slides_data['msg'] = ''
+		slides_data['dynamic'] = ''
+		return True
 
 if __name__ == '__main__':
 	app.run(host="0.0.0.0", port=80, debug=True)

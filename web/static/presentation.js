@@ -17,6 +17,7 @@
     let mode = 'view';
     let touchableElement;
     let w_id;
+    let adding_slide = 0;
 
     // Socket Server url
     let socket_url = window.location.hostname;
@@ -258,7 +259,7 @@
             params div: target div to load presentation
         */
         if (!slides) {  // If no slides data, connect server to reload
-            socket.emit('reload');
+            socket.emit('reload', w_id);
         }
 
         if (msg) {
@@ -357,7 +358,6 @@
         if (data.style.background) {
             if (mode != 'musician') { // Musician mode doesn't need background
                 div.css('background-image', 'url("' + data.style.background + '")');
-                console.log(div.css('background-image'))
                 if(data.type == 'image') {
                     div.css('background-size', 'contain');
                 }
@@ -379,7 +379,7 @@
             dataType: 'json',
             complete: function(response) {
                 if(response.status==200) {
-                    socket.emit('reload');
+                    socket.emit('reload', w_id);
                 }
             }
         });
@@ -470,7 +470,7 @@
     $(document).on('keyup',function(e) {
 
         // If the keyup is inside content box, ignore them
-        if (Object.keys(div_content).length > 0) {
+        if (Object.keys(div_content).length > 0 || adding_slide == 1) {
             return false;
         }
 

@@ -33,7 +33,7 @@
             //display: none;
         }
 
-        i:hover {
+        .material-icons:hover {
             cursor: pointer;
             color: #fff;
             background-color: #000;
@@ -69,7 +69,7 @@
     <div id="menu">
         <div id="control_panel"><div id="edit_btn"><i class="material-icons small disabled" name="one" title="Apply">&#xE876;</i><i class="material-icons small disabled" name="all" title="Apply All">&#xE877;</i><i class="material-icons small disabled" name="cancel" title="Cancel">&#xE5C9;</i></div>
             <br/><textarea id="content" rows="3" cols="40"></textarea>&nbsp;&nbsp;<i class="material-icons small" name="0" title="Send a message to view">&#xE163;</i><i class="material-icons small" name="-1" title="Clear the message">&#xE14C;</i>
-            <br/><i class="material-icons small" name="1" title="Add a slide">&#xE89C;</i><i class="material-icons small" name="2" title="Add a sermon link">&#xE250;</i><i class="material-icons small" name="3" title="Add Background">&#xE3F4;</i><!--<i class="material-icons small" name="left" title="Align Left">&#xE236;</i><i class="material-icons small" name="center" title="Align Center">&#xE234;</i><i class="material-icons small" name="right" title="Align Right">&#xE237;</i>-->
+            <br/><i class="material-icons small" name="delete" title="Delete current Slide">&#xE92B;</i><i class="material-icons small" name="1" title="Add a Slide">&#xE89C;</i><i class="material-icons small" name="2" title="Add a sermon link">&#xE250;</i><i class="material-icons small" name="3" title="Add Background">&#xE3F4;</i><!--<i class="material-icons small" name="left" title="Align Left">&#xE236;</i><i class="material-icons small" name="center" title="Align Center">&#xE234;</i><i class="material-icons small" name="right" title="Align Right">&#xE237;</i>-->
         </div>
         <hr/>
         <div id="image_icon"></div>
@@ -96,6 +96,7 @@
             console.log('Admin reload json data');
             slides = presentation['data'];
             w_id = presentation['id'];
+            adding_slide = 0;
             load(preview);
             //pos = presentation['pos'][0];
             //order = presentation['pos'][1];
@@ -138,7 +139,19 @@
             }
         }
 
+        function delete_slide() {
+            let text = 'Are you sure you want to delete current slide?';
+            if (confirm(text) == true) {
+                slides.splice(pos, 1);
+                update_json();
+            }
+        }
+
         function add_slide(num) {
+            adding_slide = 1;
+            $('#edit_btn').css('left', $('#preview').width()-90);
+            $('#edit_btn').show();
+
             if (num == 1) { // For adding sermon slide
                 $("#preview").find('.content').html('<iframe id="sermon_frame" frameborder="0" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe><br/><textarea row="5" cols="60" id="google_url"></textarea><button id="sermon_add_btn">OK</button>');
                 $("#google_url").change(function() {
@@ -234,7 +247,12 @@
         });
 
         function cancel() {
-            $('#preview').css('background-image', 'url(' + slides[pos]['style']['background'] + ')');
+            if (adding_slide == 1) {
+                update_json();
+            }
+            else {
+                $('#preview').css('background-image', 'url(' + slides[pos]['style']['background'] + ')');
+            }
             $('#edit_btn').hide();
         }
 
@@ -252,8 +270,15 @@
             else if (a_type == 'info') {
                 origin = $('#info_origin').html();
                 region = $('#info_region').html();
-                info = {"alt_sequence": "", "author": "", "style": {"align": "", "background": ""}, "bible": "", "book": "", "ccli": "", "content": {"origin_text": origin, "region_text": region}, "copyright": "", "date": "", "id": 115, "key": "", "lang": "", "lang_2": "", "lyricist": "", "lyrics_raw": "", "notes": "歡迎報告", "score": "", "sequence": "", "title": "歡迎報告", "transpose": "0", "type": "info", "version": "", "video": ""};
-                slides.splice(pos+1, 0, info);
+                if ((origin == '' || origin == origin_text) && (region == '' || region == region_text)) {
+                    alert("No information is entered!!");
+                    return false;
+                }
+                else {
+                    info = {"alt_sequence": "", "author": "", "style": {"align": "", "background": ""}, "bible": "", "book": "", "ccli": "", "content": {"origin_text": origin, "region_text": region}, "copyright": "", "date": "", "id": 115, "key": "", "lang": "", "lang_2": "", "lyricist": "", "lyrics_raw": "", "notes": "歡迎報告", "score": "", "sequence": "", "title": "歡迎報告", "transpose": "0", "type": "info", "version": "", "video": ""};
+                    slides.splice(pos+1, 0, info);
+                    $('#edit_btn').hide();
+                }
             }
             a_type = '';
             update_json();
@@ -293,6 +318,9 @@
                     case 'cancel':
                         cancel();
                         break;
+                    case 'delete':
+                        delete_slide();
+                        break
                 }
             }
         });
