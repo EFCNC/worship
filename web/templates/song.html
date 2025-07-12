@@ -258,8 +258,6 @@ li {
                 complete: function(response) {
             	    if(response.status==200) {
             	        alert("Worship Arrangement Saved!!");
-            	        window.location.href = 'API/download?file=' + response.responseText;
-            	        //location.reload();
     	            }
         	        else {
         	            alert(response);

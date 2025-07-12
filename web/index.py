@@ -37,9 +37,9 @@ def handle_disconnect(data):
 def handle_control(data):
 	print('Received message:', data)
 	global slides_data
-	if data['type'] == 'pos':
+	if data['type'] == 'pos': # When data is about position change, empty dynamic
 		slides_data['dynamic'] = ''
-		if slides_data['pos'][0] != data['value'][0]:
+		if slides_data['pos'][0] != data['value'][0]: # When pos is different (new slide), change key to 0
 			slides_data['key'] = 0
 	slides_data[data['type']] = data['value']
 	emit('response', slides_data, broadcast=True)
@@ -80,7 +80,6 @@ def worship_notes(id):
 def sildes_admin():
 	global client
 	id = request.args.get('id', None)
-	bg = request.args.get('bg', None)
 	if id:
 		headers = {'Content-Type': 'application/json; charset=utf-8'}
 		response = requests.get("http://localhost/API/worship/{}/json".format(id), headers=headers)
@@ -89,16 +88,14 @@ def sildes_admin():
 		#slides = Tools.get_worship_json(id)
 		if slides is None:
 			return "Worship slides not found!!", 400
-		bg_files = []
-		if bg:
-			bg_files = Tools.get_background_files()
 		global slides_data
 		slides_data['id'] = id
 		slides_data['data'] = slides
 		slides_data['pos'] = [0, 0]
+		if slides[0]['type'] == 'song':
+			slides_data['key'] = slides[0]['transpose'][0]
 		slides_data['msg'] = ''
 		slides_data['dynamic'] = ''
-		slides_data['background'] = bg_files
 		return render_template('slides_admin.html', presentation=slides_data)
 	else:
 		files = Tools.list_worship_file()

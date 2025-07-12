@@ -78,7 +78,7 @@
                 continue;
             }
             key = keys.indexOf(init)+diff;
-            html += '<button name="transpose" title="Prepare to change Key to ' + keys[key] + '" transpose="' + diff + '">Change Key to ' + keys[key] + '</button>';
+            html += '<button name="transpose" title="Prepare to change to Key of ' + keys[key] + '" transpose="' + diff + '">Change Key to ' + keys[key] + '</button>';
         }
         return html;
     }
@@ -222,19 +222,11 @@
     function show_info(content, align) {
         text = content.origin_text;
         text = text.replaceAll('\n', '<br/>');
-        len = text.length;
-        if (mode=='admin' || mode=='lead') {
-            len = len * 1.5;
-        }
-        html = '<div class="' + mode + ' info origin">'  + text + '</div>';
+        html = '<div class="' + mode + ' info origin" style="text-align:' + align + '">'  + text + '</div>';
         if (content.region_text) {
             text = content.region_text;
             text = text.replaceAll('\n', '<br/>');
-            len = text.length;
-            if (mode=='admin' || mode=='lead') {
-                len = len * 1.5;
-            }
-        html += '<div class="' + mode + ' info region">'  + text + '</div>';
+            html += '<div class="' + mode + ' info region" style="text-align:' + align + '">'  + text + '</div>';
         }
         return html;
     }
@@ -293,8 +285,7 @@
         slide.setAttribute('class', 'content');
         if (data.type == 'song') {
             l = data.content[order];
-            transpose = 'transpose' in data? parseInt(data.transpose): 0;
-            reversed = data.reverse;
+            transpose = key_change;
             if (mode=='musician') {     // musician mode will only show original lyrics with chord
                 chords = l.origin_chord;
                 if (transpose !=0) {
@@ -324,6 +315,7 @@
             else {  // show both original and region content
                 $("#bottom-left").html(data.title + ' (' + data.author + ')');
                 $("#bottom-right").html(data.copyright + ' ' + data.ccli);
+                $("#title").html('');
                 if (l) {
                     slide.innerHTML += show_lyrics(l, data.lang, data.lang_2);
                 }
@@ -331,6 +323,7 @@
         }
         else if (data.type == 'info') {     // If slide type is info, display data.notes. TODO: info slide will be treated the same way song is displayed
             $("#bottom-left").html(data.title);
+            $("#title").html(data.title);
             $("#bottom-right").html(data.book);
             html = show_info(data.content, data.style.align);
             slide.innerHTML += html;
@@ -362,15 +355,13 @@
         fit_div(slide);
 
         if (data.style.background) {
-            div.css('background-image', 'url("' + data.style.background + '")');
-            console.log(div.css('background-image'))
-            if(data.type == 'image') {
-                div.css('background-size', 'contain');
+            if (mode != 'musician') { // Musician mode doesn't need background
+                div.css('background-image', 'url("' + data.style.background + '")');
+                console.log(div.css('background-image'))
+                if(data.type == 'image') {
+                    div.css('background-size', 'contain');
+                }
             }
-        }
-        else if (background.length>0) {
-            i = Math.floor(Math.random() * background.length);
-            div.css('background-image', 'url(' + background[i] + ')');
         }
         else {
             div.css('background-image', '');
@@ -425,16 +416,11 @@
         }
     }
 
-    // contentEditable for origin and region
+    // contentEditable for origin, region, title, and notes
     let div_content = {};
     $(document).on('click', '.admin', function() {
         $(this).attr('contentEditable', 'true');
         div_content[$(this).attr('class')] = $(this).html();
-    });
-
-    $(document).on('change', '#google_url', function() {
-        slides[pos].content = $(this).val();
-        update_json();
     });
 
     $(document).on('focusout', '.admin', function() {
@@ -442,10 +428,15 @@
         current_elm = this;
         if ($(this).attr('class') in div_content) {
             if (temp != div_content[$(this).attr('class')]) {
-                // When notes div is changed
-                if ($(this).attr('class').match('notes')) {
+                 // When notes div is changed
+                 if ($(this).attr('class').match('notes')) {
                     console.log("changed")
                     slides[pos].notes = temp;
+                }
+                // When title div is changed
+                else if ($(this).attr('class').match('title')) {
+                    console.log("changed")
+                    slides[pos].title = temp;
                 }
                 // When info div is changed
                 else if ($(this).attr('class').match('info')) {
