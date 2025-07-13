@@ -367,6 +367,7 @@
             div.css('background-image', '');
         }
         last_order = order;
+        $('.content').hide().fadeIn();
     }
 
     function update_json() {
