@@ -289,15 +289,15 @@
             transpose = key_change;
             if (mode=='musician') {     // musician mode will only show original lyrics with chord
                 chords = l.origin_chord;
-                if (transpose !=0) {
+                if (transpose !=0 && dynamic.indexOf('Prepare to')<0) {
                     chords = chords.replace(/(data-chord=")([^"]+)/g, (match, g1, g2) => {return g1+parse_chord(g2, transpose);});
                 }
-                if (key_change != 0) {
+                /*if (key_change != 0) {
                     if(last_order != order) {
                         $("#top-left").fadeOut();
                         chords = chords.replace(/(data-chord=")([^"]+)/g, (match, g1, g2) => {return g1+parse_chord(g2, key_change);});
                     }
-                }
+                }*/
                 temp = '<div class="song_chord" name="' + l.name + '">' + chords + '</div>';
                 next = order+1;
                 if (data.content[next]) {
