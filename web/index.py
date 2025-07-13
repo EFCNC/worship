@@ -88,7 +88,7 @@ def sildes_admin():
 		return "Worship slides not found!!", 400
 	else:
 		files = Tools.list_worship_file()
-		return render_template('slides_admin.html', files=files)
+		return render_template('slide_list.html', files=files)
 
 @app.route("/slides")
 @app.route("/slides/<mode>")

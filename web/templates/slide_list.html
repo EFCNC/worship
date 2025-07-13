@@ -1,0 +1,20 @@
+{% include 'header.html' %}
+    <script src="../static/presentation.js"></script>
+    <link href="../static/presentation.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<style>
+        html {
+            height: 100%;
+            background-color: #8c92ac;
+        }
+
+        body {
+            overflow: hidden;
+        }
+
+</style>
+<h3>Select a Worship Slides</h3>
+<hr/>
+{% for f in  files %}
+<a href="/slides/admin?id={{ f.id }}">{{ f.filename }}</a><br/>
+{% endfor %}
