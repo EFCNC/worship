@@ -76,27 +76,26 @@ def create_html(id):
     return html_file
 
 def create_json(id, worship=None):
+    root = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'files')
     if not worship:
         worship = Utils.get_worship_songs(id)
-        worship_date = worship[0]["date"]
         if not worship:
             return None
+        worship_date = worship[0]["date"]
+        template_file = os.path.join(root, 'template.json')
+        with open(template_file, "r", encoding="utf-8") as f:
+            template = json.loads(f.read())
+        worship.insert(0, template["welcome"])
+        worship.append(template["benediction"])
+
     else:
         worship_date = Utils.get_worship_date(id)[0]
-
-    root = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'files')
-    template_file = os.path.join(root, 'template.json')
-    with open(template_file, "r", encoding="utf-8") as f:
-        template = json.loads(f.read())
 
     path = os.path.join(root, 'json')
     if not os.path.exists(path):
         os.makedirs(path, exist_ok=True)
 
     json_file = os.path.join(path, '{}_{}.json'.format(worship_date, id))
-    os.chmod(path, stat.S_IWRITE)
-    worship.insert(0, template["welcome"])
-    worship.append(template["benediction"])
     with open(json_file, "w", encoding="utf-8") as f:
         json.dump(worship, f, indent=4, ensure_ascii=False)
 
