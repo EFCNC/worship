@@ -12,7 +12,7 @@ from app import parser as Parser
 import hanzidentifier
 
 path = os.path.dirname(os.path.realpath(__file__))
-with open(os.path.join(path, 'conf.json')) as json_file:
+with open(os.path.join(path, 'conf.json'), encoding="utf8") as json_file:
     conf = json.loads(json.dumps(json.load(json_file)))
 
 search_db = conf["db"]["imported"]
@@ -335,12 +335,12 @@ def get_worship_songs(id):
     result = dB.run_para(sql, id)
     songs = []
 
-    style = {'align': '', 'background': ''}
+    style = {'align': '', 'background': '', 'color': '', 'bgcolor': ''}
     for r in result:
         if r[22] == 'info':
-            songs.append({'type': r[22], 'title': r[19] if r[19] else r[18][0:10], 'author': '', 'lang': '', 'lang_2': '', 'key': '', 'sequence': '', 'bible': '', 'lyricist': '', 'book': '', 'copyright': '', 'ccli': '', 'lyrics_raw': '', 'content': '', 'video': '', 'score': '', 'date': r[14], 'id': r[21], 'transpose': r[16], 'alt_sequence': '', 'notes': r[18] if r[18] else '', 'version': r[20] if r[20] else '', 'style': style})
+            songs.append({'type': r[22], 'title': r[19] if r[19] else r[18][0:10], 'author': '', 'lang': '', 'lang_2': '', 'key': '', 'sequence': '', 'bible': '', 'lyricist': '', 'book': '', 'copyright': '', 'ccli': '', 'lyrics_raw': '', 'content': '', 'video': '', 'score': '', 'date': r[14], 'id': r[21], 'transpose': r[16].split(','), 'alt_sequence': '', 'notes': r[18] if r[18] else '', 'version': r[20] if r[20] else '', 'style': style})
         elif r[22] == 'song':
-            songs.append({'type': r[22], 'title': r[0], 'author': r[1] if r[1] else '', 'lang': r[2] if r[2] else '', 'lang_2': r[3] if r[3] else '', 'key': r[4] if r[4] else '', 'sequence': r[5] if r[5] else '', 'bible': r[6] if r[6] else '', 'lyricist': r[7] if r[7] else '', 'book': r[8] if r[8] else '', 'copyright': r[9] if r[9] else '', 'ccli': r[10] if r[10] else '', 'lyrics_raw': r[11], 'content': Parser.parse_lyrics(r[11], r[17]), 'video': r[12] if r[12] else '', 'score': r[13] if r[13] else '', 'date': r[14], 'id': r[15], 'transpose': r[16] if r[16] else 0, 'alt_sequence': r[17] if r[17] else '', 'notes': r[18] if r[18] else '', 'style': style})
+            songs.append({'type': r[22], 'title': r[0], 'author': r[1] if r[1] else '', 'lang': r[2] if r[2] else '', 'lang_2': r[3] if r[3] else '', 'key': r[4] if r[4] else '', 'sequence': r[5] if r[5] else '', 'bible': r[6] if r[6] else '', 'lyricist': r[7] if r[7] else '', 'book': r[8] if r[8] else '', 'copyright': r[9] if r[9] else '', 'ccli': r[10] if r[10] else '', 'lyrics_raw': r[11], 'content': Parser.parse_lyrics(r[11], r[17]), 'video': r[12] if r[12] else '', 'score': r[13] if r[13] else '', 'date': r[14], 'id': r[15], 'transpose': r[16].split(',') if r[16] else [0], 'alt_sequence': r[17] if r[17] else '', 'notes': r[18] if r[18] else '', 'style': style})
     return songs
 
 def get_availablity():

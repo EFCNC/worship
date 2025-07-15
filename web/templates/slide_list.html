@@ -1,6 +1,4 @@
 {% include 'header.html' %}
-    <script src="../static/presentation.js"></script>
-    <link href="../static/presentation.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 <style>
         html {
@@ -12,9 +10,17 @@
             overflow: hidden;
         }
 
+        .list {
+            padding: 5px;
+        }
+
+        button {
+            padding: 5px;
+        }
+
 </style>
-<h3>Select a Worship Slides</h3>
-<hr/>
-{% for f in  files %}
-<a href="/slides/admin?id={{ f.id }}">{{ f.filename }}</a><br/>
-{% endfor %}
+<div class="list">
+    {% for f in  files %}
+        {{ f.filename }}: <a href="/slides/admin?id={{ f.id }}">Admin</a></a><br/>
+    {% endfor %}
+</div>

@@ -59,6 +59,9 @@
         $("#container").html(load_container());
         preview = $('#preview');
         load(preview);
+        if (mode == 'lead') {
+            $("#preview").css('height', '75vh');
+        }
     }
 
     function show_msg(){

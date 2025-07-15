@@ -13,7 +13,7 @@ app = Flask(__name__)
 # register blueprint of API
 app.register_blueprint(api, url_prefix='/API')
 
-slides_data = {'pos': [0, 0], 'data': [], 'msg': '', 'dynamic': '', 'key': 0, 'background': []}
+slides_data = {'pos': [0, 0], 'data': [], 'msg': '', 'dynamic': '', 'key': 0, 'background': [], 'id': 0}
 client = {'admin': 1, 'lead': 1, 'musician': 10, 'view': 10}
 
 # SocketIO section, for presentation control
@@ -77,8 +77,20 @@ def worship_notes(id):
 	w = Utils.worship_list(id)[0]
 	return render_template('worship_notes.html', songs=songs, id=id, w=w)
 
+@app.route("/slides/<id>/<action>")
+def sildes_admin(id, action):
+	if action == "start":
+		slides = __get_slide_json(id)
+		if slides:
+			return id
+		return "Failed starting slides", 400
+	elif action == "stop":
+		_init_slide()
+		return "Slide stopped", 200
+
+
 @app.route("/slides/admin")
-def sildes_admin():
+def sildes_admin1():
 	global client
 	id = request.args.get('id', None)
 	if id:
@@ -88,7 +100,8 @@ def sildes_admin():
 		return "Worship slides not found!!", 400
 	else:
 		files = Tools.list_worship_file()
-		return render_template('slide_list.html', files=files)
+		id = slides_data["id"]
+		return render_template('slide_list.html', files=files, id=id)
 
 @app.route("/slides")
 @app.route("/slides/<mode>")
@@ -188,7 +201,7 @@ def file_list():
 
 @app.route("/1")
 def t():
-	return render_template('1.html', )
+	return render_template('1.html')
 
 @app.route("/playground/<name>")
 def playground(name):
@@ -198,21 +211,23 @@ def playground(name):
 	'''
 	return render_template(name+'.html')
 
+def _init_slide():
+	global slides_data
+	slides_data = {'pos': [0, 0], 'data': [], 'msg': '', 'dynamic': '', 'key': 0, 'background': [], 'id': 0}
+
 def __get_slide_json(id):
-	headers = {'Content-Type': 'application/json; charset=utf-8'}
-	response = requests.get("http://localhost/API/worship/{}/json".format(id), headers=headers)
-	print(response)
-	if response.status_code == 200:
-		slides = response.json()
-		global slides_data
-		slides_data['id'] = id
-		slides_data['data'] = slides
-		slides_data['pos'] = [0, 0]
-		if slides[0]['type'] == 'song':
-			slides_data['key'] = slides[0]['transpose'][0]
-		slides_data['msg'] = ''
-		slides_data['dynamic'] = ''
-		return True
+	slides = Tools.get_worship_json(id)
+	if not slides:
+		return false
+	global slides_data
+	slides_data['id'] = id
+	slides_data['data'] = slides
+	slides_data['pos'] = [0, 0]
+	if slides[0]['type'] == 'song':
+		slides_data['key'] = slides[0]['transpose'][0]
+	slides_data['msg'] = ''
+	slides_data['dynamic'] = ''
+	return True
 
 if __name__ == '__main__':
 	app.run(host="0.0.0.0", port=80, debug=True)

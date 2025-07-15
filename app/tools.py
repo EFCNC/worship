@@ -53,7 +53,7 @@ def get_worship_json(id):
     return slides
 
 def list_worship_file():
-    path = conf["worship"]["path"]
+    path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'files', 'json')
     files = os.listdir(path)
     return [{'filename': x.split('.')[0].split('_')[0], 'id': x.split('.')[0].split('_')[1]} for x in files if os.path.isfile(os.path.join(path, x))]
 
@@ -77,14 +77,24 @@ def create_html(id):
 def create_json(id, worship=None):
     if not worship:
         worship = Utils.get_worship_songs(id)
+        worship_date = worship[0]["date"]
         if not worship:
             return None
+    else:
+        worship_date = Utils.get_worship_date(id)[0]
 
-    path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'files', 'json')
+    root = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'files')
+    template_file = os.path.join(root, 'template.json')
+    with open(template_file, "r", encoding="utf-8") as f:
+        template = json.loads(f.read())
+
+    path = os.path.join(root, 'json')
     if not os.path.exists(path):
         os.makedirs(path, exist_ok=True)
 
-    json_file = os.path.join(path, '{}_{}.json'.format(worship[0]["date"], id))
+    json_file = os.path.join(path, '{}_{}.json'.format(worship_date, id))
+    worship.insert(0, template["welcome"])
+    worship.append(template["benediction"])
     with open(json_file, "w", encoding="utf-8") as f:
         json.dump(worship, f, indent=4, ensure_ascii=False)
 

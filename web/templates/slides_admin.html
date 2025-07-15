@@ -69,7 +69,7 @@
     <div id="menu">
         <div id="control_panel"><div id="edit_btn"><i class="material-icons small disabled" name="one" title="Apply">&#xE876;</i><i class="material-icons small disabled" name="all" title="Apply All">&#xE877;</i><i class="material-icons small disabled" name="cancel" title="Cancel">&#xE5C9;</i></div>
             <br/><textarea id="content" rows="3" cols="40"></textarea>&nbsp;&nbsp;<i class="material-icons small" name="0" title="Send a message to view">&#xE163;</i><i class="material-icons small" name="-1" title="Clear the message">&#xE14C;</i>
-            <br/><i class="material-icons small" name="delete" title="Delete current Slide">&#xE92B;</i><i class="material-icons small" name="1" title="Add a Slide">&#xE89C;</i><i class="material-icons small" name="2" title="Add a sermon link">&#xE250;</i><i class="material-icons small" name="3" title="Add Background">&#xE3F4;</i><!--<i class="material-icons small" name="left" title="Align Left">&#xE236;</i><i class="material-icons small" name="center" title="Align Center">&#xE234;</i><i class="material-icons small" name="right" title="Align Right">&#xE237;</i>-->
+            <br/><i class="material-icons small" name="delete" title="Delete current Slide">&#xE92B;</i><i class="material-icons small" name="1" title="Add a Slide">&#xE89C;</i><i class="material-icons small" name="2" title="Add a sermon link">&#xE250;</i><i class="material-icons small" name="3" title="Add Background">&#xE3F4;</i><i class="material-icons small" name="4" title="Edit Josn File">&#xE3C9;</i><!--<i class="material-icons small" name="left" title="Align Left">&#xE236;</i><i class="material-icons small" name="center" title="Align Center">&#xE234;</i><i class="material-icons small" name="right" title="Align Right">&#xE237;</i>-->
         </div>
         <hr/>
         <div id="image_icon"></div>
@@ -104,7 +104,9 @@
 
         socket.on('response', function (data) {
             console.log('Server sent: ' + data);
-            slides = data.data;
+            if(slides != data.data) {
+                slides = data.data;
+            }
             pos = data.pos[0];
             order = data.pos[1];
             msg = data.msg;
@@ -203,6 +205,7 @@
         }
 
         $(document).ready(function() {
+            $("#preview").css('height', '85vh');
             load(preview);
         });
 
@@ -308,6 +311,9 @@
                         break;
                     case '3':
                         add_background();
+                        break;
+                    case '4':
+                        window.open('/worship/'+w_id+'?json=true', '_blank');
                         break;
                     case 'one':
                         apply('one');

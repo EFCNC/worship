@@ -12,7 +12,7 @@
     let msg = '';
     let dynamic = '';
     let key_change = 0;
-    let last_order = 0;
+    let last_position = [-1, -1];
     let background = [];
     let mode = 'view';
     let touchableElement;
@@ -204,6 +204,10 @@
         */
 
         div = '';
+        if (!Array.isArray(data)) {
+            $('#preview_div').html(div);
+            return false;
+        }
         for (i in data) {
             if (i == order) {
                 div += '<div class="inner current" id="current_' + i + '"><div>' + data[i].name + '</div>' + data[i].origin_text + '</div>';
@@ -280,6 +284,10 @@
             $("#top-left").fadeOut();
         }
 
+        console.log(last_position == [pos, order]);
+        if (last_position[0] == pos && last_position[1] == order) { // If the change is not about position, then skip loading preview div
+            return;
+        }
         data = slides[pos];
         var slide = document.createElement('div');
         slide.setAttribute('name', pos);
@@ -366,8 +374,8 @@
         else {
             div.css('background-image', '');
         }
-        last_order = order;
-        $('.content').hide().fadeIn();
+        last_position = [pos, order];
+        $('.content').hide().fadeIn('slow');
     }
 
     function update_json() {
