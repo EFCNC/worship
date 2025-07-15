@@ -1,6 +1,7 @@
 from app import utils as Utils
 import re
 import os
+import stat
 from datetime import date, timedelta, datetime
 from zipfile import ZipFile
 import json
@@ -54,7 +55,7 @@ def get_worship_json(id):
 
 def list_worship_file():
     path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'files', 'json')
-    files = os.listdir(path)
+    files = sorted(os.listdir(path))
     return [{'filename': x.split('.')[0].split('_')[0], 'id': x.split('.')[0].split('_')[1]} for x in files if os.path.isfile(os.path.join(path, x))]
 
 def create_html(id):
@@ -93,6 +94,7 @@ def create_json(id, worship=None):
         os.makedirs(path, exist_ok=True)
 
     json_file = os.path.join(path, '{}_{}.json'.format(worship_date, id))
+    os.chmod(path, stat.S_IWRITE)
     worship.insert(0, template["welcome"])
     worship.append(template["benediction"])
     with open(json_file, "w", encoding="utf-8") as f:
