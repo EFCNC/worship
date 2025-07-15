@@ -1,0 +1,38 @@
+{
+   "welcome":{
+      "bible":"",
+      "content":{
+         "origin_text":"<p>主日禮拜即將開始<br/>請安靜預備心<br/><br/>歡迎您參加今日的主日崇拜</p>",
+         "region_text":"<p>Please be prepared as the service is about to start<br/>Welcome to worship with us</p>"
+      },
+      "lang":"",
+      "lang_2":"",
+      "notes":"安靜心前奏",
+      "style":{
+         "align":"center",
+         "background":"",
+         "color":"",
+         "bgcolor":""
+      },
+      "title":"安靜心",
+      "type":"info"
+   },
+   "benediction":{
+      "bible":"",
+      "content":{
+         "origin_text":"<p><i>願上帝賜福您</i></p><p>默禱散會</p>",
+         "region_text":"<p><i>May God bless you</i></p><p><i>Silent Prayer</i></p>"
+      },
+      "lang":"",
+      "lang_2":"",
+      "notes":"<div class=\"admin notes\" contenteditable=\"true\">祝禱</div><div class=\"admin notes\" contenteditable=\"true\">默禱散會</div>",
+      "style":{
+         "align":"center",
+         "background":"",
+         "color":"",
+         "bgcolor":""
+      },
+      "title":"祝禱 BENEDICTION",
+      "type":"info"
+   }
+}
