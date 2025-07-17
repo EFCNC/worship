@@ -115,7 +115,7 @@
     var video = {{ content.video|d([])|safe }};
     var score = {{ content.score|d([])|safe }};
     var abc = {{ content.abc|d([])|safe }};
-    var id = {{ content.id }};
+    var id = {{ content.id|d(-1)|safe }};
     $('input[name="video"]').val(video);
     $('input[name="score"]').val(score);
     $('textarea[name="abc"]').html(abc);

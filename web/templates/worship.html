@@ -91,9 +91,13 @@ border:none;display:inline-block;padding:8px 16px;vertical-align:middle;overflow
         <div class="card-front">
             <h3>{{ w.date }}</h3>
     {% if w.worship %}
-        Sermon: {{ w.worship.sermon_title }}<br/>
-        Speaker: {{ w.worship.speaker }}<br/>
+        <div style="padding:10px;text-align:left;">
+            <b>{{ w.worship.sermon_title }}</b><br/>
+            Speaker: {{ w.worship.speaker }}<br/>
+            Bible: {{ w.worship.bible }}<br/>
+            Notes: {{ w.worship.notes|truncate(100) }}
         </div>
+            </div>
             <div class="card-back" name="{{ w.worship.worship_id }}">
             <b>Worship Team</b><br/>
                 {% for team in w.worship.content %}
@@ -101,7 +105,7 @@ border:none;display:inline-block;padding:8px 16px;vertical-align:middle;overflow
                         {{ team.role }}:&nbsp;{{ team.user_name }}<br/>
                     {% endif %}
                 {% endfor %}
-            <div class="overlay_btns"><button id="song_btn" name="{{ w.worship.worship_id }}">Songs</button>&nbsp;<button id="team_btn" name="{{ w.worship.worship_id }}">Teams</button></div>
+            <div class="overlay_btns"><button id="sermon_btn" name="{{ w.worship.worship_id }}">Edit</button> <button id="song_btn" name="{{ w.worship.worship_id }}">Songs</button>&nbsp;<button id="team_btn" name="{{ w.worship.worship_id }}">Teams</button></div>
         </div>
     {% else %}
             </div>
@@ -113,7 +117,7 @@ border:none;display:inline-block;padding:8px 16px;vertical-align:middle;overflow
 </div>
 {% endfor %}
 </div>
-<div id="roster"></div>
+<div id="popup"></div>
 </body>
 <script>
 let teams = [];
@@ -143,7 +147,7 @@ function pop_role(name) {
 }
 
 function get_roster(id, date) {
-    $("#roster").empty();
+    $("#popup").empty();
     url = API_URL + 'inst_team/'+id;
     $.when( $.ajax( url ) ).then(function( response, textStatus, jqXHR ) {
         if(response) {
@@ -154,7 +158,7 @@ function get_roster(id, date) {
                 p.innerHTML = this.inst_name + ' => ';
                 p.append(team_list);
                 br = document.createElement('br');
-                $("#roster").append(p);
+                $("#popup").append(p);
                 pop_role(this.inst_name);
                 teams.push({'id': this.id, 'user_id': this.user_id});
             });
@@ -166,8 +170,8 @@ function get_roster(id, date) {
             button.setAttribute('title', 'Click to add team member');
             button.innerHTML = ' > ';
             p.append(button);
-            $("#roster").append(p);
-            $("#roster").dialog({
+            $("#popup").append(p);
+            $("#popup").dialog({
                 title: "Assign Worship Team (" + date + ")",
                 width: 'auto',
                 buttons: [
@@ -180,6 +184,55 @@ function get_roster(id, date) {
                         }
                     }
                 ]
+            });
+        }
+    });
+}
+
+function get_sermon(id) {
+    url = API_URL + 'sermon/'+id;
+    $.when( $.ajax( url ) ).then(function( response, textStatus, jqXHR ) {
+        if(response) {
+            var sermon_data = {};
+            $("#popup").empty();
+            html = 'Title: <input type="text" id="title" value="' + response.title + '"></input>&nbsp;Speaker: <input type="text" id="speaker" value="' + response.speaker + '"></input><br/>&nbsp;Bible: <input type="text" id="bible_verse" value="' + response.bible + '"></input><br/>Outline:<textarea rows="3" cols="50" id="outline">' + response.outline + '</textarea><br/>Notes:<textarea rows="3" cols="50" id="notes">' + response.notes + '</textarea>';
+            $("#popup").append(html);
+            $("#popup").dialog({
+                title: "Sermon Information (" + date + ")",
+                width: 'auto',
+                buttons: [
+	                {
+	                    id: "button-add",
+                        text : "OK",
+                        click: function() {
+                            if(!jQuery.isEmptyObject(sermon_data)) {
+                                sermon_data["date"] = date;
+                                $.ajax({
+                                    type: "post",
+                                    url: url,
+	                                data: JSON.stringify(sermon_data),
+                                    contentType: "application/json",
+                                    dataType: 'json',
+                                    complete: function(response) {
+          	                            if(response.status==200) {
+                                            location.reload();
+    	                                }
+                                        else {
+                                            alert(response.responseText);
+		                                }
+                                    }
+                                });
+                            }
+                            $( this ).dialog( "close" );
+                        }
+                    }
+                ]
+            });
+            $('#popup input').change(function() {
+                sermon_data[this.id] = $(this).val();
+            });
+            $('#popup textarea').change(function() {
+                sermon_data[this.id] = $(this).val();
             });
         }
     });
@@ -220,7 +273,6 @@ function setRoleOption(user){
 
 $(document).on('click', '.additional_add_btn', function () {
     parent = $(this).parent()
-    console.log( parent.children('additional_role').val())
     role_id = Number(parent.children('.additional_role').val());
     user_id = Number(parent.children('.additional_member').val());
     data = JSON.stringify({'worship_id': worship_id, 'role_id': role_id, 'user_id': user_id});
@@ -300,7 +352,7 @@ $(document).ready(function () {
         id = $(this).attr('name');
         date = $(this).parent().parent().parent().attr('date')
         if(!id) {
-            $("#roster").html();
+            $("#popup").html();
         }
         else {
             worship_id = Number(id);
@@ -309,6 +361,9 @@ $(document).ready(function () {
             }
             else if (this.id == 'team_btn') {
                 get_roster(id, date);
+            }
+            else if (this.id == 'sermon_btn') {
+                get_sermon(worship_id);
             }
         }
     });

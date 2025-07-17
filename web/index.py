@@ -136,7 +136,7 @@ def get_songs():
 	:return: all song
 	'''
 	songs = Utils.get_songs()
-	return render_template('songs.html', songs=songs)
+	return render_template('song_list.html', songs=songs)
 
 @app.route("/sheet/<id>")
 def get_song_sheet(id):
@@ -158,7 +158,7 @@ def get_song_by_id(id):
 	'''
 
 	if id == '-1':
-		return render_template('song_editor.html', content=[])
+		return render_template('song_editor.html', content={'id':-1})
 	db = request.args.get('db', 'worship.db')
 	lang = request.args.get('lang', None)
 	if db != 'worship.db':

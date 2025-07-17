@@ -99,7 +99,6 @@ def add_song():
     if result:
         return "{} already exist".format(title), 400
     song_id = Utils.add_song(song)
-    #print("song created", song_id)
     if song_id:
         return str(song_id), 200
     return "Unknown Error!!", 500
@@ -124,6 +123,18 @@ def search_song():
 def list_bg():
     bg_files = Tools.get_background_files()
     return bg_files
+
+@api.route("/sermon/<id>", methods=["GET", "POST"])
+def edit_sermon(id):
+    '''
+    :id: worship id
+    '''
+    if request.method == 'POST':
+        sermon_data = request.get_json()
+        Utils.update_sermon(sermon_data)
+        return "good"
+    sermon = Utils.get_worship(id)
+    return sermon
 
 @api.route("/notes", methods=["POST"])
 def edit_notes():

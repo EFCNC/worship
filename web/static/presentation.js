@@ -248,6 +248,7 @@
         container = {
             'view': '<div id="top-left"></div><div id="top-right"></div><div id="preview" class="preview view"></div><div id="bottom-left"></div><div id="bottom-right"></div>',
             'musician': '<div id="top-left"></div><div id="top-right"></div><div id="preview" class="preview view"></div><div id="bottom-left"></div><div id="bottom-right"></div>',
+            'score': '<div id="top-left"></div><div id="top-right"></div><div id="preview" class="preview view"></div><div id="bottom-left"></div><div id="bottom-right"></div>',
             'lead': '<div id="top-right"></div><div class="preview_container"><div id="preview"></div><div id="menu"><div id="dynamic_btn"><br/><button name="dynamic" title="Intro">Intro</button><button name="dynamic" title="Interlude">Interlude</button><button name="dynamic" title="Ending">Ending</button><br/><button name="dynamic" title="Ready tp Build up">Build Up</button><button name="dynamic" title="Slow Down">Slow Down</button><button name="dynamic" title="Speed Up">Speed Up</button><br/><button name="dynamic" title="Acapella">Acapella</button><button name="dynamic" title="Repeat Chorus">Repeat Chorus</button><button name="dynamic" title="Last Sentence">Last Sentence</button><div id="key_change"></div></div><div id="notes"></div></div><div id="preview_div"></div></div>',
             'remote': '<div id=buttons><button id="btn_previous">Up</button><button id="btn_next">Down</button></div>'
         }
@@ -284,7 +285,6 @@
             $("#top-left").fadeOut();
         }
 
-        console.log(last_position == [pos, order]);
         if (last_position[0] == pos && last_position[1] == order) { // If the change is not about position, then skip loading preview div
             return;
         }
@@ -295,17 +295,11 @@
         if (data.type == 'song') {
             l = data.content[order];
             transpose = key_change;
-            if (mode=='musician') {     // musician mode will only show original lyrics with chord
+            if (mode == 'musician' || mode == 'score') {     // musician mode will only show original lyrics with chord
                 chords = l.origin_chord;
                 if (transpose !=0 && dynamic.indexOf('Prepare to')<0) {
                     chords = chords.replace(/(data-chord=")([^"]+)/g, (match, g1, g2) => {return g1+parse_chord(g2, transpose);});
                 }
-                /*if (key_change != 0) {
-                    if(last_order != order) {
-                        $("#top-left").fadeOut();
-                        chords = chords.replace(/(data-chord=")([^"]+)/g, (match, g1, g2) => {return g1+parse_chord(g2, key_change);});
-                    }
-                }*/
                 temp = '<div class="song_chord" name="' + l.name + '">' + chords + '</div>';
                 next = order+1;
                 if (data.content[next]) {
@@ -318,6 +312,16 @@
                         text = text.replace(/(data-chord=")([^"]+)/g, (match, g1, g2) => {return g1+parse_chord(g2, key_change);});
                     }
                     temp += '<div class="song_chord next"' + n.name + '">' + text + '</div>';
+                }
+                if (mode == 'score') {
+                    if(data.score) {
+                        if(['bmp', 'jpg', 'png', 'gif'].some(char => data.score.endsWith(char))) {
+                            temp = '<img src="' + data.score + '" style="max-width: 100%;max-height: 100vh;margin: auto;"/>';
+                        }
+                        else {
+                            temp = '<iframe id="score" src="' + data.score + '" frameborder="0" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true" onload="this.width=screen.width;this.height=screen.height;"></iframe>';
+                        }
+                    }
                 }
                 slide.innerHTML += temp;
             }
@@ -361,10 +365,12 @@
 
         div.empty();
         div.append(slide);
-        fit_div(slide);
+        if (mode != 'score' && mode != 'remote') {
+            fit_div(slide);
+        }
 
         if (data.style.background) {
-            if (mode != 'musician') { // Musician mode doesn't need background
+            if (mode != 'musician' && mode != 'score') { // Musician mode doesn't need background
                 div.css('background-image', 'url("' + data.style.background + '")');
                 if(data.type == 'image') {
                     div.css('background-size', 'contain');

@@ -254,6 +254,7 @@
                 update_json();
             }
             else {
+                socket.emit('reload', w_id);
                 $('#preview').css('background-image', 'url(' + slides[pos]['style']['background'] + ')');
             }
             $('#edit_btn').hide();

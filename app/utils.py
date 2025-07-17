@@ -315,10 +315,28 @@ def edit_songset(id, content):
         print(sql)
         return dB.run(sql)
 
+def update_sermon(data):
+    w_date = data["date"]
+    w_notes = data["notes"] if "notes" in data else None
+    values = []
+    sql = "update sermon set "
+    for key, val in data.items():
+        if key != 'notes' and key != 'date':
+            sql += key + "= ?,"
+            values.append(val)
+    if len(values) > 0:
+        values.append(w_date)
+        sql = sql[:-1] + " where date = ?"
+        dB.run_para(sql, values)
+    if w_notes:
+        sql = "update worship set notes=? where scheduled_date=?"
+        dB.run_para(sql, w_date)
+
 def get_worship(id):
     sql = "select notes, scheduled_date, s.title, s.speaker, s.bible_verse, s.outline from worship w inner join sermon s on w.scheduled_date = s.date where worship_id = ?"
     r = dB.run_para(sql, id)[0]
-    return {'date': r[1], 'title': r[2] if r[2] else '', 'notes': r[0] if r[0] else '', 'speaker': r[3] if r[3] else '', 'verse': r[4] if r[4] else '', 'outline': r[5] if r[5] else ''}
+    print(r)
+    return {'date': r[1], 'title': r[2] if r[2] else '', 'notes': r[0] if r[0] else '', 'speaker': r[3] if r[3] else '', 'bible': r[4] if r[4] else '', 'outline': r[5] if r[5] else ''}
 
 def get_worship_date(id):
     sql = "select scheduled_date from worship where worship_id = ?"

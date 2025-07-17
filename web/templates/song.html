@@ -227,6 +227,12 @@ li {
         }
     });
 
+    // When notes are changed
+    $(document).on('change', 'textarea[name="song_notes"]', function() {
+        index = $(this).attr('index');
+        songs_temp[index].notes = $(this).val();
+    });
+
     // Functions
 
     // Presentation mode

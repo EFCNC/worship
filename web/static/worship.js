@@ -25,11 +25,11 @@ let API_URL = 'API/';
         worship_list.empty();
         var top_ul = document.createElement('ul');
         top_ul.setAttribute('id', 'songs');
+        var i = 0;
         for (data of songs_temp) {
             var list = document.createElement('li');
             list.setAttribute('class', 'ui-state-default');
             list.setAttribute('name', data.id);
-            console.log(data);
             if (data.type == 'song') {
                 //list.innerHTML = '<span class="title" name="' + data.id + '" lang="' + data.lang + '"><b>' + data.title + '</b>&nbsp;' + lang_tag(data.lang) + '&nbsp;' + lang_tag(data.lang_2) + ' Author: ' + data.author + '/' + data.lyricist + '&nbsp;<button class="remove_btn" style="display:none"> - </button></span><br/>Current Key: <select class="key" name="' + data.transpose + '" init="' + data.key + '"><option>' + data.key + '</option></select>&nbsp;Original Key: ' +  data.key + '<p>Notes: <span name="song_notes" contenteditable="true">' + data.notes + '</p><span class="lyrics_section" title="Click to arrange song sequence" name="' + data.id + '">Song Sequence: <span class="sequence" id="song-' +  data.id + '_alt">' + data.sequence + '</span>&nbsp;&nbsp;<span class="edit_btn"><img style="display:none" src="../static/img/edit-button-icon.png" title="edit lyrics" name="' + data.id + '"/></span></span><br/><textarea rows="10" cols="100" class="lyrics_raw" name="lyrics_raw" id="lyrics_raw_' + data.id + '" style="display:none">' + data.lyrics_raw + '</textarea>';
                 html = '<span class="title" name="' + data.id + '" lang="' + data.lang + '"><b>' + data.title + '</b>&nbsp;' + lang_tag(data.lang) + '&nbsp;' + lang_tag(data.lang_2) + ' Author: ' + data.author + '/' + data.lyricist + '&nbsp;<button class="remove_btn" style="display:none"> - </button></span><br/>Current Key: <select class="key" name="' + data.transpose + '" init="' + data.key + '"><option>' + data.key + '</option></select>&nbsp;Original Key: ' +  data.key
@@ -39,7 +39,10 @@ let API_URL = 'API/';
                 if (data.video) {
                     html += '&nbsp;&nbsp;<a href="' + data.video + '" target=new><i class="fa fa-play-circle" style="font-size:24px" title="Youtube Video"></i></a>';
                 }
-                html += '<p>Notes: <span name="song_notes" contenteditable="true">' + data.notes + '</p><span class="lyrics_section" title="Click to arrange song sequence" name="' + data.id + '">Song Sequence: <span class="sequence" id="song-' +  data.id + '_alt">' + data.sequence + '</span></span>';
+                //notes = data.notes?data.notes:'Enter Notes';
+                //html += '<p>Notes: <span name="song_notes" contenteditable="true">' + notes + '</span></p>';
+                html += '<p>Notes: <textarea name="song_notes" index="' + i + '" rols="5" cols="60">' + data.notes + '</textarea></p>';
+                html += '<span class="lyrics_section" title="Click to arrange song sequence" name="' + data.id + '">Song Sequence: <span class="sequence" id="song-' +  data.id + '_alt">' + data.sequence + '</span></span>';
                 list.innerHTML = html;
                 var ul = document.createElement('ul');
                 ul.setAttribute('id', 'sequence_' + data.id)
@@ -58,6 +61,7 @@ let API_URL = 'API/';
                 list.innerHTML = '<span class="infotitle" name="' + data.id + '" bible="' + data.bible + '">' + data.notes + '&nbsp;<button class="remove_btn" style="display:none"> - </button></span>';
             }
             top_ul.append(list)
+            i++;
         }
         worship_list.append(top_ul);
         return;
@@ -139,13 +143,13 @@ let API_URL = 'API/';
     	                id: "button-add",
                         text : dialog_title[num]['text'],
                         click: function() {
+                        console.log(num)
                             if (num ==0) {
                                 click_url = API_URL + 'song/' + id + '/' +  dialog_title[num]['action'];
                                 temp = data_changed(JSON.stringify($("#song_form").serializeArray()));
                                 if (temp) {
-                                    if (submit_song(click_url, temp)) {
-                                        $( this ).dialog( "close" );
-                                    }
+                                    submit_song(click_url, temp);
+                                    $( this ).dialog( "close" );
                                 }
                                 else {
                                     $( this ).dialog( "close" );
@@ -153,9 +157,8 @@ let API_URL = 'API/';
                             }
                             else {
                                 click_url = API_URL + 'song/' +  dialog_title[num]['action'];
-                                if (submit_song(click_url, JSON.stringify($("#song_form").serializeArray()))) {
-                                    $( this ).dialog( "close" );
-                                }
+                                submit_song(click_url, JSON.stringify($("#song_form").serializeArray()));
+                                $( this ).dialog( "close" );
                             }
                         }
                     },
