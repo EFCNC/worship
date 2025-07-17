@@ -1,6 +1,5 @@
 let device = 'desktop';
 let API_URL = 'API/';
-let elem;
 
     if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
         device = 'mobile';
@@ -16,18 +15,6 @@ let elem;
     function exitHandler() {
         if (!document.webkitIsFullScreen && !document.mozFullScreen && !document.msFullscreenElement) {
             //$('#preview').hide();
-        }
-    }
-
-    function go_full_screen() {
-        if (elem.requestFullscreen) {
-            elem.requestFullscreen();
-        }
-        else if (elem.webkitRequestFullscreen) { /* Safari */
-            elem.webkitRequestFullscreen();
-        }
-        else if (elem.msRequestFullscreen) { /* IE11 */
-            elem.msRequestFullscreen();
         }
     }
 
@@ -59,7 +46,6 @@ let elem;
                 ul.setAttribute('class', 'lyrics')
                 ul.setAttribute('style', 'display:none');
                 for(let l of data.content) {
-                console.log(l)
                     var list_1 = document.createElement('li');
                     list_1.setAttribute('class', 'ui-state-default');
                     list_1.setAttribute('id', 'song-' + data.id + '_' + l.name);
@@ -87,6 +73,7 @@ let elem;
             contentType: "application/json",
             dataType: 'json',
             complete: function(response) {
+            console.log(response)
           	    if(response.status==200) {
                     return true;
     	        }
@@ -103,6 +90,34 @@ let elem;
             type: "GET",
             url: url
         });
+    }
+
+    function submit_song(url, data) {
+        $.ajax({
+            type: "post",
+            url: url,
+	        data: data,
+            complete: function(response) {
+                if(response.status==200) {
+                    return true;
+    	        }
+                else {
+                   alert(response.responseText);
+                   return false;
+		        }
+            },
+            contentType: "application/json",
+            dataType: 'json'
+        });
+    }
+
+    function data_changed(map2) {
+        temp = [];
+        for (let i of form_data) {
+            find = map2.find(o=> o.value != i.value && o.name == i.name)
+            if(find) {temp.push(find)}
+        }
+        return temp;
     }
 
     function render_song(id, db, lang, num) {
@@ -126,28 +141,22 @@ let elem;
                         click: function() {
                             if (num ==0) {
                                 click_url = API_URL + 'song/' + id + '/' +  dialog_title[num]['action'];
+                                temp = data_changed(JSON.stringify($("#song_form").serializeArray()));
+                                if (temp) {
+                                    if (submit_song(click_url, temp)) {
+                                        $( this ).dialog( "close" );
+                                    }
+                                }
+                                else {
+                                    $( this ).dialog( "close" );
+                                }
                             }
                             else {
                                 click_url = API_URL + 'song/' +  dialog_title[num]['action'];
+                                if (submit_song(click_url, JSON.stringify($("#song_form").serializeArray()))) {
+                                    $( this ).dialog( "close" );
+                                }
                             }
-                            data = JSON.stringify($("#song_form").serializeArray());
-                            $.ajax({
-                                type: "post",
-                                url: click_url,
-	                            data: data,
-                                complete: function(response) {
-          	                        if(response.status==200) {
-                                        $( "#dialog" ).dialog( "close" );
-                                        return true;
-    	                            }
-                                    else {
-                                    console.log(response)
-                                        alert(response.responseText);
-		                            }
-                                },
-                                contentType: "application/json",
-            			        dataType: 'json'
-                            });
                         }
                     },
 	                {

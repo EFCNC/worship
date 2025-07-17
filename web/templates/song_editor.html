@@ -1,12 +1,19 @@
+<style>
+.sequence, .chord {
+    text-align: center;
+    border: 3px solid #0c0c0c;
+    border-radius: 5px;
+    margin: 2px;
+    padding: 5px;
+}
+.sequence:hover, .chord:hover {
+    cursor: pointer;
+}
+</style>
 <h3>Song Editor</h3>
 <p>
-    If you need to add translation to it, please add the tag '[region 2]' before it under each section.<br/>
-    <b>ex: &lt;chorus&gt;...<br/>
-        [region 2]<br/>
-        Your translation...<br/>
-        &lt;/chorus&gt;</b>>
 </p>
-<form id="content">
+<form id="song_form">
     Title: <input name="title" type="text" value="{{ content.title }}"/>
     Book: <input name="book" type="text" value="{{ content.book }}"/>
     Key: <input name="song_key" type="text" value="{{ content.key }}" style="width: 30px;"/>
@@ -15,13 +22,133 @@
     Author: <input name="author" type="text" value="{{ content.author }}"/>
     Lyricist: <input name="lyricist" type="text" value="{{ content.lyricist }}"/>
     <br/>
-    <p>Lyrics Sequence: <input name="sequence" type="text" value="{{ content.sequence }}"/> (sequence is comma separated without space)<br/>
+    <p>Lyrics Sequence: <span class="sequence" name="verse">Verse</span><span class="sequence" name="chorus">Chorus</span><span class="sequence" name="prechorus">Pre-Chorus</span><span class="sequence" name="bridge">Bridge</span><span class="sequence" name="last">Last Sentence</span><input name="sequence" type="text" value="{{ content.sequence }}"/></p>
+        <p id="chord_tags">Chord: <span class="chord" name="1">I</span><span class="chord" name="2">ii</span><span class="chord" name="3">iii</span><span class="chord" name="4">IV</span><span class="chord" name="5">V</span><span class="chord" name="6">VI</span><span class="chord" name="7">VII</span></p>
         <textarea rows="6" name="content" cols="60">{{ content.lyrics }}</textarea>
-    </p>
+    <hr/>
     Copyright: <input name="copyright" type="text" value="{{ content.copyright }}"/>
     CCLI: <input name="ccli" type="text" value="{{ content.ccli }}"/>
     Bible: <input name="bible_verse" type="text" value="{{ content.bible }}"/><br/>
-    Youtube: <input name="video" type="text" value=""/><button onclick="javascript:search_video('{{ content.title }}, {{ content.book }}'); title="(Search using title/book)">Find</button>
+    Youtube: <input name="video" type="text" value=""/>
     Score: <input name="score" type="text" value=""/>
-    Other: <input name="file" type="text" value="{{ content.file }}"/>
+    <br/>
+    ABC: <textarea name="abc" rows="5" cols="50"></textarea>
 </form>
+<script>
+    function insertChord(num) {
+        var key = $('input[name="song_key"]').val();
+        if(!key) {
+            alert("Please provide the Key of the Song first!");
+            return false;
+        }
+        let sharp = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+        let sharp_keys = ["C", "D", "E", "G", "A", "B"];
+        let flat = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"];
+        let keys = flat;
+        if (sharp_keys.indexOf(key) > 0 || key.includes("#")) {
+            keys = sharp;
+        }
+        var base = keys.indexOf(key);
+        var interval = [2, 2, 1, 2, 2, 2];
+        // Create key set for given key
+        let new_keys = []
+        new_keys.push(keys[base]);
+        for (i of interval) {
+            base += i;
+            console.log(base);
+            if (base > keys.length-1) {
+                base = base-keys.length;
+            }
+            new_keys.push(keys[base]);
+        }
+        if (num==2||num==3||num==6) {
+            return new_keys[num-1] + 'm';
+        }
+        else if (num == 7) {
+            return new_keys[num-1] + 'dim';
+        }
+        else {
+            return new_keys[num-1];
+        }
+    }
+
+    function insert_tag(tag, paired) {
+    // Obtain the object reference for the <textarea>
+    var txtarea = document.getElementsByName("content");
+
+    // Obtain the index of the first selected character
+    var start = txtarea[0].selectionStart;
+
+    // Obtain the index of the last selected character
+    var finish = txtarea[0].selectionEnd;
+
+    // Obtain the selected text
+    var sel = txtarea[0].value.substring(start, finish);
+    if (sel) {
+        if (paired==1) {
+            temp = '<' + tag + '>\n' + sel + '\n</' + tag + '>';
+        }
+        else {
+            temp = '[' + tag + ']' + sel;
+        }
+        txtarea[0].value = txtarea[0].value.replace(sel, temp);
+    }
+    else {
+        temp = txtarea[0].value.substring(0, start);
+        after = txtarea[0].value.substring(start);
+        if (paired == 1) {
+            temp += '<' + tag + '>\n' + sel + '\n</' + tag + '>';
+        }
+        else {
+            temp += '[' + tag + ']';
+        }
+        txtarea[0].value = temp + after;
+    }
+    }
+
+    function get_chord_name(num) {
+        $('#chord_tags span').each(function() {
+            $(this).html(insertChord(parseInt($(this).attr('name'))));
+        });
+    }
+
+    var video = {{ content.video|d([])|safe }};
+    var score = {{ content.score|d([])|safe }};
+    var abc = {{ content.abc|d([])|safe }};
+    var id = {{ content.id }};
+    $('input[name="video"]').val(video);
+    $('input[name="score"]').val(score);
+    $('textarea[name="abc"]').html(abc);
+    $(document).on('click', 'span', function() {
+        if ($(this).attr('class') == 'chord') {
+            chord = insertChord(parseInt($(this).attr('name')));
+            if (chord != false) {
+                insert_tag(chord);
+            }
+        }
+        else if($(this).attr('class') == 'sequence') {
+            if($(this).attr('name') == 'region') {
+                insert_tag('region 2');
+            }
+            else {
+                insert_tag($(this).attr('name'), 1);
+            }
+        }
+    });
+
+    $('input[name="song_key"]').change(function() {
+        key = $(this).val();
+        if(key != '') {
+            get_chord_name();
+        }
+    });
+
+    $(document).ready(function() {
+        form_data = $("#song_form").serializeArray();
+        key = $('input[name="song_key"]').val();
+        if(key != '') {
+            get_chord_name();
+        }
+    });
+
+</script>

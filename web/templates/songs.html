@@ -5,6 +5,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <script src="../static/jquery-3.6.0.min.js"></script>
 <script src="../static/jquery-ui.js"></script>
+<script src="../static/worship.js"></script>
 <link href="../static/datatables.min.css" rel="stylesheet">
 <link href="../static/jquery-ui.css" rel="stylesheet">
 <script src="../static/datatables.min.js"></script>
@@ -292,10 +293,15 @@ span.chunk:before {
   		        {
                     text: 'OK',
                     click: function() {
-                        if ($("#content").text() != '') {
-                            data = JSON.stringify($("#content").serializeArray());
+                        temp = data_changed($("#song_form").serializeArray());
+                        if(temp) {
+                            submit_song('/API/song/' + id + '/edit', JSON.stringify(temp))
+                                $( this ).dialog( "close" );
+                            //}
                         }
-                        $( this ).dialog( "close" );
+                        else {
+                            $( this ).dialog( "close" );
+                        }
                     }
                 }
             ],
