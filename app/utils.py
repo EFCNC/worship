@@ -330,7 +330,7 @@ def update_sermon(data):
         dB.run_para(sql, values)
     if w_notes:
         sql = "update worship set notes=? where scheduled_date=?"
-        dB.run_para(sql, w_date)
+        dB.run_para(sql, [w_notes, w_date])
 
 def get_worship(id):
     sql = "select notes, scheduled_date, s.title, s.speaker, s.bible_verse, s.outline from worship w inner join sermon s on w.scheduled_date = s.date where worship_id = ?"
