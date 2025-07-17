@@ -91,7 +91,6 @@ def add_song():
     '''
     :param song: Form data of song content
     :return: 400 when title already in current dB
-    TODO: return add_song message
     '''
 
     song = request.get_json()
@@ -100,8 +99,10 @@ def add_song():
     if result:
         return "{} already exist".format(title), 400
     song_id = Utils.add_song(song)
-    print(song_id)
-    return song_id, 200
+    #print("song created", song_id)
+    if song_id:
+        return str(song_id), 200
+    return "Unknown Error!!", 500
 
 @api.route("/search/song")
 def search_song():
