@@ -163,7 +163,7 @@ def get_songs():
             elif r[13] == 'abc':
                 temp['abc'] = r[14]
         else:
-            songs.append({'type': 'song', 'title': r[0], 'author': r[1] if r[1] else '', 'lang': r[2] if r[2] else '', 'lang_2': r[3] if r[3] else '', 'key': r[4] if r[4] else '', 'sequence': r[5] if r[5] else '', 'bible': r[6] if r[6] else '', 'lyricist': r[7] if r[7] else '', 'book': r[8] if r[8] else '', 'copyright': r[9] if r[9] else '', 'ccli': r[10] if r[10] else '', 'lyrics_raw': r[11], 'content': Parser.parse_lyrics(r[11], r[5]), 'video': [r[12]] if r[13] == 'video' else [], 'score': [r[12]] if r[13] == 'score' else [], 'abc': r[14] if r[13] == 'abc' else '', 'id': r[15], 'notes': '', 'transpose': 0, 'alt_sequence': r[5] if r[5] else ''})
+            songs.append({'type': 'song', 'title': r[0], 'author': r[1] if r[1] else '', 'lang': r[2] if r[2] else '', 'lang_2': r[3] if r[3] else '', 'key': r[4] if r[4] else '', 'sequence': r[5] if r[5] else '', 'bible': r[6] if r[6] else '', 'lyricist': r[7] if r[7] else '', 'book': r[8] if r[8] else '', 'copyright': r[9] if r[9] else '', 'ccli': r[10] if r[10] else '', 'lyrics_raw': r[11], 'content': Parser.parse_lyrics(r[11], r[5]), 'video': [r[12]] if r[13] == 'video' else [], 'score': [r[12]] if r[13] == 'score' else [], 'abc': r[14] if r[13] == 'abc' else '', 'id': r[15], 'notes': '', 'transpose': ['0'], 'alt_sequence': r[5] if r[5] else ''})
     return songs
 
 def get_song_sheet(id):
@@ -203,7 +203,7 @@ def get_song_by_id(id):
                 abc.append(s[14])
     if songs:
         r = songs[0]
-        return {'type': 'song', 'title': r[0], 'author': r[1] if r[1] else '', 'lang': r[2] if r[2] else '', 'lang_2': r[3] if r[3] else '', 'key': r[4] if r[4] else '', 'sequence': r[5] if r[5] else '', 'bible': r[6] if r[6] else '', 'lyricist': r[7] if r[7] else '', 'book': r[8] if r[8] else '', 'copyright': r[9] if r[9] else '', 'ccli': r[10] if r[10] else '', 'lyrics_raw': r[11], 'content': Parser.parse_lyrics(r[11], r[5]), 'video': video, 'score': score, 'abc': abc, 'id': r[15], 'notes': '', 'transpose': 0, 'alt_sequence': r[5] if r[5] else ''}
+        return {'type': 'song', 'title': r[0], 'author': r[1] if r[1] else '', 'lang': r[2] if r[2] else '', 'lang_2': r[3] if r[3] else '', 'key': r[4] if r[4] else '', 'sequence': r[5] if r[5] else '', 'bible': r[6] if r[6] else '', 'lyricist': r[7] if r[7] else '', 'book': r[8] if r[8] else '', 'copyright': r[9] if r[9] else '', 'ccli': r[10] if r[10] else '', 'lyrics_raw': r[11], 'content': Parser.parse_lyrics(r[11], r[5]), 'video': video, 'score': score, 'abc': abc, 'id': r[15], 'notes': '', 'transpose': ['0'], 'alt_sequence': r[5] if r[5] else ''}
     return None
 
 def get_song_by_title(title):
@@ -324,15 +324,12 @@ def edit_songset(id, content):
     """
     if content:
         dB.run_para('delete from presentation where worship_id = ?', id)
-        #sql = "insert into presentation(song_id, worship_id, transpose, scheduled_date, sequence, song_order, notes, bible, version, type) values"
         sql = "insert into presentation(song_id, worship_id, transpose, scheduled_date, sequence, song_order, notes, type) values"
         for song in content:
             if song['type'] == 'info':
-                #sql += '({}, {}, {}, "{}", "{}", {}, "{}"),'.format(-1, id, song['transpose'], song['scheduled_date'], song['sequence'], song['song_order'], song['notes'], song['bible'], song['version'], song['type'])
-                sql += '({}, {}, {}, "{}", "{}", {}, "{}", "{}"),'.format(-1, id, song['transpose'], song['scheduled_date'], song['sequence'], song['song_order'], song['notes'], song['type'])
+                sql += '({}, {}, {}, "{}", "{}", {}, "{}", "{}"),'.format(-1, id, ','.join(song['transpose']), song['scheduled_date'], song['sequence'], song['song_order'], song['notes'], song['type'])
             else:
-                sql += '({}, {}, {}, "{}", "{}", {}, "{}", "{}"),'.format(song['song_id'], id, song['transpose'], song['scheduled_date'], song['sequence'], song['song_order'], song['notes'], song['type'])
-                #sql += '({}, {}, {}, "{}", "{}", {}, "{}"),'.format(song['song_id'], id, song['transpose'], song['scheduled_date'], song['sequence'], song['song_order'], song['notes'], song['bible'], song['version'], song['type'])
+                sql += '({}, {}, {}, "{}", "{}", {}, "{}", "{}"),'.format(song['song_id'], id, ','.join(song['transpose']), song['scheduled_date'], song['sequence'], song['song_order'], song['notes'], song['type'])
         sql = sql[:-1]
         print(sql)
         return dB.run(sql)
