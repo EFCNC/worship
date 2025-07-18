@@ -153,10 +153,10 @@ def get_song_sheet(id):
 	sheet, key = Utils.get_song_sheet(id)
 	if key:
 		k_init = keys.index(key) if key in keys else keys_1.index(key)
-		keyof = [k_init+int(x) for x in keyof]
-		for i in range(0, len(keyof)): # adjust index when value is 12 or over
-			keyof[i] = keyof[i]-12 if keyof[i] > 11 else keyof[i]
-		sheet['keyof_name'] = [keys[x] for x in keyof]
+		keyof_ = [k_init+int(x) for x in keyof]
+		for i in range(0, len(keyof_)): # adjust index when value is 12 or over
+			keyof_[i] = keyof_[i]-12 if keyof_[i] > 11 else keyof_[i]
+		sheet['keyof_name'] = [keys[x] for x in keyof_]
 		keyof = [keys[int(x)] for x in keyof] # Translate int to key name
 		sheet['keyof'] = keyof
 	return render_template('sheet.html', sheets=sheet)
