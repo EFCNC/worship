@@ -2,28 +2,51 @@
 <head>
   <link rel="stylesheet" href="http://dev.music.free.fr/css/music.min.css" />
   <script src="http://dev.music.free.fr/js/abc-ui-1.0.0.min.js"></script>
+<style>
+  iframe {
+    height: 800px;
+    width: 600px;
+    resize: both;
+    overflow: auto;
+}
+</style>
 </head>
 <body bgcolor="#fff">
-<div class="abc-source" id="sheet">
+<div id="keys" style="display:none"></div>
+<div class="abc-source transposable" id="abc">
 </div>
+<div style="text-align:center" id="sheet"></div>
 <script>
 let data = {{ sheets|safe }};
-function loadHTML(url) {
-  fetch(url)
-      .then(response => response.text())
-      .then(text => document.getElementById('sheet').innerHTML = text);
-}
 
 if (data.abc) {
+  // Add '%%no_player' before abc to hide play button
   $.when($(".abc-source").html(data.abc)).then(function() {
     $ABC_UI.init();
+    $("#sheet").hide();
+    html = '';
+    if (data.keyof.length > 1) {
+      for(var i=0;i<data.keyof.length;i++) {
+        html += '<button name="' + data.keyof[i] + '">' + data.keyof_name[i] + '</button>';
+      }
+      $('#keys').html(html);
+      $('#keys').show();
+      $('button').click(function() {
+        $ABC_UI.init({"tonality": 'M'+this.name});
+      });
+    }
   });
 }
 else if (data.sheet) {
-//console.log(data.sheet)
-  loadHTML("https://grago.org/wp-content/uploads/2022/01/553-How-Great-Thou-Art.pdf");
-  //$('#sheet').load('http://localhost');
-//  $('#sheet').load('<object type="text/html" data="https://grago.org/wp-content/uploads/2022/01/553-How-Great-Thou-Art.pdf"></object>');
+  console.log(data.sheet);
+  if(['bmp', 'jpg', 'png', 'gif'].some(char => data.sheet.endsWith(char))) {
+    temp = '<img src="' + data.sheet + '" style="max-width: 100%;max-height: 100vh;margin: auto;"/>';
+  }
+  else {
+    temp = '<iframe id="sheet_link" src="' + data.sheet + '"></iframe>';
+  }
+    $('#sheet').append(temp);
+    $("#abc").hide();
 }
 </script>
 </body>

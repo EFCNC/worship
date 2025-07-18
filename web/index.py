@@ -142,10 +142,20 @@ def get_songs():
 def get_song_sheet(id):
 	'''
 	:param id: song_id
-	:return: ABC content
+	:param keys: comma number
+	:return: sheet object with ABC content, sheet link, and transpose numbers
 	'''
-	sheet = {}
-	sheet['abc'] = Utils.get_song_sheet(id)
+	keys = ['C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B']
+	keys_1 = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B']
+	keyof = request.args.get('keyof', '0')
+	keyof = keyof.split(',')
+
+	sheet, key = Utils.get_song_sheet(id)
+	if key:
+		k_init = keys.index(key) if key in keys else keys_1.index(key)
+		sheet['keyof_name'] = [keys[k_init + int(x)] for x in keyof]
+		keyof = [keys[int(x)] for x in keyof] # Translate int to key name
+		sheet['keyof'] = keyof
 	return render_template('sheet.html', sheets=sheet)
 
 @app.route("/song/<id>")
