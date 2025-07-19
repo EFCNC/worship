@@ -75,10 +75,10 @@
     	    keys = sharp;
         }
         for (diff of transpose) {
-            if (diff == 0) {
+            if (parseInt(diff) == 0) {
                 continue;
             }
-            key = keys.indexOf(init)+diff;
+            key = keys.indexOf(init)+parseInt(diff);
             html += '<button name="transpose" title="Prepare to change to Key of ' + keys[key] + '" transpose="' + diff + '">Change Key to ' + keys[key] + '</button>';
         }
         return html;
