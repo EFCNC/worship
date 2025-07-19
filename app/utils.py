@@ -149,9 +149,36 @@ def get_song_by_id_(id, db_name):
 
     return song
 
-def get_songs():
-    sql = "select s.title, s.author, s.lang, s.lang_2, s.song_key, s.sequence, s.bible_verse, s.lyricist, s.book, s.copyright, s.ccli, s.content, m.link, m.m_type, m.abc, s.song_id as id from songs s left join media m on s.song_id = m.song_id order by s.song_id"
-    result = dB.run(sql)
+def get_songs_para(days, count=None):
+    if count:
+        sql = "select count(*) count, s.title, s.song_id from presentation p inner join songs s on s.song_id = p.song_id where julianday('now') - julianday(p.scheduled_date) <= {} group by p.song_id order by count desc, s.title".format(days)
+        result = dB.run(sql)
+        content = []
+        for r in result:
+            content.append({'count': r[0], 'title': r[1], 'id': r[2]})
+        return content
+    else:
+        sql = "select p.scheduled_date, s.title, s.song_id from presentation p inner join songs s on s.song_id = p.song_id where julianday('now') - julianday(p.scheduled_date) <= {} order by p.scheduled_date desc, s.title".format(days)
+        result = dB.run(sql)
+        content = {}
+        temp = []
+        for r in result:
+            if r[0] in content.keys():
+                temp.append({'id': r[2], 'title': r[1]})
+            else:
+                content[r[0]] = temp
+                temp = []
+        return content
+
+def get_songs(ids=None):
+    sql = "select s.title, s.author, s.lang, s.lang_2, s.song_key, s.sequence, s.bible_verse, s.lyricist, s.book, s.copyright, s.ccli, s.content, m.link, m.m_type, m.abc, s.song_id as id from songs s left join media m on s.song_id = m.song_id"
+    if ids:
+        ids = ids.split(',')
+        sql += ' where s.song_id in ({ids}) order by s.song_id'.format(ids=','.join(['?']*len(ids)))
+        result = dB.run_para(sql, ids)
+    else:
+        sql += ' order by s.song_id'
+        result = dB.run(sql)
     songs = []
     for r in result:
         temp = next((x for x in songs if x['title'] == r[0]), None)

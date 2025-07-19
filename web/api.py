@@ -69,10 +69,26 @@ def get_song(id):
     content = Utils.get_song_by_id(id)
     return content
 
-@api.route("/songs")
-def list_song():
+@api.route("/songs/<ids>")
+def list_song(ids=None):
+    '''
+    :param ids: song_ids in comma
+    :return: return list of songs
+    '''
+    if ids:
+        return Utils.get_songs(ids)
     songs = Utils.get_songs()
     return songs
+
+@api.route("/songs/ranking/<days>/<yes>")
+@api.route("/songs/ranking/<days>")
+def get_song_ranking(days, yes=None):
+    '''
+    :param days: ranking within days
+    :return: return list of songs
+    '''
+    content = Utils.get_songs_para(days, yes)
+    return content
 
 @api.route("/song/<id>/edit", methods=["POST"])
 def edit_song(id):
