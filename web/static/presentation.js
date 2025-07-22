@@ -248,7 +248,7 @@
         container = {
             'view': '<div id="top-left"></div><div id="top-right"></div><div id="preview" class="preview view"></div><div id="bottom-left"></div><div id="bottom-right"></div>',
             'musician': '<div id="top-left"></div><div id="top-right"></div><div id="preview" class="preview view"></div><div id="bottom-left"></div><div id="bottom-right"></div>',
-            'score': '<div id="top-left"></div><div id="top-right"></div><div id="preview" class="preview view"></div><div id="bottom-left"></div><div id="bottom-right"></div>',
+            'score': '<div id="top-left"></div><div id="top-right"></div><div id="preview" class="preview view"><object id="sheets" type="text/html" style="width:100%; height:100%; margin:1%;"></object></div><div id="bottom-left"></div><div id="bottom-right"></div>',
             'lead': '<div id="top-right"></div><div class="preview_container"><div id="preview"></div><div id="menu"><div id="dynamic_btn"><br/><button name="dynamic" title="Intro">Intro</button><button name="dynamic" title="Interlude">Interlude</button><button name="dynamic" title="Ending">Ending</button><br/><button name="dynamic" title="Ready tp Build up">Build Up</button><button name="dynamic" title="Slow Down">Slow Down</button><button name="dynamic" title="Speed Up">Speed Up</button><br/><button name="dynamic" title="Acapella">Acapella</button><button name="dynamic" title="Repeat Chorus">Repeat Chorus</button><button name="dynamic" title="Last Sentence">Last Sentence</button><div id="key_change"></div></div><div id="notes"></div></div><div id="preview_div"></div></div>',
             'remote': '<div id=buttons><button id="btn_previous">Up</button><button id="btn_next">Down</button></div>'
         }
@@ -276,7 +276,7 @@
         }
 
         if (dynamic) {
-            if (mode == "musician") {
+            if (mode == "musician" || mode == "score") { // only musician and score mode will see the dynamic notification
                 $("#top-left").html(dynamic);
                 $("#top-left").fadeIn();
             }
@@ -285,6 +285,16 @@
             $("#top-left").fadeOut();
         }
 
+        if(mode == 'score') {
+        console.log($('#sheets').attr('data'))
+            if ($('#sheets').attr('data')) {
+                return fal;se
+            }
+                ids = slides.map((item, index)=>(item.id));
+                url = '/sheets/' + ids.toString();
+                $('#sheets').attr('data', url);
+            return false;
+        }
         if (last_position[0] == pos && last_position[1] == order) { // If the change is not about position, then skip loading preview div
             return;
         }
@@ -295,7 +305,7 @@
         if (data.type == 'song') {
             l = data.content[order];
             transpose = key_change;
-            if (mode == 'musician' || mode == 'score') {     // musician mode will only show original lyrics with chord
+            if (mode == 'musician') {     // musician mode will only show original lyrics with chord
                 chords = l.origin_chord;
                 if (transpose !=0 && dynamic.indexOf('Prepare to')<0) {
                     chords = chords.replace(/(data-chord=")([^"]+)/g, (match, g1, g2) => {return g1+parse_chord(g2, transpose);});
@@ -313,7 +323,7 @@
                     }
                     temp += '<div class="song_chord next"' + n.name + '">' + text + '</div>';
                 }
-                if (mode == 'score') {
+                /*if (mode == 'score') {
                     if(data.score) {
                         if(['bmp', 'jpg', 'png', 'gif'].some(char => data.score.endsWith(char))) {
                             temp = '<img src="' + data.score + '" style="max-width: 100%;max-height: 100vh;margin: auto;"/>';
@@ -322,7 +332,7 @@
                             temp = '<iframe id="score" src="' + data.score + '" frameborder="0" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true" onload="this.width=screen.width;this.height=screen.height;"></iframe>';
                         }
                     }
-                }
+                }*/
                 slide.innerHTML += temp;
             }
             else {  // show both original and region content

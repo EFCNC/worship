@@ -161,6 +161,37 @@ def get_song_sheet(id):
 		sheet['keyof'] = keyof
 	return render_template('sheet.html', sheets=sheet)
 
+@app.route("/sheets/<ids>")
+def get_song_sheet1(ids):
+	'''
+	:param ids: song_ids
+	:return: sheet object with ABC content, sheet link, and transpose numbers
+	'''
+	keys_1 = ['C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B']
+	keys_2 = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B']
+
+	keyof = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+
+	ids = ids.split(',')
+	sheets = Utils.get_song_sheet(ids)
+	for sheet in sheets:
+		if sheet['key']:
+			keys = []
+			if sheet['key'] in keys_1:
+				k_init = keys_1.index(sheet['key'])
+				keys = keys_1
+			else:
+				k_init = keys_2.index(sheet['key'])
+				keys = keys_1
+			keyof = [x - k_init for x in keyof]
+			for i in range(0, len(keyof)): # adjust index when value is less than 0
+				keyof[i] = keyof[i]+12 if keyof[i] < 0 else keyof[i]
+
+			sheet['keyof_name'] = keys
+			keyof_name = [keys[x] for x in keyof] # Translate int to key name
+			sheet['keyof'] = keyof_name
+	return render_template('sheet.html', sheets=sheets)
+
 @app.route("/song/<id>")
 def get_song_by_id(id):
 	'''

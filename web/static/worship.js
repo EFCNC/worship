@@ -67,6 +67,49 @@ let API_URL = 'API/';
         return;
     }
 
+    // Validate form values
+    function validate_form() {
+
+        // Sequence can not be empty
+        sequence = $("input[name='sequence']").val();
+        if(sequence == '') {
+            alert("Sequence needs value!!");
+            return false;
+        }
+
+        // Lyrics can not be empty
+        content = $("textarea[name='content']").val();
+        if(content == '') {
+            alert("Please enter the lyrics!!");
+            return false;
+        }
+
+        // Sequence sections are using paired tag
+        temp = content.replace(/(<\/?)(\d)+(>)/g, '$1temp$2$3')
+        var doc = document.createElement('div');
+        doc.innerHTML = temp;
+        if ( doc.innerHTML !== temp ) {
+            alert("The Song Sequence tags are not matched, please make sure sequence is using open and close tags as a pair. ex: <1>...</1>");
+            return false;
+        }
+
+        // No duplicated sequence section
+        let tags = content.match(/<\/?[^>]+>/g);
+        let duplicates = tags.filter((item, index) => tags.indexOf(item) !== index);
+        if (duplicates.length > 0) {
+            alert('Duplicated sequence tag been used. ' + duplicates.toString());
+            return false;
+        }
+
+        // chords symbols are in []
+        let pattern = /\[[^\]]+\[/g;
+        let result = content.match(pattern);
+        if (result) {
+            alert("Please make sure Chords and region are marked in '[' and ']'. The following are not correct..." + result);
+            return false;
+        }
+    }
+
     // song related APIs
     function add_song(data) {
         url = API_URL + 'song/add';
@@ -143,7 +186,7 @@ let API_URL = 'API/';
     	                id: "button-add",
                         text : dialog_title[num]['text'],
                         click: function() {
-                        console.log(num)
+                            validate_form();
                             if (num ==0) {
                                 click_url = API_URL + 'song/' + id + '/' +  dialog_title[num]['action'];
                                 temp = data_changed(JSON.stringify($("#song_form").serializeArray()));

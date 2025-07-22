@@ -12,41 +12,96 @@
 </style>
 </head>
 <body bgcolor="#fff">
-<div id="keys" style="display:none"></div>
-<div class="abc-source transposable" id="abc">
+<div id="my_score">
+  <div id="top"><span id="sheet_title"></span>&nbsp;<span id="sheet_btn"></span></div>
+  <div id="abc">
+  <div id="keys"></div>
+  <div class="abc-source transposable" id="abc_sheet">
+  </div>
+  </div>
+  <div style="text-align:center" id="sheet"></div>
 </div>
-<div style="text-align:center" id="sheet"></div>
+</body>
 <script>
-let data = {{ sheets|safe }};
+  let sheets = {{ sheets|safe }};
+  let index = 0;
 
-if (data.abc) {
-  // Add '%%no_player' before abc to hide play button
-  $.when($(".abc-source").html(data.abc)).then(function() {
-    $ABC_UI.init();
-    $("#sheet").hide();
-    html = '';
-    if (data.keyof.length > 1) {
-      for(var i=0;i<data.keyof.length;i++) {
-        html += '<button name="' + data.keyof[i] + '">' + data.keyof_name[i] + '</button>';
-      }
-      $('#keys').html(html);
-      $('#keys').show();
-      $('button').click(function() {
-        $ABC_UI.init({"tonality": 'M'+this.name});
+  function load_sheet(type) {
+    data = sheets[index]
+
+    if (type == 'abc') {
+      $("#sheet").hide();
+
+        html = '';
+        console.log(data)
+          for(var i=0;i<data.keyof_name.length;i++) {
+            if (data.keyof_name[i] == data.key) {
+              html += '<button title="Original Key" name="' + data.keyof[i] + '"><b>' + data.keyof_name[i] + '</b></button>';
+            }
+            else {
+              html += '<button name="' + data.keyof[i] + '">' + data.keyof_name[i] + '</button>';
+            }
+          }
+          $('#keys').html(html);
+      // Add '%%no_player' before abc to hide play button
+      $.when($("#abc_sheet").html(data.abc)).then(function() {
+        $ABC_UI.init();
+          $('button').click(function() {
+            $ABC_UI.init({"tonality": 'M'+this.name});
+          });
+        $("#abc").show();
       });
     }
+    else if (type == 'sheet') {
+      if(['bmp', 'jpg', 'png', 'gif'].some(char => data.sheet.endsWith(char))) {
+        temp = '<img src="' + data.sheet + '" style="max-width: 100%;max-height: 100vh;margin: auto;"/>';
+      }
+      else {
+        temp = '<iframe id="sheet_link" src="' + data.sheet + '"></iframe>';
+      }
+        $("#abc").hide();
+        $('#sheet').empty();
+        $('#sheet').append(temp);
+        $('#sheet').show();
+    }
+  }
+
+  function load_sheet_btn(n) {
+    data = sheets[n];
+    html = '';
+    if(data.abc) {
+      html += '<button class="type_btn" name="abc" onclick="load_sheet(this.name)">Interact Sheet</button>';
+    }
+    if(data.sheet) {
+      html += '<button class="type_btn" name="sheet" onclick="load_sheet(this.name)">Normal Sheet</button>';
+    }
+    $('#sheet_btn').html(html);
+    if(data.abc) {
+      load_sheet('abc');
+    }
+    else {
+      load_sheet('sheet');
+    }
+  }
+
+  $(document).ready(function() {
+    // Form select box with song title
+    if (sheets.length > 1) {
+      var songs = '<select name="songs" id="song_list">';
+      for(var s=0;s<sheets.length;s++) {
+        data = sheets[s];
+        songs += '<option value=' + s + '>' + data.title + '</option>';
+      }
+      songs += '</select>';
+      $("#sheet_title").html(songs);
+    }
+    load_sheet_btn(index);
+
+    $('#song_list').change(function(){
+      index = this.value;
+      load_sheet_btn(index);
+    });
   });
-}
-else if (data.sheet) {
-  console.log(data.sheet);
-  if(['bmp', 'jpg', 'png', 'gif'].some(char => data.sheet.endsWith(char))) {
-    temp = '<img src="' + data.sheet + '" style="max-width: 100%;max-height: 100vh;margin: auto;"/>';
-  }
-  else {
-    temp = '<iframe id="sheet_link" src="' + data.sheet + '"></iframe>';
-  }
-    $('#sheet').append(temp);
-    $("#abc").hide();
-}
+
 </script>
 </body>

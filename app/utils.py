@@ -193,24 +193,25 @@ def get_songs(ids=None):
             songs.append({'type': 'song', 'title': r[0], 'author': r[1] if r[1] else '', 'lang': r[2] if r[2] else '', 'lang_2': r[3] if r[3] else '', 'key': r[4] if r[4] else '', 'sequence': r[5] if r[5] else '', 'bible': r[6] if r[6] else '', 'lyricist': r[7] if r[7] else '', 'book': r[8] if r[8] else '', 'copyright': r[9] if r[9] else '', 'ccli': r[10] if r[10] else '', 'lyrics_raw': r[11], 'content': Parser.parse_lyrics(r[11], r[5]), 'video': [r[12]] if r[13] == 'video' else [], 'score': [r[12]] if r[13] == 'score' else [], 'abc': r[14] if r[13] == 'abc' else '', 'id': r[15], 'notes': '', 'transpose': ['0'], 'alt_sequence': r[5] if r[5] else ''})
     return songs
 
-def get_song_sheet(id):
-    sql = "select abc, link from media where song_id=? and (m_type='score' or m_type='abc')"
-    result = dB.run_para(sql, id)
-    sheet = {'abc': '', 'sheet': ''}
+def get_song_sheet(ids):
+    sql = "select (select abc from media m where m.song_id=s.song_id and m_type='abc') as abc, (select link from media m where m.song_id=s.song_id and m_type='score') as sheet, s.title from songs s where (abc is not null or sheet is not null) and s.song_id in ({ids})".format(ids=','.join(['?']*len(ids)))
+    print(sql)
+    result = dB.run_para(sql, ids)
+    sheets = []
     for r in result:
-        if r[0] and sheet['abc'] == '':
-            sheet['abc'] = r[0]
-        if r[1] and sheet['sheet'] == '':
-            sheet['sheet'] = r[1]
-    if sheet['abc']:
-        abc = sheet['abc'].split('\r\n')
-        if len(abc) < 5:
-            abc = sheet['abc'].split('\n')
-        print(abc)
-        abc = [x for x in abc if x.startswith('K:')][0]
-        abc = abc.split(':')
-        return sheet, abc[1]
-    return sheet, None
+        sheet = {'abc': '', 'sheet': '', 'title': '', 'key': ''}
+        sheet['abc'] = r[0] if r[0] else ''
+        if sheet['abc'] != '':
+            abc = sheet['abc'].split('\r\n')
+            if len(abc) < 5:
+                abc = sheet['abc'].split('\n')
+            abc = [x for x in abc if x.startswith('K:')][0]
+            abc = abc.split(':')
+            sheet['key'] = abc[1]
+        sheet['sheet'] = r[1] if r[1] else ''
+        sheet['title'] = r[2]
+        sheets.append(sheet)
+    return sheets
 
 def get_song_by_id(id):
     sql = "select s.title, s.author, s.lang, s.lang_2, s.song_key, s.sequence, s.bible_verse, s.lyricist, s.book, s.copyright, s.ccli, s.content, m.link, m.m_type, m.abc, s.song_id as id from songs s left join media m on s.song_id = m.song_id where s.song_id = ?"
@@ -308,7 +309,6 @@ def edit_media(id, content):
                 sql = 'insert into media(abc, song_id, m_type) values(? ,? ,?)'
             else:
                 sql = 'insert into media(link, song_id, m_type) values(? ,? ,?)'
-        print(sql, id, c['name'])
         dB.run_para(sql, [c['value'], id, c['name']])
 
 def edit_song_set_row(id, content):
