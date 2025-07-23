@@ -152,7 +152,6 @@ let API_URL = 'API/';
 
     function get_songs(ids) {
         url = API_URL + 'songs/' + ids;
-        console.log(url)
         return $.ajax({
             type: "GET",
             url: url
@@ -250,10 +249,11 @@ let API_URL = 'API/';
     }
 
     // Return media links
-    function get_links(video, score) {
+    function get_links(video, score, id) {
         var links = '';
         links += video ? "<a href='" + video + "' target='new'><i class='fa fa-play-circle' style='font-size:24px' title='Youtube Video'></i></a>&nbsp;" : "";
-        links += score ? "<a href='" + score + "' target='new'><i style='font-size:24px' class='fa' title='Sheet Music'>&#xf1c7;</i></a>&nbsp;" : "";
+        links += score ? "<a href='" + score + "' target='new'><i style='font-size:24px' class='fa' title='Sheet Music'>&#xf0f6;</i></a>&nbsp;" : "";
+        links += id? "<a href='sheets/" + id + "' target='new'><i style='font-size:24px' class='fa' title='Interacted Sheet Music'>&#xf1c7;</i></a>&nbsp;" : "";
         return links;
     }
 
