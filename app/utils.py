@@ -158,13 +158,13 @@ def get_songs_para(days, count=None):
             content.append({'count': r[0], 'title': r[1], 'id': r[2]})
         return content
     else:
-        sql = "select p.scheduled_date, s.title, s.song_id from presentation p inner join songs s on s.song_id = p.song_id where julianday('now') - julianday(p.scheduled_date) <= {} order by p.scheduled_date desc, s.title".format(days)
+        sql = "select p.scheduled_date, s.title, s.song_id, s.lang, s.lang_2, s.song_key from presentation p inner join songs s on s.song_id = p.song_id where julianday('now') - julianday(p.scheduled_date) <= {} order by p.scheduled_date desc, s.title".format(days)
         result = dB.run(sql)
         content = {}
         temp = []
         for r in result:
             if r[0] in content.keys():
-                temp.append({'id': r[2], 'title': r[1]})
+                temp.append({'id': r[2], 'title': r[1], 'lang': r[3], 'lang_2': r[4] if r[4] else '', 'key': r[5]})
             else:
                 content[r[0]] = temp
                 temp = []
@@ -195,7 +195,6 @@ def get_songs(ids=None):
 
 def get_song_sheet(ids):
     sql = "select (select abc from media m where m.song_id=s.song_id and m_type='abc') as abc, (select link from media m where m.song_id=s.song_id and m_type='score') as sheet, s.title from songs s where (abc is not null or sheet is not null) and s.song_id in ({ids})".format(ids=','.join(['?']*len(ids)))
-    print(sql)
     result = dB.run_para(sql, ids)
     sheets = []
     for r in result:
