@@ -9,7 +9,7 @@
     .infotitle:hover{cursor: pointer}
     .lyrics li span { position: absolute; margin-left: -1.3em;}
     .lyrics li:hover {cursor: pointer}
-    .1, .2, .3, .4 { background-color: #da2c43; color: #fff}
+    .1, .2, .3, .4 .5 .6 .7 .8 { background-color: #da2c43; color: #fff}
     .chorus, .Chorus, .c { background-color: #556b2f; color: #fff}
     .bridge, .b, .b2, .b3, .b4 { background-color: #003153; color: #fff}
 
@@ -162,8 +162,9 @@ li {
     <button class="export_btn" onclick="javascript:export_file({{ id }})">Export</button>
     &nbsp;&nbsp;<button class="reset_btn" onclick="javascript:reset()">Reset</button>
         </div>
-    <div id="song_list" style="display:none">
+    <div id="song_list" >
         <div id="left_content"></div>
+        <div id="middle_content"></div>
         <div id="right_content"></div>
     </div>
     <div id="preview" style="display:none"></div>
@@ -432,6 +433,30 @@ li {
         $.when( add_song_to_worship(worship)).then(function() {
             init();
         });
+        if($.cookie("pinned")) {
+            var my_pinned_songs = '<div style="font-size:16px;font-weight:600;width:100%;padding:5px">My pinned songs&nbsp;&nbsp;<a href="song/list" title="more">...</a></div>';
+            get_songs($.cookie("pinned")).done(function(data) {
+                for (s of data) {
+                    //my_pinned_songs += "<span songid='" + s.id + "' class='song_title'>" + s.title + "&nbsp;<span class='keynote'>" + s.key + "</span>&nbsp;" + lang_tag(s.lang) + "&nbsp;" + lang_tag(s.lang_2) + "&nbsp;" + get_links(s.video, s.score) + " <button style='display:none' class='insert_btn'> + </button></span><br/>";
+                    my_pinned_songs += "<span songid='" + s.id + "' class='song_title'>" + s.title + "&nbsp;<span class='keynote'>" + s.key + "</span>&nbsp;" + lang_tag(s.lang) + "&nbsp;" + lang_tag(s.lang_2) + "&nbsp;<button style='display:none' class='insert_btn'> + </button></span><br/>";
+                }
+            $('#left_content').append(my_pinned_songs);
+            });
+        }
+            get_songs_by_days(30).done(function(data1) {
+            var my_song_list = '<div style="font-size:16px;font-weight:600;width:100%;padding:5px">Songs from the past month&nbsp;&nbsp;<a href="song/list" title="more">...</a></div>';
+                for (key in data1) {
+                    ss = data1[key];
+                    if (ss) {
+                        for (s1 of ss) {
+                            my_song_list += "<span title ='" + key + "' songid='" + s1.id + "' class='song_title'>" + s1.title + "&nbsp;<span class='keynote'>" + s1.key + "</span>&nbsp;" + lang_tag(s1.lang) + "&nbsp;" + lang_tag(s1.lang_2) + "&nbsp;" + " <button style='display:none' class='insert_btn'> + </button></span><br/>";
+                        }
+                    }
+                }
+                $('#left_content').append(my_song_list);
+            });
+            //$('#left_content').append('</div>');
+
         $('.arrow').click(function() {
             increment = Number($(this).attr('name'));
             id = worship_id;
@@ -585,58 +610,62 @@ li {
         };
         var url = API_URL + 'search/song?keywords=' + keyword;
         $.when( $.ajax( url ) ).then(function( data, textStatus, jqXHR ) {
-            // This returns dict with id, title and file
 
-            var left = '<span id="left_header"><h3>Available Songs from Imported Database</h3></span><br/>'
+            // This returns dict with id, title and file
+            var left = '<span id="left_header"><h3>Songs which can be imported from another Database</h3></span><br/>'
             for(var i=0;i<data['left'].length;i++) {
                 left += "<span class='song_title'>" + highlight_keyword(keyword, data['left'][i]['title']) + lang_tag(data['left'][i]['lang']) + " <button lang='" + data['left'][i]['lang'] + "' db='" + data['left'][i]['db'] + "' songid='" + data['left'][i]['id'] + "' style='display:none' class='insert_btn'> + </button></span><br/>";
             }
-            var right = '<span id="right_header"><h3>Current Song Set</h3></sapn><br/>';
+            var right = '<span id="right_header"><h3>Available Songs</h3></sapn><br/>';
             for(var i=0;i<data['right'].length;i++) {
                 right += "<span songid='" + data['right'][i]['id'] + "' class='song_title'>" + highlight_keyword(keyword, data['right'][i]['title']) + "&nbsp;<span class='keynote'>" + data['right'][i]['key'] + "</span>&nbsp;" + lang_tag(data['right'][i]['lang']) + "&nbsp;" + lang_tag(data['right'][i]['lang_2']) + get_links(data['right'][i]['video'], data['right'][i]['score']) + " <button style='display:none' class='insert_btn'> + </button></span><br/>";
             }
 
-            $("#left_content").html(left);
-            $("#right_content").html(right);
-            $("#song_list").show('slow');
-
-            // Event handlers for searched songs
-
-            $(".song_title").hover(function() {
-                $(".insert_btn", this).show();
-            }, function() {
-                $(".insert_btn", this).hide();
-            });
-
-            // When "+" button is click from the searched songs
-            $(".insert_btn").click(function() {
-                // When songs from imported dB is clicked, prepare for import
-                if ($(this).parent().parent().attr('id') == 'left_content') {
-                    id = $(this).attr('songid');
-                    db = $(this).attr('db');
-                    lang = $(this).attr('lang');
-                    $.when(render_song(id, db, lang, 1), function() {
-                        console.log('added');
-                    });
-                }
-                // When songs in current dB is clicked, add it to panel
-                else {
-                    id = $(this).parent().attr('songid');
-                    get_song(id)
-                    .done(function(data) {
-                        if(songs_temp.find(o => o.title === data.title)) {
-                            alert('"' + data.title + '" already in the set!!');
-                            return false;
-                        }
-                        data['date'] = worship_data.date;
-                        songs_temp.push(data);
-                        $.when( add_song_to_worship(worship)).then(function() {
-                            init();
-                        });
-                    });
-                }
-            });
+            $("#right_content").html(left);
+            $("#middle_content").html(right);
+            $("#song_list").show();
+            var aTag = $("#song_list");
+            $('html,body').animate({scrollTop: aTag.offset().top},'slow');
         });
+    });
+
+    // Event handlers for inset_btn
+    $(document).on({
+        mouseover: function () {
+            $(".insert_btn", this).show();
+        },
+        mouseout: function () {
+            $(".insert_btn", this).hide();
+        }
+    }, ".song_title");
+
+    // event handler "+" button is click from the searched songs
+    $(document).on('click', '.insert_btn', function() {
+        // When songs from imported dB is clicked, prepare for import
+        if ($(this).parent().parent().attr('id') == 'right_content') {
+            id = $(this).attr('songid');
+            db = $(this).attr('db');
+            lang = $(this).attr('lang');
+            $.when(render_song(id, db, lang, 1), function() {
+                console.log('added');
+            });
+        }
+        // When songs in current dB is clicked, add it to panel
+        else {
+            id = $(this).parent().attr('songid');
+            get_song(id)
+            .done(function(data) {
+                if(songs_temp.find(o => o.title === data.title)) {
+                    alert('"' + data.title + '" already in the set!!');
+                    return false;
+                }
+                data['date'] = worship_data.date;
+                songs_temp.push(data);
+                $.when( add_song_to_worship(worship)).then(function() {
+                    init();
+                });
+            });
+        }
     });
 
     // Remove song from song set, when click save song_set table will be updated

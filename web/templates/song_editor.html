@@ -22,7 +22,7 @@
     Author: <input name="author" type="text" value="{{ content.author }}"/>
     Lyricist: <input name="lyricist" type="text" value="{{ content.lyricist }}"/>
     <br/>
-    <p>Lyrics Sequence: <span class="sequence" name="verse">Verse</span><span class="sequence" name="chorus">Chorus</span><span class="sequence" name="prechorus">Pre-Chorus</span><span class="sequence" name="bridge">Bridge</span><span class="sequence" name="last">Last Sentence</span><input name="sequence" type="text" value="{{ content.sequence }}"/></p>
+    <p title="Highlight the area, then click the button">Lyrics Sequence: <span class="sequence" name="verse">Verse</span><span class="sequence" name="chorus">Chorus</span><span class="sequence" name="prechorus">Pre-Chorus</span><span class="sequence" name="bridge">Bridge</span><!--<span class="sequence" name="last">Last Sentence</span>--><input name="sequence" type="text" value="{{ content.sequence }}"/></p>
         <p id="chord_tags">Chord: <span class="chord" name="1">I</span><span class="chord" name="2">ii</span><span class="chord" name="3">iii</span><span class="chord" name="4">IV</span><span class="chord" name="5">V</span><span class="chord" name="6">VI</span><span class="chord" name="7">VII</span></p>
         <textarea rows="6" name="content" cols="60">{{ content.lyrics }}</textarea>
     <hr/>
@@ -55,7 +55,6 @@
         new_keys.push(keys[base]);
         for (i of interval) {
             base += i;
-            console.log(base);
             if (base > keys.length-1) {
                 base = base-keys.length;
             }
@@ -86,7 +85,7 @@
     var sel = txtarea[0].value.substring(start, finish);
     if (sel) {
         if (paired==1) {
-            temp = '<' + tag + '>\n' + sel + '\n</' + tag + '>';
+            temp = '<' + tag + '>\n' + sel.replace('\n', '') + '\n</' + tag + '>';
         }
         else {
             temp = '[' + tag + ']' + sel;
@@ -119,9 +118,10 @@
     $('input[name="video"]').val(video);
     $('input[name="score"]').val(score);
     $('textarea[name="abc"]').html(abc);
-    $(document).on('click', 'span', function() {
+    $('body').off().on('click', 'span', function() {
         if ($(this).attr('class') == 'chord') {
             chord = insertChord(parseInt($(this).attr('name')));
+            console.log('clicked', chord)
             if (chord != false) {
                 insert_tag(chord);
             }

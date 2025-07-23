@@ -131,8 +131,28 @@ let API_URL = 'API/';
         });
     }
 
+    function get_songs_by_days(days, count) {
+        url = API_URL + 'songs/ranking/' + days;
+        if (count) {
+            url += '/true';
+        }
+        return $.ajax({
+            type: "GET",
+            url: url
+        });
+    }
+
     function get_song(id) {
         url = API_URL + 'song/' + id;
+        return $.ajax({
+            type: "GET",
+            url: url
+        });
+    }
+
+    function get_songs(ids) {
+        url = API_URL + 'songs/' + ids;
+        console.log(url)
         return $.ajax({
             type: "GET",
             url: url

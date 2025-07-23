@@ -3,12 +3,13 @@
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1" charset="utf-8">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<script src="../static/jquery-3.6.0.min.js"></script>
+<script src="../static/jquery.js"></script>
 <script src="../static/jquery-ui.js"></script>
+<script src="../static/jquery.cookie.js"></script>
 <script src="../static/worship.js"></script>
 <link href="../static/datatables.min.css" rel="stylesheet">
 <link href="../static/jquery-ui.css" rel="stylesheet">
-<script src="../static/datatables.min.js"></script>
+<script src="../static/datatables.js"></script>
 <style>
 #dialog {
     padding:5px;
@@ -220,21 +221,26 @@ span.chunk:before {
     let table = new DataTable('#songs', {
         data: songs,
 		columns: [
-		    { data: null, className: 'title',
+		    {
+		        data: null, className: 'title',
 		        render: (data, type, row) => show_lyrics(data, row)
 		    },
 		    { data: 'key' },
 		    { data: 'book' },
-		    { data: null,
+		    {
+		        data: null,
 		        render: (data, type, row) => lang_tag(data.lang, row)
 		    },
-		    { data: null,
+		    {
+		        data: null,
 		        render: (data, type, row) => lang_tag(data.lang_2, row)
 		    },
-		    { data: null,
+		    {
+		        data: null,
 		        render: (data, type, row) => get_score(data, row)
 		    },
-		    { data: null,
+		    {
+		        data: null,
 		        render: (data, type, row) => get_video(data.video, row)
 		    }
 		],
@@ -242,8 +248,46 @@ span.chunk:before {
 		"pageLength": 25
     });
 
+    function set_cookies(id, action) {
+        if($.cookie('pinned')) {
+            let cookies = $.cookie('pinned').split(',');
+            let c = cookies.indexOf(id);
+            if(c < 0) {
+            console.log('not found', action, action == 'pin it')
+                if (action == 'pin it') {
+                    cookies.push(parseInt(id));
+                    $.cookie('pinned', cookies.toString(), { path: '/' });
+                    $('#pin_'+id).attr('title', 'pinned');
+                    $('#pin_'+id).html('&#xf004;');
+                }
+            }
+            else {
+                cookies.pop(c);
+                $.cookie('pinned', cookies.toString(), { path: '/' });
+                $('#pin_'+id).attr('title', 'pin it');
+                $('#pin_'+id).html('&#xf08a;');
+            }
+        }
+        else {
+            $.cookie('pinned', parseInt(id), { path: '/' });
+            $('#pin_'+id).attr('title', 'pinned');
+            $('#pin_'+id).html('&#xf004;');
+        }
+    }
+
+    function pinned(id) {
+        if($.cookie('pinned')) {
+            cookies = $.cookie('pinned').split(',');
+            if(cookies.indexOf(id.toString()) < 0) {
+                return ' title="pin it">&#xf08a;';
+            }
+            return ' title="pinned">&#xf004;';
+        }
+        return ' title="pin it">&#xf08a;';
+    }
+
     function show_lyrics(data) {
-        html = '<span>' + data.title + '</span>&nbsp;<i style="display:none" style="font-size:14px" class="fa" title="Edit Song" id="' + data.id + '" name="' + data.title + '">&#xf044;</i><span class="lyrics" style="display:none">';
+        html = '<span>' + data.title + '</span>&nbsp;<i style="display:none" style="font-size:14px" class="fa" title="Edit Song" id="edit_' + data.id + '" name="' + data.title + '">&#xf044;</i>&nbsp;<i style="display:none" style="font-size:14px" class="fa" id="pin_' + data.id + '"' + pinned(data.id) + '</i><span class="lyrics" style="display:none">';
         for (l of data.content) {
             html += l.origin_chord;
         }
@@ -325,11 +369,17 @@ span.chunk:before {
     });
 
     $(document).on('click', '.title i', function() {
-        var url = this.id;
-        $('#dialog').dialog({
-            'title': $(this).attr('name')
-        });
-        $("#dialog").load(url).dialog("open");
+        var url = this.id.split('_')[1];
+        if ($(this).attr('name')) {
+            $('#dialog').dialog({
+                'title': $(this).attr('name')
+            });
+            $("#dialog").load(url).dialog("open");
+        }
+        else {
+            set_cookies(url, $(this).attr('title'));
+            console.log($.cookie('pinned'))
+        }
     });
 
     $('.all_keys').click(function() {
