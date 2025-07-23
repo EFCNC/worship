@@ -437,8 +437,8 @@ li {
             var my_pinned_songs = '<div style="font-size:16px;font-weight:600;width:100%;padding:5px">My pinned songs&nbsp;&nbsp;<a href="song/list" title="more">...</a></div>';
             get_songs($.cookie("pinned")).done(function(data) {
                 for (s of data) {
-                    //my_pinned_songs += "<span songid='" + s.id + "' class='song_title'>" + s.title + "&nbsp;<span class='keynote'>" + s.key + "</span>&nbsp;" + lang_tag(s.lang) + "&nbsp;" + lang_tag(s.lang_2) + "&nbsp;" + get_links(s.video, s.score) + " <button style='display:none' class='insert_btn'> + </button></span><br/>";
-                    my_pinned_songs += "<span songid='" + s.id + "' class='song_title'>" + s.title + "&nbsp;<span class='keynote'>" + s.key + "</span>&nbsp;" + lang_tag(s.lang) + "&nbsp;" + lang_tag(s.lang_2) + "&nbsp;<button style='display:none' class='insert_btn'> + </button></span><br/>";
+                    my_pinned_songs += "<span songid='" + s.id + "' class='song_title'>" + s.title + "&nbsp;<span class='keynote'>" + s.key + "</span>&nbsp;" + lang_tag(s.lang) + "&nbsp;" + lang_tag(s.lang_2) + "&nbsp;" + get_links(s.video, s.score, s.abc) + " <button style='display:none' class='insert_btn'> + </button></span><br/>";
+                    //my_pinned_songs += "<span songid='" + s.id + "' class='song_title'>" + s.title + "&nbsp;<span class='keynote'>" + s.key + "</span>&nbsp;" + lang_tag(s.lang) + "&nbsp;" + lang_tag(s.lang_2) + "&nbsp;<button style='display:none' class='insert_btn'> + </button></span><br/>";
                 }
             $('#left_content').append(my_pinned_songs);
             });
@@ -618,7 +618,7 @@ li {
             }
             var right = '<span id="right_header"><h3>Available Songs</h3></sapn><br/>';
             for(var i=0;i<data['right'].length;i++) {
-                right += "<span songid='" + data['right'][i]['id'] + "' class='song_title'>" + highlight_keyword(keyword, data['right'][i]['title']) + "&nbsp;<span class='keynote'>" + data['right'][i]['key'] + "</span>&nbsp;" + lang_tag(data['right'][i]['lang']) + "&nbsp;" + lang_tag(data['right'][i]['lang_2']) + get_links(data['right'][i]['video'], data['right'][i]['score']) + " <button style='display:none' class='insert_btn'> + </button></span><br/>";
+                right += "<span songid='" + data['right'][i]['id'] + "' class='song_title'>" + highlight_keyword(keyword, data['right'][i]['title']) + "&nbsp;<span class='keynote'>" + data['right'][i]['key'] + "</span>&nbsp;" + lang_tag(data['right'][i]['lang']) + "&nbsp;" + lang_tag(data['right'][i]['lang_2']) + get_links(data['right'][i]['video'], data['right'][i]['score'], data['right'][i]['abc']) + " <button style='display:none' class='insert_btn'> + </button></span><br/>";
             }
 
             $("#right_content").html(left);

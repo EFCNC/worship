@@ -39,7 +39,7 @@
       "default": {
         "name": "worship.db",
         "search": {
-            "query": "select s.song_id, s.title, s.lang, s.lang_2, s.song_key, (select link from media m where m.song_id=s.song_id and m_type='video') as video, (select link from media m where m.song_id=s.song_id and m_type='score') as score from songs s where {} group by s.song_id",
+            "query": "select s.song_id, s.title, s.lang, s.lang_2, s.song_key, (select link from media m where m.song_id=s.song_id and m_type='video') as video, (select link from media m where m.song_id=s.song_id and m_type='score') as score, (select abc from media m where m.song_id=s.song_id and m_type='abc') as abc from songs s where {} group by s.song_id",
             "columns": [
               "s.title",
               "s.content"
@@ -63,7 +63,7 @@
             "condition": "or"
           },
           "get_song": "select s.id as id, title, sb.name as bookname, null as lang, lyrics, copyright, ccli_number, song_number, file_name from songs s left join song_books sb on s.song_book_id = sb.id left join media_files m on s.id = m.song_id where s.id = ?",
-          "enabled": 0
+          "enabled": 1
         },
         {
           "name": "zh.sqlite",
