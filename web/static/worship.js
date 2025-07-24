@@ -34,7 +34,10 @@ let API_URL = 'API/';
                 //list.innerHTML = '<span class="title" name="' + data.id + '" lang="' + data.lang + '"><b>' + data.title + '</b>&nbsp;' + lang_tag(data.lang) + '&nbsp;' + lang_tag(data.lang_2) + ' Author: ' + data.author + '/' + data.lyricist + '&nbsp;<button class="remove_btn" style="display:none"> - </button></span><br/>Current Key: <select class="key" name="' + data.transpose + '" init="' + data.key + '"><option>' + data.key + '</option></select>&nbsp;Original Key: ' +  data.key + '<p>Notes: <span name="song_notes" contenteditable="true">' + data.notes + '</p><span class="lyrics_section" title="Click to arrange song sequence" name="' + data.id + '">Song Sequence: <span class="sequence" id="song-' +  data.id + '_alt">' + data.sequence + '</span>&nbsp;&nbsp;<span class="edit_btn"><img style="display:none" src="../static/img/edit-button-icon.png" title="edit lyrics" name="' + data.id + '"/></span></span><br/><textarea rows="10" cols="100" class="lyrics_raw" name="lyrics_raw" id="lyrics_raw_' + data.id + '" style="display:none">' + data.lyrics_raw + '</textarea>';
                 html = '<span class="title" name="' + data.id + '" lang="' + data.lang + '"><b>' + data.title + '</b>&nbsp;' + lang_tag(data.lang) + '&nbsp;' + lang_tag(data.lang_2) + ' Author: ' + data.author + '/' + data.lyricist + '&nbsp;<button class="remove_btn" style="display:none"> - </button></span><br/>Current Key: <select class="key" name="' + data.transpose + '" init="' + data.key + '"><option>' + data.key + '</option></select>&nbsp;Original Key: ' +  data.key
                 if (data.score) {
-                    html += '&nbsp;&nbsp;<a href="' + data.score + '" target=new><i style="font-size:24px" class="fa" title="Sheet Music">&#xf1c7;</i></a>';
+                    html += '&nbsp;&nbsp;<a href="' + data.score + '" target=new><i style="font-size:24px" class="fa" title="Sheet Music">&#xf0f6;</i></a>';
+                }
+                if (data.abc) {
+                    html += '&nbsp;&nbsp;<a href="sheets/' + data.id + '" target=new><i class="fa" style="font-size:24px" title="Interacted Sheet Music">&#xf1c7;</i></a>';
                 }
                 if (data.video) {
                     html += '&nbsp;&nbsp;<a href="' + data.video + '" target=new><i class="fa fa-play-circle" style="font-size:24px" title="Youtube Video"></i></a>';
@@ -95,6 +98,10 @@ let API_URL = 'API/';
 
         // No duplicated sequence section
         let tags = content.match(/<\/?[^>]+>/g);
+        if (!tags) {
+            alert('Please mark lyrics with sequence tags!!');
+            return false;
+        }
         let duplicates = tags.filter((item, index) => tags.indexOf(item) !== index);
         if (duplicates.length > 0) {
             alert('Duplicated sequence tag been used. ' + duplicates.toString());
@@ -108,6 +115,7 @@ let API_URL = 'API/';
             alert("Please make sure Chords and region are marked in '[' and ']'. The following are not correct..." + result);
             return false;
         }
+        return true;
     }
 
     // song related APIs
@@ -205,7 +213,9 @@ let API_URL = 'API/';
     	                id: "button-add",
                         text : dialog_title[num]['text'],
                         click: function() {
-                            validate_form();
+                            if (!validate_form()) {
+                                return false;
+                            }
                             if (num ==0) {
                                 click_url = API_URL + 'song/' + id + '/' +  dialog_title[num]['action'];
                                 temp = data_changed(JSON.stringify($("#song_form").serializeArray()));
