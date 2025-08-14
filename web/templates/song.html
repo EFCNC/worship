@@ -253,7 +253,7 @@ li {
     function save(id) {
         temp = is_changed($('#songs').sortable('toArray', {attribute: 'name'}), $('#lyrics').sortable('toArray', {attribute: 'name'}))
         if (temp) {
-            changed = temp.map((item, i)=> ({'song_order': i+1, 'type': item.type, 'song_id': item.id, 'sequence': item.alt_sequence, 'notes': item.notes, 'transpose': item.transpose, 'scheduled_date': item.date}));
+            changed = temp.map((item, i)=> ({'song_order': i+1, 'type': item.type, 'song_id': item.id, 'sequence': item.alt_sequence, 'notes': item.notes, 'transpose': [item.transpose.toString()], 'scheduled_date': item.date}));
 
             url = API_URL + 'worship/' + id + '/edit';
             data = JSON.stringify(changed);
@@ -546,9 +546,7 @@ li {
     });
 
     $(document).on('click', '#add_song_btn', function() {
-        $.when(render_song(-1, '', '', 1), function() {
-            console.log('added');
-        });
+        render_song(-1, '', '', 1);
     });
 
     $(document).on('click', '#add_note_btn', function() {
@@ -646,15 +644,12 @@ li {
             id = $(this).attr('songid');
             db = $(this).attr('db');
             lang = $(this).attr('lang');
-            $.when(render_song(id, db, lang, 1), function() {
-                console.log('added');
-            });
+            render_song(id, db, lang, 1);
         }
         // When songs in current dB is clicked, add it to panel
         else {
             id = $(this).parent().attr('songid');
-            get_song(id)
-            .done(function(data) {
+            get_song(id).done(function(data) {
                 if(songs_temp.find(o => o.title === data.title)) {
                     alert('"' + data.title + '" already in the set!!');
                     return false;

@@ -72,37 +72,43 @@
     }
 
     function insert_tag(tag, paired) {
-    // Obtain the object reference for the <textarea>
-    var txtarea = document.getElementsByName("content");
 
-    // Obtain the index of the first selected character
-    var start = txtarea[0].selectionStart;
+        // Obtain the object reference for the <textarea>
+        var txtarea = document.getElementsByName("content");
 
-    // Obtain the index of the last selected character
-    var finish = txtarea[0].selectionEnd;
+        // Obtain the index of the first selected character
+        var start = txtarea[0].selectionStart;
 
-    // Obtain the selected text
-    var sel = txtarea[0].value.substring(start, finish);
-    if (sel) {
-        if (paired==1) {
-            temp = '<' + tag + '>\n' + sel.replace('\n', '') + '\n</' + tag + '>';
+        // Obtain the index of the last selected character
+        var finish = txtarea[0].selectionEnd;
+
+        // Obtain the selected text
+        var sel = txtarea[0].value.substring(start, finish);
+        if (sel) {
+            if (paired==1) {
+                temp = '<' + tag + '>\n' + sel.replace('\n', '') + '\n</' + tag + '>';
+            }
+            else {
+                temp = '[' + tag + ']' + sel;
+            }
+            txtarea[0].value = txtarea[0].value.replace(sel, temp);
+            start += temp.length;
         }
         else {
-            temp = '[' + tag + ']' + sel;
+            //temp = txtarea[0].value.substring(0, start);
+            after = txtarea[0].value.substring(start);
+            if (paired == 1) {
+                temp = '<' + tag + '>\n</' + tag + '>';
+            }
+            else {
+                temp = '[' + tag + ']';
+            }
+            txtarea[0].value = txtarea[0].value.substring(0, start) + temp + after;
+            start += temp.length;
         }
-        txtarea[0].value = txtarea[0].value.replace(sel, temp);
-    }
-    else {
-        temp = txtarea[0].value.substring(0, start);
-        after = txtarea[0].value.substring(start);
-        if (paired == 1) {
-            temp += '<' + tag + '>\n' + sel + '\n</' + tag + '>';
-        }
-        else {
-            temp += '[' + tag + ']';
-        }
-        txtarea[0].value = temp + after;
-    }
+        txtarea[0].selectionStart = start;
+        txtarea[0].selectionEnd = start;
+        txtarea[0].focus();
     }
 
     function get_chord_name(num) {
