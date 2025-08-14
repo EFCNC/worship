@@ -167,19 +167,20 @@ let API_URL = 'API/';
     }
 
     function submit_song(url, data) {
-        $.ajax({
+        return $.ajax({
             type: "post",
             url: url,
 	        data: data,
-            complete: function(response) {
+            /*complete: function(response) {
                 if(response.status==200) {
-                    return true;
+                    console.log(response)
+                    return response.responseText;
     	        }
                 else {
                    alert(response.responseText);
                    return false;
 		        }
-            },
+            },*/
             contentType: "application/json",
             dataType: 'json'
         });
@@ -218,19 +219,38 @@ let API_URL = 'API/';
                             }
                             if (num ==0) {
                                 click_url = API_URL + 'song/' + id + '/' +  dialog_title[num]['action'];
-                                temp = data_changed(JSON.stringify($("#song_form").serializeArray()));
+                                temp = data_changed($("#song_form").serializeArray());
                                 if (temp) {
-                                    submit_song(click_url, temp);
-                                    $( this ).dialog( "close" );
+                                    submit_song(click_url, JSON.stringify(temp));
                                 }
-                                else {
-                                    $( this ).dialog( "close" );
-                                }
+                                $( this ).dialog( "close" );
                             }
                             else {
                                 click_url = API_URL + 'song/' +  dialog_title[num]['action'];
-                                submit_song(click_url, JSON.stringify($("#song_form").serializeArray()));
-                                $( this ).dialog( "close" );
+                                const promised = new Promise(function(resolve, reject) {
+                                    const song_id = submit_song(click_url, JSON.stringify($("#song_form").serializeArray()));
+                                    if (song_id) {
+                                        return resolve(song_id);
+                                    }
+                                    else {
+                                        return reject('Failed adding new song.');
+                                    }
+                                });
+                                promised.then(function(result) {
+                                    console.log('before closing', result);
+                                    get_song(result).done(function(data) {
+                                        console.log('song_data', data);
+                                        data['date'] = worship_data.date;
+                                        songs_temp.push(data);
+                                        $.when( add_song_to_worship(worship)).then(function() {
+                                            init();
+                                        });
+                                    });
+                                    $('#dialog').dialog( "close" );
+                                })
+                                .catch(function(error) {
+                                    alert(error);
+                                });
                             }
                         }
                     },
