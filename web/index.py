@@ -7,37 +7,46 @@ from app import utils as Utils
 from app import tools as Tools
 from web.api import api
 import json
-import requests
 
 app = Flask(__name__)
 # register blueprint of API
 app.register_blueprint(api, url_prefix='/API')
 
 slides_data = {'pos': [0, 0], 'data': [], 'msg': '', 'dynamic': '', 'key': 0, 'background': [], 'id': 0}
-client = {'admin': 1, 'lead': 1, 'musician': 10, 'view': 10}
+client = {'admin': [], 'lead': [], 'musician': [], 'view': []}
+client_mode = ''
 
 # SocketIO section, for presentation control
 
 socketio = SocketIO(app)
 
 @socketio.on('reload')
-def reload_json(id):
+def reload_json():
 	print('Reloading json data')
-	if __get_slide_json(id):
+	if __get_slide_json():
 		emit('reload', slides_data, broadcast=True)
 
 @socketio.on('connect')
 def handle_connect():
-    print('Client connected')
+	__update_client(client_mode, request.sid)
 
-@socketio.on('disconnecting')
-def handle_disconnect(data):
-	print('Client disconnected: {}'.format(data["mode"]))
+@socketio.on('disconnect')
+def handle_disconnect():
+	# release slides_data if all clients are disconnected
+	global client
+	print(client)
+	sid = request.sid
+	for val in client.values():
+		if sid in val:
+			val.remove(sid)
+	if not client['admin'] and not client['musician'] and not client['lead'] and not client['view']:
+		_init_slide()
+	print('Client disconnected: {}'.format(request.sid))
+	print(client)
 
 @socketio.on('control')
 def handle_control(data):
 	print('Received message:', data)
-	global slides_data
 	if data['type'] == 'pos': # When data is about position change, empty dynamic
 		slides_data['dynamic'] = ''
 		if slides_data['pos'][0] != data['value'][0]: # When pos is different (new slide), change key to 0
@@ -77,24 +86,11 @@ def worship_notes(id):
 	w = Utils.worship_list(id)[0]
 	return render_template('worship_notes.html', songs=songs, id=id, w=w)
 
-@app.route("/slides/<id>/<action>")
-def sildes_admin(id, action):
-	if action == "start":
-		slides = __get_slide_json(id)
-		if slides:
-			return id
-		return "Failed starting slides", 400
-	elif action == "stop":
-		_init_slide()
-		return "Slide stopped", 200
-
-
-@app.route("/slides/admin")
+@app.route("/slides/admin1")
 def sildes_admin1():
-	global client
 	id = request.args.get('id', None)
 	if id:
-		slides = __get_slide_json(id)
+		slides = __get_slide_json()
 		if slides:
 			return render_template('slides_admin.html', presentation=slides_data)
 		return "Worship slides not found!!", 400
@@ -106,13 +102,21 @@ def sildes_admin1():
 @app.route("/slides")
 @app.route("/slides/<mode>")
 def slides_viewer(mode=None):
+	__update_client_mode(mode)
 	if not mode:
-		mode = ''
-		#global client
-		#if client[mode] == 0:
-		#	return "No more seat for connection!!"
-		#client[mode] -= 1
-		#return slides_data
+		return render_template('slides.html', presentation=slides_data, mode='')
+	if not slides_data['data']:
+		__get_slide_json()
+	if mode == 'admin':
+		if len(client['admin']) > 0:
+			__update_client_mode('')
+			return "<script>alert('Only one Admin mode can be connected, please use different mode.');window.location.replace('../slides');</script>"
+		return render_template('slides_admin.html', presentation=slides_data)
+	elif mode == 'lead':
+		if len(client['lead']) > 0:
+			__update_client_mode('')
+			return "<script>alert('Only one Lead mode can be connected, please use different mode.');window.location.replace('../slides');</script>"
+		return render_template('slides.html', presentation=slides_data, mode=mode)
 	return render_template('slides.html', presentation=slides_data, mode=mode)
 
 
@@ -245,7 +249,7 @@ def file_list():
 
 @app.route("/1")
 def t():
-	return render_template('1.html')
+	return slides_data
 
 @app.route("/playground/<name>")
 def playground(name):
@@ -259,11 +263,27 @@ def _init_slide():
 	global slides_data
 	slides_data = {'pos': [0, 0], 'data': [], 'msg': '', 'dynamic': '', 'key': 0, 'background': [], 'id': 0}
 
-def __get_slide_json(id):
+def __update_client(mode, id):
+	if mode:
+		global client
+		if mode == 'admin':
+			if len(client[mode]) == 0:
+				client[mode].append(id)
+		elif mode == 'lead':
+			if len(client[mode]) == 0:
+				client[mode].append(id)
+
+def __update_client_mode(name):
+	global client_mode
+	client_mode = name
+
+def __get_slide_json():
+	coming_sunday = Tools.allsundays()[0]
+	id = Utils.get_worship_id(coming_sunday)[0]
 	slides = Tools.get_worship_json(id)
-	if not slides:
-		return false
 	global slides_data
+	if not slides:
+		return None
 	slides_data['id'] = id
 	slides_data['data'] = slides
 	slides_data['pos'] = [0, 0]

@@ -254,7 +254,7 @@
                 update_json();
             }
             else {
-                socket.emit('reload', w_id);
+                socket.emit('reload');
                 $('#preview').css('background-image', 'url(' + slides[pos]['style']['background'] + ')');
             }
             $('#edit_btn').hide();
@@ -328,6 +328,10 @@
                     case 'delete':
                         delete_slide();
                         break
+                    case '-1':
+                        $("#content").val('');
+                        send_msg('');
+                        break;
                 }
             }
         });

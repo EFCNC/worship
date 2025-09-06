@@ -23,10 +23,7 @@
     let preview;    // Declare target div for load() function
 
     socket.on('connect', function () {
-        console.log('Lead View connected to the server');
-        socket.on('disconnected', function() {
-            socket.emit('disconnecting', {'mode': mode});
-        });
+        console.log('connected to the server');
     });
 
     socket.on('response', function (data) {
@@ -42,17 +39,17 @@
     });
 
     // init data from flask
-    presentation = {{ presentation|safe }};
-    slides = presentation['data'];
-    pos = presentation['pos'][0];
-    order = presentation['pos'][1];
-    msg = presentation['msg'];
-    mode = '{{ mode }}';
+        presentation = {{ presentation|safe }};
+        slides = presentation['data'];
+        pos = presentation['pos'][0];
+        order = presentation['pos'][1];
+        msg = presentation['msg'];
+        mode = '{{ mode|safe }}';
 
     function init() {
-        if (slides.length == 0) {
+        if (slides.length == 0 || mode == '') {
             alert("No slide is currently running!!");
-            mode = '';
+            //mode = '';
             return false;
         }
         $("#control_btn").hide();
@@ -102,8 +99,8 @@
 
     // functions for init page
     $(document).on('click', '#control_btn button', function() {
-        mode = $(this).attr('name');
-        init();
+        mode_ = $(this).attr('name');
+        document.location.href = 'slides/'+ mode_;
     });
 
     /*$(document).on('change', '#key', function (event) {
@@ -131,7 +128,7 @@
 </script>
 </head>
 <body>
-<div id="control_btn"><button name="view">View</button>&nbsp;<button name="lead">Lead</button>&nbsp;<button name="musician">Musician</button>&nbsp;<button name="score">Score</button>&nbsp;<button name="remote">Remote</button></div>
+<div id="control_btn"><button name="admin">Admin</button>&nbsp;<button name="lead">Lead</button>&nbsp;<button name="view">View</button>&nbsp;<button name="musician">Musician</button>&nbsp;<button name="score">Score</button>&nbsp;<button name="remote">Remote</button></div>
 <div id="container"></div>
 </body>
 </html>

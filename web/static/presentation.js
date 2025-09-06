@@ -14,7 +14,7 @@
     let key_change = 0;
     let last_position = [-1, -1];
     let background = [];
-    let mode = 'view';
+    let mode = '';
     let touchableElement;
     let w_id;
     let adding_slide = 0;
@@ -416,6 +416,7 @@
         var new_font_size = 0;
         for (var i=0;i<kids.length;i++) {
             var overflow = true;
+            counter = 0;
             content_height = kids[i].scrollHeight;
             if (mode == 'musician') {
                 div_height = $("#preview").height()-65;
@@ -428,10 +429,11 @@
             else {
                 div_height = $("#preview").height()/kids.length-65;
             }
-            while (overflow) {
+            while (overflow && counter < 15) {
                 if (content_height <= div_height) {
                     break;
                 }
+                counter++;
                 $temp = jQuery(kids[i])
                 console.log("Content is too long", $temp.css('font-size'));
                 new_font_size = parseInt($temp.css('font-size')) - 2;
