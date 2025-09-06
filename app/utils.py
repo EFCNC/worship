@@ -389,6 +389,11 @@ def get_worship_date(id):
     r = dB.run_para(sql, id)[0]
     return r
 
+def get_worship_id(date):
+    sql = "select worship_id from worship where scheduled_date = ?"
+    r = dB.run_para(sql, date)[0]
+    return r
+
 def get_worship_songs(id):
     #sql = "select s.title, s.author, s.lang, s.lang_2, s.song_key, s.sequence, s.bible_verse, s.lyricist, s.book, s.copyright, s.ccli, s.content, (select link from media m where m.song_id=s.song_id and m_type=0) as video, (select link from media m where m.song_id=s.song_id and m_type=1) as score, w.scheduled_date as date, se.song_id as id, se.transpose as transpose, se.sequence alt_sequence, se.notes as notese from song_set se left join songs s on s.song_id = se.song_id  inner join worship w on w.scheduled_date = se.scheduled_date where se.worship_id = ? group by s.song_id order by se.song_order"
     sql = "select s.title, s.author, s.lang, s.lang_2, s.song_key, s.sequence, s.bible_verse, s.lyricist, s.book, s.copyright, s.ccli, s.content, (select link from media m where m.song_id=s.song_id and m_type='video') as video, (select link from media m where m.song_id=s.song_id and m_type='score') as score, w.scheduled_date as date, se.song_id as id, se.transpose as transpose, se.sequence alt_sequence, se.notes as notes, se.bible, se.version, se.rowid, se.type, (select abc from media m where m.song_id=s.song_id and m_type='abc') as abc from presentation se left join songs s on s.song_id = se.song_id  inner join worship w on w.scheduled_date = se.scheduled_date where se.worship_id = ? order by se.song_order"
