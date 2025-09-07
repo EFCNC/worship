@@ -88,16 +88,8 @@ def worship_notes(id):
 
 @app.route("/slides/admin1")
 def sildes_admin1():
-	id = request.args.get('id', None)
-	if id:
-		slides = __get_slide_json()
-		if slides:
-			return render_template('slides_admin.html', presentation=slides_data)
-		return "Worship slides not found!!", 400
-	else:
-		files = Tools.list_worship_file()
-		id = slides_data["id"]
-		return render_template('slide_list.html', files=files, id=id)
+	_init_slide()
+	return slides_data
 
 @app.route("/slides")
 @app.route("/slides/<mode>")
