@@ -142,7 +142,7 @@ span.chunk:before {
     <p><pre>{{ w.notes }}</pre></p>
 
     <!-- Container of worship songs -->
-    <button class="view" onclick="javascript:load(0, this.className)">View</button><button class="chord" onclick="javascript:load(1, this.className)">Chord</button><button class="bi" onclick="javascript:load(2, this.className)">Bilingual</button>
+    <button class="view" onclick="javascript:load(0, this.className)">View</button><button class="chord" onclick="javascript:load(1, this.className)">Chord</button><button class="bi" onclick="javascript:load(2, this.className)">Bilingual</button><button class="bi" onclick="javascript:load_chords()">All Chords</button><button class="bi" onclick="javascript:load_sheets()">All Sheets</button>
     <hr/>
     <div id="worship">
     </div>
@@ -193,6 +193,15 @@ span.chunk:before {
     }
 
     let worship = {{ songs|safe }};
+    let song_id = worship.map(o=> o.id);
+
+    function load_chords() {
+        window.open('/chords/' + song_id.toString(), '_blank').focus();
+    }
+
+    function load_sheets() {
+        window.open('/sheets/' + song_id.toString(), '_blank').focus();
+    }
 
     function lang_tag(lang) {
         if(lang == '') { return ''; }
