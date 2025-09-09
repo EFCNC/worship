@@ -1,187 +1,144 @@
-<!DOCTYPE html>
-<html lang="en">
+{% include 'header.html' %}
 <head>
-    <meta charset="UTF-8">
-    <title>EFCNC Worship Songs Database</title>
-      <link href="../static/jquery-ui.css" rel="stylesheet">
-<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-	  <script src="../static/jquery-3.6.0.min.js"></script>
-       <script src="../static/jquery-ui.js"></script>
-       <script src="../static/jquery.weekpicker.js"></script>
-    <style>
-            #preview {
-        background-position: center;
-        background-repeat: no-repeat;
-        background-size: cover;
-        background-color: #000;
-        text-align: center;
-        font-size: 50px;
-        padding: 10px;
-        color: #fff;
-    }
+    <link href="../static/presentation.css" rel="stylesheet">
+  <style>
+    span.chunk {
+    position:relative;
+}
 
-        .song_title {
-            cursor: pointer;
-        }
-        .highlighted {
-            font-weight: 400px;
-            color: red;
-        }
-        #popup {
-            background-color: #fff;
-            width: 300px;
-            border: 2px solid green;
-            padding: 50px;
-            margin: 20px;
-        }
-        .lyric {
-            display: inline-grid;
-            grid-template-columns: auto;
-            grid-template-rows: auto auto;
-            line-height: 1;
-        }
-        .lyric[data-chord] {
-            --chord: attr(data-chord);
-        }
-        .lyric:before {
-            content: var(--chord, '\00a0');
-        }
-        #chord_chk {
-            text-align: right;
-            padding: 10px;
-        }
-        .line {
-            display: flex;
-            align-items: flex-end;
-            flex-wrap: wrap;
-        }
+span.chunk:before {
+    font-size:65%;
+    content:attr(data-chord);
+    position:absolute;
+    top:-120%;
+}
 
-        .chord-letter {
-            display: flex;
-            flex-direction: column;
-            padding: 0 2px;
-            align-items: center; /* center chord */
-        }
+#sheet {
+    font-size:125%;
+    line-height: 200%;
+}
 
-        .chord {
-            font-style: italic;
-            font-weight: bold;
-            font-size: 15px;
-        }
-    .split 1 {
-        height: 100%;
-    }
-
-</style>
-</head>
-<body>
-<div id="search_panel"><input id="keyword" type="text"></text>&nbsp;<button id="search_btn">Search</button>&nbsp;<button id="search_btn1">Search Bible</button></div>
-<hr/>
-<div id="preview" class="split 1"><div id="songs"></div>
-<div id="region"></div>
-</div>
-<div id="bible"></div>
-</body>
+  </style>
 <script>
-var lyrics = '';
-var lyrics_tag = '';
-$(document).ready(function () {
-    $("#search_btn").click(function() {
-        var keyword = $("#keyword").val();
-        if (keyword == '') {
-            $("#keyword").focus();
-            return false;
-        };
-        var url = '/API/search?keyword=' + keyword;
-        $.when( $.ajax( url ) ).then(function( data, textStatus, jqXHR ) {
-            // This returns dict with id, title and file
-            console.log(data)
-            var html = '';
-            for(var i=0;i<data['right'].length;i++) {
-                html += "<span class='song_title' id='song_" + data['right'][i]['id'] + "' onclick='get_song(this.id); return false'>" + highlight_keyword(keyword, data['right'][i]['title']) + "</span></a>";
-                /*if (data[i]['file']!=null) {
-                    html += "<a href='title?id=" + data['right'][i]['id'] + "'>" + data['right'][i]['file']+ "</a>";
-                }*/
-                html += "<br/>";
+    function parse_chord(chord, diff) {
+	    diff = Number(diff);
+	    chord = chord.split('/');
+        new_chord = []
+        for(c in chord) {
+    	    if(chord[c][1] == 'b' || chord[c][1] == '#') {
+              	pos_ = keys.indexOf(chord[c].substring(0,2))+diff
+              	if(pos_>= keys.length) {
+          	    	pos_ = pos_-keys.length;
+                }
+                else if(pos_<0) {
+            	    pos_ = keys.length+pos_;
+                }
+            new_chord.push(keys[pos_]+chord[c].substring(2));
+        	chord[c] = chord[c].substring(0,2) + chord[c].substring(2);
             }
-            $("#songs").html(html);
-        });
-
-    });
-
-    $("#search_btn1").click(function() {
-        var keyword = $("#keyword").val();
-        if (keyword == '') {
-            $("#keyword").focus();
-            return false;
-        };
-        var url = '/API/search/bible?keyword=' + keyword;
-        $.when( $.ajax( url ) ).then(function( data, textStatus, jqXHR ) {
-            // This returns dict with id, title and file
-            console.log(jqXHR.status)
-            var html = '';
-            verses = data["data"]["verses"]
-            if(!data["data"]) {
-                $("#bible").html("No verses found!!");
-                return false;
+            else {
+			    pos_ = keys.indexOf(chord[c][0])+diff
+          	    if(pos_>= keys.length) {
+          		    pos_ = pos_-keys.length;
+                }
+                else if(pos_<0) {
+            	    pos_ = keys.length+pos_;
+                }
+                new_chord.push(keys[pos_]+chord[c].substring(1));
+                chord[c] = chord[c][0] + chord[c].substring(1);
             }
-            for(var i=0;i<verses.length;i++) {
-                html += verses[i]["reference"] + ": " + highlight_keyword(keyword, verses[i]["text"]) + "<br/>";
-            }
-            $("#bible").html(html);
-        });
-    });
-
-    $(document).on("click", "#chord_chk", function(e) {
-        if(this.checked) {
-            $("#verses").html(lyrics_tag);
         }
-        else {
-            $("#verses").html(lyrics);
+        if(diff) {
+    	    return new_chord.join('/');
         }
-    });
-        /*$(document).on("mouseover", ".song_title", function(e) {
-            mouseX = e.pageX;
-            mouseY = e.pageY;
-            id = this;
-            console.log(e.pageX, e.pageY);
-            //$(this).css({position: 'relative'});
-            $("#popup").css({top: e.pageX, left: e.pageY, position:'absolute'});
-            $('#popup').toggle();
-        });
-
-        $(document).on("mouseout", ".song_title", function(e) {
-            $('#popup').toggle();
-        });*/
-});
-    function get_song(id) {
-        id = id.split('_')[1];
-        var url = '/API/song/' + id + '?data=1';
-        $("#songs").html('Loading...');
-        $.when( $.ajax( url ) ).then(function( data, textStatus, jqXHR ) {
-            html = display_song(data);
-            $("#songs").html(html);
-            $("#verses").html(lyrics);
-        });
-    }
-
-    function display_song(data) {
-        html = '';
-        lyrics = '';
-        lyrics_tag = '';
-        html += "<p>Title: " + data["title"] + "<input type='checkbox' id='chord_chk' value='chord'><label for='chord_chk'>Chord</label></p><hr/><div id='verses' class='line'>";
-        for(var i=0;i<data["content"].length;i++) {
-            lyrics += data["content"][i]["origin_text"];
-            lyrics_tag += data["content"][i]["origin_chord"];
-        }
-        html += "</div>";
-        return html;
-    }
-
-    function highlight_keyword(keyword, text) {
-        var regEx = new RegExp((keyword.trim()), "ig");
-        return text.replace(regEx, function(a){ return '<span class="highlighted">' + a + '</span>';});
+	    return chord.join('/');
     }
 
 </script>
-</html>
+</head>
+<body bgcolor="#fff">
+<div id="my_score">
+  <div id="top"><span id="sheet_title"></span>&nbsp;<span id="sheet_btn"></span></div>
+  <div id="abc">
+  <div id="keys"></div>
+  </div>
+  </div>
+  <div style="text-align:center" id="sheet"></div>
+</div>
+</body>
+<script>
+  let chords = {{ chords|safe }};
+  let index = 0;
+  let data;
+  let keys;
+
+  function load_sheet(ii, key) {
+    data = chords[ii];
+    let name = [];
+	keys_1 = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
+	keys_2 = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B']
+	if(keys_1.indexOf(data.key) > 0) {
+	  keys = keys_1;
+	}
+	else {
+	  keys = keys_2;
+	}
+	html = '';
+	if (!key) {
+	  key = data.key;
+	}
+    for(var i=0;i<keys.length;i++) {
+      if (key == keys[i]) {
+        html += '<button title="Original Key" name="' + keys[i] + '"><b>' + keys[i] + '</b></button>';
+      }
+      else {
+        html += '<button name="' + keys[i] + '">' + keys[i] + '</button>';
+      }
+    }
+    $('#keys').html(html);
+    let transpose = 0;
+    if (key) {
+      transpose = keys.indexOf(key) - keys.indexOf(data.key);
+    }
+
+    temp = '';
+    for(var i=0;i<data.content.length;i++) {
+      if(name.indexOf(data.content[i].name) < 0) {
+        chord = data.content[i].origin_chord
+        if (transpose != 0) {
+          chord = chord.replace(/(data-chord=")([^"]+)/g, (match, g1, g2) => {return g1+parse_chord(g2, transpose);});
+        }
+        temp += '<div class="block">' + data.content[i].name + '<br/>' + chord + '</div>';
+        name.push(data.content[i].name);
+      }
+    }
+    $('#sheet').empty();
+    $('#sheet').html(temp);
+    $('#sheet').show();
+  }
+
+  $(document).ready(function() {
+    // Form select box with song title
+    if (chords.length > 1) {
+      var songs = '<select name="songs" id="song_list">';
+      for(var s=0;s<chords.length;s++) {
+        song_title = chords[s].title;
+        song_key = chords[s].key
+        songs += '<option value=' + s + '>' + song_title + ' (' + song_key + ')</option>';
+      }
+      songs += '</select>';
+      $("#sheet_title").html(songs);
+      load_sheet(0);
+    }
+
+    $('#song_list').change(function(){
+      index = this.value;
+      load_sheet(index);
+    });
+  });
+
+  $(document).on('click', 'button', function() {
+    load_sheet(index, this.name)
+  });
+</script>
+</body>

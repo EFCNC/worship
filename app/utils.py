@@ -191,7 +191,6 @@ def get_songs(ids=None):
                 temp['abc'] = r[15]
         else:
             songs.append({'type': 'song', 'title': r[0], 'author': r[1] if r[1] else '', 'lang': r[2] if r[2] else '', 'lang_2': r[3] if r[3] else '', 'key': r[4] if r[4] else '', 'sequence': r[5] if r[5] else '', 'bible': r[6] if r[6] else '', 'lyricist': r[7] if r[7] else '', 'book': r[8] if r[8] else '', 'copyright': r[9] if r[9] else '', 'ccli': r[10] if r[10] else '', 'lyrics_raw': r[11], 'content': Parser.parse_lyrics(r[11], r[5]), 'video': [r[12]] if r[13] == 'video' else [], 'score': [r[12]] if r[13] == 'score' else [], 'abc': r[15] if r[13] == 'abc' and r[14] else '', 'id': r[15], 'notes': '', 'transpose': ['0'], 'alt_sequence': r[5] if r[5] else ''})
-    print(songs)
     return songs
 
 def get_song_sheet(ids):
@@ -212,6 +211,14 @@ def get_song_sheet(ids):
         sheet['title'] = r[2]
         sheets.append(sheet)
     return sheets
+
+def get_song_chords(ids):
+    sql = "select s.song_id, s.title, s.content, s.sequence, s.song_key from songs s where s.song_id in ({ids})".format(ids=','.join(['?']*len(ids)))
+    result = dB.run_para(sql, ids)
+    chords = []
+    for r in result:
+        chords.append({'id': r[0], 'title': r[1], 'content': Parser.parse_lyrics(r[2], r[3]), 'key': r[4]})
+    return chords
 
 def get_song_by_id(id):
     sql = "select s.title, s.author, s.lang, s.lang_2, s.song_key, s.sequence, s.bible_verse, s.lyricist, s.book, s.copyright, s.ccli, s.content, m.link, m.m_type, m.abc, s.song_id as id from songs s left join media m on s.song_id = m.song_id where s.song_id = ?"
