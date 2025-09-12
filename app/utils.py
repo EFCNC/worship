@@ -248,8 +248,8 @@ def get_song_by_title(title):
 
 def add_song(content):
     content = [x for x in content if x['value'] != '']
-    media = [x for x in content if x['name'] in ('video', 'score', 'file')]
-    content = [x for x in content if x['name'] not in ('video', 'score', 'file')]
+    media = [x for x in content if x['name'] in ('video', 'score', 'abc')]
+    content = [x for x in content if x['name'] not in ('video', 'score', 'abc')]
     sql = "insert into songs("
     for s in content:
         sql += '{},'.format(s['name'])
