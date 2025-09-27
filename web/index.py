@@ -89,6 +89,8 @@ def worship_notes(id):
 @app.route("/slides/admin1")
 def sildes_admin1():
 	_init_slide()
+	global client
+	client = {'admin': [], 'lead': [], 'musician': [], 'view': []}
 	return slides_data
 
 @app.route("/slides")
@@ -122,7 +124,7 @@ def get_notes():
 	id = request.args.get('id', None)
 	content = []
 	if id:
-		content = Utils.get_bible_by_id(id)
+		content = Utils.get_info_by_id(id)
 	return render_template("notes.html", content=content)
 
 @app.route("/song/list")
