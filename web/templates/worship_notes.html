@@ -232,7 +232,7 @@ span.chunk:before {
                 html += '<div class="info">' + data.notes.replace('\n', '<br/>') + '</div>';
             }
             else {
-                html += '<div class="songs"><div class="reference">' + data.title + ' (' + parse_chord(data.key, parseInt(data.transpose)) + ') ' + lang_tag(data.lang) + ' ' + lang_tag(data.lang_2) + ' [' + data.sequence + ']';
+                html += '<div class="songs"><div class="reference">' + data.title + ' (' + parse_chord(data.key, parseInt(data.transpose)) + ') ' + lang_tag(data.lang) + ' ' + lang_tag(data.lang_2) + ' [' + data.alt_sequence + ']';
 
                 if (data.score) {
                     html += '&nbsp;&nbsp;<a href="' + data.score + '" target="new"><i style="font-size:24px" class="fa" title="Sheet Music">&#xf0f6;</i></a>';
