@@ -1,0 +1,195 @@
+{% include 'header.html' %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<style>
+.worship_container {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+.worship_container > div {
+  min-width: 220px;
+  margin: 10px;
+  text-align: center;
+  font-size: 14px;
+}
+
+#content > div {
+    position: relative;
+    display: inline-block;
+    border-radius: 5px;
+    margin: 5px;
+    padding: 5px 25px 5px 5px;
+}
+
+.announcement {
+    background-color: #556b2f;
+    color: #fff;
+}
+
+.caring {
+    background-color: #6b552f;
+    color: #fff;
+}
+
+#content > div:hover {
+    cursor: pointer;
+}
+
+.fa-trash-o .show {
+  visibility: visible;
+  -webkit-animation: fadeIn 1s;
+  animation: fadeIn 1s;
+}
+
+@media (max-width: 600px) {
+  .worship_container {
+    flex-direction: column;
+    flex: 100%;
+  }
+}
+
+</style>
+<body>
+<div class="worship_container">
+    <div class="worship-card">
+        <span id="current"></span>
+        <div id="content" style="padding:10px;text-align:left;">
+        </div>
+        <button id="pre" class="nav" title="Last Week"></button>&nbsp;&nbsp;&nbsp;&nbsp;<button id="add_1" title="Add Announcement">Add Announcement</button>&nbsp;&nbsp;<button id="add_2" title="Add Caring">Add Caring</button>&nbsp;&nbsp;<button id="copyall"  itle="Copy from Last Week">Copy last week</button>&nbsp;&nbsp;<button id="delete" title="Delete selected Item"><i class="fa fa-trash-o"></i></button>&nbsp;&nbsp;&nbsp;&nbsp;<button id="next" class="nav" title="Next Week"></button>
+    </div>
+</div>
+</body>
+<script>
+    let content = [];
+    let current_week;
+    let d = new Date();
+    const sundays = [];
+    getSundays(new Date().getFullYear());
+
+    $(document).ready(function () {
+        d.setDate(d.getDate() - d.getDay() + 7); // coming Sunday
+        index = sundays.indexOf(d.toLocaleDateString('en-CA'));
+        current_week =  sundays[index];
+        $('#current').html('<h3>Announcement for: ' + current_week + '</h3>');
+        get_info(current_week);
+        show_nav(index);
+    });
+
+    $('#copyall').on('click', function() {
+        d1 = current_week;
+        d2 = sundays[sundays.indexOf(current_week)-1];
+        url = API_URL + 'info/duplicate?d1=' + d1 + '&d2=' + d2;
+        $.when( $.ajax( url ) ).then(function( response, textStatus, jqXHR ) {
+            if(response) {
+                get_info(current_week);
+            }
+        });
+    });
+
+    $('#delete').on('click', function() {
+        content_index = $('input[name="info_box"]:checked').val();
+        if (content_index) {
+            if(confirm("Are you sure?")) {
+                url = API_URL + 'info/delete/'+content[content_index].id;
+                $.when( $.ajax( url ) ).then(function( response, textStatus, jqXHR ) {
+                    if(response) {
+                        get_info(current_week);
+                    }
+                });
+            }
+        }
+        else {
+            alert("Please select an item first!");
+        }
+    });
+
+    $(document).on('blur', '.info_list', function() {
+        tt = $(this).text();
+        if (tt == 'New Announcement' || tt == 'New Caring') {
+            return false;
+        }
+        cc = content[$(this).prev('input').val()];
+        if(tt!= cc.info) {  // content changed
+            cc.info = tt;
+            console.log(cc)
+            url = API_URL + 'info/edit';
+            data = cc;
+            $.ajax({
+                type: "post",
+                url: url,
+	            data: JSON.stringify(data),
+                contentType: "application/json",
+                dataType: 'json',
+                complete: function(response) {
+          	        if(response.status==200) {
+                        get_info(current_week);
+                    }
+                }
+            });
+        }
+    });
+
+    $('.nav').on('click', function() {
+        index = sundays.indexOf($(this).val());
+        current_week = sundays[index];
+        get_info(current_week);
+        show_nav(index);
+        $('#current').html('<h3>Announcement for: ' + current_week + '</h3>');
+    });
+
+    $('#add_1').click(function() {
+        $("#content").append('<input type="radio" value="' + content.length + '" name="info_box"/><div class="info_list announcement" contenteditable="true">New Announcement</div><br/>');
+        content.push({'id': -1, 'info': 'New Announcement', 'type': 'announcement', 'date': current_week});
+    });
+
+    $('#add_2').click(function() {
+        $("#content").append('<input type="radio" value="' + content.length + '" name="info_box"/><div class="info_list caring" contenteditable="true">New Caring</div><br/>');
+        content.push({'id': -1, 'info': 'New Caring', 'type': 'caring', 'date': current_week});
+    });
+
+    function getSundays(year) {
+        var i = year-1;
+        while (i <= year) {
+            let date = new Date(i, 0, 1); // January 1 of the specified year
+            date.setDate(date.getDate() + (7 - date.getDay()) % 7); // Find the first Sunday
+            while (date.getFullYear() === i) {
+                sundays.push(new Date(date).toLocaleDateString('en-CA')); // Add the Sunday to the array
+                date.setDate(date.getDate() + 7); // Move to the next Sunday
+            }
+            i++;
+        }
+    }
+
+    function show_nav(i) {
+        if (i > 0) {
+            $('#pre').text('<< ' + sundays[i-1]);
+            $('#pre').val(sundays[i-1]);
+        }
+        if (i < sundays.length-1) {
+            $('#next').text(sundays[i+1] + ' >>')
+            $('#next').val(sundays[i+1])
+        }
+    }
+
+    function get_info(current_week) {
+        url = API_URL + 'info/'+current_week;
+        $.when( $.ajax( url ) ).then(function( response, textStatus, jqXHR ) {
+            if(response) {
+                content = response;
+                html = '';
+                i = 0;
+                $.each(content, function() {
+                    if (this.info) {
+                        html += '<input type="radio" value="' + i + '" name="info_box"/><div name="' + i + '" class="info_list ' + this.type + '" contenteditable="true" title="' + this.type + '">' + this.info + '</div><br/>';
+                        i++;
+                    }
+                });
+            }
+            $('#content').html(html);
+        });
+    }
+</script>

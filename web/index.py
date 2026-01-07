@@ -73,6 +73,10 @@ def index():
 	worship = [{'date': x, 'worship': next((y for y in worship if y['date'] == x), -1)} for x in sundays[1]]
 	return render_template('worship.html', worship=worship, sundays=sundays)
 
+@app.route("/info")
+def info():
+	return render_template('info.html')
+
 @app.route("/worship/<id>")
 def worship_notes(id):
 	json_file = request.args.get('json', None)

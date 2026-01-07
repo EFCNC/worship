@@ -53,6 +53,27 @@ def preview(id):
     slides = Utils.get_worship_songs(id)
     return slides
 
+@api.route("/info/<d>")
+def get_info(d):
+    info = Utils.get_info(d)
+    return info
+
+@api.route("/info/edit", methods=["POST"])
+def edit_info():
+    info = request.get_json()
+    result = Utils.add_info(info)
+    print(result)
+    return result
+
+@api.route("/info/duplicate")
+def duplicate_info():
+    d1 = request.args.get('d1', None)
+    d2 = request.args.get('d2', None)
+    return Utils.duplicate_info(d1, d2)
+
+@api.route("/info/delete/<id>")
+def del_info(id):
+    return Utils.del_info_by_id(id)
 
 @api.route("/download")
 def download():
@@ -151,14 +172,6 @@ def edit_sermon(id):
         return "good"
     sermon = Utils.get_worship(id)
     return sermon
-
-@api.route("/notes", methods=["POST"])
-def edit_notes():
-    '''
-    TODO
-    :return: content of bible or None
-    '''
-    pass
 
 # BibleAPI section
 @api.route("/bible/books")

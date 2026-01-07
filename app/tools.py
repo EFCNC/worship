@@ -85,7 +85,42 @@ def create_json(id, worship=None):
         template_file = os.path.join(root, 'template.json')
         with open(template_file, "r", encoding="utf-8") as f:
             template = json.loads(f.read())
+        sermon = Utils.get_worship(id)
+        info = Utils.get_info(worship_date)
+        announce = [[re.search('(^[^\[]+)', x['info'])[0], re.findall('\[[^\]]+\](.+)$', x['info'])] for x in info if
+             x['type'] == 'announcement']
+        a_origin = '<ul>'
+        a_region = '<ul>'
+        for a in announce:
+            a_origin += '<li>' + a[0] + '</li>'
+            if a[1]:
+                a_region += '<li>' + a[1][0] + '</li>'
+
+        caring = [[re.search('(^[^\[]+)', x['info'])[0], re.findall('\[[^\]]+\](.+)$', x['info'])] for x in info if
+             x['type'] == 'caring']
+        a_origin += '</ul>'
+        a_region += '</ul>'
+
+        c_origin = '<ul>'
+        c_region = '<ul>'
+        for c in caring:
+            c_origin += '<li>' + c[0] + '</li>'
+            if c[1]:
+                c_region += '<li>' + c[1][0] + '</li>'
+        c_origin += '</ul>'
+        c_region += '</ul>'
+
+        template["announcement"]["content"]["origin_text"] = a_origin
+        template["announcement"]["content"]["region_text"] = a_region
+        template["caring"]["content"]["origin_text"] = c_origin
+        template["caring"]["content"]["region_text"] = c_region
+        template["sermon"]["content"]["origin_text"] = '<div>{title}</div><div><br></div><div>{bible}</div>'.format(bible=sermon['bible'], title=sermon['title'])
+        template["sermon"]["content"]["region_text"] = '<div></div><div>{speaker}</div><div>{outline}</div>'.format(outline=sermon['outline'], speaker=sermon['speaker'])
         worship.insert(0, template["welcome"])
+        worship.insert(1, template["announcement"])
+        worship.append(template["sermon"])
+        worship.append(template["offering"])
+        worship.append(template["caring"])
         worship.append(template["benediction"])
 
     else:

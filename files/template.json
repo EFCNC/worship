@@ -17,6 +17,92 @@
       "title":"安靜心",
       "type":"info"
    },
+   "announcement":{
+      "bible":"",
+      "content":{
+         "origin_text":"",
+         "region_text":""
+      },
+      "lang":"",
+      "lang_2":"",
+      "notes":"報告",
+      "style":{
+         "align":"left",
+         "background":"",
+         "color":"",
+         "bgcolor":""
+      },
+      "title":"報告",
+      "type":"info"
+   },
+   "caring":{
+      "bible":"",
+      "content":{
+         "origin_text":"",
+         "region_text":""
+      },
+      "lang":"",
+      "lang_2":"",
+      "notes":"肢體交通",
+      "style":{
+         "align":"left",
+         "background":"",
+         "color":"",
+         "bgcolor":""
+      },
+      "title":"肢體交通",
+      "type":"info"
+   },
+   "offering":{
+      "author": "Mozart",
+      "lang": "zh-TW",
+      "lang_2": "en",
+      "key": "F",
+      "sequence": "1,2,3,4,5",
+      "bible": "羅馬書12:1",
+      "lyricist": "Frances Ridley Havergal",
+      "book": "聖詩(2009) 382",
+      "copyright": "",
+      "ccli": "",
+      "lyrics_raw": "<1>\r\n我的性命獻互祢，\r\n做祢路用到一世；\r\n時刻暝日獻互主，\r\n歸榮光祢萬年久。\r\n[region 2]\r\nTake my silver and my gold,\r\nNot a mite would I with hold.\r\nTake my intellect and use\r\nEvery pow’r as Thou shalt choose.\r\n</1>\r\n<2>\r\n我的手愛祢命令，\r\n為著我主做差用；\r\n我腳也愛為祢獻，\r\n常常替祢行無倦。\r\n</2>\r\n<3>\r\n我的聲音互祢用，\r\n歡喜謳咾主無停；\r\n我獻嘴唇來振動，\r\n報傳福音來救人。\r\n</3>\r\n<4>\r\n我的錢銀獻互祢，\r\n用出攏趁祢旨意；\r\n我的才情祢賞賜，\r\n甘願還祢做器具。\r\n</4>\r\n<5>\r\n我的疼痛求主助，\r\n疼祢贏過此世間；\r\n今我立志獻家己，\r\n永永專專歸互祢。\r\n阿們。\r\n</5>",
+      "content":[
+         {
+            "name": "4",
+            "origin": "我的錢銀獻互祢，<br/>用出攏趁祢旨意；<br/>我的才情祢賞賜，<br/>甘願還祢做器具。",
+            "region": "",
+            "origin_text": "我的錢銀獻互祢，<br/>用出攏趁祢旨意；<br/>我的才情祢賞賜，<br/>甘願還祢做器具。",
+            "region_text": "Take my silver and my gold,<br/>Not a mite would I with hold.<br/>Take my intellect and use<br/>Every pow’r as Thou shalt choose.",
+            "origin_chord": "我的錢銀獻互祢，<br/>用出攏趁祢旨意；<br/>我的才情祢賞賜，<br/>甘願還祢做器具。"
+         }],
+      "notes":"Offering Hymn",
+      "style":{
+         "align":"center",
+         "background":"",
+         "color":"",
+         "bgcolor":""
+      },
+      "title":"我的性命獻互祢",
+      "type":"song"
+   },
+   "sermon": {
+      "alt_sequence": "",
+      "author": "",
+      "style": {
+         "align": "center",
+         "background": ""
+      },
+      "bible": "",
+      "book": "",
+      "ccli": "",
+      "content": {
+         "origin_text": "",
+         "region_text": ""
+      },
+      "copyright": "",
+      "notes": "主日信息",
+      "title": "主日信息",
+      "type": "info"
+   },
    "benediction":{
       "bible":"",
       "content":{

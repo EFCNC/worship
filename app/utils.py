@@ -127,10 +127,22 @@ def get_worship_teams(id):
         roster.append({'id': r[3], 'user_id': r[4], 'user_name': r[0], 'user_name_2': r[1], 'inst_name': r[2]})
     return team, inst, roster
 
-def get_bible_by_id(id):
-    sql = "select rowid, notes, bible, version from presentation where rowid = ?"
+def get_info(d):
+    sql = "select id, content, type, note, date from info where content is not null and date = ?"
+    result = dB.run_para(sql, d)
+    info = []
+    for r in result:
+        info.append({'id': r[0], 'info': r[1], 'type': r[2] if r[2] else '', 'note': r[3] if r[3] else '', 'date': r[4]})
+    return info
+
+def get_info_by_id(id):
+    sql = "select id, content, type, note from info where id = ?"
     r = dB.run_para(sql, id)[0]
-    return {'rowid': r[0], 'notes': r[1], 'bible': r[2] if r[2] else '', 'version': r[3] if r[3] else ''}
+    return {'id': r[0], 'info': r[1], 'type': r[2] if r[2] else '', 'note': r[3] if r[3] else ''}
+
+def del_info_by_id(id):
+    sql = "delete from info where id = ?"
+    return dB.run_para(sql, id)
 
 def get_song_by_id_(id, db_name):
     db = [x for x in conf["db"]["imported"] if x["name"] == db_name]
@@ -245,6 +257,21 @@ def get_song_by_title(title):
     sql = "select song_id, title from songs where title = ?"
     result = dB.run_para(sql, title)
     return result
+
+def duplicate_info(d1, d2):
+    sql = 'insert into info(content, type, date) select d0.content, d0.type, ? from info d0 where d0.date = ? and d0.content not in (select d1.content from info d1 inner join info d2 on d1.content = d2.content where d1.date = ? and d2.date = ?)'
+    return dB.run_para(sql, [d1, d2, d2, d1])
+
+def add_info(content):
+    if content["id"] != -1:
+        sql = "update info set content = ?, type = ? where id = ?"
+        return dB.run_para(sql, [content["info"], content["type"], content["id"]])
+    else:
+        sql = "insert into info(content, type, date) values(?, ?, ?)"
+        id = dB.insert(sql, [content["info"], content["type"], content["date"]])
+        if id:
+            return str(id)
+        return "Error", 400
 
 def add_song(content):
     content = [x for x in content if x['value'] != '']
@@ -365,7 +392,6 @@ def edit_songset(id, content):
             else:
                 sql += '({}, {}, {}, "{}", "{}", {}, "{}", "{}"),'.format(song['song_id'], id, ','.join(song['transpose']), song['scheduled_date'], song['sequence'], song['song_order'], song['notes'], song['type'])
         sql = sql[:-1]
-        print(sql)
         return dB.run(sql)
 
 def update_sermon(data):
