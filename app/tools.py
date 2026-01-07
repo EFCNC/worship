@@ -89,26 +89,27 @@ def create_json(id, worship=None):
         info = Utils.get_info(worship_date)
         announce = [[re.search('(^[^\[]+)', x['info'])[0], re.findall('\[[^\]]+\](.+)$', x['info'])] for x in info if
              x['type'] == 'announcement']
-        a_origin = '<ul>'
-        a_region = '<ul>'
+        a_origin = ''
+        a_region = ''
         for a in announce:
             a_origin += '<li>' + a[0] + '</li>'
             if a[1]:
                 a_region += '<li>' + a[1][0] + '</li>'
 
+        a_origin = '<ul>' + a_origin + '</ul>' if a_origin else ''
+        a_region = '<ul>' + a_region + '</ul>' if a_region else ''
+
         caring = [[re.search('(^[^\[]+)', x['info'])[0], re.findall('\[[^\]]+\](.+)$', x['info'])] for x in info if
              x['type'] == 'caring']
-        a_origin += '</ul>'
-        a_region += '</ul>'
 
-        c_origin = '<ul>'
-        c_region = '<ul>'
+        c_origin = ''
+        c_region = ''
         for c in caring:
             c_origin += '<li>' + c[0] + '</li>'
             if c[1]:
                 c_region += '<li>' + c[1][0] + '</li>'
-        c_origin += '</ul>'
-        c_region += '</ul>'
+        c_origin = '<ul>' + c_origin + '</ul>' if c_origin else ''
+        c_region = '<ul>' + c_region + '</ul>' if c_region else ''
 
         template["announcement"]["content"]["origin_text"] = a_origin
         template["announcement"]["content"]["region_text"] = a_region
@@ -116,6 +117,17 @@ def create_json(id, worship=None):
         template["caring"]["content"]["region_text"] = c_region
         template["sermon"]["content"]["origin_text"] = '<div>{title}</div><div><br></div><div>{bible}</div>'.format(bible=sermon['bible'], title=sermon['title'])
         template["sermon"]["content"]["region_text"] = '<div></div><div>{speaker}</div><div>{outline}</div>'.format(outline=sermon['outline'], speaker=sermon['speaker'])
+
+        '''
+        Adding slides in the order of the following, to switch order just move the block up and down
+            welcome page
+            announcement
+            worship songs
+            sermon
+            offering
+            caring/prayers
+            benediction
+        '''
         worship.insert(0, template["welcome"])
         worship.insert(1, template["announcement"])
         worship.append(template["sermon"])

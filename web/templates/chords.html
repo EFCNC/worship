@@ -119,7 +119,7 @@ span.chunk:before {
 
   $(document).ready(function() {
     // Form select box with song title
-    if (chords.length > 1) {
+    if (chords.length >= 1) {
       var songs = '<select name="songs" id="song_list">';
       for(var s=0;s<chords.length;s++) {
         song_title = chords[s].title;
@@ -128,12 +128,12 @@ span.chunk:before {
       }
       songs += '</select>';
       $("#sheet_title").html(songs);
-      load_sheet(0);
+      load_sheet(0, chords[0].key);
     }
 
     $('#song_list').change(function(){
       index = this.value;
-      load_sheet(index);
+      load_sheet(index, chords[index].key);
     });
   });
 
