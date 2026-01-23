@@ -440,11 +440,12 @@ li {
                     my_pinned_songs += "<span songid='" + s.id + "' class='song_title'>" + s.title + "&nbsp;<span class='keynote'>" + s.key + "</span>&nbsp;" + lang_tag(s.lang) + "&nbsp;" + lang_tag(s.lang_2) + "&nbsp;" + get_links(s.video, s.score, s.abc) + " <button style='display:none' class='insert_btn'> + </button></span><br/>";
                     //my_pinned_songs += "<span songid='" + s.id + "' class='song_title'>" + s.title + "&nbsp;<span class='keynote'>" + s.key + "</span>&nbsp;" + lang_tag(s.lang) + "&nbsp;" + lang_tag(s.lang_2) + "&nbsp;<button style='display:none' class='insert_btn'> + </button></span><br/>";
                 }
+            my_pinned_songs += "</div>";
             $('#left_content').append(my_pinned_songs);
             });
         }
             get_songs_by_days(30).done(function(data1) {
-            var my_song_list = '<div style="font-size:16px;font-weight:600;width:100%;padding:5px">Songs from the past month&nbsp;&nbsp;<a href="song/list" title="more">...</a></div>';
+            var my_song_list = '<div style="font-size:16px;font-weight:600;width:100%;padding:5px">Songs used recently&nbsp;&nbsp;<a href="song/list" title="more">...</a></div>';
                 for (key in data1) {
                     ss = data1[key];
                     if (ss) {
@@ -453,9 +454,18 @@ li {
                         }
                     }
                 }
+                my_song_list += "</div>";
                 $('#left_content').append(my_song_list);
             });
-            //$('#left_content').append('</div>');
+            get_songs().done(function(data) {
+                var my_new_songs = '<div style="font-size:16px;font-weight:600;width:100%;padding:5px">Newly added songs&nbsp;&nbsp;<a href="song/list" title="more">...</a></div>';
+                for (s of data) {
+                    my_new_songs += "<span songid='" + s.id + "' class='song_title'>" + s.title + "&nbsp;<span class='keynote'>" + s.key + "</span>&nbsp;" + lang_tag(s.lang) + "&nbsp;" + lang_tag(s.lang_2) + "&nbsp;" + get_links(s.video, s.score, s.abc) + " <button style='display:none' class='insert_btn'> + </button></span><br/>";
+                }
+                $('#left_content').append(my_new_songs);
+            });
+
+            $('#left_content').append('</div>');
 
         $('.arrow').click(function() {
             increment = Number($(this).attr('name'));
@@ -554,7 +564,7 @@ li {
         $.when( $.ajax( url ) ).then(function( data, textStatus, jqXHR ) {
             $("#dialog").html(data);
             $("#dialog").dialog({
-                title: "Add Note to Song",
+                title: "Add Info to Song",
                 width: 'auto',
                 buttons: [
 	                {
@@ -570,9 +580,9 @@ li {
                                 init();
                             });
 
-                            url = API_URL + 'notes';
-                            data = $("#content").serialize();
-                            /*$.ajax({
+                            url = API_URL + 'info';
+                            data = JSON.stringify($("#info").serialize());
+                            $.ajax({
                                 type: "post",
                                 url: url,
 	                            data: data,
@@ -584,8 +594,10 @@ li {
                                     else {
                                         alert(response);
 		                            }
-                                }
-                            });*/
+                                },
+                                contentType: "application/json",
+                                dataType: 'json'
+                            });
                         }
                     },
 	                {

@@ -105,7 +105,7 @@ border:none;display:inline-block;padding:8px 16px;vertical-align:middle;overflow
                         {{ team.role }}:&nbsp;{{ team.user_name }}<br/>
                     {% endif %}
                 {% endfor %}
-            <div class="overlay_btns"><button id="sermon_btn" name="{{ w.worship.worship_id }}">Edit</button> <button id="song_btn" name="{{ w.worship.worship_id }}">Songs</button>&nbsp;<button id="team_btn" name="{{ w.worship.worship_id }}">Teams</button></div>
+            <div class="overlay_btns"><button id="info_btn" name="{{ w.worship.date }}">Info</button> <button id="sermon_btn" name="{{ w.worship.worship_id }}">Edit</button> <button id="song_btn" name="{{ w.worship.worship_id }}">Songs</button>&nbsp;<button id="team_btn" name="{{ w.worship.worship_id }}">Teams</button></div>
         </div>
     {% else %}
             </div>
@@ -364,6 +364,9 @@ $(document).ready(function () {
             }
             else if (this.id == 'sermon_btn') {
                 get_sermon(worship_id);
+            }
+            else if (this.id == 'info_btn') {
+                window.open('/info?date='+id, '_blank').focus();
             }
         }
     });

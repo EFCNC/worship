@@ -142,7 +142,7 @@ span.chunk:before {
     <p><pre>{{ w.notes }}</pre></p>
 
     <!-- Container of worship songs -->
-    <button class="view" onclick="javascript:load(0, this.className)">View</button><button class="chord" onclick="javascript:load(1, this.className)">Chord</button><button class="bi" onclick="javascript:load(2, this.className)">Bilingual</button><button class="bi" onclick="javascript:load_chords()">All Chords</button><button class="bi" onclick="javascript:load_sheets()">All Sheets</button>
+    <button class="view" onclick="javascript:load(0, this.className)">View</button><button class="chord" onclick="javascript:load(1, this.className)">Chord</button><button class="bi" onclick="javascript:load(2, this.className)">Bilingual</button><button onclick="javascript:load_chords()">All Chords</button><button onclick="javascript:load_sheets()">All Sheets</button>
     <hr/>
     <div id="worship">
     </div>
@@ -238,7 +238,7 @@ span.chunk:before {
                     html += '&nbsp;&nbsp;<a href="' + data.score + '" target="new"><i style="font-size:24px" class="fa" title="Sheet Music">&#xf0f6;</i></a>';
                 }
                 if (data.abc) {
-                    html += '&nbsp;&nbsp;<a href="/sheet/' + data.id + '" target="new"><i style="font-size:24px" class="fa" title="Interacted Sheet Music">&#xf1c7;</i></a>';
+                    html += '&nbsp;&nbsp;<a href="/sheets/' + data.id + '" target="new"><i style="font-size:24px" class="fa" title="Interacted Sheet Music">&#xf1c7;</i></a>';
                 }
                 if (data.video) {
                     html += '&nbsp;&nbsp;<a href="' + data.video + '" target="new"><i class="fa fa-play-circle" style="font-size:24px" title="Youtube Video"></i></a>';
