@@ -1,0 +1,294 @@
+{% include 'header.html' %}
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+.grid-container {
+  display: grid;
+  grid-gap: 10px;
+  background-color: #2196F3;
+  padding: 10px;
+  grid-auto-flow: row;
+}
+
+.grid-container > div {
+  background-color: rgba(255, 255, 255, 0.8);
+  text-align: center;
+  padding: 20px 0;
+  font-size: 30px;
+}
+
+select {
+  font-size: 20px;
+}
+
+.sunday {
+ grid-row: 1 span 2;
+};
+
+.user {
+ grid-column: 2;
+}
+
+.nav > div {
+  text-align: center;
+  font-size: 30px;
+}
+
+.grid-container > div {
+  background-color: rgba(255, 255, 255, 0.8);
+  text-align: center;
+  padding: 20px 0;
+  font-size: 30px;
+}
+
+.header {
+display:none;
+}
+
+.month_name {
+ display: none;
+}
+
+input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+}
+
+@media (min-width: 576px) {
+.nav > div {
+  background-color: rgba(255, 255, 255, 0.8);
+  text-align: center;
+  padding: 20px 0;
+  font-size: 30px;
+}
+
+.month_name {
+ grid-rwo: 1;
+}
+
+.sunday {
+ grid-row: 2;
+}
+
+.nav {
+ grid-row: 3;
+}
+
+nav {
+    flex-direction: row;
+  }
+
+.header {
+display:block;
+}
+
+.month_name {
+ display: block;
+}
+}
+</style>
+</head>
+<body>
+<div id="calendar-container">
+</div>
+</body>
+<script>
+    let team = {{ team|safe }};
+    let booked = {{ booked|safe }};
+    let marked = {{ marked|safe }};
+    let roles = ['', 'Lead', 'Co-lead', 'Piano']
+
+    $(document).ready(function () {
+        get_info();
+        secondFunction();
+    });
+
+    const secondFunction = async () => {
+        const result = await get_info();
+        if($.cookie("user_id")) {
+            d2 = new Date();
+            $('.sunday').each(function() {
+                if ($(this).text() != 'Role') {
+                    d1 = new Date($(this).text().replace('-', '/'));
+                    if (d1 > d2) {
+                        if($.cookie('marked_date')) {
+                            temp = $.cookie('marked_date').split(',');
+                            if (temp.indexOf($(this).text()) >= 0) {
+                                $(this).append('<input type="checkbox" title="Uncheck to make yourself available for this week" checked/>');
+                            }
+                            else {
+                                $(this).append('<input type="checkbox" title="Check to mark yourself unavailable for this week"/>');
+                            }
+                        }
+                        else {
+                            $(this).append('<input type="checkbox" title="Click to mark yourself unavailable for this week"/>');
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    function week_count(weeks, month) {
+        month++;
+        weeks = weeks.map((item, index) => item[0])
+        var regex = new RegExp("-0?" + month + "-", "gi");
+        let count = weeks.filter((item, index) => item.match(regex));
+        return count.length;
+    }
+
+    function populate_options(person, d, role) {
+        dd = new Date();
+        d1 = new Date(d.replace('-','/'));
+        if (dd > d1) {
+            if (person) {
+                var $select = $('<select class="roster" disabled title="' + role + '"></select>');
+            }
+            else {
+                var $select = $('<select class="roster" disabled title="' + role + '"><option> N/A </option></select>');
+            }
+        }
+        else {
+            if(person) {
+                var $select = $('<select class="roster" name="' + d + '" title="' + role + '" data-role_id=' + roles.indexOf(role) + '></select>');
+            }
+            else {
+                var $select = $('<select class="roster" name="' + d + '" title="' + role + '" data-role_id=' + roles.indexOf(role) + ' data-init=0><option value=0>Select a User</option></select>');
+            }
+        }
+        matched = marked.filter(obj=>{return obj.date == d}).map(obj => obj.id);
+        for (x in team) {
+            let optionHTML = '';
+            if (person && team[x].id == person.id) {
+                optionHTML = '<option value="' + team[x].id + '" selected value=' + team[x].id + '>' + team[x].name + ' (' + team[x].name_2 + ')</option>';
+                $select.attr('data-init', team[x].id);
+            }
+            else {
+                if(matched.indexOf(team[x].id) >= 0 ) {
+                    optionHTML = '<option title="Not Available" disabled value="' + team[x].id + '" value=' + team[x].id + '>' + team[x].name + ' (' + team[x].name_2 + ')</option>';
+                }
+                else {
+                optionHTML = '<option value="' + team[x].id + '" value=' + team[x].id + '>' + team[x].name + ' (' + team[x].name_2 + ')</option>';
+                }
+            }
+            $select.append(optionHTML);
+        }
+        return '<div class="user">' + $select[0].outerHTML + '</div>';
+    }
+
+    function get_info() {
+        var month = 0;
+        var count = [];
+        count = week_count(booked, 0)+1;
+        html = '<div class="grid-container"><div class="month_name" style="grid-column: 1 / span ' + count + '">January</div><div class="sunday header">Role</div><nav class="nav"><div class="user header">Lead</div><div class="user header">Co-lead</div><div class="user header">Piano</div></nav>';
+        // Loop through 52 weeks
+        for (m=0;m<booked.length;m++) {
+            d = new Date(booked[m][0].replace('-', '/'));
+            if (d.getMonth() != month) {
+                month = d.getMonth();
+                count = week_count(booked, month)+1;
+                html += '</div>'
+                html += '<div class="grid-container"><div class="month_name" style="grid-column: 1 / span ' + count + '">' + d.toLocaleString('default', { month: 'long' }) + '</div><div class="sunday header">Role</div><nav class="nav"><div class="user header">Lead</div><div class="user header">Co-lead</div><div class="user header">Piano</div></nav>';
+            }
+                html += '<div class="sunday">' + booked[m][0] + '</div>';
+                html += '<nav class="nav">'
+                users = booked[m][1];
+                for (var i=1;i<=3;i++) {
+                    person = users.filter((item, index) => item.role_id==i)[0];
+                    if(person) {
+                        html += populate_options(person, person.date, roles[i]);
+                    }
+                    else {
+                        html += populate_options('', booked[m][0], roles[i]);
+                    }
+                }
+                html += '</nav>';
+        }
+        $('#calendar-container').html(html);
+    }
+
+    $(document).on('click', 'input[type=checkbox]', function() {
+        user_id = $.cookie("user_id");
+        mark = $(this).is(':checked')? 1:0;
+        date = $(this).parent().text();
+        url = API_URL + 'roles/user/' + user_id + '?mark=' + mark + '&date=' + date;
+        $('#loading').show();
+        $.ajax({
+            type: "get",
+            url: url,
+            contentType: "application/json",
+            complete: function(response) {
+          	    if(response.status==200) {
+          	        if($.cookie('marked_date')) {
+          	            cookies = $.cookie('marked_date').split(',');
+                    }
+                    else {
+                        cookies = [];
+                    }
+                    if(mark==0) {
+                        cookies.splice(cookies.indexOf(date), 1);
+          	            $.cookie("marked_date", cookies.toString(), { path: '/' })
+                    }
+                    else {
+                        cookies.push(date);
+                        $.cookie("marked_date", cookies.toString(), { path: '/' })
+                    }
+                    location.reload;
+                }
+                else {
+                    alert(response);
+                }
+                $('#loading').hide();
+            }
+        });
+    });
+
+    $(document).on('change', '.roster', function() {
+        pre = $(this).data("init");
+        id = $(this).val();
+        inst_id = $(this).data("role_id");
+        dd = $(this).attr('name');
+        url = API_URL + 'roles/' + dd;
+        data = {'pre_id': pre, 'user_id': id, 'role_id': inst_id};
+        $('#loading').show();
+        if (pre == 0) {
+            $.ajax({
+                type: "post",
+                url: url,
+	            data: JSON.stringify(data),
+                contentType: "application/json",
+                dataType: 'json',
+                complete: function(response) {
+          	        if(response.status==200) {
+                        location.reload;
+                    }
+                    else {
+                        alert(response);
+                    }
+                $('#loading').hide();
+                }
+            });
+        }
+        else {
+            $('#loading').show();
+            $.ajax({
+                type: "put",
+                url: url,
+	            data: JSON.stringify(data),
+                contentType: "application/json",
+                dataType: 'json',
+                complete: function(response) {
+          	        if(response.status==200) {
+                        location.reload;
+                    }
+                    else {
+                        alert(response);
+                    }
+                $('#loading').hide();
+                }
+            });
+        }
+    });
+</script>
+</html>
