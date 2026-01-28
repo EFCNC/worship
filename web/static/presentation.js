@@ -89,8 +89,10 @@
         $.ajax({
             url: url,
             success: function(data) {
-                location.reload;
-                //window.location.href = '/API/download?file=' + data;
+                alert('Slides created');
+                //socket.emit('reload');
+                //location.reload;
+                window.location.href = '/slides/admin';
             },
             fail: function(data) {
                 alert(data);
@@ -265,7 +267,7 @@
             params div: target div to load presentation
         */
         if (!slides) {  // If no slides data, connect server to reload
-            socket.emit('reload', w_id);
+            socket.emit('reload');
         }
 
         if (msg) {
@@ -405,7 +407,7 @@
             dataType: 'json',
             complete: function(response) {
                 if(response.status==200) {
-                    socket.emit('reload', w_id);
+                    socket.emit('reload');
                 }
             }
         });

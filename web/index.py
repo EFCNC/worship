@@ -21,12 +21,6 @@ client_mode = ''
 
 socketio = SocketIO(app)
 
-@socketio.on('reload')
-def reload_json():
-	print('Reloading json data')
-	if __get_slide_json():
-		emit('reload', slides_data, broadcast=True)
-
 @socketio.on('connect')
 def handle_connect():
 	__update_client(client_mode, request.sid)
@@ -44,6 +38,12 @@ def handle_disconnect():
 		_init_slide()
 	print('Client disconnected: {}'.format(request.sid))
 	print(client)
+
+@socketio.on('reload')
+def reload_json():
+	print('Reloading json data')
+	if __get_slide_json():
+		emit('reload', slides_data, broadcast=True)
 
 @socketio.on('control')
 def handle_control(data):

@@ -32,6 +32,8 @@ def edit_worship(id):
         Utils.edit_songset(int(id), content)
         return '', 200
     result = Tools.create_json(int(id))
+    if result == '':
+        return "No song is arranged", 500
     return result, 200
 
 @api.route("/worship/<id>/export")
