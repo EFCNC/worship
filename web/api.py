@@ -61,7 +61,6 @@ def get_info(d):
 def edit_info():
     info = request.get_json()
     result = Utils.add_info(info)
-    print(result)
     return result
 
 @api.route("/info/duplicate")

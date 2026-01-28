@@ -59,7 +59,7 @@
         <span id="current"></span>
         <div id="content" style="padding:10px;text-align:left;">
         </div>
-        <button id="pre" class="nav" title="Last Week"></button>&nbsp;&nbsp;&nbsp;&nbsp;<button id="add_1" title="Add Announcement">Add Announcement</button>&nbsp;&nbsp;<button id="add_2" title="Add Caring">Add Caring</button>&nbsp;&nbsp;<button id="copyall"  itle="Copy from Last Week">Copy last week</button>&nbsp;&nbsp;<button id="delete" title="Delete selected Item"><i class="fa fa-trash-o"></i></button>&nbsp;&nbsp;&nbsp;&nbsp;<button id="next" class="nav" title="Next Week"></button>
+        <button id="pre" class="nav" title="Last Week"></button>&nbsp;&nbsp;&nbsp;&nbsp;<button id="add_1" title="Add Announcement">Add Announcement</button>&nbsp;&nbsp;<button id="add_2" title="Add Prayer Request">Add Prayer Request</button>&nbsp;&nbsp;<button id="copyall"  itle="Copy from Last Week">Copy last week</button>&nbsp;&nbsp;<button id="delete" title="Delete selected Item"><i class="fa fa-trash-o"></i></button>&nbsp;&nbsp;&nbsp;&nbsp;<button id="next" class="nav" title="Next Week"></button>
     </div>
 </div>
 </body>
@@ -90,9 +90,11 @@
         d1 = current_week;
         d2 = sundays[sundays.indexOf(current_week)-1];
         url = API_URL + 'info/duplicate?d1=' + d1 + '&d2=' + d2;
+        $('#loading').show();
         $.when( $.ajax( url ) ).then(function( response, textStatus, jqXHR ) {
             if(response) {
                 get_info(current_week);
+                $('#loading').hide();
             }
         });
     });
@@ -102,9 +104,11 @@
         if (content_index) {
             if(confirm("Are you sure?")) {
                 url = API_URL + 'info/delete/'+content[content_index].id;
+                $('#loading').show();
                 $.when( $.ajax( url ) ).then(function( response, textStatus, jqXHR ) {
                     if(response) {
                         get_info(current_week);
+                        $('#loading').hide();
                     }
                 });
             }
@@ -116,7 +120,7 @@
 
     $(document).on('blur', '.info_list', function() {
         tt = $(this).text();
-        if (tt == 'New Announcement' || tt == 'New Caring') {
+        if (tt == 'New Announcement' || tt == 'New Prayer Request') {
             return false;
         }
         cc = content[$(this).prev('input').val()];
@@ -125,6 +129,7 @@
             console.log(cc)
             url = API_URL + 'info/edit';
             data = cc;
+            $('#loading').show();
             $.ajax({
                 type: "post",
                 url: url,
@@ -135,6 +140,7 @@
           	        if(response.status==200) {
                         get_info(current_week);
                     }
+                    $('#loading').hide();
                 }
             });
         }
@@ -154,8 +160,8 @@
     });
 
     $('#add_2').click(function() {
-        $("#content").append('<input type="radio" value="' + content.length + '" name="info_box"/><div class="info_list caring" contenteditable="true">New Caring</div><br/>');
-        content.push({'id': -1, 'info': 'New Caring', 'type': 'caring', 'date': current_week});
+        $("#content").append('<input type="radio" value="' + content.length + '" name="info_box"/><div class="info_list caring" contenteditable="true">New Prayer Request</div><br/>');
+        content.push({'id': -1, 'info': 'New Prayer Request', 'type': 'caring', 'date': current_week});
     });
 
     function getSundays(year) {
