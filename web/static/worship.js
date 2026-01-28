@@ -159,7 +159,12 @@ let API_URL = 'API/';
     }
 
     function get_songs(ids) {
-        url = API_URL + 'songs/' + ids;
+        if (ids) {
+            url = API_URL + 'songs/' + ids;
+        }
+        else {
+            url = API_URL + 'songs';
+        }
         return $.ajax({
             type: "GET",
             url: url

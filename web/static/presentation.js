@@ -85,11 +85,12 @@
     }
 
     function save_slides() {
-        var url = '/API/worship/' + w_id + '/export';
+        var url = '/API/worship/' + w_id + '/edit';
         $.ajax({
             url: url,
             success: function(data) {
-                window.location.href = '/API/download?file=' + data;
+                location.reload;
+                //window.location.href = '/API/download?file=' + data;
             },
             fail: function(data) {
                 alert(data);

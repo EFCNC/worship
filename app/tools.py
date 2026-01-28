@@ -48,7 +48,7 @@ def get_worship_json(id):
     w = Utils.get_worship_date(id)
     json_file = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'files', 'json', '{}_{}.json'.format(w[0], id))
     if not os.path.exists(json_file):
-        return None
+        create_json(id)
     with open(json_file, 'r', encoding='utf8') as f:
         slides = json.load(f)
     return slides

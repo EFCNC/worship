@@ -20,18 +20,17 @@ def edit_worship_json(id):
         return result, 200
     return "No Json is provided", 400
 
-@api.route("/worship/<id>/edit", methods=["POST"])
+@api.route("/worship/<id>/edit", methods=["POST", "GET"])
 def edit_worship(id):
     '''
     :param id: worship_id
     :return: dB result
     '''
 
-    content = request.get_json()
-    if content:
+    if request.method == 'POST':
+        content = request.get_json()
         Utils.edit_songset(int(id), content)
-        result = Tools.create_json(int(id))
-        return result, 200
+        return '', 200
     result = Tools.create_json(int(id))
     return result, 200
 
@@ -90,6 +89,7 @@ def get_song(id):
     content = Utils.get_song_by_id(id)
     return content
 
+@api.route("/songs")
 @api.route("/songs/<ids>")
 def list_song(ids=None):
     '''
@@ -98,8 +98,9 @@ def list_song(ids=None):
     '''
     if ids:
         return Utils.get_songs(ids)
-    songs = Utils.get_songs()
-    return songs
+    else:
+        songs = Utils.get_songs()
+        return songs[:5]
 
 @api.route("/songs/ranking/<days>/<yes>")
 @api.route("/songs/ranking/<days>")
@@ -211,10 +212,10 @@ def arrange_team(id):
     '''
 
     content = Utils.get_worship_teams(id)
-    return {'team': content[0], 'inst': content[1], 'roster': content[2]}
+    return {'team': content[0], 'inst': content[1], 'roster': content[2], 'marked': content[3]}
 
-@api.route("/roles/<date>", methods=["POST", "GET"])
-def get_roles(date):
+@api.route("/roles/<dd>", methods=["POST", "PUT"])
+def edit_roles(dd):
     '''
     :param date: date for matching the availability of each team
     :return: available team on provided date
@@ -223,14 +224,22 @@ def get_roles(date):
 
     if request.method == 'POST':
         content = request.get_json()
-        result = Utils.edit_role(date, [content], delete=False)
-        return result
-    team = Utils.list_team(date)
-    return team, 200
+        if 'pre_id' in content and content['pre_id'] == 0:
+            content['worship_id'] = Utils.get_worship_id(dd)[0]
+        return Utils.edit_role(dd, content)
+    elif request.method == 'PUT':
+        content = request.get_json()
+        return Utils.edit_role(dd, content, True)
 
-@api.route("/roles/edit/<date>", methods=["POST"])
-def edit_role(date):
-    content = request.get_json()
-    result = Utils.edit_role(date, content)
+@api.route("/roles/user/<id>", methods=["GET"])
+def mark_user(id):
+    '''
+    :param id: user id
+    :param mark: 1=unavailable, 0=available
+    :param date: worship date
+    :return: nothing, if error return 500
+    '''
+    mark = request.args.get('mark', 0)
+    date = request.args.get('date', None)
+    result = Utils.edit_user_schedule(int(id), int(mark), date)
     return result
-

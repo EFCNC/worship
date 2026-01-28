@@ -1,5 +1,6 @@
 #coding: utf-8
 import os.path
+from datetime import datetime
 
 from flask import Flask, render_template, request
 from flask_socketio import SocketIO, emit
@@ -75,7 +76,8 @@ def index():
 
 @app.route("/info")
 def info():
-	return render_template('info.html')
+	d = request.args.get('date', '')
+	return render_template('info.html', date=d)
 
 @app.route("/worship/<id>")
 def worship_notes(id):
@@ -225,6 +227,23 @@ def get_song_by_id(id):
 		content["lyrics"] = content["lyrics_raw"]  # add key lyrics to be used by song_editor
 		return render_template('song_editor.html', content=content)
 
+@app.route("/calendar")
+def calendar():
+	now = datetime.now()
+	year = str(now.year)
+	allsundays = Tools.allsundays()[1]
+	assigned = []
+	booked = Utils.list_team(year)
+	for sun in allsundays:
+		if any(x for x in booked if x['date'] == sun):
+			assigned.append([sun, [x for x in booked if x['date'] == sun]])
+		else:
+			assigned.append([sun, []])
+	team = Utils.list_team()
+	marked = Utils.get_marked_user()
+	return render_template('calendar.html', booked=assigned, team=team, marked=marked)
+
+
 @app.route("/schedule")
 def schedule():
 	'''
@@ -236,6 +255,11 @@ def schedule():
 	team = Utils.list_team()
 	inst = Utils.list_instrument()
 	return render_template('schedule.html', assigned=assigned, team=team, sundays=sundays, inst=inst)
+
+@app.route("/profile")
+def profile():
+	team = Utils.list_team()
+	return render_template('profile.html', team=team)
 
 @app.route("/files")
 def file_list():
@@ -250,10 +274,6 @@ def file_list():
 	json_files = os.listdir(worship_path)
 	json_files = [{'date': x.split('_')[0], 'id': x.split('_')[1].split('.')[0], 'path': os.path.join(worship_path, x)} for x in json_files]
 	return render_template('files.html', zip=files, json=json_files)
-
-@app.route("/1")
-def t():
-	return slides_data
 
 @app.route("/playground/<name>")
 def playground(name):

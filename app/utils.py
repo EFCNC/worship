@@ -99,16 +99,10 @@ def list_instrument(exclude=None):
 def list_team(date=None):
     team = []
     if date:
-        sql = 'select it.user_id, name, name_2, it.instrument_id from team t inner join instrument_team it on it.user_id = t.user_id where it.available_date = ?'
-        result = dB.run_para(sql, date)
-        seen = []
+        sql = 'select it.user_id, t.name, name_2, it.instrument_id, it.available_date, i.name, it.worship_id from team t inner join instrument_team it on it.user_id = t.user_id inner join instrument i on it.instrument_id = i.id where it.available_date like ?'
+        result = dB.run_para(sql, '%'+date+'%')
         for r in result:
-            if not any(x for x in seen if x['id'] == r[0]):
-                team.append({'id': r[0], 'name': r[1], 'name_2': r[2]})
-            seen.append({'id': r[0], 'role_id': r[3]})
-        for role in team:
-            role_ids = [y['role_id'] for y in seen if y['id'] == role['id']]
-            role["roles"] = role_ids
+            team.append({'id': r[0], 'name': r[1], 'name_2': r[2], 'date': r[4], 'instrument': r[5], 'role_id': r[3]})
         return team
     else:
         sql = "select user_id, name, name_2 from team order by name"
@@ -117,15 +111,25 @@ def list_team(date=None):
             team.append({'id': r[0], 'name': r[1], 'name_2': r[2]})
     return team
 
+def get_marked_user():
+    sql = "select user_id, available_date from instrument_team it where it.instrument_id == -1"
+    result = dB.run(sql)
+    marked = []
+    for r in result:
+        marked.append({'date': r[1], 'id': r[0]})
+    return marked
+
+
 def get_worship_teams(id):
     team = list_team()
     inst = list_instrument()
+    marked = get_marked_user()
     roster = []
-    sql = 'select t.name, t.name_2, i.name, i.id, t.user_id from instrument_team it inner join team t on t.user_id = it.user_id inner join instrument i on it.instrument_id = i.id where worship_id=? order by i.id'
+    sql = 'select t.name, t.name_2, i.name, i.id, t.user_id from instrument_team it inner join team t on t.user_id = it.user_id inner join instrument i on it.instrument_id = i.id where  worship_id=? order by i.id'
     result = dB.run_para(sql, id)
     for r in result:
         roster.append({'id': r[3], 'user_id': r[4], 'user_name': r[0], 'user_name_2': r[1], 'inst_name': r[2]})
-    return team, inst, roster
+    return team, inst, roster, marked
 
 def get_info(d):
     sql = "select id, content, type, note, date from info where content is not null and date = ?"
@@ -189,7 +193,7 @@ def get_songs(ids=None):
         sql += ' where s.song_id in ({ids}) order by s.song_id'.format(ids=','.join(['?']*len(ids)))
         result = dB.run_para(sql, ids)
     else:
-        sql += ' order by s.song_id'
+        sql += ' order by s.song_id desc'
         result = dB.run(sql)
     songs = []
     for r in result:
@@ -360,20 +364,32 @@ def edit_song_set_row(id, content):
         sql = sql[:-1]
         sql += " where song_id = ?"
         values.append(id)
-        print(sql, values)
         dB.run_para(sql, values)
 
-def edit_role(date, content, delete=True):
+def edit_user_schedule(id, mark, date):
+    worship_id = get_worship_id(date)[0]
+    if mark == 0:
+        r = dB.run_para('delete from instrument_team where instrument_id = -1 and user_id = ? and worship_id = ?', [int(id), int(worship_id)])
+        if r:
+            return r, 500
+        return '', 200
+    else:
+        r = dB.run_para('insert into instrument_team(instrument_id, user_id, worship_id, available_date) values(-1, ?, ?, ?)', [int(id), int(worship_id), date])
+        if r:
+            return r, 500
+        return '', 200
+
+def edit_role(date, content, edit=None):
     """
     :param date: available_date, content: dict of column name, value
     """
-    sql = "insert into instrument_team(user_id, instrument_id, available_date, worship_id) values"
-    for item in content:
-        sql += '({}, {}, "{}", {}),'.format(item['user_id'], item['role_id'], date, item['worship_id'])
-    sql = sql[:-1]
-    if delete:
-        dB.run_para('delete from instrument_team where available_date = ?', date)
-    r = dB.run(sql)
+    if edit:
+        r = dB.run_para('update instrument_team set user_id = ? where user_id = ? and instrument_id = ? and available_date = ?', [int(content['user_id']), int(content['pre_id']), int(content['role_id']), date])
+        if r:
+            return r, 500
+        return '', 200
+    sql = "insert into instrument_team(user_id, instrument_id, available_date, worship_id) values(?, ?, ?, ?)"
+    r = dB.run_para(sql, [int(content['user_id']), int(content['role_id']), date, int(content['worship_id'])])
     if r:
         return r, 500
     return '', 200
@@ -451,7 +467,7 @@ def get_availablity():
 
 def worship_list(id=None):
     if id:
-        sql = "select s.title, s.speaker, t.name, (select i.name from instrument i where i.id = it.instrument_id), w.title, w.scheduled_date, w.worship_id, s.bible_verse, s.outline, w.notes from worship w inner join sermon s on w.scheduled_date = s.date left join instrument_team it on w.worship_id = it.worship_id left join team t on it.user_id = t.user_id where w.worship_id=? order by w.scheduled_date, it.instrument_id"
+        sql = "select s.title, s.speaker, t.name, (select i.name from instrument i where i.id = it.instrument_id), w.title, w.scheduled_date, w.worship_id, s.bible_verse, s.outline, w.notes from worship w inner join sermon s on w.scheduled_date = s.date left join instrument_team it on w.worship_id = it.worship_id left join team t on it.user_id = t.user_id where w.worship_id=? and it.instrument_id <> -1 order by w.scheduled_date, it.instrument_id"
         result = dB.run_para(sql, id)
     else:
         sql = "select s.title, s.speaker, t.name, (select i.name from instrument i where i.id = it.instrument_id), w.title, w.scheduled_date, w.worship_id, s.bible_verse, s.outline, w.notes from worship w inner join sermon s on w.scheduled_date = s.date left join instrument_team it on w.worship_id = it.worship_id left join team t on it.user_id = t.user_id order by w.scheduled_date, it.instrument_id"

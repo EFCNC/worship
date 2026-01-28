@@ -66,14 +66,21 @@
 <script>
     let content = [];
     let current_week;
+    let dd = '{{ date|safe }}';
     let d = new Date();
     const sundays = [];
     getSundays(new Date().getFullYear());
 
     $(document).ready(function () {
-        d.setDate(d.getDate() - d.getDay() + 7); // coming Sunday
-        index = sundays.indexOf(d.toLocaleDateString('en-CA'));
-        current_week =  sundays[index];
+        if (dd) {
+            current_week = dd;
+            index = sundays.indexOf(current_week);
+        }
+        else {
+            d.setDate(d.getDate() - d.getDay() + 7); // coming Sunday
+            index = sundays.indexOf(d.toLocaleDateString('en-CA'));
+            current_week =  sundays[index];
+        }
         $('#current').html('<h3>Announcement for: ' + current_week + '</h3>');
         get_info(current_week);
         show_nav(index);
