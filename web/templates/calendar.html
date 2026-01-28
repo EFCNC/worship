@@ -15,7 +15,7 @@
   background-color: rgba(255, 255, 255, 0.8);
   text-align: center;
   padding: 20px 0;
-  font-size: 30px;
+  font-size: 25px;
 }
 
 select {
@@ -32,14 +32,14 @@ select {
 
 .nav > div {
   text-align: center;
-  font-size: 30px;
+  font-size: 25px;
 }
 
 .grid-container > div {
   background-color: rgba(255, 255, 255, 0.8);
   text-align: center;
   padding: 20px 0;
-  font-size: 30px;
+  font-size: 25px;
 }
 
 .header {
@@ -48,6 +48,10 @@ display:none;
 
 .month_name {
  display: none;
+}
+
+.label {
+ display: block;
 }
 
 input[type="checkbox"] {
@@ -60,7 +64,15 @@ input[type="checkbox"] {
   background-color: rgba(255, 255, 255, 0.8);
   text-align: center;
   padding: 20px 0;
-  font-size: 30px;
+  font-size: 20px;
+}
+
+select {
+  font-size: 15px;
+}
+
+.grid-container > div {
+  font-size: 20px;
 }
 
 .month_name {
@@ -86,6 +98,11 @@ display:block;
 .month_name {
  display: block;
 }
+
+.label {
+ display: none;
+}
+
 }
 </style>
 </head>
@@ -196,6 +213,7 @@ display:block;
                 users = booked[m][1];
                 for (var i=1;i<=3;i++) {
                     person = users.filter((item, index) => item.role_id==i)[0];
+                    html += '<div class="user label">' + roles[i] + '</div>';
                     if(person) {
                         html += populate_options(person, person.date, roles[i]);
                     }

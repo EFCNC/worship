@@ -79,30 +79,9 @@ border:none;display:inline-block;padding:8px 16px;vertical-align:middle;overflow
     background-color: #008CBA;
     color: #fff;
 }
-
-.login {
-  height: 30px;
-  width: 30px;
-  background-color: #c85550;
-  color: #fff;
-  border-radius: 50%;
-  line-height: 30px;
-  font-size: 14px;
-  text-align: center;
-}
-
-a:link {
-    text-decoration: none;
-    color: #fff;
-}
-a:visited {
-    text-decoration: none;
-    color: #fff;
-}
 </style>
 </head>
 <body>
-<div class="header"><div id="profile"><a href="profile"><img id="profile_img" src="../static/img/login.jpg" title="Profile"/></a></div></div>
 <div class="worship_container">
 {% for w in worship %}
     <div class="worship-card">
@@ -145,16 +124,6 @@ let roster;
 let inst;
 let marked;
 let worship_id = -1;
-
-if($.cookie("user_name")) {
-    full_name = $.cookie('user_name').split('(')[0];
-    short_name = full_name.match(/(\b\S)?/g).join("").toUpperCase()
-
-    $('#profile').html('<a href="profile">' + short_name + '</a>');
-    $('#profile').attr('class', 'login');
-    $('#profile').attr('title', full_name);
-    //$('#profile_img').attr('title', $.cookie('user_name'));
-}
 
 function pop_role(name) {
     for(i in taken_role) {
@@ -368,7 +337,7 @@ $(document).ready(function () {
                 get_sermon(worship_id);
             }
             else if (this.id == 'info_btn') {
-                window.open('/info?date='+id, '_blank').focus();
+                location.href = '/info?date='+id;
             }
         }
     });

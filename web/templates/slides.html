@@ -59,6 +59,9 @@
         if (mode == 'lead') {
             $("#preview").css('height', '75vh');
         }
+        else if (mode == 'view' || mode == 'musician') {
+            $('#header').hide();
+        }
     }
 
     function show_msg(){

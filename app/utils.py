@@ -132,7 +132,7 @@ def get_worship_teams(id):
     return team, inst, roster, marked
 
 def get_info(d):
-    sql = "select id, content, type, note, date from info where content is not null and date = ?"
+    sql = "select id, content, type, note, date from info where content is not null and date = ? order by type"
     result = dB.run_para(sql, d)
     info = []
     for r in result:

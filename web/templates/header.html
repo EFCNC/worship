@@ -13,6 +13,35 @@
     <script src="../static/worship.js"></script>
     <link href="../static/jquery-ui.css" rel="stylesheet">
 <style>
+.login {
+  float: left;
+  height: 30px;
+  width: 30px;
+  background-color: #c85550;
+  color: #fff;
+  border-radius: 50%;
+  line-height: 30px;
+  font-size: 14px;
+  text-align: center;
+}
+
+#header {
+  margin: 10px 10px 10px 10px;
+  padding-bottom: 35px;
+}
+
+#profile a:link {
+    text-decoration: none;
+    color: #fff;
+}
+#profile a:visited {
+    text-decoration: none;
+    color: #fff;
+}
+
+.navigation {
+  float: right;
+}
 
 #loading {
     display: none;
@@ -30,4 +59,17 @@
 </style>
 </head>
 <div id="loading"></div>
+<div id="header"><div id="profile"><a href="profile"><img id="profile_img" src="../static/img/login.jpg" title="Profile"/></a></div><div class="navigation"><a href="/">Home</a>&nbsp;&nbsp;<a href="song/list">Songs</a>&nbsp;&nbsp;<a href="/calendar">Calendar</a>&nbsp;&nbsp;<a href="/slides">Slide</a></div></div>
 <div id="dialog"></div>
+<script>
+    if($.cookie("user_name")) {
+    full_name = $.cookie('user_name').split('(')[0];
+    short_name = full_name.match(/(\b\S)?/g).join("").toUpperCase()
+
+    $('#profile').html('<a href="profile">' + short_name + '</a>');
+    $('#profile').attr('class', 'login');
+    $('#profile').attr('title', full_name);
+    //$('#profile_img').attr('title', $.cookie('user_name'));
+}
+
+</script>

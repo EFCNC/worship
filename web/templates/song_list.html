@@ -1,14 +1,7 @@
 <!DOCTYPE html>
-<html>
-<head>
-<meta name="viewport" content="width=device-width, initial-scale=1" charset="utf-8">
+{% include 'header.html' %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<script src="../static/jquery.js"></script>
-<script src="../static/jquery-ui.js"></script>
-<script src="../static/jquery.cookie.js"></script>
-<script src="../static/worship.js"></script>
 <link href="../static/datatables.min.css" rel="stylesheet">
-<link href="../static/jquery-ui.css" rel="stylesheet">
 <script src="../static/datatables.js"></script>
 <style>
 #dialog {
@@ -207,7 +200,6 @@ span.chunk:before {
         div += '<input class="keys" type="checkbox" checked value="' + key + '">' + key + '</input>';
     }
     div += '<input class="all_keys" type="checkbox" checked>All</input>';
-    div += '&nbsp;<a href="/">Home</a>';
     $('#key').html(div);
 
     /*div = 'Language: ';
