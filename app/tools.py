@@ -80,8 +80,10 @@ def create_json(id, worship=None):
     if not worship:
         worship = Utils.get_worship_songs(id)
         if not worship:
-            return ''
-        worship_date = worship[0]["date"]
+            worship = []
+            worship_date = Utils.get_worship_date(id)[0]
+        else:
+            worship_date = worship[0]["date"]
         template_file = os.path.join(root, 'template.json')
         with open(template_file, "r", encoding="utf-8") as f:
             template = json.loads(f.read())
