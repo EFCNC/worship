@@ -13,7 +13,6 @@
 <script>
     team = {{ team|safe }};
     html = '';
-    console.log($.cookie("user_id"));
     for(x in team) {
         if($.cookie("user_id") == team[x].id) {
             html += '<option selected value=' + team[x].id + '>' + team[x].name + ' (' + team[x].name_2 + ')</option>';
@@ -29,8 +28,8 @@
         console.log(user_id);
         user_name = $('#user :selected').text();
         if(confirm('Are you sure you are ' + user_name + '?')) {
-            $.cookie("user_id", user_id, { path: '/' });
-            $.cookie("user_name", user_name, { path: '/' });
+            $.cookie("user_id", user_id, { path: '/' }, { expires: 365 });
+            $.cookie("user_name", user_name, { path: '/' }, { expires: 365 });
             location.href= '/';
         }
         return true;

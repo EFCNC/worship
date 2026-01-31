@@ -23,6 +23,7 @@
   line-height: 30px;
   font-size: 14px;
   text-align: center;
+  display: inline-block;
 }
 
 #header {
@@ -56,10 +57,14 @@
     bottom: 0;
     right: 0;
 }
+
+#profile-img {
+    float: left;
+}
 </style>
 </head>
 <div id="loading"></div>
-<div id="header"><div id="profile"><a href="profile"><img id="profile_img" src="../static/img/login.jpg" title="Profile"/></a></div><div class="navigation"><a href="/">Home</a>&nbsp;&nbsp;<a href="/song/list">Songs</a>&nbsp;&nbsp;<a href="/calendar">Calendar</a>&nbsp;&nbsp;<a href="/slides">Slide</a></div></div>
+<div id="header"><div id="profile"><a href="profile"><img id="profile-img" src="../static/img/login.jpg" title="Profile"/></a></div><div class="navigation"><a href="/">Home</a>&nbsp;&nbsp;<a href="/song/list">Songs</a>&nbsp;&nbsp;<a href="/calendar">Calendar</a>&nbsp;&nbsp;<a href="/slides">Slide</a></div></div>
 <div id="dialog"></div>
 <script>
     if($.cookie("user_name")) {
@@ -69,7 +74,6 @@
     $('#profile').html('<a href="profile">' + short_name + '</a>');
     $('#profile').attr('class', 'login');
     $('#profile').attr('title', full_name);
-    //$('#profile_img').attr('title', $.cookie('user_name'));
 }
 
 </script>

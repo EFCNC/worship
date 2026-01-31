@@ -248,20 +248,20 @@ span.chunk:before {
             console.log('not found', action, action == 'pin it')
                 if (action == 'pin it') {
                     cookies.push(parseInt(id));
-                    $.cookie('pinned', cookies.toString(), { path: '/' });
+                    $.cookie('pinned', cookies.toString(), { path: '/' }, { expires: 365 });
                     $('#pin_'+id).attr('title', 'pinned');
                     $('#pin_'+id).html('&#xf004;');
                 }
             }
             else {
                 cookies.pop(c);
-                $.cookie('pinned', cookies.toString(), { path: '/' });
+                $.cookie('pinned', cookies.toString(), { path: '/' }, { expires: 365 });
                 $('#pin_'+id).attr('title', 'pin it');
                 $('#pin_'+id).html('&#xf08a;');
             }
         }
         else {
-            $.cookie('pinned', parseInt(id), { path: '/' });
+            $.cookie('pinned', parseInt(id), { path: '/' }, { expires: 365 });
             $('#pin_'+id).attr('title', 'pinned');
             $('#pin_'+id).html('&#xf004;');
         }
