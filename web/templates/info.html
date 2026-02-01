@@ -52,14 +52,23 @@
   }
 }
 
+#current {
+    font-size: 25px;
+    font-weight: 600;
+    text-decoration-line: underline;
+}
+
+.nav {
+    font-size: 15px;
+}
 </style>
 <body>
 <div class="worship_container">
     <div class="worship-card">
-        <span id="current"></span>
+        <button id="pre" class="nav" title="Last Week"></button>&nbsp;&nbsp;&nbsp;&nbsp;<span id="current"></span>&nbsp;&nbsp;&nbsp;&nbsp;<button id="next" class="nav" title="Next Week"></button>
         <div id="content" style="padding:10px;text-align:left;">
         </div>
-        <button id="pre" class="nav" title="Last Week"></button>&nbsp;&nbsp;&nbsp;&nbsp;<button id="add_1" title="Add Announcement">Add Announcement</button>&nbsp;&nbsp;<button id="add_2" title="Add Prayer Request">Add Prayer Request</button>&nbsp;&nbsp;<button id="copyall"  itle="Copy from Last Week">Copy from last week</button>&nbsp;&nbsp;<button id="delete" title="Delete selected Item"><i class="fa fa-trash-o"></i></button>&nbsp;&nbsp;&nbsp;&nbsp;<button id="next" class="nav" title="Next Week"></button>
+        <button id="add_1" title="Add Announcement">Add Announcement</button>&nbsp;&nbsp;<button id="add_2" title="Add Prayer Request">Add Prayer Request</button>&nbsp;&nbsp;<button id="copyall"  itle="Copy from Last Week">Copy from last week</button>&nbsp;&nbsp;<button id="delete" title="Delete selected Item"><i class="fa fa-trash-o"></i></button>
     </div>
 </div>
 </body>
@@ -81,7 +90,7 @@
             index = sundays.indexOf(d.toLocaleDateString('en-CA'));
             current_week =  sundays[index];
         }
-        $('#current').html('<h3>Announcement for: ' + current_week + '</h3>');
+        $('#current').html(current_week);
         get_info(current_week);
         show_nav(index);
     });
@@ -151,7 +160,7 @@
         current_week = sundays[index];
         get_info(current_week);
         show_nav(index);
-        $('#current').html('<h3>Announcement for: ' + current_week + '</h3>');
+        $('#current').html(current_week);
     });
 
     $('#add_1').click(function() {
@@ -179,11 +188,11 @@
 
     function show_nav(i) {
         if (i > 0) {
-            $('#pre').text('<< ' + sundays[i-1]);
+            $('#pre').text('< ' + sundays[i-1]);
             $('#pre').val(sundays[i-1]);
         }
         if (i < sundays.length-1) {
-            $('#next').text(sundays[i+1] + ' >>')
+            $('#next').text(sundays[i+1] + ' >')
             $('#next').val(sundays[i+1])
         }
     }
