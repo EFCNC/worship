@@ -333,7 +333,6 @@
     }
 ]
     function fetch_books() {
-        //let name_zh = {'GEN': ['創', '創世記'], 'EXO': ['出', '出埃及記'], 'LEV', 'NUM', 'DEU', 'JOS', 'JDG', 'RUT', '1SA', '2SA', '1KI', '2KI', '1CH', '2CH', 'EZR', 'NEH', 'EST', 'JOB', 'PSA', 'PRO', 'ECC', 'SNG', 'ISA', 'JER', 'LAM', 'EZK', 'DAN', 'HOS', 'JOL', 'AMO', 'OBA', 'JON', 'MIC', 'NAM', 'HAB', 'ZEP', 'HAG', 'ZEC', 'MAL', 'MAT', 'MRK', 'LUK', 'JHN', 'ACT', 'ROM', '1CO', '2CO', 'GAL', 'EPH', 'PHP', 'COL', '1TH', '2TH', '1TI', '2TI', 'TIT', 'PHM', 'HEB', 'JAS', '1PE', '2PE', '1JN', '2JN', '3JN', 'JUD', 'REV']}
         fetch(`https://bible.helloao.org/api/cmn_cuv/books.json`)
             .then(request => request.json())
                 .then(books => {
@@ -345,8 +344,17 @@
     function show_verse(response) {
         html = [];
         for (var i=1;i<response.length;i++) {
-            temp = response[i][0]
-            html.push(temp.number + '' + temp.content[0]);
+            temp = response[i][0];
+            vv = [];
+            if (temp.content.length > 1) {
+                for(var j=0;j<temp.content.length;j++) {
+                    vv.push(temp.content.filter(obj=>typeof obj == "string" || Object.keys(obj).includes('text')).map(obj=>Object.keys(obj).includes('text')? obj.text: obj))
+                }
+            }
+            else {
+                vv = [temp.content[0]]
+            }
+            html.push(temp.number + '' + vv.join('<br/'));
         }
         $("#dialog").html(html.join('<br/>'));
         $("#dialog").dialog({
@@ -365,27 +373,35 @@
     }
 
     async function get_bible(callback, name) {
-        var b_name = name.match(/\D+/g)[0];
+        var b_name = name.match(/\D+/g)[0]; // Get book name
         name = name.replace(b_name, '');
         var ch_ver = name.split(':');
         var ch = ch_ver[0];
-        if(ch_ver[1].indexOf('-') >= 0) {
-            var ver = ch_ver[1].split('-');
+        var ver = [];
+        var parts = ch_ver[1].split(',');
+        for (var k=0;k<parts.length;k++) {
+            t = parts[k].split('-');
+            if(t.length>1) {
+                for(var n=t[0];n<=t[1];n++) {
+                    ver.push(n);
+                }
+            }
+            else {
+                ver.push(t[0]);
+            }
         }
-        else {
-            var ver = [ch_ver[1], ch_ver[1]];
-        }
+        b_name = b_name.trim();
         var verses = [b_name + ' ' + name];
         ver = ver.map(Number);
         b_name = book_name.filter(obj=>{return obj.s_name == b_name || obj.name == b_name}).map(obj=>obj.id);
         var url = 'https://bible.helloao.org/api/cmn_cuv/' + b_name + '/' + ch + '.json';
+        console.log(url)
         fetch(url)
             .then(request => request.json())
                 .then(chapter => {
-                    for (var i=ver[0];i<=ver[1];i++) {
-                        verses.push(chapter.chapter.content.filter(obj => {return obj.number == i}));
+                    for (var i=0;i<ver.length;i++) {
+                        verses.push(chapter.chapter.content.filter(obj => {return obj.number == ver[i]}));
                     }
-                    console.log(verses)
                     callback(verses);
                 });
     }

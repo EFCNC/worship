@@ -245,7 +245,13 @@ li {
 
     function get_sermon() {
         var html = [];
-        html.push('Title: ' + worship_data.title + ' <a href="javascript:get_bible(show_verse, \'' + worship_data.bible + '\')">' + worship_data.bible + '</a>');
+        var bible = worship_data.bible.replace(/(、|;)/g, '，'); // Replace possible symbols to Chinese comma
+        bible = bible.split('，');
+        var b = '';
+        for (var i=0;i<bible.length;i++) {
+            b += ' <a href="javascript:get_bible(show_verse, \'' + bible[i] + '\')">' + bible[i] + '</a>';
+        }
+        html.push('Title: ' + worship_data.title + b);
         html.push('Speaker: ' + worship_data.speaker);
         html.push(worship_data.outline);
         $('#sermon_data').html(html.join('<br/>'));
