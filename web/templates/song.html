@@ -1,6 +1,7 @@
 {% include 'header.html' %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
+<script src="../static/bible.js"></script>
 <style>
     #songs { text-align:left; list-style-type: none; margin: 0; padding: 0; width: 95%; }
     .lyrics { text-align:center; list-style-type: none; margin: 0; padding: 0; width: 75%; }
@@ -137,12 +138,19 @@ li {
     cursor: pointer;
     border: 1px solid #d0d0d0;
 }
+
+#sermon_data {
+    padding: 5px;
+    margin: 5px;
+    width: 95%;
+}
 </style>
 </head>
 <body>
     <div class="custom-loader" style="display:none"></div>
     <h3><span class="arrow left" name="-1">&lt;</span> {{ w.date }} <span class="arrow ight" name="1">&gt;</span></h3>
     <!-- Container of worship songs -->
+    <div id="sermon_data"></div>
     <div class="action_btns">
         <input id="keyword" style="display:none">
         <button id="search_btn">Search</button>
@@ -152,14 +160,13 @@ li {
             <!--<button class="export_btn" onclick="javascript:export_file({{ id }})">Export</button>-->
             <button class="reset_btn" onclick="javascript:reset()">Reset</button>
             <!--<button id="preview_btn">Present</button>-->
-            <button id="home">Home</button>
         </div>
     <div id="worship">
         <!-- sortable songs -->
     </div>
         <div class="action_btns">
     <button class="save_btn" onclick="javascript:save({{ id }})">Save</button>
-    <button class="export_btn" onclick="javascript:export_file({{ id }})">Export</button>
+    <!--<button class="export_btn" onclick="javascript:export_file({{ id }})">Export</button>-->
     &nbsp;&nbsp;<button class="reset_btn" onclick="javascript:reset()">Reset</button>
         </div>
     <div id="song_list" >
@@ -235,6 +242,14 @@ li {
     });
 
     // Functions
+
+    function get_sermon() {
+        var html = [];
+        html.push('Title: ' + worship_data.title + ' <a href="javascript:get_bible(show_verse, \'' + worship_data.bible + '\')">' + worship_data.bible + '</a>');
+        html.push('Speaker: ' + worship_data.speaker);
+        html.push(worship_data.outline);
+        $('#sermon_data').html(html.join('<br/>'));
+    }
 
     // Presentation mode
     function presentation() {
@@ -430,6 +445,7 @@ li {
     }
 
     $(document).ready(function () {
+        get_sermon();
         $.when( add_song_to_worship(worship)).then(function() {
             init();
         });

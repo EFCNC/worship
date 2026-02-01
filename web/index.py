@@ -89,7 +89,9 @@ def worship_notes(id):
 		return "No Slides available", 400
 
 	songs = Utils.get_worship_songs(id)
-	w = Utils.worship_list(id)[0]
+	w = Utils.worship_list(id)
+	if w:
+		w = w[0]
 	return render_template('worship_notes.html', songs=songs, id=id, w=w)
 
 @app.route("/slides/admin1")
