@@ -68,7 +68,7 @@
 <div id="dialog"></div>
 <script>
     if($.cookie("user_name")) {
-    full_name = $.cookie('user_name').split('(')[0];
+    full_name = $.cookie('user_name').split('(')[0].trim();
     short_name = full_name.match(/(\b\S)?/g).join("").toUpperCase()
 
     const username = $.cookie('user_name').split('(')[1]?.replace(')', '');
