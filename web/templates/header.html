@@ -71,9 +71,23 @@
     full_name = $.cookie('user_name').split('(')[0];
     short_name = full_name.match(/(\b\S)?/g).join("").toUpperCase()
 
-    $('#profile').html('<a href="profile">' + short_name + '</a>');
-    $('#profile').attr('class', 'login');
-    $('#profile').attr('title', full_name);
+    const username = $.cookie('user_name').split('(')[1]?.replace(')', '');
+    const imgPath = `/static/img/profiles/${username}.jpg`;
+
+    const img = new Image();
+    img.onload = function () {
+        $('#profile').html(
+            `<a href="profile">
+                <img id="profile-img" src="${imgPath}" title="${full_name}" />
+             </a>`
+        );
+    };
+    img.onerror = function () {
+        $('#profile').html(`<a href="profile">${short_name}</a>`);
+    };
+    img.src = imgPath;
+
+    $('#profile').attr('class', 'login').attr('title', full_name);
 }
 
 </script>
