@@ -13,79 +13,106 @@
     <script src="../static/worship.js"></script>
     <link href="../static/jquery-ui.css" rel="stylesheet">
 <style>
-.login {
-  float: left;
-  height: 30px;
-  width: 30px;
-  background-color: #c85550;
-  color: #fff;
-  border-radius: 50%;
-  line-height: 30px;
-  font-size: 14px;
-  text-align: center;
-  display: inline-block;
-}
+	:root {
+		--primary-color: #1abc9c;
+		--secondary-color: #c85550;
+		--text-light: #ffffff;
+		--header-height: 60px;
+	}
+	
+	.login {
+	  float: left;
+	  height: 30px;
+	  width: 30px;
+	  background-color: #c85550;
+	  color: #fff;
+	  border-radius: 50%;
+	  line-height: 30px;
+	  font-size: 14px;
+	  text-align: center;
+	  display: inline-block;
+	}
+	
+	#header {
+	  background: var(--primary-color);
+	  color: var(--text-light);
+	  display: flex;
+	  align-items: center;
+	  justify-content: space-between;	
+	  padding: 0 20px;
+	  height: var(--header-height);
+	  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+	  position: sticky;
+	  top: 0;
+	  z-index: 100;								
+	}
+	
+	#profile a:link {
+	    text-decoration: none;
+	    color: #fff;
+	}
+	#profile a:visited {
+	    text-decoration: none;
+	    color: #fff;
+	}
+	
+	.navigation {
+	  float: right;
+	}
+	
+	#loading {
+	    display: none;
+	    z-index:999;
+	    background-color: #000;
+	    opacity: 0.8;
+	    position: fixed;
+	    overflow: show;
+	    margin: auto;
+	    top: 0;
+	    left: 0;
+	    bottom: 0;
+	    right: 0;
+	}
+	
+	#profile-img {
+	    float: left;
+	}
 
-#header {
-  margin: 10px 10px 10px 10px;
-  padding-bottom: 35px;
-}
-
-#profile a:link {
-    text-decoration: none;
-    color: #fff;
-}
-#profile a:visited {
-    text-decoration: none;
-    color: #fff;
-}
-
-.navigation {
-  float: right;
-}
-
-#loading {
-    display: none;
-    z-index:999;
-    background-color: #000;
-    opacity: 0.8;
-    position: fixed;
-    overflow: show;
-    margin: auto;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0;
-}
-
-#profile-img {
-    float: left;
-}
+	/* Mobile Adjustments */
+	@media (max-width: 600px) {
+		#header {
+			padding: 0 10px;
+		}
+	}
+	
 </style>
 </head>
 <div id="loading"></div>
 <div id="header"><div id="profile"><a href="profile"><img id="profile-img" src="../static/img/login.jpg" title="Profile"/></a></div><div class="navigation"><a href="/">Home</a>&nbsp;&nbsp;<a href="/song/list">Songs</a>&nbsp;&nbsp;<a href="/calendar">Calendar</a>&nbsp;&nbsp;<a href="/slides">Slide</a></div></div>
 <div id="dialog"></div>
 <script>
-    if($.cookie("user_name")) {
-    full_name = $.cookie('user_name').split('(')[0].trim();
-    short_name = full_name.match(/(\b\S)?/g).join("").toUpperCase()
+    const userCookie = $.cookie("user_name");
+    
+    if(userCookie) {
+        const full_name = userCookie.split('(')[0].trim();
+        const short_name = full_name.match(/(\b\S)?/g).join("").toUpperCase();
+        const username = userCookie.split('(')[1]?.replace(')', '');
+        const imgPath = `/static/img/profiles/${username}.jpg`;
 
-    const username = $.cookie('user_name').split('(')[1]?.replace(')', '');
-    const imgPath = `/static/img/profiles/${username}.jpg`;
-
-    const img = new Image();
-    img.onload = function () {
-        $('#profile').html(
+        const img = new Image();
+		// Need to refactor CSS Classes so that profile image gets scaled correctly.
+        img.onload = function () {
+            $('#profile').html(
             `<a href="profile">
                 <img id="profile-img" src="${imgPath}" title="${full_name}" />
              </a>`
-        );
-    };
-    img.onerror = function () {
-        $('#profile').html(`<a href="profile">${short_name}</a>`);
-    };
-    img.src = imgPath;
+        	);
+        };
+        img.onerror = function () {
+           $('#profile').html(`<a href="profile">${short_name}</a>`);
+        };
+        img.src = imgPath;
+    }
 
     $('#profile').attr('class', 'login').attr('title', full_name);
 }
