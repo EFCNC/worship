@@ -239,7 +239,7 @@ function get_sermon(id) {
         if(response) {
             var sermon_data = {};
             $("#popup").empty();
-            html = 'Title: <input type="text" id="title" value="' + response.title + '"></input>&nbsp;Speaker: <input type="text" id="speaker" value="' + response.speaker + '"></input><br/>&nbsp;Bible: <input type="text" id="bible_verse" value="' + response.bible + '"></input><br/>Outline:<textarea rows="3" cols="50" id="outline">' + response.outline + '</textarea><br/>Notes:<textarea rows="3" cols="50" id="notes">' + response.notes + '</textarea>';
+            html = 'Title: <input type="text" id="title" value="' + response.title + '"></input><br/>Speaker: <input type="text" id="speaker" value="' + response.speaker + '"></input><br/>&nbsp;Bible: <input type="text" id="bible_verse" value="' + response.bible + '"></input><br/>Outline<br/><textarea rows="3" cols="2" style="width:95%" id="outline">' + response.outline + '</textarea><br/>Notes<br/><textarea rows="3" cols="2" style="width:95%" id="notes">' + response.notes + '</textarea>';
             $("#popup").append(html);
             $("#popup").dialog({
                 title: "Sermon Information (" + date + ")",
