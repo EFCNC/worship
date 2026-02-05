@@ -139,7 +139,9 @@ span.chunk:before {
             {{ team.role }}: {{ team.user_name }}<br/>
         {% endfor %}
     </p>
-    <p><pre>{{ w.notes }}</pre></p>
+    <p><b>Worship Leader's Notes:</b>
+    {{ w.notes }}
+    </p>
 
     <!-- Container of worship songs -->
     <button class="view" onclick="javascript:load(0, this.className)">View</button><button class="chord" onclick="javascript:load(1, this.className)">Chord</button><button class="bi" onclick="javascript:load(2, this.className)">Bilingual</button><button onclick="javascript:load_chords()">All Chords</button><button onclick="javascript:load_sheets()">All Sheets</button>

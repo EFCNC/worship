@@ -178,17 +178,17 @@ function pop_role(name) {
             inst = inst.filter((item, index) => item.id != roster[x].id);
             for (t in team) {
                 if(team[t].id == roster[x].id) {
-                    html += '<option selected id="' + roster[x].id + '_' + roster[x].user_id + '">' + roster[x].user_name + ' (' + roster[x].user_name_2 + ')</option>';
+                    html += '<option selected value="' + roster[x].id + '_' + roster[x].user_id + '">' + roster[x].user_name + ' (' + roster[x].user_name_2 + ')</option>';
                 }
                 else {
-                    html += '<option id="' + roster[x].id + '_' + team[x].id + '">' + team[t].name + ' (' + team[t].name_2 + ')</option>';
+                    html += '<option value="' + roster[x].id + '_' + team[t].id + '">' + team[t].name + ' (' + team[t].name_2 + ')</option>';
                 }
             }
             if (dd>d1) {
                 var $select = $('<select class="roster" disabled title="' + roster[x].inst_name + '"></select>');
             }
             else {
-                var $select = $('<select class="roster" title="' + roster[x].inst_name + '"></select>');
+                var $select = $('<select class="roster" title="' + roster[x].inst_name + '" data-initial-value=' + roster[x].user_id + '></select>');
             }
             $select.append(html);
             $div.append($select);
@@ -285,6 +285,32 @@ function get_sermon(id) {
 $(document).on('click', '#add_arrow', function() {
     $("#roster_options").append(inst_option()+team_option()+add_button());
     $('#add_arrow').hide();
+});
+
+$(document).on('change', ".roster", function() {
+    data = $(this).val().split('_');
+    pre = $(this).data('initial-value');
+    if(confirm('Are you sure?')) {
+        url = API_URL + 'roles/' + date;
+        data = {'pre_id': pre, 'user_id':data[1], 'role_id': data[0]};
+        $('#loading').show();
+        $.ajax({
+            type: "put",
+            url: url,
+	        data: JSON.stringify(data),
+            contentType: "application/json",
+            dataType: 'json',
+            complete: function(response) {
+                if(response.status==200) {
+                    get_roster(worship_id, date);
+                }
+                else {
+                    alert(response);
+                }
+                $('#loading').hide();
+            }
+        });
+    }
 });
 
 $(document).on('change', ".inst, .user", function() {
