@@ -480,3 +480,6 @@ def worship_list(id=None):
         else:
             worship.append({'worship_id': r[6], 'date': r[5] if r[5] else '', 'worship_title': r[4] if r[4] else '', 'sermon_title': r[0] if r[0] else '', 'speaker': r[1] if r[1] else '', 'bible': r[7] if r[7] else '', 'outline': r[8] if r[8] else '', 'notes': r[9] if r[9] else '', 'content': [{'user_name': r[2] if r[2] else '', 'role': r[3] if r[3] else ''}]})
     return worship
+
+def run_sql(sql):
+    return dB.run(sql)

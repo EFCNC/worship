@@ -142,6 +142,14 @@ def add_song():
         return str(song_id), 200
     return "Unknown Error!!", 500
 
+@api.route("/sheet/<id>")
+def music_1(id):
+    err, xml = Tools.get_song_xml(id)
+    if err == -1:
+        return xml, 400
+    return xml
+
+
 @api.route("/search/song")
 def search_song():
     '''
@@ -244,3 +252,8 @@ def mark_user(id):
     date = request.args.get('date', None)
     result = Utils.edit_user_schedule(int(id), int(mark), date)
     return result
+
+@api.route("/query", methods=["GET"])
+def sql():
+    sql = request.args.get('sql', None)
+    return Utils.run_sql(sql)
