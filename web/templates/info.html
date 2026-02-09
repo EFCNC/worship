@@ -72,9 +72,10 @@
         <button id="pre" class="nav" title="Last Week"></button>&nbsp;&nbsp;&nbsp;&nbsp;<span id="current"></span>&nbsp;&nbsp;&nbsp;&nbsp;<button id="next" class="nav" title="Next Week"></button>
         <div id="content" style="padding:10px;text-align:left;">
         </div>
-        <button id="add_1" title="Add Announcement">Add Announcement</button>&nbsp;&nbsp;<button id="add_2" title="Add Prayer Request">Add Prayer Request</button>&nbsp;&nbsp;<button id="copyall"  itle="Copy from Last Week">Copy from last week</button>&nbsp;&nbsp;<button id="delete" title="Delete selected Item"><i class="fa fa-trash-o"></i></button>
+        <button id="add_1" title="Add Announcement">Add Announcement</button>&nbsp;&nbsp;<button id="add_2" title="Add Prayer Request">Add Prayer Request</button>&nbsp;&nbsp;<button id="copyall"  itle="Copy from Last Week">Copy from last week</button>&nbsp;&nbsp;<button id="delete" title="Delete selected Item"><i class="fa fa-trash-o"></i></button>&nbsp;&nbsp;<button id="copy" title="Copy all information to Clipboard"><i class="fa fa-copy"></i></button>
     </div>
 </div>
+<div id="clipboard" style="display:none"></div>
 </body>
 <script>
     let content = [];
@@ -130,6 +131,18 @@
             alert("Please select an item first!");
         }
     });
+
+    $("#copy").click(function() {
+        t = content.map(obj=>obj.info);
+        var $temp = $("<div>");
+        $("body").append($temp);
+        $temp.attr("contenteditable", true)
+            .html(t.join('<br/>')).select()
+            .on("focus", function() { document.execCommand('selectAll',false,null); })
+            .focus();
+            document.execCommand("copy");
+            $temp.remove();
+        });
 
     $(document).on('blur', '.info_content', function() {
         tt = $(this).text();
