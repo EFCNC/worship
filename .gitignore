@@ -1,4 +1,5 @@
 web/static/presentation/
-/files
-/app/pptx_tools
+/files/json/
+/files/html/
+/files/xml/
 web/static/video
