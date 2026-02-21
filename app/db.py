@@ -1,4 +1,4 @@
-import pyodbc
+#import pyodbc
 import sqlite3
 import os
 
