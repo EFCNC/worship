@@ -9,7 +9,6 @@ import re
 #import opencc
 from app import db as dB
 from app import parser as Parser
-#import hanzidentifier
 
 path = os.path.dirname(os.path.realpath(__file__))
 with open(os.path.join(path, 'conf.json'), encoding="utf8") as json_file:

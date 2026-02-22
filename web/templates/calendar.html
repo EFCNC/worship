@@ -195,14 +195,14 @@ display:block;
         // New remove button if a person is assigned and the date is in the future
         let container = $('<div class="user-select-container" style="display:flex; align-items:center; justify-content:center;"></div>');
         container.append($select);
-        
+
         if (person && dd <= d1) {
-            container.append('<button class="clear-user" data-date="'+d+'" data-role_id="'+roles.indexOf(role)+'" data-user_id="'+person.id+'" title="Remove User" style="margin-left:5px; cursor:pointer; border:1px solid #ccc; background:#fff; color:red; border-radius:3px; padding:0 5px;">&times;</button>');
+            container.append('<button class="clear-user" data-date="'+d+'" data-role_id="'+roles.indexOf(role)+'" data-user_id="'+person.id+'" title="Remove User from this assignment" style="margin-left:5px; cursor:pointer; border:1px solid #ccc; background:#fff; color:red; border-radius:3px; padding:0 5px;">&times;</button>');
         }
 
         return '<div class="user">' + container[0].outerHTML + '</div>';
 
-        
+
     }
 
     function get_info() {
@@ -263,7 +263,7 @@ display:block;
                         cookies.push(date);
                         $.cookie("marked_date", cookies.toString(), { path: '/' })
                     }
-                    location.reload;
+                    location.reload();
                 }
                 else {
                     alert(response);
@@ -290,7 +290,7 @@ display:block;
                 dataType: 'json',
                 complete: function(response) {
           	        if(response.status==200) {
-                        location.reload;
+                        location.reload();
                     }
                     else {
                         alert(response);
@@ -309,7 +309,7 @@ display:block;
                 dataType: 'json',
                 complete: function(response) {
           	        if(response.status==200) {
-                        location.reload;
+                        location.reload();
                     }
                     else {
                         alert(response);
@@ -321,6 +321,9 @@ display:block;
     });
 
     $(document).on('click', '.clear-user', function() {
+        if(!confirm("Are you sure?")) {
+            return false;
+        }
         inst_id = $(this).data("role_id");
         dd = $(this).data("date");
         user_id = $(this).data("user_id");
@@ -335,7 +338,7 @@ display:block;
                 dataType: 'json',
                 complete: function(response) {
           	        if(response.status==200) {
-                        location.reload;
+                        location.reload();
                     }
                     else {
                         alert(response);
