@@ -1,0 +1,417 @@
+[
+  {
+    "bible": "",
+    "content": {
+      "origin_text": "<p>主日禮拜即將開始<br/>請安靜預備心<br/><br/>歡迎您參加今日的主日崇拜</p>",
+      "region_text": "<p>Please be prepared as the service is about to start<br/>Welcome to worship with us</p>"
+    },
+    "lang": "",
+    "lang_2": "",
+    "notes": "安靜心前奏",
+    "style": {
+      "align": "center",
+      "background": "../static/presentation/bg1/Paint Sweeps Gold.jpg",
+      "color": "",
+      "bgcolor": ""
+    },
+    "title": "安靜心",
+    "type": "info"
+  },
+  {
+    "bible": "",
+    "content": {
+      "origin_text": "<ul><li>二月份月份請弟兄小組幫忙教會主堂清潔工作</li><li>二月份廚房中餐打菜和清洗由姐妹小組負責</li><li>謝謝心儀傳道今天的證道，願主祝福她的家庭和事工</li><li>下主日為聯合主日學，由廖忠信傳道帶領</li></ul>",
+      "region_text": ""
+    },
+    "lang": "",
+    "lang_2": "",
+    "notes": "報告",
+    "style": {
+      "align": "left",
+      "background": "../static/presentation/bg1/Paint Sweeps Gold.jpg",
+      "color": "",
+      "bgcolor": ""
+    },
+    "title": "報告",
+    "type": "info"
+  },
+  {
+    "type": "song",
+    "title": "愛得以完全",
+    "author": "papachen",
+    "lang": "zh",
+    "lang_2": "en",
+    "key": "G",
+    "sequence": "1,2,c1,c2,f",
+    "bible": "",
+    "lyricist": "papachen",
+    "book": "",
+    "copyright": "papa&mafille",
+    "ccli": "",
+    "lyrics_raw": "<1>\r\n我們[G]愛  因為[C]神先愛我[G]們[F][D/F#]\r\n在主[G]裡面我[Am]有滿足喜[Dsus4]樂[D7]\r\n我們[C]肩並肩  [D]心相連  [G]大[D/F#]步向[Em]前\r\n因[C]祂的愛  我[Am]們的愛  [Cm]得以完全[D7]\r\n[region 2]\r\nWe love because He first loved us.\r\nThe fulfillment of joys is completed in Christ\r\nLet’s walk together in one accord\r\nIn You, love is perfected with us\r\n</1>\r\n<2>\r\n我們[G]愛  因為[C]神先愛我[G]們[F][D/F#]\r\n在主[G]面前  享[Am]受完全恩[Dsus4]典[D7]\r\n我們[C]手牽手  [D]心謙卑  [G]相[D/F#]互赦[Em]免\r\n靠主[Am]恩典  我們[Cm]共同走向明[Dsus4]天[D7]\r\n[region 2]\r\nWe love because He first loved us.\r\nThe fulfillment of joys is completed in Christ\r\nLet’s hand in hand with humble heart in forgiveness\r\nIn His grace, our future is sound\r\n</2>\r\n<chorus1>\r\n我要[G]堅定信[Bm]念  [B7]不再倚靠世[Em]界\r\n因祢[Am]已賜給 我所[C]有一切\r\n是祢[Am]愛犧牲的挽回[D]\r\n[region 2]\r\nI will trust in You, the world is behind me\r\nYou have given me all thing,\r\nRedeem us from the sacrifice of Your love\r\n</chorus1>\r\n<chorus2>\r\n我要[G]持守誓[Bm]言  [B7]不再自怨自[Em]憐\r\n因祢[Am]的完全  靠主[C]的恩典\r\n我們[Am]的愛[D7]得以完全[Cm][G][Cm][D7]\r\n[region 2]\r\nI will keep my promise, no longer self-pity\r\nTrust in Your fulliness, and grace\r\nIn You, love is perfected with us\r\n</chorus2>\r\n<final>\r\n因祢[C]的完全  [Cm]靠主[G]的恩典[D/F#][Em]\r\n我們[Am]的愛[D7]得以完全[Cm][G]\r\n[region 2]\r\nTrust in Your fulliness, and grace\r\nIn You, love is perfected with us\r\n</final>",
+    "content": [
+      {
+        "name": "1",
+        "origin": "我們[G]愛  因為[C]神先愛我[G]們[F][D/F#]<br/>在主[G]裡面我[Am]有滿足喜[Dsus4]樂[D7]<br/>我們[C]肩並肩  [D]心相連  [G]大[D/F#]步向[Em]前<br/>因[C]祂的愛  我[Am]們的愛  [Cm]得以完全[D7]",
+        "region": "We love because He first loved us.<br/>The fulfillment of joys is completed in Christ<br/>Let’s walk together in one accord<br/>In You, love is perfected with us",
+        "origin_text": "我們愛  因為神先愛我們<br/>在主裡面我有滿足喜樂<br/>我們肩並肩  心相連  大步向前<br/>因祂的愛  我們的愛  得以完全",
+        "region_text": "We love because He first loved us.<br/>The fulfillment of joys is completed in Christ<br/>Let’s walk together in one accord<br/>In You, love is perfected with us",
+        "origin_chord": "我們<span class=\"chunk\" data-chord=\"G\">愛</span>&nbsp;&nbsp;  因為<span class=\"chunk\" data-chord=\"C\">神先愛我</span><span class=\"chunk\" data-chord=\"G\">們</span>&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"F\"></span>&nbsp;&nbsp;&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"D/F#\"></span>&nbsp;&nbsp;&nbsp;&nbsp;<br/>在主<span class=\"chunk\" data-chord=\"G\">裡面我</span><span class=\"chunk\" data-chord=\"Am\">有滿足喜</span><span class=\"chunk\" data-chord=\"Dsus4\">樂</span>&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"D7\"></span>&nbsp;&nbsp;&nbsp;&nbsp;<br/>我們<span class=\"chunk\" data-chord=\"C\">肩並肩</span>  <span class=\"chunk\" data-chord=\"D\">心相連</span>  <span class=\"chunk\" data-chord=\"G\">大</span>&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"D/F#\">步向</span><span class=\"chunk\" data-chord=\"Em\">前</span>&nbsp;&nbsp;<br/>因<span class=\"chunk\" data-chord=\"C\">祂的愛</span>  我<span class=\"chunk\" data-chord=\"Am\">們的愛</span>  <span class=\"chunk\" data-chord=\"Cm\">得以完全</span><span class=\"chunk\" data-chord=\"D7\"></span>&nbsp;&nbsp;&nbsp;&nbsp;"
+      },
+      {
+        "name": "2",
+        "origin": "我們[G]愛  因為[C]神先愛我[G]們[F][D/F#]<br/>在主[G]面前  享[Am]受完全恩[Dsus4]典[D7]<br/>我們[C]手牽手  [D]心謙卑  [G]相[D/F#]互赦[Em]免<br/>靠主[Am]恩典  我們[Cm]共同走向明[Dsus4]天[D7]",
+        "region": "We love because He first loved us.<br/>The fulfillment of joys is completed in Christ<br/>Let’s hand in hand with humble heart in forgiveness<br/>In His grace, our future is sound",
+        "origin_text": "我們愛  因為神先愛我們<br/>在主面前  享受完全恩典<br/>我們手牽手  心謙卑  相互赦免<br/>靠主恩典  我們共同走向明天",
+        "region_text": "We love because He first loved us.<br/>The fulfillment of joys is completed in Christ<br/>Let’s hand in hand with humble heart in forgiveness<br/>In His grace, our future is sound",
+        "origin_chord": "我們<span class=\"chunk\" data-chord=\"G\">愛</span>&nbsp;&nbsp;  因為<span class=\"chunk\" data-chord=\"C\">神先愛我</span><span class=\"chunk\" data-chord=\"G\">們</span>&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"F\"></span>&nbsp;&nbsp;&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"D/F#\"></span>&nbsp;&nbsp;&nbsp;&nbsp;<br/>在主<span class=\"chunk\" data-chord=\"G\">面前</span>  享<span class=\"chunk\" data-chord=\"Am\">受完全恩</span><span class=\"chunk\" data-chord=\"Dsus4\">典</span>&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"D7\"></span>&nbsp;&nbsp;&nbsp;&nbsp;<br/>我們<span class=\"chunk\" data-chord=\"C\">手牽手</span>  <span class=\"chunk\" data-chord=\"D\">心謙卑</span>  <span class=\"chunk\" data-chord=\"G\">相</span>&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"D/F#\">互赦</span><span class=\"chunk\" data-chord=\"Em\">免</span>&nbsp;&nbsp;<br/>靠主<span class=\"chunk\" data-chord=\"Am\">恩典</span>  我們<span class=\"chunk\" data-chord=\"Cm\">共同走向明</span><span class=\"chunk\" data-chord=\"Dsus4\">天</span>&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"D7\"></span>&nbsp;&nbsp;&nbsp;&nbsp;"
+      },
+      {
+        "name": "c1",
+        "origin": "我要[G]堅定信[Bm]念  [B7]不再倚靠世[Em]界<br/>因祢[Am]已賜給 我所[C]有一切<br/>是祢[Am]愛犧牲的挽回[D]",
+        "region": "I will trust in You, the world is behind me<br/>You have given me all thing,<br/>Redeem us from the sacrifice of Your love",
+        "origin_text": "我要堅定信念  不再倚靠世界<br/>因祢已賜給 我所有一切<br/>是祢愛犧牲的挽回",
+        "region_text": "I will trust in You, the world is behind me<br/>You have given me all thing,<br/>Redeem us from the sacrifice of Your love",
+        "origin_chord": "我要<span class=\"chunk\" data-chord=\"G\">堅定信</span><span class=\"chunk\" data-chord=\"Bm\">念</span>&nbsp;&nbsp;  <span class=\"chunk\" data-chord=\"B7\">不再倚靠世</span><span class=\"chunk\" data-chord=\"Em\">界</span>&nbsp;&nbsp;<br/>因祢<span class=\"chunk\" data-chord=\"Am\">已賜給</span> 我所<span class=\"chunk\" data-chord=\"C\">有一切</span><br/>是祢<span class=\"chunk\" data-chord=\"Am\">愛犧牲的挽回</span><span class=\"chunk\" data-chord=\"D\"></span>&nbsp;&nbsp;&nbsp;&nbsp;"
+      },
+      {
+        "name": "c2",
+        "origin": "我要[G]持守誓[Bm]言  [B7]不再自怨自[Em]憐<br/>因祢[Am]的完全  靠主[C]的恩典<br/>我們[Am]的愛[D7]得以完全[Cm][G][Cm][D7]",
+        "region": "I will keep my promise, no longer self-pity<br/>Trust in Your fulliness, and grace<br/>In You, love is perfected with us",
+        "origin_text": "我要持守誓言  不再自怨自憐<br/>因祢的完全  靠主的恩典<br/>我們的愛得以完全",
+        "region_text": "I will keep my promise, no longer self-pity<br/>Trust in Your fulliness, and grace<br/>In You, love is perfected with us",
+        "origin_chord": "我要<span class=\"chunk\" data-chord=\"G\">持守誓</span><span class=\"chunk\" data-chord=\"Bm\">言</span>&nbsp;&nbsp;  <span class=\"chunk\" data-chord=\"B7\">不再自怨自</span><span class=\"chunk\" data-chord=\"Em\">憐</span>&nbsp;&nbsp;<br/>因祢<span class=\"chunk\" data-chord=\"Am\">的完全</span>  靠主<span class=\"chunk\" data-chord=\"C\">的恩典</span><br/>我們<span class=\"chunk\" data-chord=\"Am\">的愛</span><span class=\"chunk\" data-chord=\"D7\">得以完全</span><span class=\"chunk\" data-chord=\"Cm\"></span>&nbsp;&nbsp;&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"G\"></span>&nbsp;&nbsp;&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"Cm\"></span>&nbsp;&nbsp;&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"D7\"></span>&nbsp;&nbsp;&nbsp;&nbsp;"
+      },
+      {
+        "name": "f",
+        "origin": "因祢[C]的完全  [Cm]靠主[G]的恩典[D/F#][Em]<br/>我們[Am]的愛[D7]得以完全[Cm][G]",
+        "region": "Trust in Your fulliness, and grace<br/>In You, love is perfected with us",
+        "origin_text": "因祢的完全  靠主的恩典<br/>我們的愛得以完全",
+        "region_text": "Trust in Your fulliness, and grace<br/>In You, love is perfected with us",
+        "origin_chord": "因祢<span class=\"chunk\" data-chord=\"C\">的完全</span>  <span class=\"chunk\" data-chord=\"Cm\">靠主</span><span class=\"chunk\" data-chord=\"G\">的恩典</span><span class=\"chunk\" data-chord=\"D/F#\"></span>&nbsp;&nbsp;&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"Em\"></span>&nbsp;&nbsp;&nbsp;&nbsp;<br/>我們<span class=\"chunk\" data-chord=\"Am\">的愛</span><span class=\"chunk\" data-chord=\"D7\">得以完全</span><span class=\"chunk\" data-chord=\"Cm\"></span>&nbsp;&nbsp;&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"G\"></span>&nbsp;&nbsp;&nbsp;&nbsp;"
+      }
+    ],
+    "video": "https://youtu.be/-2FPa-RgLCs?si=-GzLQrjmbfAMVXkp",
+    "score": "https://drive.google.com/file/d/1tP0mvuOR6ah8L2v21TDwwrDdDs9z5O5E/preview",
+    "date": "2026-02-22",
+    "id": 22,
+    "transpose": [
+      "0"
+    ],
+    "alt_sequence": "1,2,c1,c2,f",
+    "notes": "Greeting to congregation, in Christ, we are family. Because God loves us first, we can love each other.\nPiano Intro 愛的真諦\nBass init, drum, guitar, and Cello plays melody\nDuring greeting, Guitar Cm-G with cello melody\n2nd time repeat chorus, then final sentence\nOnly guitar for final sentence, then cello intro of next song",
+    "abc": "",
+    "style": {
+      "align": "",
+      "background": "../static/presentation/bg1/Paint Sweeps Gold.jpg",
+      "color": "",
+      "bgcolor": ""
+    }
+  },
+  {
+    "type": "song",
+    "title": "Tis so Sweet to Trust in Jesus",
+    "author": "William J. KIRKPATRICK",
+    "lang": "en",
+    "lang_2": "zh",
+    "key": "G",
+    "sequence": "1,c,2,c,3,c,4,c",
+    "bible": "",
+    "lyricist": "Louisa M. R. STEAD",
+    "book": "OpenSong: Zagraniczne",
+    "copyright": "Public Domain",
+    "ccli": "",
+    "lyrics_raw": "<1>\r\n''[G]Tis so sweet to [C]trust in [G]Jesus\r\nJust to take Him [D]at [A7]His [D]Word\r\n[G]Just to rest up [C]on His [G]promise\r\nJust to [C]know thus [G/D]saith [D]the [G]Lord\r\n[region 2]\r\n信靠耶穌真是甜美\r\n只要信靠主恩言\r\n只要站在主應許上\r\n信靠主蒙福無邊\r\n</1>\r\n<chorus>\r\nJe[G]sus, Jesus [D7]how I trust Him\r\n[G]How I''ve proved Him [D]o''er [A7]and [D]o''er\r\n[G]Jesus Jesus [C]precious [G]Jesus\r\nO for [C]grace to [G]trust [D]Him [G]more\r\n[region 2]\r\n耶穌，耶穌，何等可靠\r\n多少事上已證明\r\n耶穌，耶穌，寶貴耶穌\r\n願我信心更堅定\r\n</chorus>\r\n<2>\r\n[G]O how sweet to [C]trust in [G]Jesus\r\nJust to trust His [D]clean[A]sing [D]blood\r\n[G]Just in simple [C]faith to [G]plunge me\r\n''Neath the [C]healing [G]clean[D]sing [G]flood\r\n[region 2]\r\n信靠耶穌何等甜美\r\n只要信靠主寶血\r\n只要憑著純一信心\r\n能洗罪污白如雪\r\n</2>\r\n<3>\r\n[G]Yes ''tis sweet to [C]trust in [G]Jesus\r\nJust from sin and [D]self [A7]to [D]cease\r\n[G]Just from Jesus [C]simply [G]taking\r\nLife and [C]rest and [G]joy [D]and [G]peace\r\n[region 2]\r\n信靠耶穌確實甜美\r\n污穢本性即停止\r\n得著耶穌得著一切\r\n生命喜樂和安息\r\n</3>\r\n<4>\r\n[G]I''m so glad I [C]learned to [G]trust Thee\r\nPrecious Jesus [D]Sa[A7]vior [D]Friend\r\n[G]And I know that [C]Thou art [G]with me\r\nWilt be [C]with me [G]to [D]the [G]end\r\n[region 2]\r\n我真快樂我信靠你\r\n你是我救主良友\r\n我深信你與我同在\r\n從今時直到永久\r\n</4>",
+    "content": [
+      {
+        "name": "1",
+        "origin": "'[G]Tis so sweet to [C]trust in [G]Jesus<br/>Just to take Him [D]at [A7]His [D]Word<br/>[G]Just to rest up [C]on His [G]promise<br/>Just to [C]know thus [G/D]saith [D]the [G]Lord",
+        "region": "信靠耶穌真是甜美<br/>只要信靠主恩言<br/>只要站在主應許上<br/>信靠主蒙福無邊",
+        "origin_text": "'Tis so sweet to trust in Jesus<br/>Just to take Him at His Word<br/>Just to rest up on His promise<br/>Just to know thus saith the Lord",
+        "region_text": "信靠耶穌真是甜美<br/>只要信靠主恩言<br/>只要站在主應許上<br/>信靠主蒙福無邊",
+        "origin_chord": "'<span class=\"chunk\" data-chord=\"G\">Tis</span> so sweet to <span class=\"chunk\" data-chord=\"C\">trust</span> in <span class=\"chunk\" data-chord=\"G\">Jesus</span><br/>Just to take Him <span class=\"chunk\" data-chord=\"D\">at</span> <span class=\"chunk\" data-chord=\"A7\">His</span> <span class=\"chunk\" data-chord=\"D\">Word</span><br/><span class=\"chunk\" data-chord=\"G\">Just</span> to rest up <span class=\"chunk\" data-chord=\"C\">on</span> His <span class=\"chunk\" data-chord=\"G\">promise</span><br/>Just to <span class=\"chunk\" data-chord=\"C\">know</span> thus <span class=\"chunk\" data-chord=\"G/D\">saith</span> <span class=\"chunk\" data-chord=\"D\">the</span> <span class=\"chunk\" data-chord=\"G\">Lord</span>"
+      },
+      {
+        "name": "c",
+        "origin": "Je[G]sus, Jesus [D7]how I trust Him<br/>[G]How I've proved Him [D]o'er [A7]and [D]o'er<br/>[G]Jesus Jesus [C]precious [G]Jesus<br/>O for [C]grace to [G]trust [D]Him [G]more",
+        "region": "耶穌，耶穌，何等可靠<br/>多少事上已證明<br/>耶穌，耶穌，寶貴耶穌<br/>願我信心更堅定",
+        "origin_text": "Jesus, Jesus how I trust Him<br/>How I've proved Him o'er and o'er<br/>Jesus Jesus precious Jesus<br/>O for grace to trust Him more",
+        "region_text": "耶穌，耶穌，何等可靠<br/>多少事上已證明<br/>耶穌，耶穌，寶貴耶穌<br/>願我信心更堅定",
+        "origin_chord": "Je<span class=\"chunk\" data-chord=\"G\">sus</span>, Jesus <span class=\"chunk\" data-chord=\"D7\">how</span> I trust Him<br/><span class=\"chunk\" data-chord=\"G\">How</span> I've proved Him <span class=\"chunk\" data-chord=\"D\">o</span>&nbsp;&nbsp;'er <span class=\"chunk\" data-chord=\"A7\">and</span> <span class=\"chunk\" data-chord=\"D\">o</span>&nbsp;&nbsp;'er<br/><span class=\"chunk\" data-chord=\"G\">Jesus</span> Jesus <span class=\"chunk\" data-chord=\"C\">precious</span> <span class=\"chunk\" data-chord=\"G\">Jesus</span><br/>O for <span class=\"chunk\" data-chord=\"C\">grace</span> to <span class=\"chunk\" data-chord=\"G\">trust</span> <span class=\"chunk\" data-chord=\"D\">Him</span> <span class=\"chunk\" data-chord=\"G\">more</span>"
+      },
+      {
+        "name": "2",
+        "origin": "[G]O how sweet to [C]trust in [G]Jesus<br/>Just to trust His [D]clean[A]sing [D]blood<br/>[G]Just in simple [C]faith to [G]plunge me<br/>'Neath the [C]healing [G]clean[D]sing [G]flood",
+        "region": "信靠耶穌何等甜美<br/>只要信靠主寶血<br/>只要憑著純一信心<br/>能洗罪污白如雪",
+        "origin_text": "O how sweet to trust in Jesus<br/>Just to trust His cleansing blood<br/>Just in simple faith to plunge me<br/>'Neath the healing cleansing flood",
+        "region_text": "信靠耶穌何等甜美<br/>只要信靠主寶血<br/>只要憑著純一信心<br/>能洗罪污白如雪",
+        "origin_chord": "<span class=\"chunk\" data-chord=\"G\">O</span>&nbsp;&nbsp; how sweet to <span class=\"chunk\" data-chord=\"C\">trust</span> in <span class=\"chunk\" data-chord=\"G\">Jesus</span><br/>Just to trust His <span class=\"chunk\" data-chord=\"D\">clean</span><span class=\"chunk\" data-chord=\"A\">sing</span> <span class=\"chunk\" data-chord=\"D\">blood</span><br/><span class=\"chunk\" data-chord=\"G\">Just</span> in simple <span class=\"chunk\" data-chord=\"C\">faith</span> to <span class=\"chunk\" data-chord=\"G\">plunge</span> me<br/>'Neath the <span class=\"chunk\" data-chord=\"C\">healing</span> <span class=\"chunk\" data-chord=\"G\">clean</span><span class=\"chunk\" data-chord=\"D\">sing</span> <span class=\"chunk\" data-chord=\"G\">flood</span>"
+      },
+      {
+        "name": "c",
+        "origin": "Je[G]sus, Jesus [D7]how I trust Him<br/>[G]How I've proved Him [D]o'er [A7]and [D]o'er<br/>[G]Jesus Jesus [C]precious [G]Jesus<br/>O for [C]grace to [G]trust [D]Him [G]more",
+        "region": "耶穌，耶穌，何等可靠<br/>多少事上已證明<br/>耶穌，耶穌，寶貴耶穌<br/>願我信心更堅定",
+        "origin_text": "Jesus, Jesus how I trust Him<br/>How I've proved Him o'er and o'er<br/>Jesus Jesus precious Jesus<br/>O for grace to trust Him more",
+        "region_text": "耶穌，耶穌，何等可靠<br/>多少事上已證明<br/>耶穌，耶穌，寶貴耶穌<br/>願我信心更堅定",
+        "origin_chord": "Je<span class=\"chunk\" data-chord=\"G\">sus</span>, Jesus <span class=\"chunk\" data-chord=\"D7\">how</span> I trust Him<br/><span class=\"chunk\" data-chord=\"G\">How</span> I've proved Him <span class=\"chunk\" data-chord=\"D\">o</span>&nbsp;&nbsp;'er <span class=\"chunk\" data-chord=\"A7\">and</span> <span class=\"chunk\" data-chord=\"D\">o</span>&nbsp;&nbsp;'er<br/><span class=\"chunk\" data-chord=\"G\">Jesus</span> Jesus <span class=\"chunk\" data-chord=\"C\">precious</span> <span class=\"chunk\" data-chord=\"G\">Jesus</span><br/>O for <span class=\"chunk\" data-chord=\"C\">grace</span> to <span class=\"chunk\" data-chord=\"G\">trust</span> <span class=\"chunk\" data-chord=\"D\">Him</span> <span class=\"chunk\" data-chord=\"G\">more</span>"
+      },
+      {
+        "name": "3",
+        "origin": "[G]Yes 'tis sweet to [C]trust in [G]Jesus<br/>Just from sin and [D]self [A7]to [D]cease<br/>[G]Just from Jesus [C]simply [G]taking<br/>Life and [C]rest and [G]joy [D]and [G]peace",
+        "region": "信靠耶穌確實甜美<br/>污穢本性即停止<br/>得著耶穌得著一切<br/>生命喜樂和安息",
+        "origin_text": "Yes 'tis sweet to trust in Jesus<br/>Just from sin and self to cease<br/>Just from Jesus simply taking<br/>Life and rest and joy and peace",
+        "region_text": "信靠耶穌確實甜美<br/>污穢本性即停止<br/>得著耶穌得著一切<br/>生命喜樂和安息",
+        "origin_chord": "<span class=\"chunk\" data-chord=\"G\">Yes</span> 'tis sweet to <span class=\"chunk\" data-chord=\"C\">trust</span> in <span class=\"chunk\" data-chord=\"G\">Jesus</span><br/>Just from sin and <span class=\"chunk\" data-chord=\"D\">self</span> <span class=\"chunk\" data-chord=\"A7\">to</span> <span class=\"chunk\" data-chord=\"D\">cease</span><br/><span class=\"chunk\" data-chord=\"G\">Just</span> from Jesus <span class=\"chunk\" data-chord=\"C\">simply</span> <span class=\"chunk\" data-chord=\"G\">taking</span><br/>Life and <span class=\"chunk\" data-chord=\"C\">rest</span> and <span class=\"chunk\" data-chord=\"G\">joy</span> <span class=\"chunk\" data-chord=\"D\">and</span> <span class=\"chunk\" data-chord=\"G\">peace</span>"
+      },
+      {
+        "name": "c",
+        "origin": "Je[G]sus, Jesus [D7]how I trust Him<br/>[G]How I've proved Him [D]o'er [A7]and [D]o'er<br/>[G]Jesus Jesus [C]precious [G]Jesus<br/>O for [C]grace to [G]trust [D]Him [G]more",
+        "region": "耶穌，耶穌，何等可靠<br/>多少事上已證明<br/>耶穌，耶穌，寶貴耶穌<br/>願我信心更堅定",
+        "origin_text": "Jesus, Jesus how I trust Him<br/>How I've proved Him o'er and o'er<br/>Jesus Jesus precious Jesus<br/>O for grace to trust Him more",
+        "region_text": "耶穌，耶穌，何等可靠<br/>多少事上已證明<br/>耶穌，耶穌，寶貴耶穌<br/>願我信心更堅定",
+        "origin_chord": "Je<span class=\"chunk\" data-chord=\"G\">sus</span>, Jesus <span class=\"chunk\" data-chord=\"D7\">how</span> I trust Him<br/><span class=\"chunk\" data-chord=\"G\">How</span> I've proved Him <span class=\"chunk\" data-chord=\"D\">o</span>&nbsp;&nbsp;'er <span class=\"chunk\" data-chord=\"A7\">and</span> <span class=\"chunk\" data-chord=\"D\">o</span>&nbsp;&nbsp;'er<br/><span class=\"chunk\" data-chord=\"G\">Jesus</span> Jesus <span class=\"chunk\" data-chord=\"C\">precious</span> <span class=\"chunk\" data-chord=\"G\">Jesus</span><br/>O for <span class=\"chunk\" data-chord=\"C\">grace</span> to <span class=\"chunk\" data-chord=\"G\">trust</span> <span class=\"chunk\" data-chord=\"D\">Him</span> <span class=\"chunk\" data-chord=\"G\">more</span>"
+      },
+      {
+        "name": "4",
+        "origin": "[G]I'm so glad I [C]learned to [G]trust Thee<br/>Precious Jesus [D]Sa[A7]vior [D]Friend<br/>[G]And I know that [C]Thou art [G]with me<br/>Wilt be [C]with me [G]to [D]the [G]end",
+        "region": "我真快樂我信靠你<br/>你是我救主良友<br/>我深信你與我同在<br/>從今時直到永久",
+        "origin_text": "I'm so glad I learned to trust Thee<br/>Precious Jesus Savior Friend<br/>And I know that Thou art with me<br/>Wilt be with me to the end",
+        "region_text": "我真快樂我信靠你<br/>你是我救主良友<br/>我深信你與我同在<br/>從今時直到永久",
+        "origin_chord": "<span class=\"chunk\" data-chord=\"G\">I</span>&nbsp;&nbsp;'m so glad I <span class=\"chunk\" data-chord=\"C\">learned</span> to <span class=\"chunk\" data-chord=\"G\">trust</span> Thee<br/>Precious Jesus <span class=\"chunk\" data-chord=\"D\">Sa</span><span class=\"chunk\" data-chord=\"A7\">vior</span> <span class=\"chunk\" data-chord=\"D\">Friend</span><br/><span class=\"chunk\" data-chord=\"G\">And</span> I know that <span class=\"chunk\" data-chord=\"C\">Thou</span> art <span class=\"chunk\" data-chord=\"G\">with</span> me<br/>Wilt be <span class=\"chunk\" data-chord=\"C\">with</span> me <span class=\"chunk\" data-chord=\"G\">to</span> <span class=\"chunk\" data-chord=\"D\">the</span> <span class=\"chunk\" data-chord=\"G\">end</span>"
+      },
+      {
+        "name": "c",
+        "origin": "Je[G]sus, Jesus [D7]how I trust Him<br/>[G]How I've proved Him [D]o'er [A7]and [D]o'er<br/>[G]Jesus Jesus [C]precious [G]Jesus<br/>O for [C]grace to [G]trust [D]Him [G]more",
+        "region": "耶穌，耶穌，何等可靠<br/>多少事上已證明<br/>耶穌，耶穌，寶貴耶穌<br/>願我信心更堅定",
+        "origin_text": "Jesus, Jesus how I trust Him<br/>How I've proved Him o'er and o'er<br/>Jesus Jesus precious Jesus<br/>O for grace to trust Him more",
+        "region_text": "耶穌，耶穌，何等可靠<br/>多少事上已證明<br/>耶穌，耶穌，寶貴耶穌<br/>願我信心更堅定",
+        "origin_chord": "Je<span class=\"chunk\" data-chord=\"G\">sus</span>, Jesus <span class=\"chunk\" data-chord=\"D7\">how</span> I trust Him<br/><span class=\"chunk\" data-chord=\"G\">How</span> I've proved Him <span class=\"chunk\" data-chord=\"D\">o</span>&nbsp;&nbsp;'er <span class=\"chunk\" data-chord=\"A7\">and</span> <span class=\"chunk\" data-chord=\"D\">o</span>&nbsp;&nbsp;'er<br/><span class=\"chunk\" data-chord=\"G\">Jesus</span> Jesus <span class=\"chunk\" data-chord=\"C\">precious</span> <span class=\"chunk\" data-chord=\"G\">Jesus</span><br/>O for <span class=\"chunk\" data-chord=\"C\">grace</span> to <span class=\"chunk\" data-chord=\"G\">trust</span> <span class=\"chunk\" data-chord=\"D\">Him</span> <span class=\"chunk\" data-chord=\"G\">more</span>"
+      }
+    ],
+    "video": "https://www.youtube.com/watch?v=-DdgkvnsHjM",
+    "score": "https://musescore.com/user/11354766/scores/5311559/embed",
+    "date": "2026-02-22",
+    "id": 154,
+    "transpose": [
+      "0"
+    ],
+    "alt_sequence": "1,c,2,c,3,c,4,c",
+    "notes": "Please listen to the youtube for reference\nCello Intro with A guitar arpeggio, folks song style\nEnding with Cello",
+    "abc": "",
+    "style": {
+      "align": "",
+      "background": "../static/presentation/bg1/Paint Sweeps Gold.jpg",
+      "color": "",
+      "bgcolor": ""
+    }
+  },
+  {
+    "type": "song",
+    "title": "跟隨到底",
+    "author": "許智皓",
+    "lang": "zh",
+    "lang_2": "",
+    "key": "G",
+    "sequence": "1,2,c,b,c",
+    "bible": "",
+    "lyricist": "許智皓",
+    "book": "",
+    "copyright": "",
+    "ccli": "",
+    "lyrics_raw": "<1>\r\n用我[G]全人全[D/F#]心 敬[Em]拜祢\r\n用我全[C]人全[Am7]心 敬拜[Dsus4]祢[D]\r\n不管[G]生命有[D/F#]多少問[Em]題\r\n祢的[Am]愛使我[D]重新得[G]力[F][Eb][C/D]\r\n</1>\r\n<2>\r\n用我[G]全心全[D/F#]意 來[Em]愛祢\r\n用我全[C]心全[G/B]意 來愛[Am7]祢[D]\r\n因為[Bm]祢 拯救[B/D#]我的[Em]生命\r\n讓我一[Am]生 從[D]此有意[G]義[G7]\r\n</2>\r\n<chorus>\r\n我願一[C]生緊緊[D/C]跟隨[Bm]祢[Em]\r\n儘管有[Am]風雨仍[G/B]然不放[C]棄\r\n[Dsus4]求祢[G/B]在[C]每一[C/D]天給[Bm]我勇[Em]氣\r\n這一[C]生 跟[D]隨祢到[G]底\r\n</chorus>\r\n<bridge>\r\n相信祢[C]的應許 走在祢[G/B]計劃裡\r\n依靠[Am]祢的膀[D]臂 [D#]不放[Em]棄[Dm7][G]\r\n相信祢[C]的應許 走在祢[Bm]計劃[Em]裡\r\n依靠[Am]祢的膀[A/C#]臂 不放[C/D]棄[D]\r\n我願一[C]生跟隨[D]祢到[G]底\r\n</bridge>",
+    "content": [
+      {
+        "name": "1",
+        "origin": "用我[G]全人全[D/F#]心 敬[Em]拜祢<br/>用我全[C]人全[Am7]心 敬拜[Dsus4]祢[D]<br/>不管[G]生命有[D/F#]多少問[Em]題<br/>祢的[Am]愛使我[D]重新得[G]力[F][Eb][C/D]",
+        "region": "",
+        "origin_text": "用我全人全心 敬拜祢<br/>用我全人全心 敬拜祢<br/>不管生命有多少問題<br/>祢的愛使我重新得力",
+        "region_text": "",
+        "origin_chord": "用我<span class=\"chunk\" data-chord=\"G\">全人全</span><span class=\"chunk\" data-chord=\"D/F#\">心</span>&nbsp;&nbsp; 敬<span class=\"chunk\" data-chord=\"Em\">拜祢</span><br/>用我全<span class=\"chunk\" data-chord=\"C\">人全</span><span class=\"chunk\" data-chord=\"Am7\">心</span>&nbsp;&nbsp; 敬拜<span class=\"chunk\" data-chord=\"Dsus4\">祢</span>&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"D\"></span>&nbsp;&nbsp;&nbsp;&nbsp;<br/>不管<span class=\"chunk\" data-chord=\"G\">生命有</span><span class=\"chunk\" data-chord=\"D/F#\">多少問</span><span class=\"chunk\" data-chord=\"Em\">題</span>&nbsp;&nbsp;<br/>祢的<span class=\"chunk\" data-chord=\"Am\">愛使我</span><span class=\"chunk\" data-chord=\"D\">重新得</span><span class=\"chunk\" data-chord=\"G\">力</span>&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"F\"></span>&nbsp;&nbsp;&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"Eb\"></span>&nbsp;&nbsp;&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"C/D\"></span>&nbsp;&nbsp;&nbsp;&nbsp;"
+      },
+      {
+        "name": "2",
+        "origin": "用我[G]全心全[D/F#]意 來[Em]愛祢<br/>用我全[C]心全[G/B]意 來愛[Am7]祢[D]<br/>因為[Bm]祢 拯救[B/D#]我的[Em]生命<br/>讓我一[Am]生 從[D]此有意[G]義[G7]",
+        "region": "",
+        "origin_text": "用我全心全意 來愛祢<br/>用我全心全意 來愛祢<br/>因為祢 拯救我的生命<br/>讓我一生 從此有意義",
+        "region_text": "",
+        "origin_chord": "用我<span class=\"chunk\" data-chord=\"G\">全心全</span><span class=\"chunk\" data-chord=\"D/F#\">意</span>&nbsp;&nbsp; 來<span class=\"chunk\" data-chord=\"Em\">愛祢</span><br/>用我全<span class=\"chunk\" data-chord=\"C\">心全</span><span class=\"chunk\" data-chord=\"G/B\">意</span>&nbsp;&nbsp; 來愛<span class=\"chunk\" data-chord=\"Am7\">祢</span>&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"D\"></span>&nbsp;&nbsp;&nbsp;&nbsp;<br/>因為<span class=\"chunk\" data-chord=\"Bm\">祢</span>&nbsp;&nbsp; 拯救<span class=\"chunk\" data-chord=\"B/D#\">我的</span><span class=\"chunk\" data-chord=\"Em\">生命</span><br/>讓我一<span class=\"chunk\" data-chord=\"Am\">生</span>&nbsp;&nbsp; 從<span class=\"chunk\" data-chord=\"D\">此有意</span><span class=\"chunk\" data-chord=\"G\">義</span>&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"G7\"></span>&nbsp;&nbsp;&nbsp;&nbsp;"
+      },
+      {
+        "name": "c",
+        "origin": "我願一[C]生緊緊[D/C]跟隨[Bm]祢[Em]<br/>儘管有[Am]風雨仍[G/B]然不放[C]棄<br/>[Dsus4]求祢[G/B]在[C]每一[C/D]天給[Bm]我勇[Em]氣<br/>這一[C]生 跟[D]隨祢到[G]底",
+        "region": "",
+        "origin_text": "我願一生緊緊跟隨祢<br/>儘管有風雨仍然不放棄<br/>求祢在每一天給我勇氣<br/>這一生 跟隨祢到底",
+        "region_text": "",
+        "origin_chord": "我願一<span class=\"chunk\" data-chord=\"C\">生緊緊</span><span class=\"chunk\" data-chord=\"D/C\">跟隨</span><span class=\"chunk\" data-chord=\"Bm\">祢</span>&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"Em\"></span>&nbsp;&nbsp;&nbsp;&nbsp;<br/>儘管有<span class=\"chunk\" data-chord=\"Am\">風雨仍</span><span class=\"chunk\" data-chord=\"G/B\">然不放</span><span class=\"chunk\" data-chord=\"C\">棄</span>&nbsp;&nbsp;<br/><span class=\"chunk\" data-chord=\"Dsus4\">求祢</span><span class=\"chunk\" data-chord=\"G/B\">在</span>&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"C\">每一</span><span class=\"chunk\" data-chord=\"C/D\">天給</span><span class=\"chunk\" data-chord=\"Bm\">我勇</span><span class=\"chunk\" data-chord=\"Em\">氣</span>&nbsp;&nbsp;<br/>這一<span class=\"chunk\" data-chord=\"C\">生</span>&nbsp;&nbsp; 跟<span class=\"chunk\" data-chord=\"D\">隨祢到</span><span class=\"chunk\" data-chord=\"G\">底</span>&nbsp;&nbsp;"
+      },
+      {
+        "name": "b",
+        "origin": "相信祢[C]的應許 走在祢[G/B]計劃裡<br/>依靠[Am]祢的膀[D]臂 [D#]不放[Em]棄[Dm7][G]<br/>相信祢[C]的應許 走在祢[Bm]計劃[Em]裡<br/>依靠[Am]祢的膀[A/C#]臂 不放[C/D]棄[D]<br/>我願一[C]生跟隨[D]祢到[G]底",
+        "region": "",
+        "origin_text": "相信祢的應許 走在祢計劃裡<br/>依靠祢的膀臂 不放棄<br/>相信祢的應許 走在祢計劃裡<br/>依靠祢的膀臂 不放棄<br/>我願一生跟隨祢到底",
+        "region_text": "",
+        "origin_chord": "相信祢<span class=\"chunk\" data-chord=\"C\">的應許</span> 走在祢<span class=\"chunk\" data-chord=\"G/B\">計劃裡</span><br/>依靠<span class=\"chunk\" data-chord=\"Am\">祢的膀</span><span class=\"chunk\" data-chord=\"D\">臂</span>&nbsp;&nbsp; <span class=\"chunk\" data-chord=\"D#\">不放</span><span class=\"chunk\" data-chord=\"Em\">棄</span>&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"Dm7\"></span>&nbsp;&nbsp;&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"G\"></span>&nbsp;&nbsp;&nbsp;&nbsp;<br/>相信祢<span class=\"chunk\" data-chord=\"C\">的應許</span> 走在祢<span class=\"chunk\" data-chord=\"Bm\">計劃</span><span class=\"chunk\" data-chord=\"Em\">裡</span>&nbsp;&nbsp;<br/>依靠<span class=\"chunk\" data-chord=\"Am\">祢的膀</span><span class=\"chunk\" data-chord=\"A/C#\">臂</span>&nbsp;&nbsp; 不放<span class=\"chunk\" data-chord=\"C/D\">棄</span>&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"D\"></span>&nbsp;&nbsp;&nbsp;&nbsp;<br/>我願一<span class=\"chunk\" data-chord=\"C\">生跟隨</span><span class=\"chunk\" data-chord=\"D\">祢到</span><span class=\"chunk\" data-chord=\"G\">底</span>&nbsp;&nbsp;"
+      },
+      {
+        "name": "c",
+        "origin": "我願一[C]生緊緊[D/C]跟隨[Bm]祢[Em]<br/>儘管有[Am]風雨仍[G/B]然不放[C]棄<br/>[Dsus4]求祢[G/B]在[C]每一[C/D]天給[Bm]我勇[Em]氣<br/>這一[C]生 跟[D]隨祢到[G]底",
+        "region": "",
+        "origin_text": "我願一生緊緊跟隨祢<br/>儘管有風雨仍然不放棄<br/>求祢在每一天給我勇氣<br/>這一生 跟隨祢到底",
+        "region_text": "",
+        "origin_chord": "我願一<span class=\"chunk\" data-chord=\"C\">生緊緊</span><span class=\"chunk\" data-chord=\"D/C\">跟隨</span><span class=\"chunk\" data-chord=\"Bm\">祢</span>&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"Em\"></span>&nbsp;&nbsp;&nbsp;&nbsp;<br/>儘管有<span class=\"chunk\" data-chord=\"Am\">風雨仍</span><span class=\"chunk\" data-chord=\"G/B\">然不放</span><span class=\"chunk\" data-chord=\"C\">棄</span>&nbsp;&nbsp;<br/><span class=\"chunk\" data-chord=\"Dsus4\">求祢</span><span class=\"chunk\" data-chord=\"G/B\">在</span>&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"C\">每一</span><span class=\"chunk\" data-chord=\"C/D\">天給</span><span class=\"chunk\" data-chord=\"Bm\">我勇</span><span class=\"chunk\" data-chord=\"Em\">氣</span>&nbsp;&nbsp;<br/>這一<span class=\"chunk\" data-chord=\"C\">生</span>&nbsp;&nbsp; 跟<span class=\"chunk\" data-chord=\"D\">隨祢到</span><span class=\"chunk\" data-chord=\"G\">底</span>&nbsp;&nbsp;"
+      }
+    ],
+    "video": "https://www.youtube.com/watch?v=J5imlALfOQk",
+    "score": "https://musescore.com/user/2414341/scores/6403590/embed",
+    "date": "2026-02-22",
+    "id": 35,
+    "transpose": [
+      "0"
+    ],
+    "alt_sequence": "1,2,c,b,c",
+    "notes": "Piano intro during prayer\nTranspose to A after bridge",
+    "abc": "",
+    "style": {
+      "align": "",
+      "background": "../static/presentation/bg1/Paint Sweeps Gold.jpg",
+      "color": "",
+      "bgcolor": ""
+    }
+  },
+  {
+    "alt_sequence": "",
+    "author": "",
+    "style": {
+      "align": "center",
+      "background": "../static/presentation/bg1/Paint Sweeps Gold.jpg"
+    },
+    "bible": "",
+    "book": "",
+    "ccli": "",
+    "content": {
+      "origin_text": "<div>約伯的信心旅程 11：與神相遇、不再一樣</div><br><div>劉心儀傳道<br>約伯記 40-42</div><div>神向約伯宣告 (約伯記 40-41)：\n神的主權\n神的大能\n神的供應\n神仍掌權\n \n約伯的回應 (約伯記 42)：\n承認神的偉大\n認知自己的渺小\n願意聆聽順服的心\n感恩神的同在和啟示\n真誠的認錯及悔改</div>",
+      "region_text": ""
+    },
+    "copyright": "",
+    "notes": "主日信息",
+    "title": "主日信息",
+    "type": "info"
+  },
+  {
+    "type": "song",
+    "title": "你坐著為王",
+    "author": "施弘美",
+    "lang": "zh",
+    "lang_2": "",
+    "key": "F",
+    "sequence": "v,c",
+    "bible": "詩29:10;詩30:5",
+    "lyricist": "施弘美",
+    "book": "生命河敬拜讚美系列02-耶穌，萬國的盼望，5",
+    "copyright": "生命河靈糧堂",
+    "ccli": "",
+    "lyrics_raw": "<verse>\r\n主耶和[Dm]華，滿有憐憫[Bb/E]和恩典\r\n我投[F]靠在你翅膀蔭[Gm]下，\r\n當我回[Dm]轉，一宿雖然[Bb/E]有哭泣\r\n早[F]晨必[A7]歡呼喜[Dm]樂。[Bb/F]\r\n</verse>\r\n<chorus>\r\n你坐著[F]為王[Dm7/F]到永永[Gm]遠遠，[G/A]\r\n雖洪水[Bb]翻騰，我[C7]堅定仰望[F]你。[A7]\r\n你坐著[Dm]為王[Bb/E]垂聽我[F]呼[Dm7]求，\r\n使我[Bb]靈甦醒，有[A7]復活的生[Dm]命。\r\n</chorus>",
+    "content": [
+      {
+        "name": "v",
+        "origin": "主耶和[Dm]華，滿有憐憫[Bb/E]和恩典<br/>我投[F]靠在你翅膀蔭[Gm]下，<br/>當我回[Dm]轉，一宿雖然[Bb/E]有哭泣<br/>早[F]晨必[A7]歡呼喜[Dm]樂。[Bb/F]",
+        "region": "",
+        "origin_text": "主耶和華，滿有憐憫和恩典<br/>我投靠在你翅膀蔭下，<br/>當我回轉，一宿雖然有哭泣<br/>早晨必歡呼喜樂。",
+        "region_text": "",
+        "origin_chord": "主耶和<span class=\"chunk\" data-chord=\"Dm\">華</span>&nbsp;&nbsp;，滿有憐憫<span class=\"chunk\" data-chord=\"Bb/E\">和恩典</span><br/>我投<span class=\"chunk\" data-chord=\"F\">靠在你翅膀蔭</span><span class=\"chunk\" data-chord=\"Gm\">下</span>&nbsp;&nbsp;，<br/>當我回<span class=\"chunk\" data-chord=\"Dm\">轉</span>&nbsp;&nbsp;，一宿雖然<span class=\"chunk\" data-chord=\"Bb/E\">有哭泣</span><br/>早<span class=\"chunk\" data-chord=\"F\">晨必</span><span class=\"chunk\" data-chord=\"A7\">歡呼喜</span><span class=\"chunk\" data-chord=\"Dm\">樂</span>&nbsp;&nbsp;。<span class=\"chunk\" data-chord=\"Bb/F\"></span>&nbsp;&nbsp;&nbsp;&nbsp;"
+      },
+      {
+        "name": "c",
+        "origin": "你坐著[F]為王[Dm7/F]到永永[Gm]遠遠，[G/A]<br/>雖洪水[Bb]翻騰，我[C7]堅定仰望[F]你。[A7]<br/>你坐著[Dm]為王[Bb/E]垂聽我[F]呼[Dm7]求，<br/>使我[Bb]靈甦醒，有[A7]復活的生[Dm]命。",
+        "region": "",
+        "origin_text": "你坐著為王到永永遠遠，<br/>雖洪水翻騰，我堅定仰望你。<br/>你坐著為王垂聽我呼求，<br/>使我靈甦醒，有復活的生命。",
+        "region_text": "",
+        "origin_chord": "你坐著<span class=\"chunk\" data-chord=\"F\">為王</span><span class=\"chunk\" data-chord=\"Dm7/F\">到永永</span><span class=\"chunk\" data-chord=\"Gm\">遠遠</span>，<span class=\"chunk\" data-chord=\"G/A\"></span>&nbsp;&nbsp;&nbsp;&nbsp;<br/>雖洪水<span class=\"chunk\" data-chord=\"Bb\">翻騰</span>，我<span class=\"chunk\" data-chord=\"C7\">堅定仰望</span><span class=\"chunk\" data-chord=\"F\">你</span>&nbsp;&nbsp;。<span class=\"chunk\" data-chord=\"A7\"></span>&nbsp;&nbsp;&nbsp;&nbsp;<br/>你坐著<span class=\"chunk\" data-chord=\"Dm\">為王</span><span class=\"chunk\" data-chord=\"Bb/E\">垂聽我</span><span class=\"chunk\" data-chord=\"F\">呼</span>&nbsp;&nbsp;<span class=\"chunk\" data-chord=\"Dm7\">求</span>&nbsp;&nbsp;，<br/>使我<span class=\"chunk\" data-chord=\"Bb\">靈甦醒</span>，有<span class=\"chunk\" data-chord=\"A7\">復活的生</span><span class=\"chunk\" data-chord=\"Dm\">命</span>&nbsp;&nbsp;。"
+      }
+    ],
+    "video": "https://youtu.be/nuK3oi7-YoM?si=S5AP0OiEHRJDLIeY",
+    "score": "https://file.xiaohai.ai/store/2015/05/01/55436f0c8062dcb9638c40fd.gif",
+    "date": "2026-02-22",
+    "id": 180,
+    "transpose": [
+      "0"
+    ],
+    "alt_sequence": "v,c",
+    "notes": "Responsive songs, piano only",
+    "abc": "",
+    "style": {
+      "align": "",
+      "background": "../static/presentation/bg1/Paint Sweeps Gold.jpg",
+      "color": "",
+      "bgcolor": ""
+    }
+  },
+  {
+    "author": "Mozart",
+    "lang": "zh-TW",
+    "lang_2": "en",
+    "key": "F",
+    "sequence": "1,2,3,4,5",
+    "bible": "羅馬書12:1",
+    "lyricist": "Frances Ridley Havergal",
+    "book": "聖詩(2009) 382",
+    "copyright": "",
+    "ccli": "",
+    "lyrics_raw": "<1>\r\n我的性命獻互祢，\r\n做祢路用到一世；\r\n時刻暝日獻互主，\r\n歸榮光祢萬年久。\r\n[region 2]\r\nTake my silver and my gold,\r\nNot a mite would I with hold.\r\nTake my intellect and use\r\nEvery pow’r as Thou shalt choose.\r\n</1>\r\n<2>\r\n我的手愛祢命令，\r\n為著我主做差用；\r\n我腳也愛為祢獻，\r\n常常替祢行無倦。\r\n</2>\r\n<3>\r\n我的聲音互祢用，\r\n歡喜謳咾主無停；\r\n我獻嘴唇來振動，\r\n報傳福音來救人。\r\n</3>\r\n<4>\r\n我的錢銀獻互祢，\r\n用出攏趁祢旨意；\r\n我的才情祢賞賜，\r\n甘願還祢做器具。\r\n</4>\r\n<5>\r\n我的疼痛求主助，\r\n疼祢贏過此世間；\r\n今我立志獻家己，\r\n永永專專歸互祢。\r\n阿們。\r\n</5>",
+    "content": [
+      {
+        "name": "4",
+        "origin": "我的錢銀獻互祢，<br/>用出攏趁祢旨意；<br/>我的才情祢賞賜，<br/>甘願還祢做器具。",
+        "region": "",
+        "origin_text": "我的錢銀獻互祢，<br/>用出攏趁祢旨意；<br/>我的才情祢賞賜，<br/>甘願還祢做器具。",
+        "region_text": "Take my silver and my gold,<br/>Not a mite would I with hold.<br/>Take my intellect and use<br/>Every pow’r as Thou shalt choose.",
+        "origin_chord": "我的錢銀獻互祢，<br/>用出攏趁祢旨意；<br/>我的才情祢賞賜，<br/>甘願還祢做器具。"
+      }
+    ],
+    "notes": "Offering Hymn",
+    "style": {
+      "align": "center",
+      "background": "../static/presentation/bg1/Paint Sweeps Gold.jpg",
+      "color": "",
+      "bgcolor": ""
+    },
+    "title": "我的性命獻互祢",
+    "type": "song"
+  },
+  {
+    "bible": "",
+    "content": {
+      "origin_text": "<ul><li>所有長輩們和會友們每天都蒙神看顧出入平安。每一個腳步都有主的保守看顧</li><li>婉萍姐2/6開始癌症治療,求主繼續保守看顧</li><li>免疫系統疾病的姐妹 (滿妹姐，麗美姐，Chloe，Imuda)</li><li>周淑娟姐的媽媽因心臟衰竭和肺積水，2/14住入加護病房，求主醫治。</li><li>尚未信主的另一半以及親人，同鄉慕道友，我們家中的下一代</li></ul>",
+      "region_text": ""
+    },
+    "lang": "",
+    "lang_2": "",
+    "notes": "肢體交通",
+    "style": {
+      "align": "left",
+      "background": "../static/presentation/bg1/Paint Sweeps Gold.jpg",
+      "color": "",
+      "bgcolor": ""
+    },
+    "title": "肢體交通",
+    "type": "info"
+  },
+  {
+    "bible": "",
+    "content": {
+      "origin_text": "<p><i>願上帝賜福您</i></p><p>默禱散會</p>",
+      "region_text": "<p><i>May God bless you</i></p><p><i>Silent Prayer</i></p>"
+    },
+    "lang": "",
+    "lang_2": "",
+    "notes": "<div class=\"admin notes\" contenteditable=\"true\">祝禱</div><div class=\"admin notes\" contenteditable=\"true\">默禱散會</div>",
+    "style": {
+      "align": "center",
+      "background": "../static/presentation/bg1/Paint Sweeps Gold.jpg",
+      "color": "",
+      "bgcolor": ""
+    },
+    "title": "祝禱 BENEDICTION",
+    "type": "info"
+  }
+]
