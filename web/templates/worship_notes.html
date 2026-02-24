@@ -1,8 +1,10 @@
+{% include 'header.html' %}
 <!DOCTYPE html>
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1" charset="utf-8">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<script src="/static/bible.js"></script>
 <style>
 span.chunk {
     position:relative;
@@ -125,13 +127,28 @@ span.chunk:before {
   background-color: #555555;
   color: white;
 }
+.video {
+  background-color: white;
+  color: black;
+  border: 2px solid #555555;
+}
+
+.video.on {
+  background-color: #800000;
+  color: white;
+}
+
+.video:hover {
+  background-color: #800000;
+  color: white;
+}
 </style>
 </head>
 <body>
     <h3> {{ w.date }} 敬拜筆記 (Worship Notes):</h3>
     <p><b>Title: {{ w.sermon_title }}<br/>
         Speaker: {{ w.speaker }}<br/>
-        Bible: {{ w.bible }}<br/>
+        Bible: <a href="javascript:get_bible(show_verse, '{{ w.bible }}')">{{ w.bible }}</a><br/>
         Outline: {{ w.outline }}</b>
     </p>
     <p>
@@ -139,16 +156,22 @@ span.chunk:before {
             {{ team.role }}: {{ team.user_name }}<br/>
         {% endfor %}
     </p>
-    <p><pre>{{ w.notes }}</pre></p>
+    <p><b>Worship Leader's Notes:</b>
+    {{ w.notes }}
+    </p>
 
     <!-- Container of worship songs -->
-    <button class="view" onclick="javascript:load(0, this.className)">View</button><button class="chord" onclick="javascript:load(1, this.className)">Chord</button><button class="bi" onclick="javascript:load(2, this.className)">Bilingual</button><button onclick="javascript:load_chords()">All Chords</button><button onclick="javascript:load_sheets()">All Sheets</button>
+    <button class="view" onclick="javascript:load(this.className)">View</button><button class="chord" onclick="javascript:load(this.className)">Chord</button><button class="bi" onclick="javascript:load(this.className)">Bilingual</button><button class="video" onclick="javascript:load(this.className)">Youtube</button><button onclick="javascript:load_chords()">All Chords</button><button onclick="javascript:load_sheets()">All Sheets</button>
     <hr/>
     <div id="worship">
     </div>
 
 </body>
 <script>
+    let tab = '{{ tab|safe }}';
+    let worship = {{ songs|safe }};
+    let song_id = worship.map(o=> o.id);
+
     // init sharp and flat keys to be assigned to keys
     let sharp = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
     let flat = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"];
@@ -192,9 +215,6 @@ span.chunk:before {
 	    return chord.join('/');
     }
 
-    let worship = {{ songs|safe }};
-    let song_id = worship.map(o=> o.id);
-
     function load_chords() {
         window.open('/chords/' + song_id.toString(), '_blank').focus();
     }
@@ -224,7 +244,7 @@ span.chunk:before {
         }
     }
 
-    function load(mode, name) {
+    function load(name) {
         clicked(name);
         html = ''
         for (data of worship) {
@@ -232,48 +252,61 @@ span.chunk:before {
                 html += '<div class="info">' + data.notes.replace('\n', '<br/>') + '</div>';
             }
             else {
-                html += '<div class="songs"><div class="reference">' + data.title + ' (' + parse_chord(data.key, parseInt(data.transpose)) + ') ' + lang_tag(data.lang) + ' ' + lang_tag(data.lang_2) + ' [' + data.alt_sequence + ']';
+                if(name == 'video') {
+                    v = data.video.replace('youtu.be/', 'www.youtube.com/embed/');
+                    v = v.replace('watch?v=', 'embed/');
+                    html += '<iframe width="400" height="301" src="' + v + '"></iframe><br/>';
+                }
+                else {
+                    html += '<div class="songs"><div class="reference">' + data.title + ' (' + parse_chord(data.key, parseInt(data.transpose)) + ') ' + lang_tag(data.lang) + ' ' + lang_tag(data.lang_2) + ' [' + data.alt_sequence + ']';
 
-                if (data.score) {
-                    html += '&nbsp;&nbsp;<a href="' + data.score + '" target="new"><i style="font-size:24px" class="fa" title="Sheet Music">&#xf0f6;</i></a>';
-                }
-                if (data.abc) {
-                    html += '&nbsp;&nbsp;<a href="/sheets/' + data.id + '" target="new"><i style="font-size:24px" class="fa" title="Interacted Sheet Music">&#xf1c7;</i></a>';
-                }
-                if (data.video) {
-                    html += '&nbsp;&nbsp;<a href="' + data.video + '" target="new"><i class="fa fa-play-circle" style="font-size:24px" title="Youtube Video"></i></a>';
-                }
-                html += '</div><table width="100%"><tr><td class="song_block">';
-                ll = []
-                for (l of data.content) {
-                    if(ll.indexOf(l.name) >= 0) {
-                        continue;
+                    if (data.score) {
+                        html += '&nbsp;&nbsp;<a href="' + data.score + '" target="new"><i style="font-size:24px" class="fa" title="Sheet Music">&#xf0f6;</i></a>';
                     }
-                    html += '<div><span>' + l.name + '</span>';
-                    if (mode == 0) {
-                        html += '<div class="song">' + l.origin_text.replace('\n', '<br/>');
+                    if (data.abc) {
+                        html += '&nbsp;&nbsp;<a href="/sheets/' + data.id + '" target="new"><i style="font-size:24px" class="fa" title="Interacted Sheet Music">&#xf1c7;</i></a>';
                     }
-                    else if (mode == 1) {
-                        chords = l.origin_chord.replace('\n', '<br/>');
-                        if(data.transpose != '0') {
-                            key_change = parseInt(data.transpose);
-                            chords = chords.replace(/(data-chord=")([^"]+)/g, (match, g1, g2) => {return g1+parse_chord(g2, key_change);});
+                    if (data.video) {
+                        html += '&nbsp;&nbsp;<a href="' + data.video + '" target="new"><i class="fa fa-play-circle" style="font-size:24px" title="Youtube Video"></i></a>';
+                    }
+                    html += '</div><table width="100%"><tr><td class="song_block">';
+                    ll = []
+                    for (l of data.content) {
+                        if(ll.indexOf(l.name) >= 0) {
+                            continue;
                         }
-                        html += '<div class="song_chord">' + chords;
+                        html += '<div><span>' + l.name + '</span>';
+                        if (name == 'view') {
+                            html += '<div class="song">' + l.origin_text.replace('\n', '<br/>');
+                        }
+                        else if (name == 'chord') {
+                            chords = l.origin_chord.replace('\n', '<br/>');
+                            if(data.transpose != '0') {
+                                key_change = parseInt(data.transpose);
+                                chords = chords.replace(/(data-chord=")([^"]+)/g, (match, g1, g2) => {return g1+parse_chord(g2, key_change);});
+                            }
+                            html += '<div class="song_chord">' + chords;
+                        }
+                        else if (name == 'bi') {
+                            html += '<div class="song"><div class="origin">' + l.origin_text.replace('\n', '<br/>') + '</div><div class="region">' + l.region + '</div>';
+                        }
+                        ll.push(l.name);
+                        html += '</div><br/>';
                     }
-                    else if (mode == 2) {
-                        html += '<div class="song"><div class="origin">' + l.origin_text.replace('\n', '<br/>') + '</div><div class="region">' + l.region + '</div>';
-                    }
-                    ll.push(l.name);
-                    html += '</div><br/>';
+                    html += '</td><td class="notes">' + data.notes.replace('\n', '<br/>') + '</td></tr></table>';
                 }
-                html += '</td><td class="notes">' + data.notes.replace('\n', '<br/>') + '</td></tr></table>';
             }
         }
         target = document.getElementById("worship");
         target.innerHTML = html;
     }
 
-    load(0, 'view');
+    console.log(tab)
+    if(tab == '') {
+        load('view');
+    }
+    else {
+        load(tab);
+    }
 </script>
 </html>

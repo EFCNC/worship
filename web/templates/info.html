@@ -61,6 +61,10 @@
 .nav {
     font-size: 15px;
 }
+
+.info_content {
+    padding: 2px 2px 2px 2px;
+}
 </style>
 <body>
 <div class="worship_container">
@@ -68,9 +72,10 @@
         <button id="pre" class="nav" title="Last Week"></button>&nbsp;&nbsp;&nbsp;&nbsp;<span id="current"></span>&nbsp;&nbsp;&nbsp;&nbsp;<button id="next" class="nav" title="Next Week"></button>
         <div id="content" style="padding:10px;text-align:left;">
         </div>
-        <button id="add_1" title="Add Announcement">Add Announcement</button>&nbsp;&nbsp;<button id="add_2" title="Add Prayer Request">Add Prayer Request</button>&nbsp;&nbsp;<button id="copyall"  itle="Copy from Last Week">Copy from last week</button>&nbsp;&nbsp;<button id="delete" title="Delete selected Item"><i class="fa fa-trash-o"></i></button>
+        <button id="add_1" title="Add Announcement">Add Announcement</button>&nbsp;&nbsp;<button id="add_2" title="Add Prayer Request">Add Prayer Request</button>&nbsp;&nbsp;<button id="copyall"  itle="Copy from Last Week">Copy from last week</button>&nbsp;&nbsp;<button id="delete" title="Delete selected Item"><i class="fa fa-trash-o"></i></button>&nbsp;&nbsp;<button id="copy" title="Copy all information to Clipboard"><i class="fa fa-copy"></i></button>
     </div>
 </div>
+<div id="clipboard" style="display:none"></div>
 </body>
 <script>
     let content = [];
@@ -127,15 +132,27 @@
         }
     });
 
-    $(document).on('blur', '.info_list', function() {
+    $("#copy").click(function() {
+        t = content.map(obj=>obj.info);
+        var $temp = $("<div>");
+        $("body").append($temp);
+        $temp.attr("contenteditable", true)
+            .html(t.join('<br/>')).select()
+            .on("focus", function() { document.execCommand('selectAll',false,null); })
+            .focus();
+            document.execCommand("copy");
+            $temp.remove();
+        });
+
+    $(document).on('blur', '.info_content', function() {
         tt = $(this).text();
-        if (tt == 'New Announcement' || tt == 'New Prayer Request') {
-            return false;
+        if (tt == '') {
+            $('#content').last().find('div').remove();
+            //return false;
         }
         cc = content[$(this).prev('input').val()];
         if(tt!= cc.info) {  // content changed
             cc.info = tt;
-            console.log(cc)
             url = API_URL + 'info/edit';
             data = cc;
             $('#loading').show();
@@ -164,12 +181,14 @@
     });
 
     $('#add_1').click(function() {
-        $("#content").append('<input type="radio" value="' + content.length + '" name="info_box"/><div class="info_list announcement" contenteditable="true">New Announcement</div><br/>');
+        $("#content").append('<div class="info_list announcement"><input type="radio" value="' + content.length + '" name="info_box"/><span class="info_content" contenteditable="true"></span></div><br/>');
+        $("#content").last().find('span').focus();
         content.push({'id': -1, 'info': 'New Announcement', 'type': 'announcement', 'date': current_week});
     });
 
     $('#add_2').click(function() {
-        $("#content").append('<input type="radio" value="' + content.length + '" name="info_box"/><div class="info_list caring" contenteditable="true">New Prayer Request</div><br/>');
+        $("#content").append('<div class="info_list caring"><input type="radio" value="' + content.length + '" name="info_box"/><span class="info_content" contenteditable="true"></span></div><br/>');
+        $("#content").last().find('span').focus();
         content.push({'id': -1, 'info': 'New Prayer Request', 'type': 'caring', 'date': current_week});
     });
 
@@ -206,7 +225,7 @@
                 i = 0;
                 $.each(content, function() {
                     if (this.info) {
-                        html += '<input type="radio" value="' + i + '" name="info_box"/><div name="' + i + '" class="info_list ' + this.type + '" contenteditable="true" title="' + this.type + '">' + this.info + '</div><br/>';
+                        html += '<div name="' + i + '" class="info_list ' + this.type + '"  title="' + this.type + '"><input type="radio" value="' + i + '" name="info_box"/><span class="info_content" contenteditable="true">' + this.info + '</span></div><br/>';
                         i++;
                     }
                 });

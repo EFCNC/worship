@@ -289,9 +289,8 @@
         }
 
         if(mode == 'score') {
-        console.log($('#sheets').attr('data'))
             if ($('#sheets').attr('data')) {
-                return fal;se
+                return false;
             }
                 ids = slides.map((item, index)=>(item.id));
                 url = '/sheets/' + ids.toString();
