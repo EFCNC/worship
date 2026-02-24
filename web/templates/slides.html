@@ -1,68 +1,19 @@
 {% include 'header.html' %}
-    <script src="../static/socket.io.js"></script>
-    <script src="../static/presentation.js"></script>
-    <link href="../static/presentation.css" rel="stylesheet">
-    <style>
-        html {
-            height: 100%;
-            background-color: #000;
-        }
-
-        body {
-            overflow: hidden;
-        }
-    </style>
+    <script src="/static/socket.io.js"></script>
+    <script src="/static/presentation.js"></script>
+    <link rel="stylesheet" href="/static/dist/reset.css">
+	<link rel="stylesheet" href="/static/dist/reveal.css">
+	<link rel="stylesheet" href="/static/dist/theme/black.css">
+	<link rel="stylesheet" href="/static/presentation.css">
+	<script src="/static/dist/reveal.js"></script>
     <script>
-    // Prevent windows back button
 
-    history.pushState(null, null, document.URL);
-    window.addEventListener('popstate', function () {
-        history.pushState(null, null, document.URL);
-    });
-
-    let preview;    // Declare target div for load() function
-
-    socket.on('connect', function () {
-        console.log('connected to the server');
-    });
-
-    socket.on('response', function (data) {
-        console.log('Server sent: ' + data);
-        slides = data.data;
-        pos = data.pos[0];
-        order = data.pos[1];
-        msg = data.msg;
-        dynamic = data.dynamic;
-        key_change = data.key;
-        background = data.background;
-        load(preview);
-    });
-
-    // init data from flask
         presentation = {{ presentation|safe }};
         slides = presentation['data'];
         pos = presentation['pos'][0];
         order = presentation['pos'][1];
         msg = presentation['msg'];
         mode = '{{ mode|safe }}';
-
-    function init() {
-        if (slides.length == 0 || mode == '') {
-            alert("No slide is currently running!!");
-            //mode = '';
-            return false;
-        }
-        $("#control_btn").hide();
-        $("#container").html(load_container());
-        preview = $('#preview');
-        load(preview);
-        if (mode == 'lead') {
-            $("#preview").css('height', '75vh');
-        }
-        else if (mode == 'view' || mode == 'musician') {
-            $('#header').hide();
-        }
-    }
 
     function show_msg(){
         $('#top-right').html(msg);
@@ -74,64 +25,26 @@
         }
     }
 
-    // function for remote view only
-
-    $(document).on('click', '#btn_previous', function(){
-        move_remote(-1);
-    });
-
-    $(document).on('click', '#btn_next', function(){
-        move_remote(1);
-    });
-
-    // function for lead view only
-    $(document).on('click', '#preview_div div', function(){
-        id = $(this).attr('id').split('_')[1];
-        id = Number(id)
-        move(1, id-order);
-    });
-
-    $(document).on('click', '#dynamic_btn button', function() {
-        msg = $(this).attr('title');
-        name = $(this).attr('name');
-        if (name=='transpose') {
-            socket.emit('control', {'type': 'key', 'value': $(this).attr('transpose')});
-        }
-        socket.emit('control', {'type': 'dynamic', 'value': msg});
-    });
-
-    // functions for init page
-    $(document).on('click', '#control_btn button', function() {
-        mode_ = $(this).attr('name');
-        document.location.href = 'slides/'+ mode_;
-    });
-
-    /*$(document).on('change', '#key', function (event) {
-        transpose = keys.indexOf(this.value)-keys.indexOf($(this).attr('init'));
-        socket.emit('control', {'type': 'key', 'value': transpose});
-    })*/
-
-    $(document).on('touchstart', '#preview', function (event) {
-        touchstartX = event.changedTouches[0].screenX;
-        touchstartY = event.changedTouches[0].screenY;
-    });
-
-    $(document).on('touchend', '#preview', function (event) {
-        touchendX = event.changedTouches[0].screenX;
-        touchendY = event.changedTouches[0].screenY;
-        handleGesture();
-    });
-
     $(document).ready(function() {
+    	$('#header').hide();
+		Reveal.initialize({
+			hash: true,
+			showHiddenSlides: true,
+			controls: "speaker-only",
+			slideNumber: false,
+			progress: false
+		});
         if (mode) {
-            init();
+            init(mode);
+            load();
         }
     });
 
 </script>
 </head>
 <body>
-<div id="control_btn"><button name="admin">Admin</button>&nbsp;<button name="lead">Lead</button>&nbsp;<button name="view">View</button>&nbsp;<button name="musician">Musician</button>&nbsp;<button name="score">Score</button>&nbsp;<!--<button name="remote">Remote</button>--></div>
-<div id="container"></div>
+	<div class="reveal">
+		<div class="slides"></div>
+	</div>
 </body>
 </html>
