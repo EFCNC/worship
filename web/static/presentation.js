@@ -51,9 +51,9 @@
 
     function init(mode_name) {
         container = {
-            'view': '<div id="top-left"></div><div id="top-right"></div><div id="bottom-left"></div><div id="bottom-right"></div>',
+            'view': '<div id="top-left" class="sticky"></div><div id="top-right" class="sticky"></div><div id="bottom-left" class="sticky"></div><div id="bottom-right" class="sticky"></div>',
         }
-        $('.preview').append(container[mode]);
+        $(container[mode_name]).appendTo('.reveal');
     }
 
     function create_view(origin, region) {
