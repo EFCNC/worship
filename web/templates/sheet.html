@@ -1,7 +1,6 @@
 {% include 'header.html' %}
 <head>
-  <link rel="stylesheet" href="http://dev.music.free.fr/css/music.min.css" />
-  <script src="http://dev.music.free.fr/js/abc-ui-1.0.0.min.js"></script>
+  <script src="/static/abcjs-basic-min.js"></script>
 <style>
   iframe {
     height: 800px;
@@ -14,42 +13,58 @@
 <body bgcolor="#fff">
 <div id="my_score">
   <div id="top"><span id="sheet_title"></span>&nbsp;<span id="sheet_btn"></span></div>
+  <div id="tools">Tempo: <input id="tempo" size="5"/>&nbsp;&nbsp;</div>
   <div id="abc">
-  <div id="keys"></div>
-  <div class="abc-source transposable" id="abc_sheet">
   </div>
-  </div>
+  <textarea id="abc_data" rows="10" cols="100"></textarea>
   <div style="text-align:center" id="sheet"></div>
 </div>
 </body>
 <script>
   let sheets = {{ sheets|safe }};
   let index = 0;
+  let key_index = 0;
+  let root = '';
+  let abc_data;
+  const keys_1 = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+  const keys_2 = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
+  var spinner = $( "#tempo" ).spinner();
 
-  function load_sheet(type) {
-    data = sheets[index]
+  $(document).on('click', 'button', function() {
+    // Reload abc sheet with key_index changed
+    key_index = keys.indexOf($(this).attr('name')) - keys.indexOf(root);
+    ABCJS.renderAbc("abc", data.abc, {visualTranspose: key_index});
+  });
+
+  function load_sheet(type, k_index) {
+    data = sheets[index];
+    $('#abc_data').val(data.abc);
 
     if (type == 'abc') {
       $("#sheet").hide();
 
+      // Load abc data
+      $.when(ABCJS.renderAbc("abc", data.abc)).then(function(abc) {
+        abc_data = abc[0];
+        $("#abc").show();
+        root = abc_data.getKeySignature().root;
+        tempo = abc_data.getBpm();
+        keys = keys_1;
+        if(['Db', 'Eb', 'F', 'Ab', 'Bb'].indexOf(root) >= 0) {
+            keys = keys_2;
+        }
+
         html = '';
-        console.log(data)
-          for(var i=0;i<data.keyof_name.length;i++) {
-            if (data.keyof_name[i] == data.key) {
-              html += '<button title="Original Key" name="' + data.keyof[i] + '"><b>' + data.keyof_name[i] + '</b></button>';
+        for(var i=0;i<keys.length;i++) {
+            if (keys[i] == root) {
+              html += '<button title="Original Key" name="' + root + '"><b>' + root + '</b></button>';
             }
             else {
-              html += '<button name="' + data.keyof[i] + '">' + data.keyof_name[i] + '</button>';
+              html += '<button name="' + keys[i] + '">' + keys[i] + '</button>';
             }
-          }
-          $('#keys').html(html);
-      // Add '%%no_player' before abc to hide play button
-      $.when($("#abc_sheet").html(data.abc)).then(function() {
-        $ABC_UI.init();
-          $('button').click(function() {
-            $ABC_UI.init({"tonality": 'M'+this.name});
-          });
-        $("#abc").show();
+        }
+        $('#tempo').val(tempo);
+        $('#tools').append(html);
       });
     }
     else if (type == 'sheet') {
@@ -77,7 +92,7 @@
     }
     $('#sheet_btn').html(html);
     if(data.abc) {
-      load_sheet('abc');
+      load_sheet('abc', key_index);
     }
     else {
       load_sheet('sheet');

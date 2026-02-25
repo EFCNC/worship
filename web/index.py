@@ -174,12 +174,18 @@ def get_song_chords(ids):
 	chords = Utils.get_song_chords(ids)
 	return render_template('chords.html', chords=chords)
 
+@app.route("/sheets")
 @app.route("/sheets/<ids>")
-def get_song_sheet1(ids):
+def get_song_sheet1(ids=None):
 	'''
 	:param ids: song_ids
 	:return: sheet object with ABC content, sheet link, and transpose numbers
 	'''
+	if not ids:
+		sheets = Utils.get_song_sheet()
+		sheets = [x for x in sheets if x["abc"] != '']
+		return render_template('sheet.html', sheets=sheets)
+
 	keys_1 = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
 	keys_2 = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B']
 
