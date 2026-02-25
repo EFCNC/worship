@@ -13,7 +13,7 @@
 <body bgcolor="#fff">
 <div id="my_score">
   <div id="top"><span id="sheet_title"></span>&nbsp;<span id="sheet_btn"></span></div>
-  <div id="tools">Tempo: <input id="tempo" size="5"/>&nbsp;&nbsp;</div>
+  Tempo: <input id="tempo" size="5"/>&nbsp;&nbsp;<div id="tools"></div>
   <div id="abc">
   </div>
   <textarea id="abc_data" rows="10" cols="100"></textarea>
@@ -64,7 +64,7 @@
             }
         }
         $('#tempo').val(tempo);
-        $('#tools').append(html);
+        $('#tools').html(html);
       });
     }
     else if (type == 'sheet') {
