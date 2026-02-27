@@ -9,7 +9,6 @@ import re
 #import opencc
 from app import db as dB
 from app import parser as Parser
-import hanzidentifier
 
 path = os.path.dirname(os.path.realpath(__file__))
 with open(os.path.join(path, 'conf.json'), encoding="utf8") as json_file:
@@ -118,7 +117,6 @@ def get_marked_user():
     for r in result:
         marked.append({'date': r[1], 'id': r[0]})
     return marked
-
 
 def get_worship_teams(id):
     team = list_team()
@@ -394,6 +392,14 @@ def edit_role(date, content, edit=None):
         return r, 500
     return '', 200
 
+# Remove user
+def remove_role(date, content):
+    sql = 'DELETE from instrument_team WHERE user_id = ? and instrument_id = ? AND available_date = ?'
+    r = dB.run_para(sql, [int(content['user_id']), int(content['role_id']), date])
+    if r:
+        return r, 500
+    return '', 200
+
 def edit_songset(id, content):
     """
     :param id: worship_id,
@@ -480,3 +486,6 @@ def worship_list(id=None):
         else:
             worship.append({'worship_id': r[6], 'date': r[5] if r[5] else '', 'worship_title': r[4] if r[4] else '', 'sermon_title': r[0] if r[0] else '', 'speaker': r[1] if r[1] else '', 'bible': r[7] if r[7] else '', 'outline': r[8] if r[8] else '', 'notes': r[9] if r[9] else '', 'content': [{'user_name': r[2] if r[2] else '', 'role': r[3] if r[3] else ''}]})
     return worship
+
+def run_sql(sql):
+    return dB.run(sql)

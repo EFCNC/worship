@@ -90,7 +90,8 @@ def info():
 	return render_template('info.html', date=d)
 
 @app.route("/worship/<id>")
-def worship_notes(id):
+@app.route("/worship/<id>/<tab>")
+def worship_notes(id, tab=''):
 	json_file = request.args.get('json', None)
 	if json_file:
 		json_file = Tools.get_worship_json(id)
@@ -102,7 +103,7 @@ def worship_notes(id):
 	w = Utils.worship_list(id)
 	if w:
 		w = w[0]
-	return render_template('worship_notes.html', songs=songs, id=id, w=w)
+	return render_template('worship_notes.html', songs=songs, id=id, w=w, tab=tab)
 
 @app.route("/slides/admin1")
 def sildes_admin1():
