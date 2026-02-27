@@ -1,6 +1,16 @@
 #coding: utf-8
+import sys
 import os.path
 from datetime import datetime
+
+# Add the project root directory to sys.path
+# __file__ is the path to the current script (web/index.py)
+# os.path.dirname(__file__) is the directory of the current script (web/)
+# os.path.join(os.path.dirname(__file__), '..') is the parent directory (project root)
+# os.path.abspath(...) makes it an absolute path
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.insert(0, project_root)
+
 
 from flask import Flask, render_template, request
 from flask_socketio import SocketIO, emit
@@ -320,4 +330,4 @@ def __get_slide_json():
 	return True
 
 if __name__ == '__main__':
-	app.run(host="0.0.0.0", port=80, debug=True)
+	app.run(host="0.0.0.0", port=5000, debug=True)
