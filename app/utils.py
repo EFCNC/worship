@@ -1,5 +1,5 @@
 import sqlite3
-from datetime import date
+from datetime import date, datetime
 from time import strftime
 
 import requests
@@ -82,6 +82,52 @@ def search_bible(keyword, offset, range=None):
     except Exception as e:
         print('bible API error', e)
         return e, 500
+
+def get_schedule_by_id(id):
+    sql = 'SELECT date, name, content, item_id FROM calendar c inner join item i on c.item_id = i.id where c.worship_id >= ? and c.worship_id <=?'
+    result = dB.run_para(sql, [id, id+2])
+    return [dict(id=x[3], date=x[0], title=x[1], name=x[2]) for x in result]
+
+def update_schedule(id, date, name):
+    sql = 'select * from calendar where date = ? and item_id = ?'
+    result = dB.run_para(sql, [date, id])
+    if result:
+        sql = 'update calendar set content = ? where date = ? and item_id = ?'
+        dB.run_para(sql, [name, date, id])
+    else:
+        worship_id = get_worship_id(date)[0]
+        sql = 'insert into calendar(item_id, date, worship_id, content) values(?, ?, ?, ?)'
+        dB.insert(sql, [id, date, worship_id, name])
+
+    now = datetime.now()
+    year = str(now.year)
+    return get_schedule(year)
+
+def get_schedule(year=None):
+    if year:
+        sql = 'select item_id, date, content from calendar where date like "{}%" order by date'.format(year)
+        #sql = 'SELECT date, group_concat(content) AS name_list FROM calendar c inner join item i on c.item_id = i.id where c.date like "{}%" GROUP BY date'.format(year)
+    else:
+        sql = 'select item_id, date, content from calendar order by date'
+        #sql = "SELECT date, group_concat(content) AS name_list FROM calendar c inner join item i on c.item_id = i.id GROUP BY date"
+    r1 = dB.run(sql)
+    r2 = dB.run('select name from item where id <12')
+    column = [x[0] for x in r2]
+    column.insert(0, '日期')
+    current_date = ''
+    calendar = []
+    temp = []
+    for r in r1:
+        if r[1] != current_date:
+            current_date = r[1]
+            if len(temp) == len(column):
+                calendar.append(temp)
+            temp = [''] * len(column)
+            temp[0] = current_date
+        temp[r[0]] = r[2]
+    calendar.append(temp)
+
+    return column, calendar
 
 def list_instrument(exclude=None):
     if exclude:
@@ -207,9 +253,13 @@ def get_songs(ids=None):
             songs.append({'type': 'song', 'title': r[0], 'author': r[1] if r[1] else '', 'lang': r[2] if r[2] else '', 'lang_2': r[3] if r[3] else '', 'key': r[4] if r[4] else '', 'sequence': r[5] if r[5] else '', 'bible': r[6] if r[6] else '', 'lyricist': r[7] if r[7] else '', 'book': r[8] if r[8] else '', 'copyright': r[9] if r[9] else '', 'ccli': r[10] if r[10] else '', 'lyrics_raw': r[11], 'content': Parser.parse_lyrics(r[11], r[5]), 'video': [r[12]] if r[13] == 'video' else [], 'score': [r[12]] if r[13] == 'score' else [], 'abc': r[15] if r[13] == 'abc' and r[14] else '', 'id': r[15], 'notes': '', 'transpose': ['0'], 'alt_sequence': r[5] if r[5] else ''})
     return songs
 
-def get_song_sheet(ids):
-    sql = "select (select abc from media m where m.song_id=s.song_id and m_type='abc') as abc, (select link from media m where m.song_id=s.song_id and m_type='score') as sheet, s.title from songs s where (abc is not null or sheet is not null) and s.song_id in ({ids})".format(ids=','.join(['?']*len(ids)))
-    result = dB.run_para(sql, ids)
+def get_song_sheet(ids=None):
+    if ids:
+        sql = "select (select abc from media m where m.song_id=s.song_id and m_type='abc') as abc, (select link from media m where m.song_id=s.song_id and m_type='score') as sheet, s.title from songs s where (abc is not null or sheet is not null) and s.song_id in ({ids})".format(ids=','.join(['?']*len(ids)))
+        result = dB.run_para(sql, ids)
+    else:
+        sql = "select (select abc from media m where m.song_id=s.song_id and m_type='abc') as abc, (select link from media m where m.song_id=s.song_id and m_type='score') as sheet, s.title from songs s where (abc is not null or sheet is not null)"
+        result = dB.run(sql)
     sheets = []
     for r in result:
         sheet = {'abc': '', 'sheet': '', 'title': '', 'key': ''}
@@ -436,7 +486,6 @@ def update_sermon(data):
 def get_worship(id):
     sql = "select notes, scheduled_date, s.title, s.speaker, s.bible_verse, s.outline from worship w inner join sermon s on w.scheduled_date = s.date where worship_id = ?"
     r = dB.run_para(sql, id)[0]
-    print(r)
     return {'date': r[1], 'title': r[2] if r[2] else '', 'notes': r[0] if r[0] else '', 'speaker': r[3] if r[3] else '', 'bible': r[4] if r[4] else '', 'outline': r[5] if r[5] else ''}
 
 def get_worship_date(id):

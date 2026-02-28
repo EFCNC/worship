@@ -1,0 +1,369 @@
+<!-- template for weekly bulletin -->
+{% include 'header.html' %}
+
+<style>
+.report {
+  display: grid;
+  grid-template-columns: 48% 48%;
+  padding: 5px;
+  gap: 35px;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+}
+
+.container div {
+  border: 1px solid;
+  padding: 1px;
+  height: 18px;
+  font-size:14px;
+}
+
+#task_table {
+  display: grid;
+  grid-template-columns: 25% 25% 25% 25%;
+  padding: 3px;
+  border: 1px double;
+}
+
+.info_table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.info_table td {
+  border: 1px solid #ddd;
+  padding: 0px;
+}
+
+.info_table tr:nth-child(odd) {
+  background-color: #d0d0d0;
+}
+
+.logo {
+  float: left;
+  content: url('/static/img/efc_logo.png');
+}
+
+.title {
+  font-size: 40px;
+  font-family: DFKai-sb;
+}
+
+.medium {
+  font-size: 16px;
+}
+
+.small {
+  font-size: 14px;
+}
+
+.tiny {
+  font-size: 12px;
+}
+
+.time_table td {
+  border: 1px solid #000;
+  padding: 3 3 3 3;
+}
+
+.header {
+  background-color: #c0c0c0;
+}
+
+@media print {
+  footer {page-break-after: always;}
+  -webkit-print-color-adjust: exact;
+}
+
+.line {
+  content: url('/static/img/line.jpg');
+  height: 20px;
+  width: 20px;
+}
+
+.youtube {
+  content: url('/static/img/youtube.jpg');
+  height: 20px;
+  width: 20px;
+}
+
+.zelle {
+  content: url('/static/img/zelle.jpg');
+  height: 20px;
+  width: 20px;
+}
+
+.zoom {
+  content: url('/static/img/zoom.jpg');
+  height: 20px;
+  width: 20px;
+}
+</style>
+<body>
+
+<!-- container for two columns -->
+<div class="report front">
+  <!-- front left -->
+  <div class="left">
+
+    <!-- div for weekly tasks -->
+    <div id="task_table"></div>
+
+    <!-- table for attendance and offering, manual input at contenteditable tds -->
+    <table class="info_table tiny">
+        <tr><td>出席與奉獻</td>
+          <!-- placeholders for previous two weeks -->
+          <td id="week_2"></td>
+          <td id="week_1"></td>
+          <td>Attendance/ Offering</td>
+        </tr>
+        <tr><td>主日總出席人數</td><td contenteditable="true"></td><td contenteditable="true"></td><td>Total Attendance</td></tr>
+        <tr><td>主日禮拜人數</td><td contenteditable="true"></td><td contenteditable="true"></td><td>Taiwanese</td></tr>
+        <tr><td>成人主日學人數</td><td contenteditable="true"></td><td contenteditable="true"></td><td>Adult Sunday School</td></tr>
+        <tr><td>英語主日禮拜人數</td><td contenteditable="true"></td><td contenteditable="true"></td><td>English Congregation</td></tr>
+        <tr><td>青少年主日學人數</td><td contenteditable="true"></td><td contenteditable="true"></td><td>Youth Sunday School</td></tr>
+        <tr><td>兒童主日學人數</td><td contenteditable="true"></td><td contenteditable="true"></td><td>Elementary SS</td></tr>
+        <tr><td>週日禱告會人數</td><td contenteditable="true"></td><td contenteditable="true"></td><td>Sunday Prayer</td></tr>
+        <tr><td>社會青年人數</td><td contenteditable="true"></td><td contenteditable="true"></td><td>Young Adult</td></tr>
+        <tr><td>學生團契人數</td><td contenteditable="true"></td><td contenteditable="true"></td><td>Student Fellowship</td></tr>
+        <tr><td>經常費奉獻</td><td contenteditable="true"></td><td contenteditable="true"></td><td>General Offering</td></tr>
+        <tr><td>建堂奉獻</td><td contenteditable="true"></td><td contenteditable="true"></td><td>New Building Offering</td></tr>
+        <tr><td>宣道奉獻</td><td contenteditable="true"></td><td contenteditable="true"></td><td>Mission Offering</td></tr>
+        <tr><td>午餐奉獻</td><td contenteditable="true"></td><td contenteditable="true"></td><td>Lunch Offering</td></tr>
+        <tr><td>學生團契奉獻</td><td contenteditable="true"></td><td contenteditable="true"></td><td>Student Offering</td></tr>
+        <tr><td>愛心奉獻</td><td contenteditable="true"></td><td contenteditable="true"></td><td>Love Offering</td></tr>    </table>
+
+    <!-- other information such as deacon board -->
+    <div id="other1" class="tiny"></div>
+  </div>
+  <!-- End of front left -->
+
+  <!-- Front right -->
+  <div class="right">
+    <div id="front_right" align="center"></div>
+    <div id="date_stamp" align="center"></div>
+    <div id="time_table"></div>
+    <div id="others">
+    </div>
+  </div>
+</div>
+<!-- End of front right -->
+
+<!-- page break -->
+<footer></footer>
+
+<!-- Back left -->
+<div class="report back">
+  <div class="left">
+
+    <!-- Table template for worship order -->
+    <table width="100%" border="1">
+      <tr>
+        <td colspan="3" align="center" id="worship_date" class="header"></td>
+      </tr>
+      <tr>
+        <td colspan="2">Worship Program</td>
+        <td>司琴：<span id="pianist"></span></td>
+      </tr>
+      <tr>
+        <td>序樂 Prelude</td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>報告 Announcement</td>
+        <td class="usher"></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>敬拜讚美 Song Praise</td>
+        <td class="lead"></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>禱告 Prayer</td>
+        <td class="lead"></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>證道 Sermon</td>
+        <td id="speaker"></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>歡迎/奉獻 Offering</td>
+        <td class="usher"></td>
+        <td>Hymn #306b</td>
+      </tr>
+      <tr>
+        <td>祝禱 Benediction</td>
+        <td id="benediction"></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>阿門頌 Amen</td>
+        <td>聖詩 #338</td>
+        <td>Hymn #338</td>
+      </tr>
+      <tr>
+        <td>殿樂 Postlude</td>
+        <td>默禱，散會</td>
+        <td>Dismiss after a silent prayer</td>
+      </tr>
+    </table>
+
+    <!-- div for sermon information -->
+    <div id="sermons"></div>
+  </div>
+  <!-- End of back left -->
+
+  <!-- Back right -->
+  <div class="right">
+    <div id="info"></div>
+  </div>
+  <!-- End of back right -->
+</div>
+</body>
+<script>
+  worship = {{ w|safe }};
+  previous = {{ p|safe }};
+  template = {{ template|safe }};
+  l = {{ l|safe }};
+  announcement = {{ announcement|safe }};
+  prayer = {{ prayer| safe }};
+
+  const d = new Date(worship.date.replace('-', '/'));
+  let date_string = '主後' + d.getFullYear().toString() + '年' + (d.getMonth()+1).toString() + '月' + d.getDate() + '日';
+
+  $(document).ready(function() {
+
+    $('#header').hide();
+
+    // Loading divs
+    load_master();
+    load_time_table();
+    load_statement();
+    load_orders();
+    load_sermons();
+    load_info();
+    load_reset();
+
+  });
+
+  // functions of loading front left div
+
+  function load_master() {
+    task_table = '<div class="container"><div class="header">負責事工</div>';
+    current_date = l[0].date;
+    for(var k=0;k<l.length;k++) {
+      if(current_date != l[k].date) {
+       break;
+      }
+      if (k % 2 == 1) {
+        task_table += '<div class="header">' + l[k].title + '</div>';
+      }
+      else {
+        task_table += '<div>' + l[k].title + '</div>';
+      }
+    }
+    current_date = '';
+    date_title = ['本週', '下週', '下下週'];
+    n = 0;
+    for(var j=0;j<l.length;j++) {
+      if(l[j].date != current_date) {
+        current_date = l[j].date;
+        dd = current_date.split('-');
+        task_table += '</div><div class="container"><div class="header">' + date_title[n] + '(' + Number(dd[1]) + '/' + Number(dd[2]) + ')</div>';
+        n++;
+      }
+      task_table += '<div>' + l[j].name + '</div>';
+    }
+    task_table += '</div>';
+    $('#task_table').html(task_table);
+  }
+
+  // functions of loading front right div
+
+  function load_statement() {
+    html = '<img class="logo">';
+    html += '<span class="title">' + template.title.zh + '</span><br/>';
+    html += '<span class="small">' + template.title.en + '</span><br/>';
+    html += '<p align="center">' + template.statement.zh;
+    html += '<br/>' + template.statement.en + '</p>';
+    $('#front_right').html(html);
+    let d = new Date(worship.date.replace('-', '/'));
+    $('#date_stamp').html('<h4>主後' + d.getFullYear().toString() + '年' + (d.getMonth()+1).toString() + '月' + d.getDate() + '日週報</h4>');
+  }
+
+  function load_time_table() {
+    html = '<b>我們的聚會</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="small">地址：' + template.address + '</span>';
+    html += '<table class="time_table" width="100%">';
+    event = template.time_table
+    for(var i=0;i<event.length;i++) {
+      html += '<tr><td>' + event[i].title + '</td><td>' + event[i].day + '</td><td>' + event[i].time + '</td><td>' + event[i].type + '</td><td>' + event[i].in_charge + '</td></tr>';
+    }
+    html += '</table>';
+    $('#time_table').html(html);
+  }
+
+  // functions of loading back left div
+
+  function load_orders() {
+    $('#worship_date').html(date_string);
+    var order = l.filter(obj=>{return obj.date == worship.date});
+    $('#pianist').html(order.filter(obj=>{return obj.id == 8}).map(obj=>obj.name));
+    $('.lead').html(order.filter(obj=>{return obj.id == 5}).map(obj=>obj.name));
+    $('.usher').html(order.filter(obj=>{return obj.id == 3}).map(obj=>obj.name));
+    $('#benediction').html(order.filter(obj=>{return obj.id == 2}).map(obj=>obj.name));
+    $('#speaker').html(order.filter(obj=>{return obj.id == 1}).map(obj=>obj.name));
+  }
+
+  function load_sermons() {
+    ww = '<h4><u>本週主日信息</u></h4>';
+    ww += '主題：' + worship.title + '<br/>';
+    ww += '經文：' + worship.bible + '<br/>';
+    ww += '大綱：';
+    ww += '<pre contenteditable="true">' + worship.outline + '</pre>';
+    ww += '<h4><u>上週主日信息</u></h4>';
+    ww += '主題：' + previous.title + '<br/>';
+    ww += '經文：' + previous.bible + '<br/>';
+    ww += '大綱：';
+    ww += '<pre contenteditable="true">' + previous.outline + '</pre>';
+    $('#sermons').html(ww);
+  }
+
+  function load_info() {
+    html = '<pre contenteditable="true"></pre>'   // Spare pre element for overflow sermon information
+    html +='<h4><u>歡迎報告</u></h4><ol>';
+    for (item in announcement) {
+      html += '<li>' + announcement[item] + '</li>';
+    }
+    html += '</ol><h4><u>肢體關懷</u></h4><ol>';
+    for (item in prayer) {
+      html += '<li>' + prayer[item] + '</li>';
+    }
+    html += '</ol>';
+    $('#info').html(html);
+  }
+
+  // function of loading the rest of the information
+  function load_reset() {
+    $('#other1').html(template.others.zh);  // Load other info -- front left
+    $('#others').html(template.links.zh);   // Load links -- front right
+
+    // calculate previous weeks for attendance table
+    let lastWeekDate = new Date(d.getTime() - 7 * 24 * 60 * 60 * 1000);
+    let text = lastWeekDate.toLocaleDateString('en-US');
+    text = text.split('/');
+    text.pop();
+    $('#week_2').html(text.join('/')+'上週');
+    lastWeekDate = new Date(lastWeekDate.getTime() - 7 * 24 * 60 * 60 * 1000);
+    text = lastWeekDate.toLocaleDateString('en-US');
+    text = text.split('/');
+    text.pop();
+    $('#week_1').html(text.join('/')+'上上週');
+  }
+</script>

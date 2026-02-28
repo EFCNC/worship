@@ -150,6 +150,39 @@ def create_json(id, worship=None):
 
     return json_file
 
+def get_report(id):
+    root = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'files')
+    template_file = os.path.join(root, 'pdf_template.json')
+    with open(template_file, "r", encoding="utf-8") as f:
+        template = json.loads(f.read())
+    #this_week = Utils.get_worship(id)
+
+    '''
+    announce = [[re.search('(^[^\[]+)', x['info'])[0], re.findall('\[[^\]]+\](.+)$', x['info'])] for x in info if
+             x['type'] == 'announcement']
+    a_origin = ''
+    a_region = ''
+    for a in announce:
+        a_origin += '<li>' + a[0] + '</li>'
+        if a[1]:
+            a_region += '<li>' + a[1][0] + '</li>'
+
+    a_origin = '<ul>' + a_origin + '</ul>' if a_origin else ''
+    a_region = '<ul>' + a_region + '</ul>' if a_region else ''
+
+    caring = [[re.search('(^[^\[]+)', x['info'])[0], re.findall('\[[^\]]+\](.+)$', x['info'])] for x in info if x['type'] == 'caring']
+
+    c_origin = ''
+    c_region = ''
+    for c in caring:
+        c_origin += '<li>' + c[0] + '</li>'
+        if c[1]:
+            c_region += '<li>' + c[1][0] + '</li>'
+    c_origin = '<ul>' + c_origin + '</ul>' if c_origin else ''
+    c_region = '<ul>' + c_region + '</ul>' if c_region else ''
+    '''
+    return template
+
 def create_xml(worship):
     theme = '<?xml version="1.0" encoding="utf-8"?>\n<Easyslides>\n<ListItem>\n<ListHeader>\n<FormatData>\n'
     theme += conf["easyslides"]["templates"]["theme"][0]

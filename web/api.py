@@ -65,6 +65,12 @@ def edit_info():
     result = Utils.add_info(info)
     return result
 
+@api.route("/schedule/<id>", methods=["POST"])
+def edit_schedule(id):
+    info = request.get_json()
+    column, schedule = Utils.update_schedule(id, info["date"], info["name"])
+    return schedule
+
 @api.route("/info/duplicate")
 def duplicate_info():
     d1 = request.args.get('d1', None)
