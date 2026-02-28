@@ -353,14 +353,16 @@ span.chunk:before {
         $(this).find('i').hide();
     });
 
-    $(document).on('click', '.title span', function() {
+    $(document).on('click', '.title span', function(e) {
+        e.preventDefault();
         $('#dialog').dialog({
             'title': $(this).text()
         });
         $("#dialog").html($(this).siblings("span").html()).dialog("open");
     });
 
-    $(document).on('click', '.title i', function() {
+    $(document).on('click', '.title i', function(e) {
+        e.preventDefault();
         var url = this.id.split('_')[1];
         if ($(this).attr('name')) {
             $('#dialog').dialog({
