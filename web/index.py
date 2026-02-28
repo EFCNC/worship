@@ -246,6 +246,13 @@ def get_song_by_id(id):
 		content["lyrics"] = content["lyrics_raw"]  # add key lyrics to be used by song_editor
 		return render_template('song_editor.html', content=content)
 
+@app.route("/schedule")
+def schedule():
+	now = datetime.now()
+	year = str(now.year)
+	column, schedule = Utils.get_schedule(year)
+	return render_template('schedule.html', column=column, schedule=schedule)
+
 @app.route("/calendar")
 def calendar():
 	now = datetime.now()
@@ -263,8 +270,8 @@ def calendar():
 	return render_template('calendar.html', booked=assigned, team=team, marked=marked)
 
 
-@app.route("/schedule")
-def schedule():
+@app.route("/schedule1")
+def _schedule():
 	'''
 	:return: schedule page with available team, role for all sundays
 	'''
@@ -279,6 +286,20 @@ def schedule():
 def profile():
 	team = Utils.list_team()
 	return render_template('profile.html', team=team)
+
+@app.route("/report/<id>")
+def report(id):
+	worship = Utils.get_worship(id)
+	previous = Utils.get_worship(int(id)-1)
+	report_template = Tools.get_report(id)
+	worship_date = worship['date']
+	info = Utils.get_info(worship_date)
+	announcement = [x['info'] for x in info if x['type'] == 'announcement']
+	prayer = [x['info'] for x in info if x['type'] == 'caring']
+	l = Utils.get_schedule_by_id(int(id))
+	if 'pdf' in request.args:
+		return render_template('report_pdf.html', w=worship, p=previous, template=report_template, announcement=announcement, prayer=prayer, l=l)
+	return render_template('report_pdf.html', w=worship, p=previous, template=report_template, announcement=announcement, prayer=prayer, l=l)
 
 @app.route("/files")
 def file_list():

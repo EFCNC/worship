@@ -1,235 +1,81 @@
 {% include 'header.html' %}
 
-<style>
-.team_container {
-  display: flex;
-  flex-wrap: wrap;
-  flex-direction: row;
-}
-
-.team_container > div {
-  width: 220px;
-  margin: 10px;
-  padding: 5px;
-  font-size: 14px;
-}
-
-@media (max-width: 600px) {
-  .team_container {
-    flex-direction: column;
-    flex: 100%;
-  }
-}
-
-.team-card {
-  background-color: transparent;
-  width: 300px;
-  height: 300px;
-  border: 2px double #000;
-  border-radius: 5px;
-  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
-  perspective: 1000px;
-}
-
-.team-inner {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  transition: transform 0.6s;
-  transform-style: preserve-3d;
-  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
-}
-
-.team-card:hover {
-  border: 2px solid #000;
-}
-
-.team_names:hover {
-    cursor: pointer;
-}
-</style>
-</head>
+<link href="/static/datatables.min.css" rel="stylesheet">
+<script src="/static/datatables.js"></script>
 <body>
-    <select id="sundays">
-        {% for day in sundays[1] %}
-            <option>{{ day }}</option>
-        {% endfor %}
-    </select>
-    <div id="team"></div>
-    <div id="btns" style="display:none"><button id="submit" disabled>Submit</button>&nbsp;<button id="reset" disabled>Undo</button></div>
+<table id="schedule" class="display compact cell-border">
+</table>
+<p><button id="addRow">Add New Week</button></p>
 </body>
+
 <script>
-let team = [];
-let assigned = [];
-let assigned_;
-let inst = [];
-let assigned_new;
-let assigned_new_;
+    let schedule = {{ schedule|safe }};
+    let column = {{ column|safe }};
 
-function find_assigned_inst(role, checked) {
-    span = document.createElement('span');
-    span.setAttribute('class', 'roles');
-    if (!checked) {
-        span.setAttribute('style', 'display:none');
-    }
-
-    $.each(inst, function() {
-        label = document.createElement('label');
-        checkbox = document.createElement('input');
-        checkbox.setAttribute('type', 'checkbox');
-        checkbox.setAttribute('id', 'role_' + this.id);
-        checkbox.setAttribute('name', this.name);
-        if (role.filter(x=>x.role_id == this.id).length>0) {
-            checkbox.setAttribute('checked', true);
-        }
-        label.setAttribute('for', 'role_' + this.id);
-        label.innerHTML = "&nbsp;" + this.name;
-        span.append(checkbox);
-        span.append(label);
-    });
-    return span;
-}
-
-function find_match_team(day) {
-    $("#team").empty();
-    //$("#team").append(day);
-    let matched = [];
-    $.each(assigned_new, function() {
-        if (this.date == day) {
-            matched.push(this)
-        }
-    });
-    p = document.createElement('p');
-    $.each(team, function() {
-        checked = false;
-        div = document.createElement('div');
-        label = document.createElement('label');
-        checkbox = document.createElement('input');
-        checkbox.setAttribute('class', 'user_name');
-        checkbox.setAttribute('type', 'checkbox');
-        checkbox.setAttribute('id', 'user_' + this.id);
-        if (matched.filter(x=>x.user_id == this.id).length>0) {
-            checkbox.setAttribute('checked', true);
-            checked = true;
-        }
-        label.setAttribute('class', 'team_names');
-        label.setAttribute('for', 'user_' + this.id);
-        label.innerHTML = "&nbsp;" + this.name + " (" + this.name_2 + ")";
-        div.append(checkbox);
-        div.append(label);
-        div.append(find_assigned_inst(matched.filter(x=>x.user_id==this.id), checked));
-        div.append(document.createElement('br'));
-        p.append(div);
-    });
-    $("#team").append(p);
-}
-
-function update_item(item, action) {
-    for(i in assigned_new) {
-        if (assigned_new[i].date == item.date && assigned_new[i].role_id == item.role_id && assigned_new[i].user_id == item.user_id) {
-            if (action == 0) {
-                assigned_new.splice(i,1);
-                console.log("delete a item", item);
+    let table = new DataTable('#schedule', {
+        ordering: false,
+        info: false,
+        data: schedule,
+		columns: column.map(name => ({ title: name })),
+        columnDefs: [
+            {
+                //render: (data, type, row) => fields(data, row),
+                createdCell: function(td, cellData, rowData, row, col) {
+                    d1 = new Date();
+                    d2 = new Date(rowData[0].replace('-', '/'));
+                    if (d2 > d1) {
+                        $(td).attr('contenteditable', 'true');
+                    }
+                    $(td).attr('init-data', cellData);
+                    $(td).attr('init-date', rowData[0]);
+                    $(td).attr('init-id', col);
+                },
+                targets: "_all"
             }
-            check_update();
-            return false;
-        }
-    }
-    console.log("add an item", item);
-    assigned_new.push(item);
-    check_update();
-}
-
-function check_update() {
-    original = assigned.map(x=>({'date': x.date, 'user_id': x.user_id, 'role_id': x.role_id}));
-    updated = assigned_new.map(x=>({'date': x.date, 'user_id': x.user_id, 'role_id': x.role_id}));
-    if (JSON.stringify(original) !== JSON.stringify(updated)) {
-        console.log("assignment changed");
-        disable_btn(false);
-    }
-}
-
-function disable_btn(flag) {
-    $('#submit').attr("disabled", flag);
-    $('#reset').attr("disabled", flag);
-}
-
-$(document).on('change', '.roles input', function(){
-    s = $("#sundays").val();
-    id = $(this).attr('id').split('_')[1];
-    user_id = $(this).parent().parent().children('input.user_name').attr('id').split('_')[1];
-    if($(this).is(":checked")) {
-        update_item({'date': s, 'role_id': id, 'user_id': user_id, 'worship_id': -1}, 1);
-    }
-    else {
-        update_item({'date': s, 'role_id': id, 'user_id': user_id, 'worship_id': -1}, 0);
-    }
-});
-
-$(document).on('change', '.user_name', function(){
-    if(this.checked) {
-        $(this).parent().children('span.roles').show('slow');
-    }
-    else {
-        $span = $(this).parent().children('span')
-        $.each($span.children('input'), function() {
-            $(this).attr('checked', false).trigger('change');
-        });
-        $(this).parent().children('span.roles').hide('slow');
-    }
-});
-
-$('#submit').click(function() {
-    s = $("#sundays").val();
-    new_role = []
-    for (role of assigned_new) {
-        if(role.date == s) {
-            new_role.push(role);
-        }
-    }
-    url = API_URL + 'roles/edit/' + s;
-    data = JSON.stringify(new_role);
-    $.ajax({
-        type: "post",
-        url: url,
-	    data: data,
-        complete: function(response) {
-          	if(response.status==200) {
-           	    location.reload();
-    	    }
-            else {
-                alert(response);
-		    }
-        },
-        contentType: "application/json",
-        dataType: 'json'
+        ],
+        "bLengthChange": false,
+        "pageLength": 26
     });
-});
 
-$('#reset').click(function() {
-    assigned_new = [...assigned];
-    s = $('#sundays').val();
-    find_match_team(s);
-    disable_btn(true);
-});
-
-$(document).ready(function () {
-    team = {{ team|safe }};
-    assigned = {{ assigned|safe }};
-    inst = {{ inst|safe }};
-    sunday = {{ sundays|safe }};
-    assigned_new = [...assigned];
-    console.log("Coming Sunday", sunday[0]);
-    find_match_team(sunday[0]);
-    $("#sundays").val(sunday[0]);
-    $("#btns").show('slow');
-
-    $('#sundays').on('change', function() {
-        s = $(this).val();
-        find_match_team(s);
-        $("#btns").show('slow');
-        disable_btn(true);
+    $(document).on('blur', '[contenteditable]', function() {
+        id = $(this).attr('init-id');
+        date = $(this).attr('init-date');
+        init_val = $(this).attr('init-data');
+        val = $(this).text();
+        if(val != init_val) {
+            //if (confirm('Change the content from "' + init_val + '" to "' + val + '"?')) {
+                data = {'date': date, 'name': val};
+                url = API_URL + 'schedule/' + id;
+                $('#loading').show();
+                $.ajax({
+                    type: "post",
+                    url: url,
+	                data: JSON.stringify(data),
+                    contentType: "application/json",
+                    dataType: 'json',
+                    complete: function(response) {
+          	            if(response.status==200) {
+                            table.clear().rows.add(response.responseJSON).draw();
+                        }
+                        $('#loading').hide();
+                    }
+                });
+            //}
+        }
     });
-});
+
+    document.querySelector('#addRow').addEventListener('click', addNewRow);
+    function addNewRow() {
+        var last_row = table.row( ':last' ).data();
+        let d = new Date(last_row[0].replace('-', '/'));
+        var nextWeek = new Date(d.getTime() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString('en-CA');
+        new_row = [nextWeek];
+        for(var i=1;i<column.length;i++) {
+            new_row.push('');
+        }
+        table.row
+            .add(new_row)
+            .draw(false);
+    }
 </script>
 </html>
