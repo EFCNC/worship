@@ -1,0 +1,68 @@
+{
+    "title": {
+        "zh": "北卡台福基督教會",
+        "en": "Evangelical Formosan Church of North Carolina"
+    },
+    "statement": {
+      "zh": "2026 台福總會年度主題：團契年 領受主恩，相愛合一<br/>本教會主題：彼此服事,委身教會,跟隨耶穌<br/>齊心建造北卡台福大家庭",
+      "en": "Year of fellowship, receive His Grace, love in Unity<br/>腓立比書 Philippians 2:1-2"
+    },
+    "time_table": [
+    {
+      "title": "主日早禱會",
+      "day": "週日",
+      "time": "9:40am",
+      "type": "實體/Zoom",
+      "in_charge": ""
+    },
+    {
+      "title": "主日禮拜",
+      "day": "週日",
+      "time": "10:15am",
+      "type": "實體/Zoom/Youtube",
+      "in_charge": "許玉麗姐"
+    },
+    {
+      "title": "英文崇拜",
+      "day": "週日",
+      "time": "10:45am",
+      "type": "實體/Discord",
+      "in_charge": "李怡昌兄"
+    },
+    {
+      "title": "長青團契 (查經班)",
+      "day": "週四",
+      "time": "2:00am",
+      "type": "實體/Zoom",
+      "in_charge": "孫曲回牧師"
+    },
+    {
+      "title": "周間禱告會",
+      "day": "週二",
+      "time": "7:30pm",
+      "type": "Zoom",
+      "in_charge": "周淑娟姐"
+    },
+    {
+      "title": "學生團契",
+      "day": "隔周六",
+      "time": "6:00pm",
+      "type": "實體",
+      "in_charge": "蘇錫安兄"
+    },
+    {
+      "title": "社青小組",
+      "day": "隔周五",
+      "time": "6:30pm",
+      "type": "實體",
+      "in_charge": "蘇頌軒兄"
+    }
+  ],
+  "others": {
+    "zh": "教會執事 Our Deacons:<br/>主席//團契Chair/Fellowship: 周淑娟:Chou Shu Chuan<br/>副主席/崇拜/關懷 VC/Worship/Caring  許玉麗 Yuli Hsu<br/>公關/財務/ 廚房Communication/Finance/Kitchen:黃淑娟:Jessica Huang<br/>教育/靈修/英文Education/ Spiritual/EM: 李怡昌 Eric Li<br/>宣教/出納/總務/書記/Mission/Accounting/ Facility/Secretary朱嘉宇 Kevin Chu<br/>Holy Communion聖餐: 3/8、6/14、9/13、12/13     每個月第二週: 執事會<br/>值星職責：關門窗冷氣/主日學時维持秩序/冬天關水/突發事件處理/停電缺電池"
+  },
+  "links": {
+    "zh": "網址：http://efcnc.org<br/><img class='zoom'/> Zoom Meeting ID: 320 077 6602，Password: 304<br/><img class='youtube'/>主日直播：https://www.youtube.com/@efcnc7395/live<br/><img class='line'/> 訊息公告群組：https://line.me/R/ti/g/A8JUxGXmWY<br/><img class='zelle'/> Donate via Zelle : efcnc.finance@gmail.com"
+  },
+  "address": "304 E. Chatham Street, Cary, NC 27511"
+}
