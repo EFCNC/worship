@@ -173,7 +173,11 @@ span.chunk:before {
     let songs = {{ songs|safe }};
     let langs = [];
     let keys = [];
-    let keys1 = []
+    let keys1 = [];
+    let clicked = '';
+    let $my_dialog;
+
+
     for (song of songs) {
         if (keys.indexOf(song.key) < 0) {
             keys.push(song.key);
@@ -279,11 +283,7 @@ span.chunk:before {
     }
 
     function show_lyrics(data) {
-        html = '<span>' + data.title + '</span>&nbsp;<i style="display:none" style="font-size:14px" class="fa" title="Edit Song" id="edit_' + data.id + '" name="' + data.title + '">&#xf044;</i>&nbsp;<i style="display:none" style="font-size:14px" class="fa" id="pin_' + data.id + '"' + pinned(data.id) + '</i><span class="lyrics" style="display:none">';
-        for (l of data.content) {
-            html += l.origin_chord;
-        }
-        html += '</span>';
+        html = '<span song_id="' + data.id + '">' + data.title + '</span>&nbsp;<i style="display:none" style="font-size:14px" class="fa" title="Edit Song" id="edit_' + data.id + '" name="' + data.title + '">&#xf044;</i>&nbsp;<i style="display:none" style="font-size:14px" class="fa" id="pin_' + data.id + '"' + pinned(data.id) + '</i></span>';
         return html;
     }
 
@@ -320,7 +320,7 @@ span.chunk:before {
     }
 
     $(document).ready(function() {
-	    $("#dialog").dialog({
+	    $my_dialog = $("#dialog").dialog({
   		    autoOpen: false,
   		    hide: { effect: "fade", duration: 800 },
   		    show: { effect: "fade", duration: 800 },
@@ -329,11 +329,13 @@ span.chunk:before {
   		        {
                     text: 'OK',
                     click: function() {
+                        if(clicked == '') {
+                            $( this ).dialog( "close" );
+                        }
                         temp = data_changed($("#song_form").serializeArray());
                         if(temp) {
                             submit_song('/API/song/' + id + '/edit', JSON.stringify(temp))
                                 $( this ).dialog( "close" );
-                            //}
                         }
                         else {
                             $( this ).dialog( "close" );
@@ -353,22 +355,36 @@ span.chunk:before {
         $(this).find('i').hide();
     });
 
-    $(document).on('click', '.title span', function(e) {
-        e.preventDefault();
-        $('#dialog').dialog({
-            'title': $(this).text()
-        });
-        $("#dialog").html($(this).siblings("span").html()).dialog("open");
+    $(document).on('click', '.title span', function() {
+        song_id = $(this).attr('song_id');
+        console.log(songs)
+        content = songs.filter(obj=>{return obj.id == song_id}).map(obj=>obj.content);
+        tabs = [];
+        tab_div = '<div class="lyrics"><ul>';
+        lyrics = '';
+        n = 1;
+        for (l of content[0]) {
+            if(tabs.indexOf(l.name) >= 0) {
+                continue;
+            }
+            tabs.push(l.name);
+            lyrics += '<div id="tabs-' + n + '">' + l.origin_text + '<br/>' + l.region_text + '</div>';
+            n++;
+        }
+        for (var i=0;i<tabs.length;i++) {
+            tab_div += '<li><a href="#tabs-'+ (i+1) + '">' + tabs[i] + '</a></li>';
+        }
+        tab_div += '</ul>' + lyrics + '</div>';
+        $my_dialog.html(tab_div).dialog({ title: $(this).text()}).dialog('open');
+        $('.lyrics').tabs();
+        clicked = '';
     });
 
-    $(document).on('click', '.title i', function(e) {
-        e.preventDefault();
+    $(document).on('click', '.title i', function() {
         var url = this.id.split('_')[1];
         if ($(this).attr('name')) {
-            $('#dialog').dialog({
-                'title': $(this).attr('name')
-            });
-            $("#dialog").load(url).dialog("open");
+            $my_dialog.load(url).dialog({ title: $(this).attr('name')}).dialog('open');
+            clicked = 'edit';
         }
         else {
             set_cookies(url, $(this).attr('title'));
@@ -399,11 +415,6 @@ span.chunk:before {
         table.column(1).search((d) => temp.includes(d)).draw();
     });
 
-    /*$('td').hover(function() {
-    console.log(this);
-        $(this).find('.lyrics').toggle();
-    });*/
-
     $('.langs').click(function() {
         var temp = [];
         $('.langs').each(function() {
@@ -416,33 +427,5 @@ span.chunk:before {
         });
 
     });
-
-        /*<table width="100%"><tr><td class="song_block">';
-            ll = []
-                for (l of data.content) {
-                    if(ll.indexOf(l.name) >= 0) {
-                        continue;
-                    }
-                    html += '<div><span>' + l.name + '</span>';
-                    content = l.origin_text;
-                    if (filter.chord) {
-                        content = l.origin_chord;
-                        html += '<div class="song_chord">' + l.origin_chord.replace('\n', '<br/>');
-                    }
-                    if (filter.bilingual) {
-                        content = l.origin_text + '</div><div class="region">' + l.region
-                    }
-                    else if (mode == 2) {
-                        html += '<div class="song">' + .replace('\n', '<br/>');
-                    }
-                    ll.push(l.name);
-                    html += '</div><br/>';
-                }
-                html += '</td><td class="notes">' + data.notes.replace('\n', '<br/>') + '</td></tr></table>';
-        }
-        target = document.getElementById("songs");
-        target.innerHTML = html;
-    }*/
-
 </script>
 </html>
