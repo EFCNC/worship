@@ -322,6 +322,9 @@ span.chunk:before {
     $(document).ready(function() {
 	    $my_dialog = $("#dialog").dialog({
   		    autoOpen: false,
+  		    position: {
+  		        my:"center", at:"center", of:window
+  		    },
   		    hide: { effect: "fade", duration: 800 },
   		    show: { effect: "fade", duration: 800 },
   		    width: 'auto',
@@ -342,8 +345,8 @@ span.chunk:before {
                         }
                     }
                 }
-            ],
-            modal: true
+            ]
+            //modal: true
 	    });
     });
 
@@ -357,7 +360,6 @@ span.chunk:before {
 
     $(document).on('click', '.title span', function() {
         song_id = $(this).attr('song_id');
-        console.log(songs)
         content = songs.filter(obj=>{return obj.id == song_id}).map(obj=>obj.content);
         tabs = [];
         tab_div = '<div class="lyrics"><ul>';
@@ -375,15 +377,19 @@ span.chunk:before {
             tab_div += '<li><a href="#tabs-'+ (i+1) + '">' + tabs[i] + '</a></li>';
         }
         tab_div += '</ul>' + lyrics + '</div>';
-        $my_dialog.html(tab_div).dialog({ title: $(this).text()}).dialog('open');
+        title = $(this).text();
+        $my_dialog.html(tab_div).dialog({ title: title}).dialog('open');
         $('.lyrics').tabs();
         clicked = '';
     });
 
     $(document).on('click', '.title i', function() {
         var url = this.id.split('_')[1];
+        title = $(this).attr('name');
         if ($(this).attr('name')) {
-            $my_dialog.load(url).dialog({ title: $(this).attr('name')}).dialog('open');
+            $my_dialog.load(url, function() {
+                $(this).dialog({ title: title}).dialog('open');
+            });
             clicked = 'edit';
         }
         else {
