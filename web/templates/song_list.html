@@ -378,8 +378,9 @@ span.chunk:before {
         }
         tab_div += '</ul>' + lyrics + '</div>';
         title = $(this).text();
-        $my_dialog.html(tab_div).dialog({ title: title}).dialog('open');
+        $my_dialog.html(tab_div);
         $('.lyrics').tabs();
+        $my_dialog.dialog({ title: title}).dialog('open');
         clicked = '';
     });
 
