@@ -156,6 +156,19 @@ def music_1(id):
     return xml
 
 
+@api.route("/groups", methods=["GET", "POST"])
+def get_groups():
+    if request.method == "POST":
+        data = request.get_json()
+        try:
+            Utils.update_groups(data['id'], data['add'], data['remove'])
+            return Utils.get_teams()
+        except Exception as e:
+            return e, 400
+    details = request.args.get('details', None)
+    groups = Utils.get_groups(details)
+    return groups, 200
+
 @api.route("/search/song")
 def search_song():
     '''
@@ -229,6 +242,29 @@ def arrange_team(id):
     content = Utils.get_worship_teams(id)
     return {'team': content[0], 'inst': content[1], 'roster': content[2], 'marked': content[3]}
 
+@api.route("/people", methods=["PUT", "POST"])
+@api.route("/people/<id>", methods=["PUT", "POST", "GET"])
+def edit_people(id=None):
+    '''
+    update people (team) with col name and value
+    :param id - user_id
+    :param json data with col name and new value
+    :return new people list
+    '''
+    if request.method == "POST":
+        data = request.get_json()
+        if "new" in data:
+            r = Utils.add_teams(data['col_name'], data['value'])
+            if r[1] == 200:
+                return Utils.get_teams(), 200
+            return r[0], 400
+        r = Utils.update_teams(id, data['col_name'], data['value'])
+        if r[1] == 200:
+            return Utils.get_teams(), 200
+        return r[0], 400
+    people = Utils.get_teams(id)[0]
+    return dict(id=people[0], name=people[1], name_2=people[2], title=people[3], groups=people[4].split(','))
+
 @api.route("/roles/<dd>", methods=["POST", "PUT", "DELETE"])
 def edit_roles(dd):
     '''
@@ -261,6 +297,16 @@ def mark_user(id):
     date = request.args.get('date', None)
     result = Utils.edit_user_schedule(int(id), int(mark), date)
     return result
+
+@api.route("/rollcall/<id>", methods=["POST", "GET"])
+def edit_rollcall(id):
+    if request.method == "GET":
+        return Utils.get_team_present(id), 200
+    data = request.get_json()
+    r = Utils.update_rollcall(id, data)
+    if r[1] == 200:
+        return Utils.get_team_present(id), 200
+    return r[0], 400
 
 @api.route("/query", methods=["GET"])
 def sql():

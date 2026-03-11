@@ -88,6 +88,81 @@ def get_schedule_by_id(id):
     result = dB.run_para(sql, [id, id+2])
     return [dict(id=x[3], date=x[0], title=x[1], name=x[2]) for x in result]
 
+def get_groups(details=False):
+    if not details:
+        sql = 'select group_id, name, name_2 from groups where group_id not in (1, 2, 3, 5, 10) order by group_id'
+        result = dB.run(sql)
+    else:
+        sql = 'select group_id, g.name, g.name_2, t.name, t.name_2, meet_day, meet_time, meet_type, master from groups g left join team t on g.in_charge_id = t.user_id order by g.name'
+        result = dB.run(sql)
+    return result
+
+def update_groups(id, add, remove):
+    if remove:
+        sql = 'select group_id from groups where name in ('
+        for r in remove:
+            sql += '?,'
+        sql = sql[:-1]
+        sql += ')'
+        ids = dB.run_para(sql, remove)
+        ids = [x[0] for x in ids]
+        sql = 'delete from team_groups where user_id = ' + id + ' and group_id in ('
+        for i in ids:
+            sql += '?,'
+        sql = sql[:-1]
+        sql += ')'
+        dB.run_para(sql, ids)
+    if add:
+        sql = 'insert into team_groups(user_id, group_id) values (?, ?)'
+        for item in add:
+            r = dB.run_para(sql, [id, int(item)])
+
+def update_rollcall(id, data):
+    sql = 'delete from rollcall where worship_id = ? and user_id = ?'
+    try:
+        dB.run_para(sql, id, data["user_id"])
+        sql = 'insert into rollcall(worship_id, user_id, present) values(?, ?, ?)'
+        print(sql)
+        return dB.run_para(sql, [id, data['user_id'], data['present']]), 200
+    except Exception as e:
+        return e, 400
+
+def get_team_present(id):
+    sql = 'select t.user_id, t.name, t.name_2, title, group_concat(g.name), case when r.worship_id = ? then r.present else -1 end from team t left join team_groups tg on t.user_id = tg.user_id left join groups g on tg.group_id = g.group_id left join rollcall r on t.user_id = r.user_id group by t.user_id'
+    sql = 'select t.user_id, t.name, t.name_2, title, group_concat(g.name), case when r.present is NULL then -1 else r.present end from team t left join team_groups tg on t.user_id = tg.user_id left join groups g on tg.group_id = g.group_id left join (select * from rollcall where worship_id=?) r on t.user_id = r.user_id group by t.user_id'
+    print(sql, id)
+    result = dB.run_para(sql, id)
+    team = []
+    for r in result:
+        team.append([r[0], r[1] if r[1] else '', r[2] if r[2] else '', r[3] if r[3] else '', r[4] if r[4] else '', r[5]])
+    return team
+
+def get_teams(id=None):
+    if id:
+        sql = 'select t.user_id, t.name, t.name_2, title, group_concat(g.name) from team t left join team_groups tg on t.user_id = tg.user_id left join groups g on tg.group_id = g.group_id where t.user_id = ? group by t.user_id'
+        result = dB.run_para(sql, [id])
+    else:
+        sql = 'select t.user_id, t.name, t.name_2, title, group_concat(g.name) from team t left join team_groups tg on t.user_id = tg.user_id left join groups g on tg.group_id = g.group_id group by t.user_id'
+        result = dB.run(sql)
+    team = []
+    for r in result:
+        team.append([r[0], r[1] if r[1] else '', r[2] if r[2] else '', r[3] if r[3] else '', r[4] if r[4] else ''])
+    return team
+
+def update_teams(id, col_name, value):
+    sql = "update team set " + col_name + "=? where user_id = ?"
+    try:
+        return dB.run_para(sql, [value, id]), 200
+    except Exception as e:
+        return e, 400
+
+def add_teams(col_name, value):
+    sql = "insert into team(" + col_name + ") values(?)"
+    try:
+        return dB.insert(sql, [value]), 200
+    except Exception as e:
+        return e, 400
+
 def update_schedule(id, date, name):
     sql = 'select * from calendar where date = ? and item_id = ?'
     result = dB.run_para(sql, [date, id])
@@ -150,7 +225,7 @@ def list_team(date=None):
             team.append({'id': r[0], 'name': r[1], 'name_2': r[2], 'date': r[4], 'instrument': r[5], 'role_id': r[3]})
         return team
     else:
-        sql = "select user_id, name, name_2 from team order by name"
+        sql = "select team.user_id, name, name_2 from team inner join team_groups on team.user_id = team_groups.user_id where group_id=11 order by team.name"
         result = dB.run(sql)
         for r in result:
             team.append({'id': r[0], 'name': r[1], 'name_2': r[2]})

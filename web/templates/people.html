@@ -1,0 +1,207 @@
+{% include 'header.html' %}
+
+<link href="/static/datatables.min.css" rel="stylesheet">
+<script src="/static/datatables.js"></script>
+<style>
+    .fellowship:hover {
+        cursor: pointer;
+    }
+</style>
+<body>
+<table id="people" class="display compact cell-border">
+</table>
+<p><button id="addRow">Add New People</button></p>
+</body>
+<script>
+    let people = {{ people|safe }};
+    let groups = [];
+    let $group_focused;
+    let init_names = [];
+    let column_name = ['user_id', 'name', 'name_2', 'title'];
+
+    let table = new DataTable('#people', {
+        info: false,
+        data: people,
+        columns: [
+            {'title' : 'ID' , 'visible': false},
+            { title: 'Name' },
+            { title: 'Other Name' },
+            { title: '稱謂' },
+            { title: '團契/團體',
+              data: null,
+              render: (data, type, row) => data[4]?'<span class="fellowship" init-data="' + data[4] + '" init-id="' + data[0] + '">' + data[4] + '</span>':'<span class="fellowship" init-data="' + data[4] + '" init-id=" ' + data[0] + '">&nbsp;&nbsp;</span>'
+            }
+        ],
+        columnDefs: [
+            {
+                createdCell: function(td, cellData, rowData, row, col) {
+                    if(col!=4) {
+                        $(td).attr('contenteditable', 'true');
+                    }
+                    $(td).attr('init-data', cellData);
+                    $(td).attr('init-id', rowData[0]);
+                    $(td).attr('column-num', col);
+                },
+                targets: "_all"
+            }
+        ],
+        "LengthChange": true,
+        "pageLength": 20
+    });
+
+    $(document).on('blur', '[contenteditable]', function() {
+        init_data = $(this).attr('init-data');
+        val = $(this).text();
+        if(val != init_data) {
+            col = Number($(this).attr('column-num'));
+            console.log($(this).attr('init-id'), val, column_name[col])
+            if($(this).attr('init-id')==-1) {
+                update_fields($(this).attr('init-id'), val, column_name[col], true)
+            }
+            else {
+                update_fields($(this).attr('init-id'), val, column_name[col])
+            }
+        }
+    });
+
+    $(document).on('click', function(e) {
+        div = $(e.target);
+
+        // When fellowship column is clicked
+        if(div.attr('class') == 'fellowship') {
+            if($group_focused && $group_focused != div) {
+                // TODO: revert when other title field is clicked
+            }
+            else {
+                $group_focused = div;
+                get_groups(div, get_group_labels);
+            }
+        }
+        else {
+            if(div.is('input') || div.is('label')) return;  // If clicked is checkbox, ignore
+            // When click is outside of current span
+            if($group_focused && $group_focused != div) {
+                update_selected_group($group_focused);
+            }
+        }
+    });
+
+    function update_selected_group(element) {
+        temp = [];
+        add = [];
+        $('input[type="checkbox"]').each(function() {
+            if(this.checked) {
+                matched = init_names.indexOf($(this).attr('init-data'));
+                temp.push([$(this).attr('init-id'), $(this).attr('init-data')]);
+                if (matched >= 0) {
+                    init_names.splice(matched, 1);
+                }
+                else {
+                    add.push([$(this).attr('init-id'), $(this).attr('init-data')]);
+                }
+            }
+        });
+        group_ids = add.map(obj=>obj[0]);
+        console.log('r', init_names, 'add', group_ids);
+        init_names = init_names[0]==''?[]:init_names;
+        if (group_ids.length > 0 || init_names.length > 0) {
+            update_groups(group_ids, element.attr('init-id'), init_names);
+        }
+        else {
+            revert = element.attr('init-data')
+            if(revert=='') {
+                element.html('&nbsp;&nbsp;').next().remove();
+            }
+            else {
+                element.html(revert).next().remove();
+            }
+        }
+        $group_focused = null;
+        init_names = [];
+    }
+
+    function get_group_labels(name) {
+        html = '<div>';
+        for(var i=0;i<groups.length;i++) {
+            html += '<label for="radio-' + (i+1) + '" style="font-size:10px">' + groups[i][1] + '</label>';
+            init_names = name.split(',');
+            if (init_names.indexOf(groups[i][1]) >= 0) {
+                html += '<input type="checkbox" checked init-id="' + groups[i][0] + '" init-data="' + groups[i][1] + '" name="radio-' + (i+1) + '" id="radio-' + (i+1) + '">';
+            }
+            else {
+                html += '<input type="checkbox" init-id="' + groups[i][0] + '" init-data="' + groups[i][1] + '" name="radio-' + (i+1) + '" id="radio-' + (i+1) + '">';
+            }
+        }
+        html += '</div>';
+        return html;
+    }
+
+    function get_groups(element, callback) {
+        if (groups.length==0) {
+            url = API_URL + 'groups';
+            $.when( $.ajax( url ) ).then(function( data, textStatus, jqXHR ) {
+                groups = data;
+                element.empty().after(callback(element.attr('init-data')));
+                $( "input[type='checkbox']" ).checkboxradio({
+                    icon: false
+                });
+            });
+        }
+        else {
+            element.empty().after(callback(element.attr('init-data')));
+            $( "input[type='checkbox']" ).checkboxradio({
+                icon: false
+            });
+        }
+    }
+
+    function update_fields(user_id, val, col_name, add) {
+        url = API_URL + 'people/' + user_id;
+        data = {'col_name': col_name, 'value': val};
+        if(add) {
+            data['new']= true;
+        }
+        $('#loading').show();
+        $.ajax({
+            type: "post",
+            url: url,
+	        data: JSON.stringify(data),
+            contentType: "application/json",
+            dataType: 'json',
+            complete: function(response) {
+                if(response.status==200) {
+                    table.clear().rows.add(response.responseJSON).draw();
+                }
+                $('#loading').hide();
+            }
+        });
+    }
+
+    function update_groups(add, user_id, remove) {
+        url = API_URL + 'groups';
+        data = {'id': user_id, 'add': add, 'remove': remove};
+        $('#loading').show();
+        $.ajax({
+            type: "post",
+            url: url,
+	        data: JSON.stringify(data),
+            contentType: "application/json",
+            dataType: 'json',
+            complete: function(response) {
+                if(response.status==200) {
+                    table.clear().rows.add(response.responseJSON).draw();
+                }
+                $('#loading').hide();
+            }
+        });
+    }
+
+    document.querySelector('#addRow').addEventListener('click', addNewRow);
+    function addNewRow() {
+        new_row = [-1, '', '', '', '  '];
+        table.row
+            .add(new_row)
+            .draw(false);
+    }
+</script>
+</html>

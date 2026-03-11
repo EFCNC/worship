@@ -257,7 +257,7 @@ def schedule():
 def calendar():
 	now = datetime.now()
 	year = str(now.year)
-	allsundays = Tools.allsundays()[1]
+	allsundays = __get_sundays()[1]
 	assigned = []
 	booked = Utils.list_team(year)
 	for sun in allsundays:
@@ -286,6 +286,22 @@ def _schedule():
 def profile():
 	team = Utils.list_team()
 	return render_template('profile.html', team=team)
+
+@app.route("/people")
+def people():
+	people = Utils.get_teams()
+	return render_template('people.html', people=people)
+
+@app.route("/rollcall")
+def roll_call():
+	id = request.args.get('id', None)
+	groups = Utils.get_groups()
+	sundays = __get_sundays()
+	if not id:
+		people = Utils.get_team_present(sundays['worship_id'])
+	else:
+		people = Utils.get_team_present(id)
+	return render_template('rollcall.html', people=people, groups=[x[1] for x in groups], sundays=sundays)
 
 @app.route("/report/<id>")
 def report(id):
@@ -323,6 +339,11 @@ def playground(name):
 	'''
 	return render_template(name+'.html')
 
+def __get_sundays():
+	sundays = Tools.allsundays()
+	id = Utils.get_worship_id(sundays[0])[0]
+	return dict(sunday=sundays[0], all=sundays[1], worship_id=id)
+
 def _init_slide():
 	global slides_data
 	slides_data = {'pos': [0, 0], 'data': [], 'msg': '', 'dynamic': '', 'key': 0, 'background': [], 'id': 0}
@@ -342,7 +363,7 @@ def __update_client_mode(name):
 	client_mode = name
 
 def __get_slide_json():
-	coming_sunday = Tools.allsundays()[0]
+	coming_sunday = __get_sundays()["sunday"]
 	id = Utils.get_worship_id(coming_sunday)[0]
 	slides = Tools.get_worship_json(id)
 	global slides_data

@@ -1,0 +1,248 @@
+{% include 'header.html' %}
+
+<link href="/static/datatables.min.css" rel="stylesheet">
+<script src="/static/datatables.js"></script>
+<style>
+.arrow {
+    padding: 2px;
+    margin: 2px;
+}
+
+.arrow:hover {
+    cursor: pointer;
+    border: 1px solid #d0d0d0;
+}
+  button {
+  background-color: #fff;
+  border: 1px solid #04AA6D; /* Green border */
+  padding: 10px 10px; /* Some padding */
+  cursor: pointer; /* Pointer/hand icon */
+  border-radius: 2px;
+  }
+
+  button:hover {
+    background-color: #3e8e41;
+    color: #fff;
+  }
+
+  .highlight {
+    background-color: #3e8e41;
+    color: #fff;
+  }
+</style>
+<body>
+<div id="groups"></div>
+<table id="people" class="display compact cell-border">
+</table>
+</body>
+<script>
+    let people = {{ people|safe }};
+    let groups = {{ groups|safe }};
+    let sundays = {{ sundays|safe }};
+    let worship_id = sundays.worship_id;
+    let roll_call = []
+    let in_person = 0;
+    let zoom = 0;
+    let total = 0;
+    let keyword = '';
+
+    html = '<div>';
+    n = 1;
+    for(g of groups) {
+        html += '<button name="' + g + '" style="font-size:12px">' + g + '</button>';
+    }
+    html += '</div>';
+    $('#groups').html(html);
+
+    let table = new DataTable('#people', {
+        info: false,
+        data: people,
+        columns: [
+            {'title' : '<span class="arrow left" name="-1">&lt;</span>&nbsp;&nbsp;<span id="today">' + sundays.sunday + '</span>&nbsp;&nbsp;<span class="arrow ight" name="1">&gt;</span>', data: null, render: (data, type, row) => create_checkbox(data[0], data[5])},
+            { title: 'Name', data: null, render: (data, type, row) => data[1]?data[2]+'('+data[1]+')':data[2], searchable: true },
+            { title: 'Name_2', visible: false },
+            { title: 'title', visible: false, searchable: false},
+            { title: '團契/團體' , visible: false, searchable: true}
+        ],
+        info: false,
+        ordering: false,
+        paging: false,
+        layout: {
+            topStart: count_panel()
+        },
+        drawCallback: function (settings) {
+            calculate_total();
+        }
+
+    });
+
+    function count_panel() {
+        let toolbar = document.createElement('div');
+        toolbar.innerHTML = '<span id="total_label">總人數</span>：<span id="total">0</span>&nbsp;實體：<span id="in_person">0</span>&nbsp;線上：<span id="zoom">0</span>&nbsp;&nbsp;&nbsp;&nbsp;<button id="addRow">Add Person</button>';
+        return toolbar;
+    }
+
+    function create_checkbox(id, present) {
+        html = '<div id="' + id + '"><button name="in"';
+        if(present==1) {
+            html += ' class="highlight"';
+        }
+        html += '>實體</button>';
+        html += '<button name="out"';
+        if(present==0) {
+            html += ' class="highlight"';
+        }
+        html += '>線上</button>';
+        html += '</div>';
+        return html;
+    }
+
+    // Update present status when button is checked
+    function update_present(id, present) {
+        console.log('submitting...', id, present)
+        url = API_URL + 'rollcall/' + (worship_id);
+        data = {'user_id': id, 'present': present};
+        $('#loading').show();
+        $.ajax({
+            type: "post",
+            url: url,
+	        data: JSON.stringify(data),
+            contentType: "application/json",
+            dataType: 'json',
+            complete: function(response) {
+                if(response.status==200) {
+                    table.clear().rows.add(response.responseJSON).draw();
+                    console.log('search keyword is', keyword)
+                }
+                $('#loading').hide();
+            }
+        });
+    }
+
+    function calculate_total() {
+        roll_call = [];
+        $('button').each(function() {
+            if(this.className == 'highlight') {
+                user_id = $(this).parent().attr('id');
+                if(this.name == "out") {
+                    roll_call.push([user_id, 0])
+                }
+                else if(this.name == "in") {
+                    roll_call.push([user_id, 1])
+                }
+                else {
+                    //$(this).removeClass('highlight');
+                }
+            }
+        });
+        if(roll_call.length>0) {
+            $('#submit').removeAttr('disabled');
+        }
+        else {
+            $('#submit').attr('disabled', true);
+        }
+        zoom = roll_call.filter(obj=>obj[1] == 0).length;
+        in_person = roll_call.filter(obj=>obj[1] == 1).length;
+        $('#in_person').text(in_person);
+        $('#zoom').text(zoom);
+        total = in_person + zoom;
+        $('#total').text(total);
+    }
+
+    $(document).on('click', 'button', function() {
+        div = $(this).parent();
+        clicked = this.name;
+        toggle = true;
+        id = div.attr('id');
+        div.children('button').each(function() {
+            if(this.name==clicked&&this.className=='highlight') {
+                toggle = false;
+                keyword = '';
+            }
+            $(this).removeClass('highlight');
+        });
+        if(clicked=='in' || clicked=='out') {
+            if (toggle) {
+                $(this).addClass('highlight');
+                update_present(id, clicked=='in'?1:0);
+            }
+            else {
+                update_present(id, -1);
+            }
+        }
+        else {
+            if(toggle) {
+                $(this).addClass('highlight');
+                keyword = clicked;
+                $('#total_label').text(keyword);
+                table.column(4).search((d) => d.indexOf(keyword)>=0).draw();
+            }
+            else {
+                $('#total_label').text('總人數');
+                table.column(4).search('').draw();
+            }
+        }
+    });
+
+    $('.arrow').click(function() {
+        increment = Number($(this).attr('name'));
+        id = sundays.all.indexOf($('#today').text());
+        (id>sundays.all.length||id==0)?id:id += increment;
+        worship_id = (worship_id+increment);
+        url = API_URL + 'rollcall/' + worship_id;
+        $('#loading').show();
+        $.ajax({
+            type: "get",
+            url: url,
+            contentType: "application/json",
+            dataType: 'json',
+            complete: function(response) {
+                if(response.status==200) {
+                console.log(response.responseJSON);
+                    table.clear().rows.add(response.responseJSON).draw();
+                    $('#today').html(sundays.all[id]);
+                    //calculate_total();
+                }
+                $('#loading').hide();
+            }
+        });
+    });
+
+    $('#addRow').on('click', function() {
+        user_name = prompt('Enter New Person\'s Name');
+        if(!user_name) {
+            return false;
+        }
+        calculate_total();
+        url = API_URL + 'people';
+        data = {'col_name': 'name_2', 'value': user_name, 'new': true};
+        $('#loading').show();
+        $.ajax({
+            type: "post",
+            url: url,
+	        data: JSON.stringify(data),
+            contentType: "application/json",
+            dataType: 'json',
+            complete: function(response) {
+                if(response.status==200) {
+                    temp = response.responseJSON;
+                    for (r of roll_call) {
+                        for(t of temp) {
+                            if(t[0]==r[0]) {
+                                t[5] = r[1]
+                            }
+                        }
+                    }
+                    table.clear().rows.add(temp).draw();
+                    $('#groups.button').each(function() {
+                    console.log(this)
+                        $(this).removeClass('highlight');
+                    });
+                }
+                $('#loading').hide();
+            }
+        });
+    });
+
+</script>
+</html>
