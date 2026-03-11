@@ -101,6 +101,14 @@
   height: 20px;
   width: 20px;
 }
+
+.editable {
+  contenteditable: true;
+}
+
+#overflow {
+  text-align: 'center'
+}
 </style>
 <body>
 
@@ -137,7 +145,7 @@
         <tr><td>愛心奉獻</td><td contenteditable="true"></td><td contenteditable="true"></td><td>Love Offering</td></tr>    </table>
 
     <!-- other information such as deacon board -->
-    <div id="other1" class="tiny"></div>
+    <div id="other1" class="tiny" contenteditable="true"></div>
   </div>
   <!-- End of front left -->
 
@@ -146,8 +154,7 @@
     <div id="front_right" align="center"></div>
     <div id="date_stamp" align="center"></div>
     <div id="time_table"></div>
-    <div id="others">
-    </div>
+    <div id="others" contenteditable="true"></div>
   </div>
 </div>
 <!-- End of front right -->
@@ -160,7 +167,7 @@
   <div class="left">
 
     <!-- Table template for worship order -->
-    <table width="100%" border="1">
+    <table width="100%" border="1" contenteditable="true">
       <tr>
         <td colspan="3" align="center" id="worship_date" class="header"></td>
       </tr>
@@ -216,13 +223,17 @@
     </table>
 
     <!-- div for sermon information -->
-    <div id="sermons"></div>
+    <div id="sermons" contenteditable="true"></div>
   </div>
   <!-- End of back left -->
 
   <!-- Back right -->
   <div class="right">
-    <div id="info"></div>
+    <div id="info" contenteditable="true"></div>
+
+  <!-- overflow session -->
+    <div id="overflow" class="small" contenteditable="true"></div>
+
   </div>
   <!-- End of back right -->
 </div>
@@ -279,7 +290,7 @@
         task_table += '</div><div class="container"><div class="header">' + date_title[n] + '(' + Number(dd[1]) + '/' + Number(dd[2]) + ')</div>';
         n++;
       }
-      task_table += '<div>' + l[j].name + '</div>';
+      task_table += '<div contenteditable="true">' + l[j].name + '</div>';
     }
     task_table += '</div>';
     $('#task_table').html(task_table);
@@ -326,18 +337,37 @@
     ww += '主題：' + worship.title + '<br/>';
     ww += '經文：' + worship.bible + '<br/>';
     ww += '大綱：';
-    ww += '<pre contenteditable="true">' + worship.outline + '</pre>';
+    if (worship.outline) {
+      temp = worship.outline.split('\n');
+      ww += '<ol>';
+      for(outline of temp) {
+        ww += '<li>' + outline + '</li>';
+      }
+      ww += '</ol>';
+    }
+    else {
+      ww += worship.outline;
+    }
     ww += '<h4><u>上週主日信息</u></h4>';
     ww += '主題：' + previous.title + '<br/>';
     ww += '經文：' + previous.bible + '<br/>';
     ww += '大綱：';
-    ww += '<pre contenteditable="true">' + previous.outline + '</pre>';
+    if (previous.outline) {
+      temp = previous.outline.split('\n');
+      ww += '<ol>';
+      for(outline of temp) {
+        ww += '<li>' + outline + '</li>';
+      }
+      ww += '</ol>';
+    }
+    else {
+      ww += previous.outline;
+    }
     $('#sermons').html(ww);
   }
 
   function load_info() {
-    html = '<pre contenteditable="true"></pre>'   // Spare pre element for overflow sermon information
-    html +='<h4><u>歡迎報告</u></h4><ol>';
+    html ='<h4><u>歡迎報告</u></h4><ol>';
     for (item in announcement) {
       html += '<li>' + announcement[item] + '</li>';
     }
