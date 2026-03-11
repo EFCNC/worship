@@ -257,7 +257,7 @@ def schedule():
 def calendar():
 	now = datetime.now()
 	year = str(now.year)
-	allsundays = __get_sundays()[1]
+	allsundays = __get_sundays()['all']
 	assigned = []
 	booked = Utils.list_team(year)
 	for sun in allsundays:
