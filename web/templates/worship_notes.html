@@ -148,7 +148,7 @@ span.chunk:before {
     <h3> {{ w.date }} 敬拜筆記 (Worship Notes):</h3>
     <p><b>Title: {{ w.sermon_title }}<br/>
         Speaker: {{ w.speaker }}<br/>
-        Bible: <a href="javascript:get_bible(show_verse, '{{ w.bible }}')">{{ w.bible }}</a><br/>
+        Bible: <span id="bible_verse"></span><br/>
         Outline: {{ w.outline }}</b>
     </p>
     <p>
@@ -170,7 +170,16 @@ span.chunk:before {
 <script>
     let tab = '{{ tab|safe }}';
     let worship = {{ songs|safe }};
+    let w = {{ w|safe }};
     let song_id = worship.map(o=> o.id);
+
+    var bible = w.bible.replace(/(、|;)/g, '，'); // Replace possible symbols to Chinese comma
+    bible = bible.split('，');
+    var b = '';
+    for (var i=0;i<bible.length;i++) {
+        b += ' <a href="javascript:get_bible(show_verse, \'' + bible[i] + '\')">' + bible[i] + '</a>';
+    }
+    $('#bible_verse').html(b);
 
     // init sharp and flat keys to be assigned to keys
     let sharp = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
