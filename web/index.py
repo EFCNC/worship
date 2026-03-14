@@ -310,12 +310,14 @@ def report(id):
 	report_template = Tools.get_report(id)
 	worship_date = worship['date']
 	info = Utils.get_info(worship_date)
+	total1, present1 = Utils.get_present_by_group(int(id)-1)
+	total2, present2 = Utils.get_present_by_group(int(id)-2)
 	announcement = [x['info'] for x in info if x['type'] == 'announcement']
 	prayer = [x['info'] for x in info if x['type'] == 'caring']
 	l = Utils.get_schedule_by_id(int(id))
 	if 'pdf' in request.args:
-		return render_template('report_pdf.html', w=worship, p=previous, template=report_template, announcement=announcement, prayer=prayer, l=l)
-	return render_template('report_pdf.html', w=worship, p=previous, template=report_template, announcement=announcement, prayer=prayer, l=l)
+		return render_template('report_pdf.html', w=worship, p=previous, template=report_template, announcement=announcement, prayer=prayer, l=l, present1=[total1, present1], present2=[total2, present2])
+	return render_template('report_pdf.html', w=worship, p=previous, template=report_template, announcement=announcement, prayer=prayer, l=l, present1=[total1, present1], present2=[total2, present2])
 
 @app.route("/files")
 def file_list():

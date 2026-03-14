@@ -109,6 +109,14 @@
 #overflow {
   text-align: 'center'
 }
+
+.number, .currency {
+  text-align: center;
+}
+
+.dollar::before {
+  content: "$";
+  }
 </style>
 <body>
 
@@ -124,25 +132,25 @@
     <table class="info_table tiny">
         <tr><td>出席與奉獻</td>
           <!-- placeholders for previous two weeks -->
-          <td id="week_2"></td>
-          <td id="week_1"></td>
+          <td id="week_2" class="number"></td>
+          <td id="week_1" class="number"></td>
           <td>Attendance/ Offering</td>
         </tr>
-        <tr><td>主日總出席人數</td><td contenteditable="true"></td><td contenteditable="true"></td><td>Total Attendance</td></tr>
-        <tr><td>主日禮拜人數</td><td contenteditable="true"></td><td contenteditable="true"></td><td>Taiwanese</td></tr>
-        <tr><td>成人主日學人數</td><td contenteditable="true"></td><td contenteditable="true"></td><td>Adult Sunday School</td></tr>
-        <tr><td>英語主日禮拜人數</td><td contenteditable="true"></td><td contenteditable="true"></td><td>English Congregation</td></tr>
-        <tr><td>青少年主日學人數</td><td contenteditable="true"></td><td contenteditable="true"></td><td>Youth Sunday School</td></tr>
-        <tr><td>兒童主日學人數</td><td contenteditable="true"></td><td contenteditable="true"></td><td>Elementary SS</td></tr>
-        <tr><td>週日禱告會人數</td><td contenteditable="true"></td><td contenteditable="true"></td><td>Sunday Prayer</td></tr>
-        <tr><td>社會青年人數</td><td contenteditable="true"></td><td contenteditable="true"></td><td>Young Adult</td></tr>
-        <tr><td>學生團契人數</td><td contenteditable="true"></td><td contenteditable="true"></td><td>Student Fellowship</td></tr>
-        <tr><td>經常費奉獻</td><td contenteditable="true"></td><td contenteditable="true"></td><td>General Offering</td></tr>
-        <tr><td>建堂奉獻</td><td contenteditable="true"></td><td contenteditable="true"></td><td>New Building Offering</td></tr>
-        <tr><td>宣道奉獻</td><td contenteditable="true"></td><td contenteditable="true"></td><td>Mission Offering</td></tr>
-        <tr><td>午餐奉獻</td><td contenteditable="true"></td><td contenteditable="true"></td><td>Lunch Offering</td></tr>
-        <tr><td>學生團契奉獻</td><td contenteditable="true"></td><td contenteditable="true"></td><td>Student Offering</td></tr>
-        <tr><td>愛心奉獻</td><td contenteditable="true"></td><td contenteditable="true"></td><td>Love Offering</td></tr>    </table>
+        <tr><td>主日總出席人數</td><td contenteditable="true" id="rollcall_total1"></td><td contenteditable="true" id="rollcall_total2"></td><td>Total Attendance</td></tr>
+        <tr><td>主日禮拜人數</td><td contenteditable="true" id="rollcall_worship1"></td><td contenteditable="true" id="rollcall_worship2"></td><td>Taiwanese</td></tr>
+        <tr><td>成人主日學人數</td><td contenteditable="true" id="rollcall_sunday_school1"></td><td contenteditable="true" id="rollcall_sunday_school2"></td><td>Adult Sunday School</td></tr>
+        <tr><td>英語主日禮拜人數</td><td contenteditable="true" id="rollcall_em1"></td><td contenteditable="true" id="rollcall_em2"></td><td>English Congregation</td></tr>
+        <tr><td>青少年主日學人數</td><td contenteditable="true" id="rollcall_youth1"></td><td contenteditable="true" id="rollcall_youth2"></td><td>Youth Sunday School</td></tr>
+        <tr><td>兒童主日學人數</td><td contenteditable="true" id="rollcall_kids1"></td><td contenteditable="true" id="rollcall_kids2"></td><td>Elementary SS</td></tr>
+        <tr><td>週日禱告會人數</td><td contenteditable="true" id="rollcall_prayer1"></td><td contenteditable="true" id="rollcall_prayer2"></td><td>Sunday Prayer</td></tr>
+        <tr><td>社會青年人數</td><td contenteditable="true" id="rollcall_young_adult1"></td><td contenteditable="true" id="rollcall_young_adult2"></td><td>Young Adult</td></tr>
+        <tr><td>學生團契人數</td><td contenteditable="true" id="rollcall_student1"></td><td contenteditable="true" id="rollcall_student2"></td><td>Student Fellowship</td></tr>
+        <tr><td>經常費奉獻</td><td contenteditable="true" class="currency"></td><td contenteditable="true" class="currency"></td><td>General Offering</td></tr>
+        <tr><td>建堂奉獻</td><td contenteditable="true" class="currency"></td><td contenteditable="true" class="currency"></td><td>New Building Offering</td></tr>
+        <tr><td>宣道奉獻</td><td contenteditable="true" class="currency"></td><td contenteditable="true" class="currency"></td><td>Mission Offering</td></tr>
+        <tr><td>午餐奉獻</td><td contenteditable="true" class="currency"></td><td contenteditable="true" class="currency"></td><td>Lunch Offering</td></tr>
+        <tr><td>學生團契奉獻</td><td contenteditable="true" class="currency"></td><td contenteditable="true" class="currency"></td><td>Student Offering</td></tr>
+        <tr><td>愛心奉獻</td><td contenteditable="true" class="currency"></td><td contenteditable="true class="currency""></td><td>Love Offering</td></tr>    </table>
 
     <!-- other information such as deacon board -->
     <div id="other1" class="tiny" contenteditable="true"></div>
@@ -245,6 +253,8 @@
   l = {{ l|safe }};
   announcement = {{ announcement|safe }};
   prayer = {{ prayer| safe }};
+  present1 = {{ present1|safe}};
+  present2 = {{ present2|safe}};
 
   const d = new Date(worship.date.replace('-', '/'));
   let date_string = '主後' + d.getFullYear().toString() + '年' + (d.getMonth()+1).toString() + '月' + d.getDate() + '日';
@@ -260,6 +270,7 @@
     load_orders();
     load_sermons();
     load_info();
+    load_present();
     load_reset();
 
   });
@@ -379,6 +390,43 @@
     $('#info').html(html);
   }
 
+  function load_present() {
+    all = present1[0];
+    em = present1[1].filter(obj=>obj['id'] == 12).map(obj=>obj['count']);
+    youth = present1[1].filter(obj=>obj['id'] == 13).map(obj=>obj['count']);
+    kids = present1[1].filter(obj=>obj['id'] == 14).map(obj=>obj['count']);
+    sunday_school = Number(present1[1].filter(obj=>obj['id'] == 4).map(obj=>obj['count'])) + Number(present1[1].filter(obj=>obj['id'] == 8).map(obj=>obj['count'])) + Number(present1[1].filter(obj=>obj['id'] == 9).map(obj=>obj['count']));
+    $('#rollcall_total1').text(all);
+    $('#rollcall_total1').addClass('number');
+    $('#rollcall_worship1').text(all-em-youth-kids);
+    $('#rollcall_worship1').addClass('number');
+    $('#rollcall_em1').text(em);
+    $('#rollcall_em1').addClass('number');
+    $('#rollcall_youth1').text(youth);
+    $('#rollcall_youth1').addClass('number');
+    $('#rollcall_kids1').text(kids);
+    $('#rollcall_kids1').addClass('number');
+    $('#rollcall_sunday_school1').text(sunday_school);
+    $('#rollcall_sunday_school1').addClass('number');
+    all = present2[0];
+    em = present2[1].filter(obj=>obj['id'] == 12).map(obj=>obj['count']);
+    youth = present2[1].filter(obj=>obj['id'] == 13).map(obj=>obj['count']);
+    kids = present2[1].filter(obj=>obj['id'] == 14).map(obj=>obj['count']);
+    sunday_school = Number(present2[1].filter(obj=>obj['id'] == 4).map(obj=>obj['count'])) + Number(present2[1].filter(obj=>obj['id'] == 8).map(obj=>obj['count'])) + Number(present2[1].filter(obj=>obj['id'] == 9).map(obj=>obj['count']));
+    $('#rollcall_total2').text(all);
+    $('#rollcall_total2').addClass('number');
+    $('#rollcall_worship2').text(all-em-youth-kids);
+    $('#rollcall_worship2').addClass('number');
+    $('#rollcall_em2').text(em);
+    $('#rollcall_em2').addClass('number');
+    $('#rollcall_youth2').text(youth);
+    $('#rollcall_youth2').addClass('number');
+    $('#rollcall_kids2').text(kids);
+    $('#rollcall_kids2').addClass('number');
+    $('#rollcall_sunday_school2').text(sunday_school);
+    $('#rollcall_sunday_school2').addClass('number');
+  }
+
   // function of loading the rest of the information
   function load_reset() {
     $('#other1').html(template.others.zh);  // Load other info -- front left
@@ -396,4 +444,11 @@
     text.pop();
     $('#week_1').html(text.join('/')+'上上週');
   }
+
+  $('.currency').blur(function() {
+  console.log($(this))
+    if($(this).text() != '') {
+      $(this).addClass('dollar');
+    }
+  });
 </script>

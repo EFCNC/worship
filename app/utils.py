@@ -127,10 +127,16 @@ def update_rollcall(id, data):
     except Exception as e:
         return e, 400
 
+def get_present_by_group(id):
+    sql = 'select g.group_id, g.name, count(t.user_id) from rollcall r inner join team t on r.user_id = t.user_id inner join team_groups tg on t.user_id = tg.user_id inner join groups g on g.group_id = tg.group_id where r.worship_id=? group by tg.group_id'
+    result = dB.run_para(sql, id)
+    total = dB.run_para('select count(present) from rollcall where worship_id = ?', id)
+    print(total[0][0], total)
+    return total[0][0], [dict(id=x[0], name=x[1], count=x[2]) for x in result]
+
 def get_team_present(id):
     sql = 'select t.user_id, t.name, t.name_2, title, group_concat(g.name), case when r.worship_id = ? then r.present else -1 end from team t left join team_groups tg on t.user_id = tg.user_id left join groups g on tg.group_id = g.group_id left join rollcall r on t.user_id = r.user_id group by t.user_id'
     sql = 'select t.user_id, t.name, t.name_2, title, group_concat(g.name), case when r.present is NULL then -1 else r.present end from team t left join team_groups tg on t.user_id = tg.user_id left join groups g on tg.group_id = g.group_id left join (select * from rollcall where worship_id=?) r on t.user_id = r.user_id group by t.user_id'
-    print(sql, id)
     result = dB.run_para(sql, id)
     team = []
     for r in result:
