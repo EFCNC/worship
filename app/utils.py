@@ -120,9 +120,9 @@ def update_groups(id, add, remove):
 def update_rollcall(id, data):
     sql = 'delete from rollcall where worship_id = ? and user_id = ?'
     try:
-        dB.run_para(sql, id, data["user_id"])
+        print(sql, id, data['user_id'])
+        dB.run_para(sql, [id, data["user_id"]])
         sql = 'insert into rollcall(worship_id, user_id, present) values(?, ?, ?)'
-        print(sql)
         return dB.run_para(sql, [id, data['user_id'], data['present']]), 200
     except Exception as e:
         return e, 400
