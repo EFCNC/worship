@@ -84,7 +84,7 @@ def search_bible(keyword, offset, range=None):
         return e, 500
 
 def get_schedule_by_id(id):
-    sql = 'SELECT date, name, content, item_id FROM calendar c inner join item i on c.item_id = i.id where c.worship_id >= ? and c.worship_id <=?'
+    sql = 'SELECT date, name, content, item_id FROM calendar c inner join item i on c.item_id = i.id where c.worship_id >= ? and c.worship_id <=? order by worship_id, item_id'
     result = dB.run_para(sql, [id, id+2])
     return [dict(id=x[3], date=x[0], title=x[1], name=x[2]) for x in result]
 
@@ -168,6 +168,17 @@ def add_teams(col_name, value):
         return dB.insert(sql, [value]), 200
     except Exception as e:
         return e, 400
+
+def add_schedule(date):
+    worship_id = get_worship_id(date)[0]
+    sql = 'insert into calendar(date, worship_id, item_id, content) values'
+    for x in range(1, 12):
+        sql += "('{}', {}, {}, ''),".format(date, worship_id, x)
+    sql = sql[:-1]
+    dB.run(sql)
+    now = datetime.now()
+    year = str(now.year)
+    return get_schedule(year)
 
 def update_schedule(id, date, name):
     sql = 'select * from calendar where date = ? and item_id = ?'

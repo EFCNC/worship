@@ -66,16 +66,25 @@
 
     document.querySelector('#addRow').addEventListener('click', addNewRow);
     function addNewRow() {
+        $('#loading').show();
         var last_row = table.row( ':last' ).data();
         let d = new Date(last_row[0].replace('-', '/'));
         var nextWeek = new Date(d.getTime() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString('en-CA');
-        new_row = [nextWeek];
-        for(var i=1;i<column.length;i++) {
-            new_row.push('');
-        }
-        table.row
-            .add(new_row)
-            .draw(false);
+        url = API_URL + 'schedule/0';
+        $.ajax({
+            type: "put",
+            url: url,
+	        data: JSON.stringify({'date':nextWeek}),
+            contentType: "application/json",
+            dataType: 'json',
+            complete: function(response) {
+          	    if(response.status==200) {
+                    table.clear().rows.add(response.responseJSON).draw();
+                }
+                $('#loading').hide();
+            }
+        });
     }
+
 </script>
 </html>
