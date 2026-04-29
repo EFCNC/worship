@@ -1,6 +1,7 @@
 <!-- template for weekly bulletin -->
-{% include 'header.html' %}
+{% include 'header1.html' %}
 
+<link href="/static/v4-shims.min.css" rel="stylesheet">
 <style>
 .report {
   display: grid;
@@ -26,6 +27,7 @@
   grid-template-columns: 25% 25% 25% 25%;
   padding: 3px;
   border: 1px double;
+  position: relative;
 }
 
 .info_table {
@@ -50,6 +52,15 @@
 .title {
   font-size: 40px;
   font-family: DFKai-sb;
+}
+
+.topic {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.large {
+  font-size: 18px;
 }
 
 .medium {
@@ -116,346 +127,366 @@
 
 .dollar::before {
   content: "$";
-  }
+}
+
+.task_table_btn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    visibility: hidden;
+}
+
+#task_table:hover .task_table_btn {
+    visibility: visible;
+}
+
+.info_table_btn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    visibility: hidden;
+}
+
+.info_table {
+    position: relative;
+}
+
+.info_table:hover .info_table_btn {
+    visibility: visible;
+}
+
+.sermons_btn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    visibility: hidden;
+}
+
+#sermons {
+    position: relative;
+}
+
+#sermons:hover .sermons_btn {
+    visibility: visible;
+}
+
+.info_btn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    visibility: hidden;
+}
+
+#info {
+    position: relative;
+}
+
+#info:hover .info_btn {
+    visibility: visible;
+}
+
+.front_right_btn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    visibility: hidden;
+}
+
+.right {
+    position: relative;
+}
+
+.right:hover .front_right_btn {
+    visibility: visible;
+}
+
+.overflow_btn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    visibility: hidden;
+}
+
+#overflow_ {
+    position: relative;
+}
+
+#overflow_:hover .overflow_btn {
+    visibility: visible;
+}
 </style>
 <body>
-
-<!-- container for two columns -->
-<div class="report front">
-  <!-- front left -->
-  <div class="left">
-
-    <!-- div for weekly tasks -->
-    <div id="task_table"></div>
-
-    <!-- table for attendance and offering, manual input at contenteditable tds -->
-    <table class="info_table tiny">
-        <tr><td>出席與奉獻</td>
-          <!-- placeholders for previous two weeks -->
-          <td id="week_2" class="number"></td>
-          <td id="week_1" class="number"></td>
-          <td>Attendance/ Offering</td>
-        </tr>
-        <tr><td>主日總出席人數</td><td contenteditable="true" id="rollcall_total1"></td><td contenteditable="true" id="rollcall_total2"></td><td>Total Attendance</td></tr>
-        <tr><td>主日禮拜人數</td><td contenteditable="true" id="rollcall_worship1"></td><td contenteditable="true" id="rollcall_worship2"></td><td>Taiwanese</td></tr>
-        <tr><td>成人主日學人數</td><td contenteditable="true" id="rollcall_sunday_school1"></td><td contenteditable="true" id="rollcall_sunday_school2"></td><td>Adult Sunday School</td></tr>
-        <tr><td>英語主日禮拜人數</td><td contenteditable="true" id="rollcall_em1"></td><td contenteditable="true" id="rollcall_em2"></td><td>English Congregation</td></tr>
-        <tr><td>青少年主日學人數</td><td contenteditable="true" id="rollcall_youth1"></td><td contenteditable="true" id="rollcall_youth2"></td><td>Youth Sunday School</td></tr>
-        <tr><td>兒童主日學人數</td><td contenteditable="true" id="rollcall_kids1"></td><td contenteditable="true" id="rollcall_kids2"></td><td>Elementary SS</td></tr>
-        <tr><td>週日禱告會人數</td><td contenteditable="true" id="rollcall_prayer1"></td><td contenteditable="true" id="rollcall_prayer2"></td><td>Sunday Prayer</td></tr>
-        <tr><td>社會青年人數</td><td contenteditable="true" id="rollcall_young_adult1"></td><td contenteditable="true" id="rollcall_young_adult2"></td><td>Young Adult</td></tr>
-        <tr><td>學生團契人數</td><td contenteditable="true" id="rollcall_student1"></td><td contenteditable="true" id="rollcall_student2"></td><td>Student Fellowship</td></tr>
-        <tr><td>經常費奉獻</td><td contenteditable="true" class="currency"></td><td contenteditable="true" class="currency"></td><td>General Offering</td></tr>
-        <tr><td>建堂奉獻</td><td contenteditable="true" class="currency"></td><td contenteditable="true" class="currency"></td><td>New Building Offering</td></tr>
-        <tr><td>宣道奉獻</td><td contenteditable="true" class="currency"></td><td contenteditable="true" class="currency"></td><td>Mission Offering</td></tr>
-        <tr><td>午餐奉獻</td><td contenteditable="true" class="currency"></td><td contenteditable="true" class="currency"></td><td>Lunch Offering</td></tr>
-        <tr><td>學生團契奉獻</td><td contenteditable="true" class="currency"></td><td contenteditable="true" class="currency"></td><td>Student Offering</td></tr>
-        <tr><td>愛心奉獻</td><td contenteditable="true" class="currency"></td><td contenteditable="true class="currency""></td><td>Love Offering</td></tr>    </table>
-
-    <!-- other information such as deacon board -->
-    <div id="other1" class="tiny" contenteditable="true"></div>
-  </div>
-  <!-- End of front left -->
-
-  <!-- Front right -->
-  <div class="right">
-    <div id="front_right" align="center"></div>
-    <div id="date_stamp" align="center"></div>
-    <div id="time_table"></div>
-    <div id="others" contenteditable="true"></div>
-  </div>
-</div>
-<!-- End of front right -->
-
-<!-- page break -->
-<footer></footer>
-
-<!-- Back left -->
-<div class="report back">
-  <div class="left">
-
-    <!-- Table template for worship order -->
-    <table width="100%" border="1" contenteditable="true">
-      <tr>
-        <td colspan="3" align="center" id="worship_date" class="header"></td>
-      </tr>
-      <tr>
-        <td colspan="2">Worship Program</td>
-        <td>司琴：<span id="pianist"></span></td>
-      </tr>
-      <tr>
-        <td>序樂 Prelude</td>
-        <td></td>
-        <td></td>
-      </tr>
-      <tr>
-        <td>報告 Announcement</td>
-        <td class="usher"></td>
-        <td></td>
-      </tr>
-      <tr>
-        <td>敬拜讚美 Song Praise</td>
-        <td class="lead"></td>
-        <td></td>
-      </tr>
-      <tr>
-        <td>禱告 Prayer</td>
-        <td class="lead"></td>
-        <td></td>
-      </tr>
-      <tr>
-        <td>證道 Sermon</td>
-        <td id="speaker"></td>
-        <td></td>
-      </tr>
-      <tr>
-        <td>歡迎/奉獻 Offering</td>
-        <td class="usher"></td>
-        <td>Hymn #306b</td>
-      </tr>
-      <tr>
-        <td>祝禱 Benediction</td>
-        <td id="benediction"></td>
-        <td></td>
-      </tr>
-      <tr>
-        <td>阿門頌 Amen</td>
-        <td>聖詩 #338</td>
-        <td>Hymn #338</td>
-      </tr>
-      <tr>
-        <td>殿樂 Postlude</td>
-        <td>默禱，散會</td>
-        <td>Dismiss after a silent prayer</td>
-      </tr>
-    </table>
-
-    <!-- div for sermon information -->
-    <div id="sermons" contenteditable="true"></div>
-  </div>
-  <!-- End of back left -->
-
-  <!-- Back right -->
-  <div class="right">
-    <div id="info" contenteditable="true"></div>
-
-  <!-- overflow session -->
-    <div id="overflow" class="small" contenteditable="true"></div>
-
-  </div>
-  <!-- End of back right -->
+<div id="weekly_report">
+{{ report|safe }}
 </div>
 </body>
 <script>
-  worship = {{ w|safe }};
-  previous = {{ p|safe }};
-  template = {{ template|safe }};
-  l = {{ l|safe }};
-  announcement = {{ announcement|safe }};
-  prayer = {{ prayer| safe }};
-  present1 = {{ present1|safe}};
-  present2 = {{ present2|safe}};
+    // variables
+    let worship = {};
+    //let previous;
+    let template;
+    let l;
+    let announcement;
+    let prayer;
+    let present1;
+    let present2;
+    let saved = {{ saved|safe }};
 
-  const d = new Date(worship.date.replace('-', '/'));
-  let date_string = '主後' + d.getFullYear().toString() + '年' + (d.getMonth()+1).toString() + '月' + d.getDate() + '日';
+    url = window.location.pathname;
+    id = url.split('/').pop();
 
-  $(document).ready(function() {
+    font_size = ['tiny', 'small', 'medium', 'large'];
 
-    $('#header').hide();
-
-    // Loading divs
-    load_master();
-    load_time_table();
-    load_statement();
-    load_orders();
-    load_sermons();
-    load_info();
-    load_present();
-    load_reset();
-
-  });
-
-  // functions of loading front left div
-
-  function load_master() {
-    task_table = '<div class="container"><div class="header">負責事工</div>';
-    current_date = l[0].date;
-    for(var k=0;k<l.length;k++) {
-      if(current_date != l[k].date) {
-       break;
-      }
-      if (k % 2 == 1) {
-        task_table += '<div class="header">' + l[k].title + '</div>';
-      }
-      else {
-        task_table += '<div>' + l[k].title + '</div>';
-      }
+    function load_content(url) {
+        return $.ajax({
+            url: url,
+            dataType: "json",
+        });
     }
-    current_date = '';
-    date_title = ['本週', '下週', '下下週'];
-    n = 0;
-    for(var j=0;j<l.length;j++) {
-      if(l[j].date != current_date) {
-        current_date = l[j].date;
-        dd = current_date.split('-');
-        task_table += '</div><div class="container"><div class="header">' + date_title[n] + '(' + Number(dd[1]) + '/' + Number(dd[2]) + ')</div>';
-        n++;
-      }
-      task_table += '<div contenteditable="true">' + l[j].name + '</div>';
+
+    function last_week(d){
+        var today = new Date(d);
+        var week = new Date(today.getFullYear(), today.getMonth(), today.getDate()-7);
+        return week;
     }
-    task_table += '</div>';
-    $('#task_table').html(task_table);
-  }
 
-  // functions of loading front right div
-
-  function load_statement() {
-    html = '<img class="logo">';
-    html += '<span class="title">' + template.title.zh + '</span><br/>';
-    html += '<span class="small">' + template.title.en + '</span><br/>';
-    html += '<p align="center">' + template.statement.zh;
-    html += '<br/>' + template.statement.en + '</p>';
-    $('#front_right').html(html);
-    let d = new Date(worship.date.replace('-', '/'));
-    $('#date_stamp').html('<h4>主後' + d.getFullYear().toString() + '年' + (d.getMonth()+1).toString() + '月' + d.getDate() + '日週報</h4>');
-  }
-
-  function load_time_table() {
-    html = '<b>我們的聚會</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="small">地址：' + template.address + '</span>';
-    html += '<table class="time_table" width="100%">';
-    event = template.time_table
-    for(var i=0;i<event.length;i++) {
-      html += '<tr><td>' + event[i].title + '</td><td>' + event[i].day + '</td><td>' + event[i].time + '</td><td>' + event[i].type + '</td><td>' + event[i].in_charge + '</td></tr>';
+    function load_time_table() {
+        html = '<b>我們的聚會</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="small">地址：' + template.address + '</span>';
+        html += '<table class="time_table" width="100%">';
+        event = template.time_table
+        for(var i=0;i<event.length;i++) {
+            html += '<tr><td>' + event[i].title + '</td><td>' + event[i].day + '</td><td>' + event[i].time + '</td><td>' + event[i].type + '</td><td>' + event[i].in_charge + '</td></tr>';
+        }
+        html += '</table>';
+        $('#time_table').html(html);
     }
-    html += '</table>';
-    $('#time_table').html(html);
-  }
 
-  // functions of loading back left div
-
-  function load_orders() {
-    $('#worship_date').html(date_string);
-    var order = l.filter(obj=>{return obj.date == worship.date});
-    $('#pianist').html(order.filter(obj=>{return obj.id == 8}).map(obj=>obj.name));
-    $('.lead').html(order.filter(obj=>{return obj.id == 5}).map(obj=>obj.name));
-    $('.usher').html(order.filter(obj=>{return obj.id == 3}).map(obj=>obj.name));
-    $('#benediction').html(order.filter(obj=>{return obj.id == 2}).map(obj=>obj.name));
-    $('#speaker').html(order.filter(obj=>{return obj.id == 1}).map(obj=>obj.name));
-  }
-
-  function load_sermons() {
-    ww = '<h4><u>本週主日信息</u></h4>';
-    ww += '主題：' + worship.title + '<br/>';
-    ww += '經文：' + worship.bible + '<br/>';
-    ww += '大綱：';
-    if (worship.outline) {
-      temp = worship.outline.split('\n');
-      ww += '<ol>';
-      for(outline of temp) {
-        ww += '<li>' + outline + '</li>';
-      }
-      ww += '</ol>';
+    function load_rollcall() {
+        console.log("Loading rollcall information...");
+        url = '/API/rollcall/' + id + '?group=1';
+        $.when(load_content(url)).done(function(rollcall) {
+            all = rollcall[0][0];
+            em = rollcall[0][1].filter(obj=>obj['id'] == 12).map(obj=>obj['count']);
+            youth = rollcall[0][1].filter(obj=>obj['id'] == 13).map(obj=>obj['count']);
+            kids = rollcall[0][1].filter(obj=>obj['id'] == 14).map(obj=>obj['count']);
+            sunday_school = Number(rollcall[0][1].filter(obj=>obj['id'] == 4).map(obj=>obj['count'])) + Number(rollcall[0][1].filter(obj=>obj['id'] == 8).map(obj=>obj['count'])) + Number(rollcall[0][1].filter(obj=>obj['id'] == 9).map(obj=>obj['count']));
+            $('#rollcall_total1').text(all);
+            $('#rollcall_total1').addClass('number');
+            $('#rollcall_worship1').text(all-em-youth-kids);
+            $('#rollcall_worship1').addClass('number');
+            $('#rollcall_em1').text(em);
+            $('#rollcall_em1').addClass('number');
+            $('#rollcall_youth1').text(youth);
+            $('#rollcall_youth1').addClass('number');
+            $('#rollcall_kids1').text(kids);
+            $('#rollcall_kids1').addClass('number');
+            $('#rollcall_sunday_school1').text(sunday_school);
+            $('#rollcall_sunday_school1').addClass('number');
+            all = rollcall[1][0];
+            em = rollcall[1][1].filter(obj=>obj['id'] == 12).map(obj=>obj['count']);
+            youth = rollcall[1][1].filter(obj=>obj['id'] == 13).map(obj=>obj['count']);
+            kids = rollcall[1][1].filter(obj=>obj['id'] == 14).map(obj=>obj['count']);
+            sunday_school = Number(rollcall[1][1].filter(obj=>obj['id'] == 4).map(obj=>obj['count'])) + Number(rollcall[1][1].filter(obj=>obj['id'] == 8).map(obj=>obj['count'])) + Number(rollcall[1][1].filter(obj=>obj['id'] == 9).map(obj=>obj['count']));
+            $('#rollcall_total2').text(all);
+            $('#rollcall_total2').addClass('number');
+            $('#rollcall_worship2').text(all-em-youth-kids);
+            $('#rollcall_worship2').addClass('number');
+            $('#rollcall_em2').text(em);
+            $('#rollcall_em2').addClass('number');
+            $('#rollcall_youth2').text(youth);
+            $('#rollcall_youth2').addClass('number');
+            $('#rollcall_kids2').text(kids);
+            $('#rollcall_kids2').addClass('number');
+            $('#rollcall_sunday_school2').text(sunday_school);
+            $('#rollcall_sunday_school2').addClass('number');
+        });
     }
-    else {
-      ww += worship.outline;
+
+    function load_calendar() {
+        console.log("Loading master calendar information...");
+        url = '/API/calendar/' + id;
+        $.when(load_content(url)).done(function(calendar) {
+            task_table = '<button class="task_table_btn" name="task_table"><i class="fa-refresh">&#xf021;</i></button>';
+            task_table += '<div class="container"><div class="header">負責事工</div>';
+            current_date = calendar[0].date;
+            const d = new Date(current_date.replace('-', '/'));
+            let date_string = '主後' + d.getFullYear().toString() + '年' + (d.getMonth()+1).toString() + '月' + d.getDate() + '日';
+            $('#worship_date').html(date_string);
+            $('#date_stamp').html("<h4>" + date_string + "週報</h4>");
+            var order = calendar.filter(obj=>{return obj.date == current_date});
+            $('#pianist').html(order.filter(obj=>{return obj.id == 8}).map(obj=>obj.name));
+            $('.lead').html(order.filter(obj=>{return obj.id == 5}).map(obj=>obj.name));
+            $('.usher').html(order.filter(obj=>{return obj.id == 3}).map(obj=>obj.name));
+            $('#benediction').html(order.filter(obj=>{return obj.id == 2}).map(obj=>obj.name));
+            $('#speaker').html(order.filter(obj=>{return obj.id == 1}).map(obj=>obj.name));
+
+            for(var k=0;k<calendar.length;k++) {
+                if(current_date != calendar[k].date) {
+                    break;
+                }
+                if (k % 2 == 1) {
+                    task_table += '<div class="header">' + calendar[k].title + '</div>';
+                }
+                else {
+                    task_table += '<div>' + calendar[k].title + '</div>';
+                }
+            }
+            current_date = '';
+            date_title = ['本週', '下週', '下下週'];
+            n = 0;
+            for(var j=0;j<calendar.length;j++) {
+                if(calendar[j].date != current_date) {
+                    current_date = calendar[j].date;
+                    dd = current_date.split('-');
+                    task_table += '</div><div class="container"><div class="header">' + date_title[n] + '(' + Number(dd[1]) + '/' + Number(dd[2]) + ')</div>';
+                    n++;
+                }
+                task_table += '<div contenteditable="true">' + calendar[j].name + '</div>';
+            }
+            task_table += '</div>';
+            $('#task_table').html(task_table);
+
+            let d1 = last_week(d)
+            let text = d1.toLocaleDateString('en-US');
+            text = text.split('/');
+            text.pop();
+            $('#week_2').html(text.join('/')+'上週');
+            d2 = last_week(d1)
+            text = d2.toLocaleDateString('en-US');
+            text = text.split('/');
+            text.pop();
+            $('#week_1').html(text.join('/')+'上上週');
+        });
     }
-    ww += '<h4><u>上週主日信息</u></h4>';
-    ww += '主題：' + previous.title + '<br/>';
-    ww += '經文：' + previous.bible + '<br/>';
-    ww += '大綱：';
-    if (previous.outline) {
-      temp = previous.outline.split('\n');
-      ww += '<ol>';
-      for(outline of temp) {
-        ww += '<li>' + outline + '</li>';
-      }
-      ww += '</ol>';
+
+    function load_info() {
+        console.log("Loading weekly info information...");
+        url = '/API/info/' + id;
+        $.when(load_content(url)).done(function(info) {
+            html ='<ol>';
+            announcement = info.filter((item, index) => item.type == 'announcement').map(obj=>obj.info);
+            for (item in announcement) {
+                html += '<li>' + announcement[item] + '</li>';
+            }
+            $('#announcement').html(html);
+            html ='<ol>';
+            prayer = info.filter((item, index) => item.type == 'caring').map(obj=>obj.info);
+            for (item in prayer) {
+                html += '<li>' + prayer[item] + '</li>';
+            }
+            html += '</ol>';
+            $('#caring').html(html);
+        });
     }
-    else {
-      ww += previous.outline;
+
+    function load_sermons() {
+        console.log("Loading sermon information...");
+        url = '/API/sermon/' + id;
+        $.when(load_content(url)).done(function(worship) {
+            ww = '主題：' + worship.title + '<br/>';
+            ww += '經文：' + worship.bible + '<br/>';
+            if (worship.outline) {
+                ww += '大綱：';
+                temp = worship.outline.split('\n');
+                ww += '<ol>';
+                for(outline of temp) {
+                    ww += '<li>' + outline + '</li>';
+                }
+                ww += '</ol>';
+            }
+            $('#this_week').html(ww);
+        });
+
+        url = '/API/sermon/' + (id-1);
+        $.when(load_content(url)).done(function(previous) {
+            ww = '主題：' + previous.title + '<br/>';
+            ww += '經文：' + previous.bible + '<br/>';
+            if (previous.outline) {
+                ww += '大綱：';
+                temp = previous.outline.split('\n');
+                ww += '<ol>';
+                for(outline of temp) {
+                    ww += '<li>' + outline + '</li>';
+                }
+                ww += '</ol>';
+            }
+            $('#previous_week').html(ww);
+        });
     }
-    $('#sermons').html(ww);
-  }
 
-  function load_info() {
-    html ='<h4><u>歡迎報告</u></h4><ol>';
-    for (item in announcement) {
-      html += '<li>' + announcement[item] + '</li>';
+    if (saved == 0) {
+        console.log('loading ajax calls');
+        load_sermons();
+        load_info();
+        load_calendar();
+        load_rollcall();
     }
-    html += '</ol><h4><u>肢體關懷</u></h4><ol>';
-    for (item in prayer) {
-      html += '<li>' + prayer[item] + '</li>';
-    }
-    html += '</ol>';
-    $('#info').html(html);
-  }
 
-  function load_present() {
-    all = present1[0];
-    em = present1[1].filter(obj=>obj['id'] == 12).map(obj=>obj['count']);
-    youth = present1[1].filter(obj=>obj['id'] == 13).map(obj=>obj['count']);
-    kids = present1[1].filter(obj=>obj['id'] == 14).map(obj=>obj['count']);
-    sunday_school = Number(present1[1].filter(obj=>obj['id'] == 4).map(obj=>obj['count'])) + Number(present1[1].filter(obj=>obj['id'] == 8).map(obj=>obj['count'])) + Number(present1[1].filter(obj=>obj['id'] == 9).map(obj=>obj['count']));
-    $('#rollcall_total1').text(all);
-    $('#rollcall_total1').addClass('number');
-    $('#rollcall_worship1').text(all-em-youth-kids);
-    $('#rollcall_worship1').addClass('number');
-    $('#rollcall_em1').text(em);
-    $('#rollcall_em1').addClass('number');
-    $('#rollcall_youth1').text(youth);
-    $('#rollcall_youth1').addClass('number');
-    $('#rollcall_kids1').text(kids);
-    $('#rollcall_kids1').addClass('number');
-    $('#rollcall_sunday_school1').text(sunday_school);
-    $('#rollcall_sunday_school1').addClass('number');
-    all = present2[0];
-    em = present2[1].filter(obj=>obj['id'] == 12).map(obj=>obj['count']);
-    youth = present2[1].filter(obj=>obj['id'] == 13).map(obj=>obj['count']);
-    kids = present2[1].filter(obj=>obj['id'] == 14).map(obj=>obj['count']);
-    sunday_school = Number(present2[1].filter(obj=>obj['id'] == 4).map(obj=>obj['count'])) + Number(present2[1].filter(obj=>obj['id'] == 8).map(obj=>obj['count'])) + Number(present2[1].filter(obj=>obj['id'] == 9).map(obj=>obj['count']));
-    $('#rollcall_total2').text(all);
-    $('#rollcall_total2').addClass('number');
-    $('#rollcall_worship2').text(all-em-youth-kids);
-    $('#rollcall_worship2').addClass('number');
-    $('#rollcall_em2').text(em);
-    $('#rollcall_em2').addClass('number');
-    $('#rollcall_youth2').text(youth);
-    $('#rollcall_youth2').addClass('number');
-    $('#rollcall_kids2').text(kids);
-    $('#rollcall_kids2').addClass('number');
-    $('#rollcall_sunday_school2').text(sunday_school);
-    $('#rollcall_sunday_school2').addClass('number');
-  }
+    // Event Triggers
+    $('#save_btn').click(function() {
+        html = $('#weekly_report').html();
+        url = '/API/report/' + id;
+        $.ajax({
+            type: "put",
+            url: url,
+	        data: JSON.stringify({'html': html}),
+            contentType: "application/json",
+            dataType: 'json',
+            complete: function(response) {
+          	    if(response.status==200) {
+                    alert("Report Saved");
+    	        }
+    	        else {
+    	            alert("Error, " + response.responseText);
+    	        }
+    	    }
+        });
+    });
 
-  // function of loading the rest of the information
-  function load_reset() {
-    $('#other1').html(template.others.zh);  // Load other info -- front left
-    $('#others').html(template.links.zh);   // Load links -- front right
+    // Reloading sessions
+    $('#info_btn').click(function() {
+        load_info();
+    });
 
-    // calculate previous weeks for attendance table
+    $('#sermons_btn').click(function() {
+        load_sermons();
+    });
 
-    let d1 = last_week(d)
-    let text = d1.toLocaleDateString('en-US');
-    text = text.split('/');
-    text.pop();
-    $('#week_2').html(text.join('/')+'上週');
-    d2 = last_week(d1)
-    text = d2.toLocaleDateString('en-US');
-    text = text.split('/');
-    text.pop();
-    $('#week_1').html(text.join('/')+'上上週');
-  }
+    $('#info_table_btn').click(function() {
+        load_rollcall();
+    });
 
-  function last_week(d){
-    var today = new Date(d);
-    var week = new Date(today.getFullYear(), today.getMonth(), today.getDate()-7);
-    return week;
-}
+    $(document).on('click', '.task_table_btn', function() {
+        load_calendar();
+    });
 
-  $('.currency').blur(function() {
-  console.log($(this))
-    if($(this).text() != '') {
-      $(this).addClass('dollar');
-    }
-  });
+    $('button.font').click(function() {
+        sessions = {'info': ['#announcement', '#prayer'], 'overflow': ['#overflow'], 'sermons': ['#this_week', '#previous_week']};
+        session_id = $(this).attr('name');
+        target = sessions[session_id];
+        current_size = $(target[0]).prop("className");
+        font_index = font_size.indexOf(current_size);
+        action = $(this).attr('class').split(' ').pop();
+        if(action == 'down') {
+            if(font_index-1>= 0) {
+                font_index = font_index - 1;
+                current_size = font_size[font_index];
+            }
+        }
+        else {
+            if(font_index+1 <= font_size.length) {
+                font_index = font_index + 1;
+                current_size = font_size[font_index];
+            }
+        }
+        for (elm in target) {
+            $(target[elm]).prop("className", current_size);
+        }
+    });
+
+    $('.currency').blur(function() {
+        if($(this).text() != '') {
+            $(this).addClass('dollar');
+        }
+    });
 </script>

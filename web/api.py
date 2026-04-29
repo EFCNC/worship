@@ -54,9 +54,9 @@ def preview(id):
     slides = Utils.get_worship_songs(id)
     return slides
 
-@api.route("/info/<d>")
-def get_info(d):
-    info = Utils.get_info(d)
+@api.route("/info/<id>")
+def get_info(id):
+    info = Utils.get_info(id)
     return info
 
 @api.route("/info/edit", methods=["POST"])
@@ -65,14 +65,16 @@ def edit_info():
     result = Utils.add_info(info)
     return result
 
-@api.route("/schedule/<id>", methods=["POST", "PUT"])
-def edit_schedule(id):
+@api.route("/calendar/<id>", methods=["POST", "PUT", "GET"])
+def edit_calendar(id):
+    if request.method == 'GET':
+        return Utils.get_calendar_by_id(int(id))
     info = request.get_json()
     if request.method == 'PUT':
-        column, schedule = Utils.add_schedule(info["date"])
-    else:
-        column, schedule = Utils.update_schedule(id, info["date"], info["name"])
-    return schedule
+        column, calendar = Utils.add_calendar(info["date"])
+    elif request.method == 'POST':
+        column, calendar = Utils.update_calendar(id, info["date"], info["name"])
+    return calendar
 
 @api.route("/info/duplicate")
 def duplicate_info():
@@ -252,21 +254,48 @@ def edit_people(id=None):
     update people (team) with col name and value
     :param id - user_id
     :param json data with col name and new value
-    :return new people list
+    :return 200
     '''
     if request.method == "POST":
         data = request.get_json()
-        if "new" in data:
-            r = Utils.add_teams(data['col_name'], data['value'])
+        worship_id = next(x['worship_id'] for x in data if 'worship_id' in x)
+        data = [x for x in data if 'worship_id' not in x]
+        fields = [x for x in data if 'group' not in x]
+        groups = [x for x in data if 'group' in x]
+        if groups:
+            groups = groups[0]['group']
+        if int(id) == 0:
+            r = Utils.add_teams(fields)
             if r[1] == 200:
-                return Utils.get_teams(), 200
+                print("New user added", r[0])
+                Utils.update_groups(r[0], groups)
+                r = Utils.update_rollcall(worship_id, {'user_id': r[0], 'present': 1})
+                if r[1] == 200:
+                    people = Utils.get_team_present(worship_id)
+                    return people, 200
+                return r[0], r[1]
             return r[0], 400
-        r = Utils.update_teams(id, data['col_name'], data['value'])
-        if r[1] == 200:
-            return Utils.get_teams(), 200
-        return r[0], 400
-    people = Utils.get_teams(id)[0]
-    return dict(id=people[0], name=people[1], name_2=people[2], title=people[3], groups=people[4].split(','))
+        for field in fields:
+            r = Utils.update_teams(id, field)
+            if r[1] == 400:
+                return r[0], 400
+        if groups:
+            r = Utils.update_groups(id, groups)
+        people = Utils.get_team_present(worship_id)
+        return people, 200
+
+
+@api.route("/report/<id>", methods=["PUT"])
+def save_report(id):
+    '''
+    :param id: id of the week
+    :return: True or False
+    :PUT: html content
+    '''
+
+    content = request.get_json()
+    Tools.save_report(id, content['html'])
+    return True, 200
 
 @api.route("/roles/<dd>", methods=["POST", "PUT", "DELETE"])
 def edit_roles(dd):
@@ -304,6 +333,11 @@ def mark_user(id):
 @api.route("/rollcall/<id>", methods=["POST", "GET"])
 def edit_rollcall(id):
     if request.method == "GET":
+        group = request.args.get('group', None)
+        if group:
+            total1, present1 = Utils.get_present_by_group(int(id) - 1)
+            total2, present2 = Utils.get_present_by_group(int(id) - 2)
+            return [[total1, present1], [total2, present2]]
         return Utils.get_team_present(id), 200
     data = request.get_json()
     r = Utils.update_rollcall(id, data)

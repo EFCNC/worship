@@ -86,8 +86,9 @@ def index():
 
 @app.route("/info")
 def info():
-	d = request.args.get('date', '')
-	return render_template('info.html', date=d)
+	coming_sunday = __get_sundays()["sunday"]
+	id = Utils.get_worship_id(coming_sunday)[0]
+	return render_template('info.html', id=id)
 
 @app.route("/worship/<id>")
 @app.route("/worship/<id>/<tab>")
@@ -246,15 +247,15 @@ def get_song_by_id(id):
 		content["lyrics"] = content["lyrics_raw"]  # add key lyrics to be used by song_editor
 		return render_template('song_editor.html', content=content)
 
-@app.route("/schedule")
-def schedule():
-	now = datetime.now()
-	year = str(now.year)
-	column, schedule = Utils.get_schedule(year)
-	return render_template('schedule.html', column=column, schedule=schedule)
-
 @app.route("/calendar")
 def calendar():
+	now = datetime.now()
+	year = str(now.year)
+	column, calendar = Utils.get_calendar(year)
+	return render_template('calendar.html', column=column, calendar=calendar)
+
+@app.route("/schedule")
+def schedule():
 	now = datetime.now()
 	year = str(now.year)
 	allsundays = __get_sundays()['all']
@@ -267,20 +268,8 @@ def calendar():
 			assigned.append([sun, []])
 	team = Utils.list_team()
 	marked = Utils.get_marked_user()
-	return render_template('calendar.html', booked=assigned, team=team, marked=marked)
+	return render_template('schedule.html', booked=assigned, team=team, marked=marked)
 
-
-@app.route("/schedule1")
-def _schedule():
-	'''
-	:return: schedule page with available team, role for all sundays
-	'''
-
-	sundays = Tools.allsundays()
-	assigned = Utils.get_availablity()
-	team = Utils.list_team()
-	inst = Utils.list_instrument()
-	return render_template('schedule.html', assigned=assigned, team=team, sundays=sundays, inst=inst)
 
 @app.route("/profile")
 def profile():
@@ -305,19 +294,8 @@ def roll_call():
 
 @app.route("/report/<id>")
 def report(id):
-	worship = Utils.get_worship(id)
-	previous = Utils.get_worship(int(id)-1)
-	report_template = Tools.get_report(id)
-	worship_date = worship['date']
-	info = Utils.get_info(worship_date)
-	total1, present1 = Utils.get_present_by_group(int(id)-1)
-	total2, present2 = Utils.get_present_by_group(int(id)-2)
-	announcement = [x['info'] for x in info if x['type'] == 'announcement']
-	prayer = [x['info'] for x in info if x['type'] == 'caring']
-	l = Utils.get_schedule_by_id(int(id))
-	if 'pdf' in request.args:
-		return render_template('report_pdf.html', w=worship, p=previous, template=report_template, announcement=announcement, prayer=prayer, l=l, present1=[total1, present1], present2=[total2, present2])
-	return render_template('report_pdf.html', w=worship, p=previous, template=report_template, announcement=announcement, prayer=prayer, l=l, present1=[total1, present1], present2=[total2, present2])
+	report, saved = Tools.get_report(id)
+	return render_template('report_pdf.html', saved=saved, report=report, id=id)
 
 @app.route("/files")
 def file_list():

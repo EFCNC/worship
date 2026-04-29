@@ -83,7 +83,7 @@ def search_bible(keyword, offset, range=None):
         print('bible API error', e)
         return e, 500
 
-def get_schedule_by_id(id):
+def get_calendar_by_id(id):
     sql = 'SELECT date, name, content, item_id FROM calendar c inner join item i on c.item_id = i.id where c.worship_id >= ? and c.worship_id <=? order by worship_id, item_id'
     result = dB.run_para(sql, [id, id+2])
     return [dict(id=x[3], date=x[0], title=x[1], name=x[2]) for x in result]
@@ -97,7 +97,18 @@ def get_groups(details=False):
         result = dB.run(sql)
     return result
 
-def update_groups(id, add, remove):
+def update_groups(id, groups):
+    sql = 'delete from team_groups where user_id = ?'
+    dB.run_para(sql, id)
+    sql = 'insert into team_groups(user_id, group_id) values (?, (select group_id from groups where name = ?))'
+    try:
+        for group in groups:
+            r = dB.run_para(sql, [id, group])
+        return r, 200
+    except Exception as e:
+        return e, 400
+
+def _update_groups(id, add, remove):
     if remove:
         sql = 'select group_id from groups where name in ('
         for r in remove:
@@ -123,6 +134,7 @@ def update_rollcall(id, data):
         print(sql, id, data['user_id'])
         dB.run_para(sql, [id, data["user_id"]])
         sql = 'insert into rollcall(worship_id, user_id, present) values(?, ?, ?)'
+        print(sql)
         return dB.run_para(sql, [id, data['user_id'], data['present']]), 200
     except Exception as e:
         return e, 400
@@ -135,12 +147,11 @@ def get_present_by_group(id):
     return total[0][0], [dict(id=x[0], name=x[1], count=x[2]) for x in result]
 
 def get_team_present(id):
-    sql = 'select t.user_id, t.name, t.name_2, title, group_concat(g.name), case when r.worship_id = ? then r.present else -1 end from team t left join team_groups tg on t.user_id = tg.user_id left join groups g on tg.group_id = g.group_id left join rollcall r on t.user_id = r.user_id group by t.user_id'
-    sql = 'select t.user_id, t.name, t.name_2, title, group_concat(g.name), case when r.present is NULL then -1 else r.present end from team t left join team_groups tg on t.user_id = tg.user_id left join groups g on tg.group_id = g.group_id left join (select * from rollcall where worship_id=?) r on t.user_id = r.user_id group by t.user_id'
+    sql = 'select t.user_id, t.name, t.name_2, title, group_concat(g.name), case when r.present is NULL then -1 else r.present end, t.family_id, (select user_id from team t2 where t.family_id = t2.family_id) as f_id, t.email, t.line_id, t.discord_id, t.other from team t left join team_groups tg on t.user_id = tg.user_id left join groups g on tg.group_id = g.group_id left join (select * from rollcall where worship_id=?) r on t.user_id = r.user_id group by t.user_id order by f_id'
     result = dB.run_para(sql, id)
     team = []
     for r in result:
-        team.append([r[0], r[1] if r[1] else '', r[2] if r[2] else '', r[3] if r[3] else '', r[4] if r[4] else '', r[5]])
+        team.append([r[0], r[1] if r[1] else '', r[2] if r[2] else '', r[3] if r[3] else '', r[4] if r[4] else '', r[5], r[6] if r[6] else '', r[7] if r[7] else 999, r[8], r[9], r[10], r[11]])
     return team
 
 def get_teams(id=None):
@@ -155,21 +166,33 @@ def get_teams(id=None):
         team.append([r[0], r[1] if r[1] else '', r[2] if r[2] else '', r[3] if r[3] else '', r[4] if r[4] else ''])
     return team
 
-def update_teams(id, col_name, value):
-    sql = "update team set " + col_name + "=? where user_id = ?"
+def update_teams(id, field):
+    result = field.popitem()
+    sql = "update team set " + result[0] + "=? where user_id = ?"
     try:
-        return dB.run_para(sql, [value, id]), 200
+        return dB.run_para(sql, [result[1], id]), 200
     except Exception as e:
         return e, 400
 
-def add_teams(col_name, value):
-    sql = "insert into team(" + col_name + ") values(?)"
+def add_teams(fields):
+    sql = "insert into team("
+    values = []
+    for field in fields:
+        result = field.popitem()
+        sql = sql + result[0] + ','
+        values.append(result[1])
+    sql = sql[:-1] + ')'
+    s = ""
+    for n in range(len(values)):
+        s += "?,"
+    s = s[:-1]
+    sql += ' values(' + s + ')'
     try:
-        return dB.insert(sql, [value]), 200
+        return dB.insert(sql, values), 200
     except Exception as e:
         return e, 400
 
-def add_schedule(date):
+def add_calendar(date):
     worship_id = get_worship_id(date)[0]
     sql = 'insert into calendar(date, worship_id, item_id, content) values'
     for x in range(1, 12):
@@ -178,9 +201,9 @@ def add_schedule(date):
     dB.run(sql)
     now = datetime.now()
     year = str(now.year)
-    return get_schedule(year)
+    return get_calendar(year)
 
-def update_schedule(id, date, name):
+def update_calendar(id, date, name):
     sql = 'select * from calendar where date = ? and item_id = ?'
     result = dB.run_para(sql, [date, id])
     if result:
@@ -193,15 +216,13 @@ def update_schedule(id, date, name):
 
     now = datetime.now()
     year = str(now.year)
-    return get_schedule(year)
+    return get_calendar(year)
 
-def get_schedule(year=None):
+def get_calendar(year=None):
     if year:
         sql = 'select item_id, date, content from calendar where date like "{}%" order by date'.format(year)
-        #sql = 'SELECT date, group_concat(content) AS name_list FROM calendar c inner join item i on c.item_id = i.id where c.date like "{}%" GROUP BY date'.format(year)
     else:
         sql = 'select item_id, date, content from calendar order by date'
-        #sql = "SELECT date, group_concat(content) AS name_list FROM calendar c inner join item i on c.item_id = i.id GROUP BY date"
     r1 = dB.run(sql)
     r2 = dB.run('select name from item where id <12')
     column = [x[0] for x in r2]
@@ -267,7 +288,8 @@ def get_worship_teams(id):
         roster.append({'id': r[3], 'user_id': r[4], 'user_name': r[0], 'user_name_2': r[1], 'inst_name': r[2]})
     return team, inst, roster, marked
 
-def get_info(d):
+def get_info(id):
+    d = get_worship_date(id)[0]
     sql = "select id, content, type, note, date from info where content is not null and date = ? order by type"
     result = dB.run_para(sql, d)
     info = []

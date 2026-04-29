@@ -31,13 +31,13 @@
 		--text-light: #ffffff;
 		--header-height: 60px;
 	}
-	
+
 	#header {
 	  background: var(--primary-color);
 	  color: var(--text-light);
 	  display: flex;
 	  align-items: center;
-	  justify-content: space-between;	
+	  justify-content: space-between;
 	  padding: 0 20px;
 	  margin: 0;
 	  height: var(--header-height);
@@ -46,7 +46,7 @@
 	  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 	  position: sticky;
 	  top: 0;
-	  z-index: 100;								
+	  z-index: 100;
 	}
 
 	/* Navigation Styles */
@@ -84,7 +84,7 @@
 		overflow: hidden;
 		cursor: pointer;
 		box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-		text-decoration: none; 
+		text-decoration: none;
 	}
 
 	 /* Only apply the orange background when initials are used */
@@ -97,7 +97,7 @@
 		height: 100%;
 		object-fit: cover;
 	}
-	
+
 	/*loading ovelay when ajax is called, usage: before calling ajax, $('#loading').show(), after return, $('#loading').hide(); */
 	#loading {
 	    display: none;
@@ -112,7 +112,7 @@
 	    bottom: 0;
 	    right: 0;
 	}
-	
+
 
 	/* Mobile Adjustments */
 	@media (max-width: 600px) {
@@ -127,19 +127,18 @@
 	<div id="loading"></div>
 	<div id="dialog"></div>
 
-	<header id="header">
+<!--	<header id="header">
 		<div id="profile">
 			<a href="/profile" id="profile-container" class="profile_bubble">
-				<!-- Image injected by JS below to prevent flickering -->
 			</a>
 		</div>
 		<nav class="navigation">
-			<a href="/">Worship Home</a>
+			<a href="/">Home</a>
 			<a href="/song/list">Songs</a>
-			<a href="/schedule">Schedule</a>
+			<a href="/calendar">Calendar</a>
 			<a href="/slides">Slides</a>
 		</nav>
-	</header>
+	</header>-->
 
 <script>
 

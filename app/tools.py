@@ -152,6 +152,23 @@ def create_json(id, worship=None):
 
 def get_report(id):
     root = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'files')
+    report_file = os.path.join(root, 'pdf', '{}.html'.format(id))
+    if os.path.exists(report_file):
+        with open(report_file, "r", encoding="utf-8") as f:
+            return f.read(), 1
+    report_file = os.path.join(root, 'pdf', '0.html')
+    with open(report_file, 'r', encoding='utf-8') as f:
+        return f.read(), 0
+
+def save_report(id, html):
+    root = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'files')
+    report_file = os.path.join(root, 'pdf', '{}.html'.format(id))
+    print(html)
+    with open(report_file, 'w', encoding='utf-8') as f:
+        f.write(html)
+
+def _get_report(id):
+    root = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'files')
     template_file = os.path.join(root, 'pdf_template.json')
     with open(template_file, "r", encoding="utf-8") as f:
         template = json.loads(f.read())

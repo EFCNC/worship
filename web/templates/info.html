@@ -79,23 +79,17 @@
 <script>
     let content = [];
     let current_week;
-    let dd = '{{ date|safe }}';
+    id = {{ id|safe }};
     let d = new Date();
     const sundays = [];
     getSundays(new Date().getFullYear());
 
     $(document).ready(function () {
-        if (dd) {
-            current_week = dd;
-            index = sundays.indexOf(current_week);
-        }
-        else {
             d.setDate(d.getDate() - d.getDay() + 7); // coming Sunday
             index = sundays.indexOf(d.toLocaleDateString('en-CA'));
             current_week =  sundays[index];
-        }
         $('#current').html(current_week);
-        get_info(current_week);
+        get_info(id);
         show_nav(index);
     });
 
@@ -106,7 +100,7 @@
         $('#loading').show();
         $.when( $.ajax( url ) ).then(function( response, textStatus, jqXHR ) {
             if(response) {
-                get_info(current_week);
+                get_info(id);
                 $('#loading').hide();
             }
         });
@@ -120,7 +114,7 @@
                 $('#loading').show();
                 $.when( $.ajax( url ) ).then(function( response, textStatus, jqXHR ) {
                     if(response) {
-                        get_info(current_week);
+                        get_info(id);
                         $('#loading').hide();
                     }
                 });
@@ -163,7 +157,7 @@
                 dataType: 'json',
                 complete: function(response) {
           	        if(response.status==200) {
-                        get_info(current_week);
+                        get_info(id);
                     }
                     $('#loading').hide();
                 }
@@ -174,7 +168,7 @@
     $('.nav').on('click', function() {
         index = sundays.indexOf($(this).val());
         current_week = sundays[index];
-        get_info(current_week);
+        get_info(index);
         show_nav(index);
         $('#current').html(current_week);
     });
@@ -215,8 +209,9 @@
         }
     }
 
-    function get_info(current_week) {
-        url = API_URL + 'info/'+current_week;
+    function get_info(id) {
+        $('loading').show();
+        url = API_URL + 'info/'+id;
         $.when( $.ajax( url ) ).then(function( response, textStatus, jqXHR ) {
             if(response) {
                 content = response;
@@ -230,6 +225,7 @@
                 });
             }
             $('#content').html(html);
+            $('loading').hide();
         });
     }
 </script>

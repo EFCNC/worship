@@ -29,6 +29,14 @@
     background-color: #3e8e41;
     color: #fff;
   }
+
+  .user_name:hover {
+    cursor: pointer;
+  }
+
+  .fellowship:hover {
+    cursor: pointer;
+  }
 </style>
 <body>
 <div id="groups"></div>
@@ -45,11 +53,12 @@
     let zoom = 0;
     let total = 0;
     let keyword = '';
+    let $group_focused;
 
     html = '<div>';
     n = 1;
     for(g of groups) {
-        html += '<button name="' + g + '" style="font-size:12px">' + g + '</button>';
+        html += '<button class="group_key" name="' + g + '" style="font-size:12px">' + g + '</button>';
     }
     html += '</div>';
     $('#groups').html(html);
@@ -58,14 +67,16 @@
         info: false,
         data: people,
         columns: [
-            {'title' : '<span class="arrow left" name="-1">&lt;</span>&nbsp;&nbsp;<span id="today">' + sundays.sunday + '</span>&nbsp;&nbsp;<span class="arrow ight" name="1">&gt;</span>', data: null, render: (data, type, row) => create_checkbox(data[0], data[5])},
-            { title: 'Name', data: null, render: (data, type, row) => data[1]?data[2]+'('+data[1]+')':data[2], searchable: true },
+            {'title' : '<span class="arrow left" name="-1">&lt;</span>&nbsp;&nbsp;<span id="today">' + sundays.sunday + '</span>&nbsp;&nbsp;<span class="arrow ight" name="1">&gt;</span>', data: null, render: (data, type, row) => create_checkbox(data[0], data[5]), orderable: false},
+            { title: 'Name', data: null, render: (data, type, row) => data[1]?'<span title="Edit">'+data[2]+' ('+data[1]+')</span>':'<span title="Edit">'+data[2]+'</span>', searchable: true, className: 'user_name' },
+            { title: 'Family', visible: false, data: null, render: (data, type, row) => data[6], searchable: true },
             { title: 'Name_2', visible: false },
+            { title: '團契/團體' , visible: false, searchable: true},
             { title: 'title', visible: false, searchable: false},
-            { title: '團契/團體' , visible: false, searchable: true}
+            { title: 'f_id', visible: false, data: null, render: (data, type, row) => data[7], searchable: false }
         ],
         info: false,
-        ordering: false,
+        ordering: true,
         paging: false,
         layout: {
             topStart: count_panel()
@@ -149,37 +160,174 @@
         $('#total').text(total);
     }
 
-    $(document).on('click', 'button', function() {
-        div = $(this).parent();
-        clicked = this.name;
+    function user_details(d) {
+        return (
+            '<dl init-data="' + d[0] + '">' +
+            '<dt><b>Name:</b> <input name="user_name" init-data="' + d[1] + '" value="' + d[1] + '"/>' +
+            ' <b>Name (Chinese):</b> <input name="user_name_2" init-data="' + d[2] + '"  value="' + d[2] + '"/>' +
+            ' <b>稱謂:</b> <input name="user_title" init-data="' + d[3] + '" value="' + d[3] + '"/></dt>' +
+            '<dt><b>Email:</b> <input name="user_email" init-data="' + d[8] + '" value="' + d[8] + '"/>' +
+            ' <b>Line:</b> <input name="user_line_id" init-data="' + d[9] + '" value="' + d[9] + '"/>' +
+            ' <b>Discord:</b> <input name="user_discord_id" init-data="' + d[10] + '" value="' + d[10] + '"/></dt>' +
+            '<dt><b>Family ID:</b> <input name="user_family_id" init-data="' + d[6] + '" value="' + d[6] + '"/>' +
+            ' <b>註:</b> <input name="user_other" init-data="' + d[11] + '" value="' + d[11] + '"/></dt>' +
+            '<dt><b>團契/團體:</b> ' + get_groups(d[4], get_group_labels) + '</dt>' +
+            '</dl>'
+        );
+    }
+
+    function get_group_labels(name) {
+        html = '<span name="user_groups" init-data="' + name + '">';
+        for(var i=0;i<groups.length;i++) {
+            html += '<label for="radio-' + (i+1) + '" style="font-size:10px">' + groups[i] + '</label>';
+            init_names = name.split(',');
+            if (init_names.indexOf(groups[i]) >= 0) {
+                html += '<input type="checkbox" checked init-id="' + groups[i] + '" init-data="' + groups[i] + '" name="radio-' + (i+1) + '" id="radio-' + (i+1) + '">';
+            }
+            else {
+                html += '<input type="checkbox" init-id="' + groups[i] + '" init-data="' + groups[i] + '" name="radio-' + (i+1) + '" id="radio-' + (i+1) + '">';
+            }
+        }
+        html += '</span>';
+        return html;
+    }
+
+    function get_groups(element, callback) {
+        if (groups.length==0) {
+            url = API_URL + 'groups';
+            $.when( $.ajax( url ) ).then(function( data, textStatus, jqXHR ) {
+                groups = data;
+                return callback(element);
+            });
+        }
+        else {
+            return callback(element);
+        }
+    }
+
+    function selected_group_name(element) {
+        temp = [];
+        element.find('input[type="checkbox"]').each(function() {
+            if(this.checked) {
+                temp.push($(this).attr('init-data'));
+            }
+        });
+        return temp.join(',');
+    }
+
+    function show_child_row(row) {
+        row.child(user_details(row.data())).show();
+        $( "input[type='checkbox']" ).checkboxradio({
+            icon: false
+        });
+    }
+
+    function submit_data(tr) {
+        data = [];
+        if(tr.find('td').find('input[name="user_name"]').attr('init-data') != tr.find('td').find('input[name="user_name"]').val()) {
+            data.push({'name': tr.find('td').find('input[name="user_name"]').val()});
+        }
+        if(tr.find('td').find('input[name="user_name_2"]').attr('init-data') != tr.find('td').find('input[name="user_name_2"]').val()) {
+            data.push({'name_2': tr.find('td').find('input[name="user_name_2"]').val()});
+        }
+        if(tr.find('td').find('input[name="user_title"]').attr('init-data') != tr.find('td').find('input[name="user_title"]').val()) {
+            data.push({'title': tr.find('td').find('input[name="user_title"]').val()});
+        }
+        if(tr.find('td').find('input[name="user_email"]').attr('init-data') != tr.find('td').find('input[name="user_email"]').val()) {
+            data.push({'email': tr.find('td').find('input[name="user_email"]').val()});
+        }
+        if(tr.find('td').find('input[name="user_line"]').attr('init-data') != tr.find('td').find('input[name="user_line"]').val()) {
+            data.push({'line': tr.find('td').find('input[name="user_line"]').val()});
+        }
+        if(tr.find('td').find('input[name="user_discord"]').attr('init-data') != tr.find('td').find('input[name="user_discord"]').val()) {
+            data.push({'discord': tr.find('td').find('input[name="user_discord"]').val()});
+        }
+        if(tr.find('td').find('input[name="user_family_id"]').attr('init-data') != tr.find('td').find('input[name="user_family_id"]').val()) {
+            data.push({'family_id': tr.find('td').find('input[name="user_family_id"]').val()});
+        }
+        if(tr.find('td').find('input[name="user_other"]').attr('init-data') != tr.find('td').find('input[name="user_other"]').val()) {
+            data.push({'other': tr.find('td').find('input[name="user_other"]').val()});
+        }
+        selected_groups = selected_group_name(tr.find('td').find('span[name="user_groups"]'))
+        if(tr.find('td').find('span[name="user_groups"]').attr('init-data') != selected_groups) {
+            data.push({'group': selected_groups.split(',')});
+        }
+        user_id = tr.find('td').find('dl').attr('init-data');
+        if (data.length>0) {
+            console.log('Updating ', user_id, ' with ', data);
+            url = API_URL + 'people/' + user_id;
+            data.push({'worship_id': worship_id});
+            $('#loading').show();
+            $.ajax({
+                type: "post",
+                url: url,
+	            data: JSON.stringify(data),
+                contentType: "application/json",
+                dataType: 'json',
+                complete: function(response) {
+                    if(response.status==200) {
+                        table.clear().rows.add(response.responseJSON).draw();
+                    }
+                    else {
+                        table.column(4).search('').draw(false).order([6, 'asc']).draw();;
+                    }
+                    $('#loading').hide();
+                }
+            });
+        }
+        else if(tr.find('td').find('input[name="user_name"]').attr('init-data') == 'Guest') {
+            table.clear().rows.add(people).draw();
+            return false;
+        }
+        return true;
+    }
+
+    function is_highlight(className) {
+        return className.trim().split(' ').pop() == 'highlight';
+    }
+
+    $(document).on('click', 'button.group_key', function() {
         toggle = true;
-        id = div.attr('id');
+        keyword = this.name;
+        div = $(this).parent();
         div.children('button').each(function() {
-            if(this.name==clicked&&this.className=='highlight') {
+            if(this.name==keyword&&is_highlight(this.className)) {
                 toggle = false;
                 keyword = '';
             }
             $(this).removeClass('highlight');
         });
+        if(toggle) {
+            $(this).addClass('highlight');
+            $('#total_label').text(keyword);
+            table.column(4).search((d) => d.indexOf(keyword)>=0).draw();
+        }
+        else {
+            console.log('reset')
+            $('#total_label').text('總人數');
+            table.column(4).search('').draw();
+        }
+    });
+
+    $(document).on('click', 'button', function() {
+        clicked = this.name;
         if(clicked=='in' || clicked=='out') {
+            div = $(this).parent();
+            toggle = true;
+            id = div.attr('id');
+            div.children('button').each(function() {
+                if(this.name==clicked&&this.className=='highlight') {
+                    toggle = false;
+                    keyword = '';
+                }
+                $(this).removeClass('highlight');
+            });
             if (toggle) {
                 $(this).addClass('highlight');
                 update_present(id, clicked=='in'?1:0);
             }
             else {
                 update_present(id, -1);
-            }
-        }
-        else {
-            if(toggle) {
-                $(this).addClass('highlight');
-                keyword = clicked;
-                $('#total_label').text(keyword);
-                table.column(4).search((d) => d.indexOf(keyword)>=0).draw();
-            }
-            else {
-                $('#total_label').text('總人數');
-                table.column(4).search('').draw();
             }
         }
     });
@@ -198,7 +346,6 @@
             dataType: 'json',
             complete: function(response) {
                 if(response.status==200) {
-                console.log(response.responseJSON);
                     table.clear().rows.add(response.responseJSON).draw();
                     $('#today').html(sundays.all[id]);
                     //calculate_total();
@@ -208,40 +355,40 @@
         });
     });
 
-    $('#addRow').on('click', function() {
-        user_name = prompt('Enter Guest\'s Name');
-        if(!user_name) {
-            return false;
-        }
-        calculate_total();
-        url = API_URL + 'people';
-        data = {'col_name': 'name_2', 'value': user_name, 'new': true};
-        $('#loading').show();
-        $.ajax({
-            type: "post",
-            url: url,
-	        data: JSON.stringify(data),
-            contentType: "application/json",
-            dataType: 'json',
-            complete: function(response) {
-                if(response.status==200) {
-                    temp = response.responseJSON;
-                    for (r of roll_call) {
-                        for(t of temp) {
-                            if(t[0]==r[0]) {
-                                t[5] = r[1]
-                            }
-                        }
-                    }
-                    table.clear().rows.add(temp).draw();
-                    $('#groups.button').each(function() {
-                    console.log(this)
-                        $(this).removeClass('highlight');
-                    });
-                }
-                $('#loading').hide();
+    $(document).on('click', function(e) {
+        div = $(e.target);
+
+        if(div.attr('class') == 'fellowship') {
+            if($group_focused && $group_focused != div) {
             }
-        });
+            else {
+                $group_focused = div;
+                get_groups(div, get_group_labels);
+            }
+        }
+    });
+
+    $(document).on('click', '.user_name', function (e) {
+        let tr = e.target.closest('tr');
+        let row = table.row(tr);
+        if (row.child.isShown()) {
+            if(submit_data(row.child())) {
+                row.child.hide();
+            }
+        }
+        else {
+            show_child_row(row);
+        }
+    });
+
+    $('#addRow').on('click', function() {
+        rows = table.data().length
+        // new data 0-11 (id, name, name_2, title, group, present, family_id, f_id, email, line_id, discord_id, other)
+        new_data = [0, 'Guest', '訪客', '', '訪客', 1, '', 0, '', '', '', ''];
+        user_details(new_data)
+        table.row.add(new_data).draw(false).order([6, 'asc']).draw();
+        row = table.row(rows);
+        show_child_row(row);
     });
 
 </script>
