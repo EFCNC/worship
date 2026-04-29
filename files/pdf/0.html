@@ -1,0 +1,139 @@
+  <!-- container for two columns -->
+<div class="report front">
+  <!-- front left -->
+  <div class="left">
+
+    <!-- div for weekly tasks -->
+    <div id="task_table" class="medium"></div>
+
+    <!-- table for attendance and offering, manual input at contenteditable tds -->
+    <table class="info_table tiny">
+        <tbody><tr><td>出席與奉獻<button class="info_table_btn" id="info_table_btn">&#xf021;</button></td>
+          <!-- placeholders for previous two weeks -->
+          <td id="week_2" class="number"></td>
+          <td id="week_1" class="number"></td>
+          <td>Attendance/ Offering</td>
+        </tr>
+        <tr><td>主日總出席人數</td><td contenteditable="true" id="rollcall_total1" class="number"></td><td contenteditable="true" id="rollcall_total2" class="number"></td><td>Total Attendance</td></tr>
+        <tr><td>主日禮拜人數</td><td contenteditable="true" id="rollcall_worship1" class="number"></td><td contenteditable="true" id="rollcall_worship2" class="number"></td><td>Taiwanese</td></tr>
+        <tr><td>成人主日學人數</td><td contenteditable="true" id="rollcall_sunday_school1" class="number"></td><td contenteditable="true" id="rollcall_sunday_school2" class="number"></td><td>Adult Sunday School</td></tr>
+        <tr><td>英語主日禮拜人數</td><td contenteditable="true" id="rollcall_em1" class="number"></td><td contenteditable="true" id="rollcall_em2" class="number"></td><td>English Congregation</td></tr>
+        <tr><td>青少年主日學人數</td><td contenteditable="true" id="rollcall_youth1" class="number"></td><td contenteditable="true" id="rollcall_youth2" class="number"></td><td>Youth Sunday School</td></tr>
+        <tr><td>兒童主日學人數</td><td contenteditable="true" id="rollcall_kids1" class="number"></td><td contenteditable="true" id="rollcall_kids2" class="number"></td><td>Elementary SS</td></tr>
+        <tr><td>週日禱告會人數</td><td contenteditable="true" id="rollcall_prayer1"></td><td contenteditable="true" id="rollcall_prayer2"></td><td>Sunday Prayer</td></tr>
+        <tr><td>社會青年人數</td><td contenteditable="true" id="rollcall_young_adult1"></td><td contenteditable="true" id="rollcall_young_adult2"></td><td>Young Adult</td></tr>
+        <tr><td>學生團契人數</td><td contenteditable="true" id="rollcall_student1"></td><td contenteditable="true" id="rollcall_student2"></td><td>Student Fellowship</td></tr>
+        <tr><td>經常費奉獻</td><td contenteditable="true" class="currency"></td><td contenteditable="true" class="currency"></td><td>General Offering</td></tr>
+        <tr><td>建堂奉獻</td><td contenteditable="true" class="currency"></td><td contenteditable="true" class="currency"></td><td>New Building Offering</td></tr>
+        <tr><td>宣道奉獻</td><td contenteditable="true" class="currency"></td><td contenteditable="true" class="currency"></td><td>Mission Offering</td></tr>
+        <tr><td>午餐奉獻</td><td contenteditable="true" class="currency"></td><td contenteditable="true" class="currency"></td><td>Lunch Offering</td></tr>
+        <tr><td>學生團契奉獻</td><td contenteditable="true" class="currency"></td><td contenteditable="true" class="currency"></td><td>Student Offering</td></tr>
+        <tr><td>愛心奉獻</td><td contenteditable="true" class="currency"></td><td contenteditable="true" class="currency"></td><td>Love Offering</td></tr></tbody></table>
+
+    <!-- other information such as deacon board -->
+    <div id="other1" class="tiny" contenteditable="true">教會執事 Our Deacons:<br>主席//團契Chair/Fellowship: 周淑娟:Chou Shu Chuan<br>副主席/崇拜/關懷 VC/Worship/Caring  許玉麗 Yuli Hsu<br>公關/財務/ 廚房Communication/Finance/Kitchen:黃淑娟:Jessica Huang<br>教育/靈修/英文Education/ Spiritual/EM: 李怡昌 Eric Li<br>宣教/出納/總務/書記/Mission/Accounting/ Facility/Secretary朱嘉宇 Kevin Chu<br>Holy Communion聖餐: 3/8、6/14、9/13、12/13     每個月第二週: 執事會</div>
+  </div>
+  <!-- End of front left -->
+
+  <!-- Front right -->
+  <div class="right">
+    <button class="front_right_btn"><i id="save_btn" class="fa-save" title="Save Report"></i></button>
+    <div id="front_right" align="center"><img class="logo"><span class="title">北卡台福基督教會</span><br><span class="small">Evangelical Formosan Church of North Carolina</span><br><p align="center">2026 台福總會年度主題：團契年 領受主恩，相愛合一<br>本教會主題：彼此服事,委身教會,跟隨耶穌<br>齊心建造北卡台福大家庭<br>Year of fellowship, receive His Grace, love in Unity<br>腓立比書 Philippians 2:1-2</p></div>
+    <div id="date_stamp" align="center"></div>
+    <div id="time_table"><b>我們的聚會</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="small">地址：304 E. Chatham Street, Cary, NC 27511</span><table class="time_table" width="100%"><tbody><tr><td>主日早禱會</td><td>週日</td><td>9:40am</td><td>實體/Zoom</td><td></td></tr><tr><td>主日禮拜</td><td>週日</td><td>10:15am</td><td>實體/Zoom/Youtube</td><td>許玉麗姐</td></tr><tr><td>英文崇拜</td><td>週日</td><td>10:45am</td><td>實體/Discord</td><td>李怡昌兄</td></tr><tr><td>長青團契 (查經班)</td><td>週四</td><td>2:00am</td><td>實體/Zoom</td><td>孫曲回牧師</td></tr><tr><td>周間禱告會</td><td>週二</td><td>7:30pm</td><td>Zoom</td><td>周淑娟姐</td></tr><tr><td>學生團契</td><td>隔周六</td><td>6:00pm</td><td>實體</td><td></td></tr><tr><td>社青小組</td><td>隔周五</td><td>6:30pm</td><td>實體</td><td>蘇頌軒兄</td></tr></tbody></table></div>
+    <div id="others" contenteditable="true">網址：http://efcnc.org<br><img class="zoom"> Zoom Meeting ID: 320 077 6602，Password: 304<br><img class="youtube">主日直播：https://www.youtube.com/@efcnc7395/live<br><img class="line"> 訊息公告群組：https://line.me/R/ti/g/A8JUxGXmWY<br><img class="zelle"> Donate via Zelle : efcnc.finance@gmail.com</div>
+  </div>
+</div>
+<!-- End of front right -->
+
+<!-- page break -->
+<footer></footer>
+
+<!-- Back left -->
+<div class="report back">
+  <div class="left">
+
+    <!-- Table template for worship order -->
+    <table width="100%" border="1" contenteditable="true">
+      <tbody><tr>
+        <td colspan="3" align="center" id="worship_date" class="header"></td>
+      </tr>
+      <tr>
+        <td colspan="2">Worship Program</td>
+        <td>司琴：<span id="pianist"></span></td>
+      </tr>
+      <tr>
+        <td>序樂 Prelude</td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>報告 Announcement</td>
+        <td class="usher"></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>敬拜讚美 Song Praise</td>
+        <td class="lead"></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>禱告 Prayer</td>
+        <td class="lead"></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>證道 Sermon</td>
+        <td id="speaker"></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>歡迎/奉獻 Offering</td>
+        <td class="usher"></td>
+        <td>Hymn #306b</td>
+      </tr>
+      <tr>
+        <td>祝禱 Benediction</td>
+        <td id="benediction"></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>阿門頌 Amen</td>
+        <td>聖詩 #338</td>
+        <td>Hymn #338</td>
+      </tr>
+      <tr>
+        <td>殿樂 Postlude</td>
+        <td>默禱，散會</td>
+        <td>Dismiss after a silent prayer</td>
+      </tr>
+    </tbody></table>
+
+    <!-- div for sermon information -->
+    <div id="sermons" contenteditable="true">
+      <div class="sermons_btn"><button class="font down" name="sermons">-</button><button class="font up" name="sermons">+</button><button id="sermons_btn" name="sermons"><i class="fa-refresh">&#xf021;</i></button></div>
+      <h4><u>本週主日信息</u></h4>
+      <div id="this_week" class="medium"></div>
+      <h4><u>上週主日信息</u></h4>
+      <div id="previous_week" class="medium"></div>
+    </div>
+  </div>
+  <!-- End of back left -->
+
+  <!-- Back right -->
+  <div class="right">
+    <div id="info" contenteditable="true">
+      <div class="info_btn"><button class="font down" name="info">-</button><button class="font up" name="info">+</button><button id="info_btn"><i class="fa-refresh">&#xf021;</i></button></div>
+      <div class="topic"><u>歡迎報告</u></div>
+      <div id="announcement" class="medium"></div>
+      <div class="topic"><u>肢體關懷</u></div>
+      <div id="caring" class="medium"></div>
+    </div>
+
+  <!-- overflow session -->
+    <div id="overflow_" class="topic"><u>本週金句</u><div class="overflow_btn"><button class="font down" name="overflow">-</button><button class="font up" name="overflow">+</button></div></div>
+      <div id="overflow" contenteditable="true" class="medium"></div>
+
+  </div>
+  <!-- End of back right -->
+</div>
