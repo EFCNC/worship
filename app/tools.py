@@ -163,7 +163,6 @@ def get_report(id):
 def save_report(id, html):
     root = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'files')
     report_file = os.path.join(root, 'pdf', '{}.html'.format(id))
-    print(html)
     with open(report_file, 'w', encoding='utf-8') as f:
         f.write(html)
 

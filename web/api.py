@@ -295,7 +295,7 @@ def save_report(id):
 
     content = request.get_json()
     Tools.save_report(id, content['html'])
-    return True, 200
+    return "Report Saved", 200
 
 @api.route("/roles/<dd>", methods=["POST", "PUT", "DELETE"])
 def edit_roles(dd):
