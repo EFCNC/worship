@@ -8,7 +8,7 @@
 
     <!-- table for attendance and offering, manual input at contenteditable tds -->
     <table class="info_table tiny">
-        <tbody><tr><td>出席與奉獻<button class="info_table_btn" id="info_table_btn">&#xf021;</button></td>
+        <tbody><tr><td>出席與奉獻<button class="info_table_btn" id="info_table_btn" title="Refresh"><i class="material-icons">refresh</i></button></td>
           <!-- placeholders for previous two weeks -->
           <td id="week_2" class="number"></td>
           <td id="week_1" class="number"></td>
@@ -37,7 +37,7 @@
 
   <!-- Front right -->
   <div class="right">
-    <button class="front_right_btn"><i id="save_btn" class="fa-save" title="Save Report"></i></button>
+    <button class="front_right_btn" id="save_btn" title="Save Report"><i class="material-icons">save</i></button>
     <div id="front_right" align="center"><img class="logo"><span class="title">北卡台福基督教會</span><br><span class="small">Evangelical Formosan Church of North Carolina</span><br><p align="center">2026 台福總會年度主題：團契年 領受主恩，相愛合一<br>本教會主題：彼此服事,委身教會,跟隨耶穌<br>齊心建造北卡台福大家庭<br>Year of fellowship, receive His Grace, love in Unity<br>腓立比書 Philippians 2:1-2</p></div>
     <div id="date_stamp" align="center"></div>
     <div id="time_table"><b>我們的聚會</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="small">地址：304 E. Chatham Street, Cary, NC 27511</span><table class="time_table" width="100%"><tbody><tr><td>主日早禱會</td><td>週日</td><td>9:40am</td><td>實體/Zoom</td><td></td></tr><tr><td>主日禮拜</td><td>週日</td><td>10:15am</td><td>實體/Zoom/Youtube</td><td>許玉麗姐</td></tr><tr><td>英文崇拜</td><td>週日</td><td>10:45am</td><td>實體/Discord</td><td>李怡昌兄</td></tr><tr><td>長青團契 (查經班)</td><td>週四</td><td>2:00am</td><td>實體/Zoom</td><td>孫曲回牧師</td></tr><tr><td>周間禱告會</td><td>週二</td><td>7:30pm</td><td>Zoom</td><td>周淑娟姐</td></tr><tr><td>學生團契</td><td>隔周六</td><td>6:00pm</td><td>實體</td><td></td></tr><tr><td>社青小組</td><td>隔周五</td><td>6:30pm</td><td>實體</td><td>蘇頌軒兄</td></tr></tbody></table></div>
@@ -111,7 +111,7 @@
 
     <!-- div for sermon information -->
     <div id="sermons" contenteditable="true">
-      <div class="sermons_btn"><button class="font down" name="sermons">-</button><button class="font up" name="sermons">+</button><button id="sermons_btn" name="sermons"><i class="fa-refresh">&#xf021;</i></button></div>
+      <div class="sermons_btn"><button class="font down" name="sermons"><i class="material-icons">-</i></button><button class="font up" name="sermons"><i class="material-icons">+</i></button><button id="sermons_btn" name="sermons" title="Refresh"><i class="material-icons">refresh</i></button></div>
       <h4><u>本週主日信息</u></h4>
       <div id="this_week" class="medium"></div>
       <h4><u>上週主日信息</u></h4>
@@ -123,7 +123,7 @@
   <!-- Back right -->
   <div class="right">
     <div id="info" contenteditable="true">
-      <div class="info_btn"><button class="font down" name="info">-</button><button class="font up" name="info">+</button><button id="info_btn"><i class="fa-refresh">&#xf021;</i></button></div>
+      <div class="info_btn"><button class="font down" name="info"><i class="material-icons">-</i></button><button class="font up" name="info"><i class="material-icons">+</i></button><button id="info_btn" title="Refresh"><i class="material-icons">refresh</i></button></div>
       <div class="topic"><u>歡迎報告</u></div>
       <div id="announcement" class="medium"></div>
       <div class="topic"><u>肢體關懷</u></div>

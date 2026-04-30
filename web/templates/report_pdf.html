@@ -1,7 +1,7 @@
 <!-- template for weekly bulletin -->
 {% include 'header1.html' %}
 
-<link href="/static/v4-shims.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 <style>
 .report {
   display: grid;
@@ -306,7 +306,7 @@
         console.log("Loading master calendar information...");
         url = '/API/calendar/' + id;
         $.when(load_content(url)).done(function(calendar) {
-            task_table = '<button class="task_table_btn" name="task_table"><i class="fa-refresh">&#xf021;</i></button>';
+            task_table = '<button class="task_table_btn" name="task_table" title="Refresh"><i class="material-icons">refresh</i></button>';
             task_table += '<div class="container"><div class="header">負責事工</div>';
             current_date = calendar[0].date;
             const d = new Date(current_date.replace('-', '/'));
