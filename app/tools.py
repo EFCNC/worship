@@ -88,7 +88,7 @@ def create_json(id, worship=None):
         with open(template_file, "r", encoding="utf-8") as f:
             template = json.loads(f.read())
         sermon = Utils.get_worship(id)
-        info = Utils.get_info(worship_date)
+        info = Utils.get_info(id)
         announce = [[re.search('(^[^\[]+)', x['info'])[0], re.findall('\[[^\]]+\](.+)$', x['info'])] for x in info if
              x['type'] == 'announcement']
         a_origin = ''
