@@ -147,11 +147,11 @@ def get_present_by_group(id):
     return total[0][0], [dict(id=x[0], name=x[1], count=x[2]) for x in result]
 
 def get_team_present(id):
-    sql = 'select t.user_id, t.name, t.name_2, title, group_concat(g.name), case when r.present is NULL then -1 else r.present end, t.family_id, (select user_id from team t2 where t.family_id = t2.family_id) as f_id, t.email, t.line_id, t.discord_id, t.other from team t left join team_groups tg on t.user_id = tg.user_id left join groups g on tg.group_id = g.group_id left join (select * from rollcall where worship_id=?) r on t.user_id = r.user_id group by t.user_id order by f_id'
+    sql = 'select t.user_id, t.name, t.name_2, title, group_concat(g.name), case when r.present is NULL then -1 else r.present end, t.family_id, (select user_id from team t2 where t.family_id = t2.family_id) as f_id, t.email, t.line_id, t.discord_id, t.other, t.phone from team t left join team_groups tg on t.user_id = tg.user_id left join groups g on tg.group_id = g.group_id left join (select * from rollcall where worship_id=?) r on t.user_id = r.user_id group by t.user_id order by f_id'
     result = dB.run_para(sql, id)
     team = []
     for r in result:
-        team.append([r[0], r[1] if r[1] else '', r[2] if r[2] else '', r[3] if r[3] else '', r[4] if r[4] else '', r[5], r[6] if r[6] else '', r[7] if r[7] else 999, r[8], r[9], r[10], r[11]])
+        team.append([r[0], r[1] if r[1] else '', r[2] if r[2] else '', r[3] if r[3] else '', r[4] if r[4] else '', r[5], r[6] if r[6] else '', r[7] if r[7] else 999, r[8], r[9], r[10], r[11], r[12] if r[12] else ''])
     return team
 
 def get_teams(id=None):
@@ -191,6 +191,10 @@ def add_teams(fields):
         return dB.insert(sql, values), 200
     except Exception as e:
         return e, 400
+
+def delete_team(id):
+    sql = 'delete from team where user_id=?'
+    dB.run_para(sql, id)
 
 def add_calendar(date):
     worship_id = get_worship_id(date)[0]

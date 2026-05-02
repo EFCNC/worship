@@ -169,10 +169,11 @@
             '<dt><b>Email:</b> <input name="user_email" init-data="' + d[8] + '" value="' + d[8] + '"/>' +
             ' <b>Line:</b> <input name="user_line_id" init-data="' + d[9] + '" value="' + d[9] + '"/>' +
             ' <b>Discord:</b> <input name="user_discord_id" init-data="' + d[10] + '" value="' + d[10] + '"/></dt>' +
-            '<dt><b>Family ID:</b> <input name="user_family_id" init-data="' + d[6] + '" value="' + d[6] + '"/>' +
+            '<dt><b>Phone:</b> <input name="user_phone" init-data="' + d[12] + '" value="' + d[12] + '"/>' +
+            '<b>Family ID:</b> <input name="user_family_id" init-data="' + d[6] + '" value="' + d[6] + '"/>' +
             ' <b>註:</b> <input name="user_other" init-data="' + d[11] + '" value="' + d[11] + '"/></dt>' +
             '<dt><b>團契/團體:</b> ' + get_groups(d[4], get_group_labels) + '</dt>' +
-            '</dl>'
+            '<dt><button class="delete" name="' + d[0] + '" title="Delete User">Delete</button></dt></dl>'
         );
     }
 
@@ -248,6 +249,9 @@
         if(tr.find('td').find('input[name="user_other"]').attr('init-data') != tr.find('td').find('input[name="user_other"]').val()) {
             data.push({'other': tr.find('td').find('input[name="user_other"]').val()});
         }
+        if(tr.find('td').find('input[name="user_phone"]').attr('init-data') != tr.find('td').find('input[name="user_phone"]').val()) {
+            data.push({'phone': tr.find('td').find('input[name="user_phone"]').val()});
+        }
         selected_groups = selected_group_name(tr.find('td').find('span[name="user_groups"]'))
         if(tr.find('td').find('span[name="user_groups"]').attr('init-data') != selected_groups) {
             data.push({'group': selected_groups.split(',')});
@@ -285,6 +289,32 @@
     function is_highlight(className) {
         return className.trim().split(' ').pop() == 'highlight';
     }
+
+    $(document).on('click', 'button.delete', function() {
+        id = this.name;
+        console.log(id)
+        if(confirm('This will delete this user, are you sure?')) {
+            url = API_URL + 'people/' + id + '?worship_id=' + worship_id;
+            $('#loading').show();
+            $.ajax({
+                type: "delete",
+                url: url,
+                contentType: "application/json",
+                dataType: 'json',
+                complete: function(response) {
+                    if(response.status==200) {
+                        if(response.responseJSON.length>0) {
+                            table.clear().rows.add(response.responseJSON).draw();
+                        }
+                        else {
+                            table.clear().rows.add(people).draw();
+                        }
+                    }
+                $('#loading').hide();
+                }
+            });
+        }
+    });
 
     $(document).on('click', 'button.group_key', function() {
         toggle = true;
@@ -383,8 +413,8 @@
 
     $('#addRow').on('click', function() {
         rows = table.data().length
-        // new data 0-11 (id, name, name_2, title, group, present, family_id, f_id, email, line_id, discord_id, other)
-        new_data = [0, 'Guest', '訪客', '', '訪客', 1, '', 0, '', '', '', ''];
+        // new data 0-11 (id, name, name_2, title, group, present, family_id, f_id, email, line_id, discord_id, other, phone)
+        new_data = [0, 'Guest', '訪客', '', '訪客', 1, '', 0, '', '', '', '', ''];
         user_details(new_data)
         table.row.add(new_data).draw(false).order([6, 'asc']).draw();
         row = table.row(rows);

@@ -248,7 +248,7 @@ def arrange_team(id):
     return {'team': content[0], 'inst': content[1], 'roster': content[2], 'marked': content[3]}
 
 @api.route("/people", methods=["PUT", "POST"])
-@api.route("/people/<id>", methods=["PUT", "POST", "GET"])
+@api.route("/people/<id>", methods=["PUT", "POST", "GET", "DELETE"])
 def edit_people(id=None):
     '''
     update people (team) with col name and value
@@ -256,6 +256,13 @@ def edit_people(id=None):
     :param json data with col name and new value
     :return 200
     '''
+    if request.method == "DELETE":
+        worship_id = request.args.get('worship_id', None)
+        Utils.delete_team(id)
+        if worship_id:
+            people = Utils.get_team_present(worship_id)
+            return people, 200
+        return [], 200
     if request.method == "POST":
         data = request.get_json()
         worship_id = next(x['worship_id'] for x in data if 'worship_id' in x)
