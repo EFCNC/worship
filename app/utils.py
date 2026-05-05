@@ -640,10 +640,10 @@ def get_availablity():
 
 def worship_list(id=None):
     if id:
-        sql = "select s.title, s.speaker, t.name, (select i.name from instrument i where i.id = it.instrument_id), w.title, w.scheduled_date, w.worship_id, s.bible_verse, s.outline, w.notes from worship w inner join sermon s on w.scheduled_date = s.date left join instrument_team it on w.worship_id = it.worship_id left join team t on it.user_id = t.user_id where w.worship_id=? and it.instrument_id <> -1 order by w.scheduled_date, it.instrument_id"
+        sql = "select s.title, s.speaker, case when t.name then t.name else t.name_2 end, (select i.name from instrument i where i.id = it.instrument_id), w.title, w.scheduled_date, w.worship_id, s.bible_verse, s.outline, w.notes from worship w inner join sermon s on w.scheduled_date = s.date left join instrument_team it on w.worship_id = it.worship_id left join team t on it.user_id = t.user_id where w.worship_id=? and it.instrument_id <> -1 order by w.scheduled_date, it.instrument_id"
         result = dB.run_para(sql, id)
     else:
-        sql = "select s.title, s.speaker, t.name, (select i.name from instrument i where i.id = it.instrument_id), w.title, w.scheduled_date, w.worship_id, s.bible_verse, s.outline, w.notes from worship w inner join sermon s on w.scheduled_date = s.date left join instrument_team it on w.worship_id = it.worship_id left join team t on it.user_id = t.user_id order by w.scheduled_date, it.instrument_id"
+        sql = "select s.title, s.speaker, case when t.name then t.name else t.name_2 end, (select i.name from instrument i where i.id = it.instrument_id), w.title, w.scheduled_date, w.worship_id, s.bible_verse, s.outline, w.notes from worship w inner join sermon s on w.scheduled_date = s.date left join instrument_team it on w.worship_id = it.worship_id left join team t on it.user_id = t.user_id order by w.scheduled_date, it.instrument_id"
         result = dB.run(sql)
     worship = []
     for r in result:
