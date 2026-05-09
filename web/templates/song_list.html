@@ -1,8 +1,10 @@
-<!DOCTYPE html>
-{% include 'header.html' %}
+{% extends 'base.html' %}
+
+{% block page_title %}Songs - Worship Manager{% endblock %}
+
+{% block extra_css %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<link href="../static/datatables.min.css" rel="stylesheet">
-<script src="../static/datatables.js"></script>
+<link href="/static/datatables.min.css" rel="stylesheet">
 <style>
 #dialog {
     padding:5px;
@@ -135,8 +137,9 @@ span.chunk:before {
   color: white;
 }
 </style>
-</head>
-<body>
+{% endblock %}
+
+{% block content %}
 <div id="filters">
     <div id="lang"></div>
     <div id="key"></div>
@@ -168,7 +171,10 @@ span.chunk:before {
 
 </table>
 <div id="dialog"></div>
-</body>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/datatables.js"></script>
 <script>
     let songs = {{ songs|safe }};
     let langs = [];
@@ -435,4 +441,5 @@ span.chunk:before {
 
     });
 </script>
+{% endblock %}
 </html>

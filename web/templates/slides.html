@@ -1,18 +1,31 @@
-{% include 'header.html' %}
-    <script src="../static/socket.io.js"></script>
-    <script src="../static/presentation.js"></script>
-    <link href="../static/presentation.css" rel="stylesheet">
-    <style>
-        html {
-            height: 100%;
-            background-color: #000;
-        }
+{% extends 'base.html' %}
 
-        body {
-            overflow: hidden;
-        }
-    </style>
-    <script>
+{% block page_title %}Slides - Worship Manager{% endblock %}
+
+{% block extra_css %}
+<link href="/static/presentation.css" rel="stylesheet">
+<style>
+    html {
+        height: 100%;
+        /* background-color: #000; */
+    }
+
+    body {
+        overflow: hidden;
+        background-color: #000;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="control_btn"><button name="admin">Admin</button>&nbsp;<button name="lead">Lead</button>&nbsp;<button name="view">View</button>&nbsp;<button name="musician">Musician</button>&nbsp;<button name="score">Score</button>&nbsp;<!--<button name="remote">Remote</button>--></div>
+<div id="container"></div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/socket.io.js"></script>
+<script src="/static/presentation.js"></script>
+<script>
     // Prevent windows back button
 
     history.pushState(null, null, document.URL);
@@ -127,11 +140,5 @@
             init();
         }
     });
-
 </script>
-</head>
-<body>
-<div id="control_btn"><button name="admin">Admin</button>&nbsp;<button name="lead">Lead</button>&nbsp;<button name="view">View</button>&nbsp;<button name="musician">Musician</button>&nbsp;<button name="score">Score</button>&nbsp;<!--<button name="remote">Remote</button>--></div>
-<div id="container"></div>
-</body>
-</html>
+{% endblock %}
