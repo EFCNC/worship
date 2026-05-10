@@ -76,7 +76,7 @@ def handle_control(data):
 @socketio.on('msg')
 def handle_announcement(data):
 	print("msg", data)
-	emit('announcement', data, brodcasr=True)
+	emit('announcement', data, broadcast=True)
 
 # Rendering interfaces
 
