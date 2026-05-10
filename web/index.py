@@ -23,6 +23,14 @@ app = Flask(__name__)
 # register blueprint of API
 app.register_blueprint(api, url_prefix='/API')
 
+# Add cache headers for static (profile picture) images to reduce bandwidth
+@app.after_request
+def add_cache_headers(response):
+    if request.path.startswith('/static/img/'):
+        # Cache images for 30 days
+        response.headers['Cache-Control'] = 'public, max-age=2592000, immutable'
+    return response
+
 slides_data = {'pos': [0, 0], 'data': [], 'msg': '', 'dynamic': '', 'key': 0, 'background': [], 'id': 0}
 client = {'admin': [], 'lead': [], 'musician': [], 'view': []}
 client_mode = ''
@@ -359,4 +367,4 @@ def __get_slide_json():
 	return True
 
 if __name__ == '__main__':
-	app.run(host="0.0.0.0", port=80, debug=True)
+	app.run(host="0.0.0.0", port=5000, debug=True)
