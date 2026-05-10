@@ -53,37 +53,6 @@
                 }
             });
         });
-
-        // Profile Picture Logic - runs for all pages
-        document.addEventListener('DOMContentLoaded', function() {
-            const userCookie = $.cookie("user_name");
-            const profileContainer = document.getElementById('profile-container');
-            
-            if (!profileContainer) return;
-
-            if (userCookie) {
-                const full_english_name = userCookie.split('(')[0].trim();
-                const initials = full_english_name.split(' ')
-                    .map(word => word[0].toUpperCase())
-                    .join('');
-
-                const chinese_name = userCookie.split('(')[1]?.replace(')', '');
-                const imgPath = `/static/img/${full_english_name}.jpg`;
-
-                const img = new Image();
-                img.onload = function() {
-                    profileContainer.innerHTML = `<img src="${imgPath}" alt="${full_english_name}" />`;
-                };
-
-                img.onerror = function() {
-                    profileContainer.classList.add('use-initials');
-                    profileContainer.innerHTML = initials;
-                };
-                img.src = imgPath;
-            } else {
-                profileContainer.innerHTML = `<img id="profile-img" src="/static/img/login.jpg" title="Profile"/>`;
-            }
-        });
     </script>
 
     <!-- Page-Specific Scripts -->
