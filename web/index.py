@@ -133,13 +133,16 @@ def slides_viewer(mode=None):
 		if len(client['admin']) > 0:
 			__update_client_mode('')
 			return "<script>alert('Only one Admin mode can be connected, please use different mode.');window.location.replace('../slides');</script>"
-		return render_template('slides_admin.html', presentation=slides_data)
+		else:
+			return render_template('slides_admin.html', presentation=slides_data, mode=mode)
 	elif mode == 'lead':
 		if len(client['lead']) > 0:
 			__update_client_mode('')
 			return "<script>alert('Only one Lead mode can be connected, please use different mode.');window.location.replace('../slides');</script>"
+		else:
+			return render_template('slides.html', presentation=slides_data, mode=mode)
+	else:
 		return render_template('slides.html', presentation=slides_data, mode=mode)
-	return render_template('slides.html', presentation=slides_data, mode=mode)
 
 
 @app.route("/notes")
