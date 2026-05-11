@@ -30,7 +30,7 @@
 
     /* Typography */
     --font-family-base: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    --font-size-base: 14px;     /* Possible change to 16px for better readability, 16px was default previously - Joseph */
+    --font-size-base: 16px;     /* Possible change to 16px for better readability, 16px was default previously - Joseph */
     --font-size-sm: 12px;
     --font-size-lg: 16px;
     --font-size-xl: 18px;
