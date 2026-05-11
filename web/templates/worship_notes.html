@@ -11,10 +11,10 @@ span.chunk {
 }
 
 span.chunk:before {
-    font-size:65%;
+    font-size: 0.65em;
     content:attr(data-chord);
     position:absolute;
-    top:-120%;
+    top:-2em;
 }
 
 .song_chord {
@@ -27,7 +27,7 @@ span.chunk:before {
     width:50%;
     position: relative;
     color: #000;
-    margin: 5 5 5 5;
+    margin: 5px;
 }
 
 .song_block > span {
@@ -125,12 +125,12 @@ span.chunk:before {
 
     <!-- Container of worship songs -->
     <div class="worship_controls_button_container">
-        <button class="toggle-btn view" onclick="javascript:load('view')">View</button>
-        <button class="toggle-btn chord" onclick="javascript:load('chord')">Chord</button>
-        <button class="toggle-btn bi" onclick="javascript:load('bi')">Bilingual</button>
-        <button class="toggle-btn video" onclick="javascript:load('video')">Youtube</button>
-        <button class="toggle-btn" onclick="javascript:load_chords()">All Chords</button>
-        <button class="toggle-btn" onclick="javascript:load_sheets()">All Sheets</button>
+        <button class="toggle-btn view" onclick="load('view')">View</button>
+        <button class="toggle-btn chord" onclick="load('chord')">Chord</button>
+        <button class="toggle-btn bi" onclick="load('bi')">Bilingual</button>
+        <button class="toggle-btn video" onclick="load('video')">Youtube</button>
+        <button class="toggle-btn" onclick="load_chords()">All Chords</button>
+        <button class="toggle-btn" onclick="load_sheets()">All Sheets</button>
     </div>
 
     <div id="worship">
@@ -224,14 +224,14 @@ span.chunk:before {
 
     function load(name) {
         clicked(name);
-        html = ''
+        let html = '';
         for (data of worship) {
             if (data.type == 'info') {
                 html += '<div class="info">' + data.notes.replace('\n', '<br/>') + '</div>';
             }
             else {
                 if(name == 'video') {
-                    v = data.video.replace('youtu.be/', 'www.youtube.com/embed/');
+                    let v = data.video.replace('youtu.be/', 'www.youtube.com/embed/');
                     v = v.replace('watch?v=', 'embed/');
                     html += '<div class="video-container"><iframe src="' + v + '"></iframe></div><br/>';
                 }
@@ -248,7 +248,7 @@ span.chunk:before {
                         html += '&nbsp;&nbsp;<a href="' + data.video + '" target="new"><i class="fa fa-play-circle" style="font-size:24px" title="Youtube Video"></i></a>';
                     }
                     html += '</div><table width="100%"><tr><td class="song_block">';
-                    ll = []
+                    let ll = [];
                     for (l of data.content) {
                         if(ll.indexOf(l.name) >= 0) {
                             continue;
@@ -258,9 +258,9 @@ span.chunk:before {
                             html += '<div class="song">' + l.origin_text.replace('\n', '<br/>');
                         }
                         else if (name == 'chord') {
-                            chords = l.origin_chord.replace('\n', '<br/>');
+                            let chords = l.origin_chord.replace('\n', '<br/>');
                             if(data.transpose != '0') {
-                                key_change = parseInt(data.transpose);
+                                let key_change = parseInt(data.transpose);
                                 chords = chords.replace(/(data-chord=")([^"]+)/g, (match, g1, g2) => {return g1+parse_chord(g2, key_change);});
                             }
                             html += '<div class="song_chord">' + chords;
@@ -275,7 +275,7 @@ span.chunk:before {
                 }
             }
         }
-        target = document.getElementById("worship");
+        const target = document.getElementById("worship");
         target.innerHTML = html;
     }
 
