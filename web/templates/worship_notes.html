@@ -133,6 +133,7 @@ span.chunk:before {
     </div>
 
     <div id="worship">
+        <!-- Worship songs will be dynamically loaded here through the script -->
     </div>
 {% endblock %}
 
@@ -147,13 +148,10 @@ span.chunk:before {
     const worshipInfo = {{ w|safe }};
     const initialTab = '{{ tab|safe }}' || 'view';
     const song_id = worshipData.map(o=> o.id);
-    
-    console.log(worshipData);
-    console.log(worshipInfo);
 
     // --- FUNCTIONS ---
     /**
-     * Transposes a single chord string (e.g., "G/B") by a specific number of steps.
+    * Transposes a single chord string (e.g., "G/B") by a specific number of steps (diff).
     */
     function transposeChord(chord, diff) {
         if (diff === 0) return chord;
@@ -185,7 +183,7 @@ span.chunk:before {
     }
 
     /** 
-      * Generate Language Tag Bubbles
+    * Generate Language Tag Bubbles
     */
     function getLangTag(lang) {
         const tags = {
@@ -198,6 +196,9 @@ span.chunk:before {
         return lang ? `<span class="${config.class}" title="${config.title}">${config.label}</span>` : "";
     }
     
+    /**
+    * Renders the song content based on the selected mode (view, chord, bi).
+    */
     function renderSongContent(song, mode) {
         let contentHtml = '';
         let seenSections = new Set();
@@ -234,6 +235,9 @@ span.chunk:before {
         return contentHtml;
     }
 
+    /**
+    * Loads the tab based on the button that was clicked (view, chord, bi, video) and updates the content accordingly.
+    */
     function loadTab(mode) {
         // Update button highlights
         document.querySelectorAll('.toggle-btn').forEach(btn => btn.classList.remove('on'));
@@ -277,8 +281,6 @@ span.chunk:before {
         document.getElementById('worship').innerHTML = finalHtml;
     }
 
-    
-       
     function load_chords() {
         window.open('/chords/' + song_id.toString(), '_blank').focus();
     }
@@ -287,8 +289,6 @@ span.chunk:before {
         window.open('/sheets/' + song_id.toString(), '_blank').focus();
     }
 
-
-
     // console.log(tab)
     // if(tab == '') {
     //     load('view');
@@ -296,6 +296,10 @@ span.chunk:before {
     // else {
     //     load(tab);
     // }
+
+    /**
+    * Thing that runs the thing on startup
+    */
     window.onload = () => {
         if (worshipInfo && worshipInfo.date) {
             document.title = `${worshipInfo.date} Worship Notes - Worship Manager`;
