@@ -66,13 +66,20 @@
         background-color: #009688;
         color: #fff;
         transform: rotateY(180deg);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 10px;
+        box-sizing: border-box;
     }
 
     .overlay_btns {
-        position: absolute;
-        bottom: 10px;
-        right: 10px;
-        font-size: 12px;
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        align-items: center;
+        padding: 10px;
+        flex-wrap: wrap;
     }
 
     .edit_btn {
