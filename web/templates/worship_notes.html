@@ -1,10 +1,10 @@
-{% include 'header.html' %}
-<!DOCTYPE html>
-<html>
-<head>
+{% extends 'base.html' %}
+
+{% block page_title %}Worship Home - Worship Manager{% endblock %}
+
+{% block extra_css %}
 <meta name="viewport" content="width=device-width, initial-scale=1" charset="utf-8">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<script src="/static/bible.js"></script>
 <style>
 span.chunk {
     position:relative;
@@ -143,7 +143,9 @@ span.chunk:before {
   color: white;
 }
 </style>
-</head>
+{% endblock %}
+
+{% block content %}
 <body>
     <h3> {{ w.date }} 敬拜筆記 (Worship Notes):</h3>
     <p><b>Title: {{ w.sermon_title }}<br/>
@@ -167,6 +169,10 @@ span.chunk:before {
     </div>
 
 </body>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/bible.js"></script>
 <script>
     let tab = '{{ tab|safe }}';
     let worship = {{ songs|safe }};
@@ -318,4 +324,4 @@ span.chunk:before {
         load(tab);
     }
 </script>
-</html>
+{% endblock %}
