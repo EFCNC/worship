@@ -3,142 +3,156 @@
 {% block page_title %}Slides - Worship Manager{% endblock %}
 
 {% block extra_css %}
-<link href="/static/presentation.css" rel="stylesheet">
-<style>
-    html {
-        height: 100%;
-        /* background-color: #000; */
-    }
+    <link href="/static/presentation.css" rel="stylesheet">
+    <style>
+        html {
+            height: 100%;
+            /* background-color: #000; */
+        }
 
-    body {
-        overflow: hidden;
-        background-color: #000;
-    }
-</style>
+        body {
+            overflow: hidden;
+            background-color: #000;
+        }
+        
+        #control_btn {
+            display: flex;
+        }
+    </style>
 {% endblock %}
 
 {% block content %}
-<div id="control_btn"><button name="admin">Admin</button>&nbsp;<button name="lead">Lead</button>&nbsp;<button name="view">View</button>&nbsp;<button name="musician">Musician</button>&nbsp;<button name="score">Score</button>&nbsp;<!--<button name="remote">Remote</button>--></div>
-<div id="container"></div>
+    <div id="control_btn">
+        <button name="admin">Admin</button>
+        <button name="lead">Lead</button>
+        <button name="view">View</button>
+        <button name="musician">Musician</button>
+        <button name="score">Score</button>
+        <!--<button name="remote">Remote</button>-->
+    </div>
+
+    <div id="container"></div>
 {% endblock %}
 
 {% block extra_js %}
-<script src="/static/socket.io.js"></script>
-<script src="/static/presentation.js"></script>
-<script>
-    // Prevent windows back button
+    <script src="/static/socket.io.js"></script>
+    <script src="/static/presentation.js"></script>
+    <script>
+        // This should be prevented using Google Chrome back swipe settings, not through website code...
 
-    history.pushState(null, null, document.URL);
-    window.addEventListener('popstate', function () {
-        history.pushState(null, null, document.URL);
-    });
+        // // Prevent windows back button
 
-    let preview;    // Declare target div for load() function
+        // history.pushState(null, null, document.URL);
+        // window.addEventListener('popstate', function () {
+        //     history.pushState(null, null, document.URL);
+        // });
 
-    socket.on('connect', function () {
-        console.log('connected to the server');
-    });
+        let preview;    // Declare target div for load() function
 
-    socket.on('response', function (data) {
-        console.log('Server sent: ' + data);
-        slides = data.data;
-        pos = data.pos[0];
-        order = data.pos[1];
-        msg = data.msg;
-        dynamic = data.dynamic;
-        key_change = data.key;
-        background = data.background;
-        load(preview);
-    });
+        socket.on('connect', function () {
+            console.log('connected to the server');
+        });
 
-    // init data from flask
-        presentation = {{ presentation|safe }};
-        slides = presentation['data'];
-        pos = presentation['pos'][0];
-        order = presentation['pos'][1];
-        msg = presentation['msg'];
-        mode = '{{ mode|safe }}';
+        socket.on('response', function (data) {
+            console.log('Server sent: ' + data);
+            slides = data.data;
+            pos = data.pos[0];
+            order = data.pos[1];
+            msg = data.msg;
+            dynamic = data.dynamic;
+            key_change = data.key;
+            background = data.background;
+            load(preview);
+        });
 
-    function init() {
-        if (slides.length == 0 || mode == '') {
-            alert("No slide is currently running!!");
-            //mode = '';
-            return false;
+        // init data from flask
+            presentation = {{ presentation|safe }};
+            slides = presentation['data'];
+            pos = presentation['pos'][0];
+            order = presentation['pos'][1];
+            msg = presentation['msg'];
+            mode = '{{ mode|safe }}';
+
+        function init() {
+            if (slides.length == 0 || mode == '') {
+                alert("No slide is currently running!!");
+                //mode = '';
+                return false;
+            }
+            $("#control_btn").hide();
+            $("#container").html(load_container());
+            preview = $('#preview');
+            load(preview);
+            if (mode == 'lead') {
+                $("#preview").css('height', '75vh');
+            }
+            else if (mode == 'view' || mode == 'musician') {
+                $('#header').hide();
+            }
         }
-        $("#control_btn").hide();
-        $("#container").html(load_container());
-        preview = $('#preview');
-        load(preview);
-        if (mode == 'lead') {
-            $("#preview").css('height', '75vh');
+
+        function show_msg(){
+            $('#top-right').html(msg);
+            if (msg != '') {
+                $('#top-right').show();
+            }
+            else {
+                $('#top-right').hide();
+            }
         }
-        else if (mode == 'view' || mode == 'musician') {
-            $('#header').hide();
-        }
-    }
 
-    function show_msg(){
-        $('#top-right').html(msg);
-        if (msg != '') {
-            $('#top-right').show();
-        }
-        else {
-            $('#top-right').hide();
-        }
-    }
+        // function for remote view only
 
-    // function for remote view only
+        $(document).on('click', '#btn_previous', function(){
+            move_remote(-1);
+        });
 
-    $(document).on('click', '#btn_previous', function(){
-        move_remote(-1);
-    });
+        $(document).on('click', '#btn_next', function(){
+            move_remote(1);
+        });
 
-    $(document).on('click', '#btn_next', function(){
-        move_remote(1);
-    });
+        // function for lead view only
+        $(document).on('click', '#preview_div div', function(){
+            id = $(this).attr('id').split('_')[1];
+            id = Number(id)
+            move(1, id-order);
+        });
 
-    // function for lead view only
-    $(document).on('click', '#preview_div div', function(){
-        id = $(this).attr('id').split('_')[1];
-        id = Number(id)
-        move(1, id-order);
-    });
+        $(document).on('click', '#dynamic_btn button', function() {
+            msg = $(this).attr('title');
+            name = $(this).attr('name');
+            if (name=='transpose') {
+                socket.emit('control', {'type': 'key', 'value': $(this).attr('transpose')});
+            }
+            socket.emit('control', {'type': 'dynamic', 'value': msg});
+        });
 
-    $(document).on('click', '#dynamic_btn button', function() {
-        msg = $(this).attr('title');
-        name = $(this).attr('name');
-        if (name=='transpose') {
-            socket.emit('control', {'type': 'key', 'value': $(this).attr('transpose')});
-        }
-        socket.emit('control', {'type': 'dynamic', 'value': msg});
-    });
+        // functions for init page
+        $(document).on('click', '#control_btn button', function() {
+            mode_ = $(this).attr('name');
+            document.location.href = 'slides/'+ mode_;
+        });
 
-    // functions for init page
-    $(document).on('click', '#control_btn button', function() {
-        mode_ = $(this).attr('name');
-        document.location.href = 'slides/'+ mode_;
-    });
+        /*$(document).on('change', '#key', function (event) {
+            transpose = keys.indexOf(this.value)-keys.indexOf($(this).attr('init'));
+            socket.emit('control', {'type': 'key', 'value': transpose});
+        })*/
 
-    /*$(document).on('change', '#key', function (event) {
-        transpose = keys.indexOf(this.value)-keys.indexOf($(this).attr('init'));
-        socket.emit('control', {'type': 'key', 'value': transpose});
-    })*/
+        $(document).on('touchstart', '#preview', function (event) {
+            touchstartX = event.changedTouches[0].screenX;
+            touchstartY = event.changedTouches[0].screenY;
+        });
 
-    $(document).on('touchstart', '#preview', function (event) {
-        touchstartX = event.changedTouches[0].screenX;
-        touchstartY = event.changedTouches[0].screenY;
-    });
+        $(document).on('touchend', '#preview', function (event) {
+            touchendX = event.changedTouches[0].screenX;
+            touchendY = event.changedTouches[0].screenY;
+            handleGesture();
+        });
 
-    $(document).on('touchend', '#preview', function (event) {
-        touchendX = event.changedTouches[0].screenX;
-        touchendY = event.changedTouches[0].screenY;
-        handleGesture();
-    });
-
-    $(document).ready(function() {
-        if (mode) {
-            init();
-        }
-    });
-</script>
+        $(document).ready(function() {
+            if (mode) {
+                init();
+            }
+        });
+    </script>
 {% endblock %}
