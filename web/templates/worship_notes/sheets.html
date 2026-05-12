@@ -1,6 +1,9 @@
-{% include 'header.html' %}
-<head>
-  <script src="/static/abcjs-basic-min.js"></script>
+{% extends 'base.html' %}
+
+{% block page_title %}Worship Home - Worship Manager{% endblock %}
+
+{% block extra_css %}
+<script src="/static/abcjs-basic-min.js"></script>
 <style>
   iframe {
     height: 800px;
@@ -9,17 +12,20 @@
     overflow: auto;
 }
 </style>
-</head>
-<body bgcolor="#fff">
+{% endblock %}
+
+{% block content %}
 <div id="my_score">
-  <div id="top"><span id="sheet_title"></span>&nbsp;<span id="sheet_btn"></span></div>
-  Tempo: <input id="tempo" size="5"/>&nbsp;&nbsp;<div id="tools"></div>
-  <div id="abc">
-  </div>
-  <textarea id="abc_data" rows="10" cols="100"></textarea>
-  <div style="text-align:center" id="sheet"></div>
+    <div id="top"><span id="sheet_title"></span>&nbsp;<span id="sheet_btn"></span></div>
+    Tempo: <input id="tempo" size="5"/>&nbsp;&nbsp;<div id="tools"></div>
+    <div id="abc">
+    </div>
+    <textarea id="abc_data" rows="10" cols="100"></textarea>
+    <div style="text-align:center" id="sheet"></div>
 </div>
-</body>
+{% endblock %}
+
+{% block extra_js %}
 <script>
   let sheets = {{ sheets|safe }};
   let index = 0;
@@ -119,4 +125,4 @@
   });
 
 </script>
-</body>
+{% endblock %}

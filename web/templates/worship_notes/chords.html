@@ -1,8 +1,11 @@
-{% include 'header.html' %}
-<head>
-    <link href="../static/presentation.css" rel="stylesheet">
-  <style>
-    span.chunk {
+{% extends 'base.html' %}
+
+{% block page_title %}Worship Home - Worship Manager{% endblock %}
+
+{% block extra_css %}
+<link href="../static/presentation.css" rel="stylesheet">
+<style>
+span.chunk {
     position:relative;
 }
 
@@ -19,6 +22,21 @@ span.chunk:before {
 }
 
   </style>
+{% endblock %}
+
+{% block content %}
+<div id="my_score">
+    <div id="top"><span id="sheet_title"></span>&nbsp;<span id="sheet_btn"></span></div>
+    <div id="abc">
+    <div id="keys"></div>
+    </div>
+    </div>
+    <div style="text-align:center" id="sheet"></div>
+</div>
+</body>
+{% endblock %}
+
+{% block extra_js %}
 <script>
     function parse_chord(chord, diff) {
 	    diff = Number(diff);
@@ -55,17 +73,7 @@ span.chunk:before {
     }
 
 </script>
-</head>
-<body bgcolor="#fff">
-<div id="my_score">
-  <div id="top"><span id="sheet_title"></span>&nbsp;<span id="sheet_btn"></span></div>
-  <div id="abc">
-  <div id="keys"></div>
-  </div>
-  </div>
-  <div style="text-align:center" id="sheet"></div>
-</div>
-</body>
+
 <script>
   let chords = {{ chords|safe }};
   let index = 0;
@@ -141,4 +149,4 @@ span.chunk:before {
     load_sheet(index, this.name)
   });
 </script>
-</body>
+{% endblock %}

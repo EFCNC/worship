@@ -194,7 +194,7 @@ def get_song_sheet(id):
 def get_song_chords(ids):
 	ids = ids.split(',')
 	chords = Utils.get_song_chords(ids)
-	return render_template('chords.html', chords=chords)
+	return render_template('/worship_notes/chords.html', chords=chords)
 
 @app.route("/sheets")
 @app.route("/sheets/<ids>")
@@ -231,7 +231,7 @@ def get_song_sheet1(ids=None):
 			sheet['keyof_name'] = keys
 			keyof_name = [keys[x] for x in keyof] # Translate int to key name
 			sheet['keyof'] = keyof_name
-	return render_template('sheet.html', sheets=sheets)
+	return render_template('worship_notes/sheets.html', sheets=sheets)
 
 @app.route("/song/<id>")
 def get_song_by_id(id):
