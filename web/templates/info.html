@@ -1,6 +1,9 @@
-{% include 'header.html' %}
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+{% extends 'base.html' %}
 
+{% block page_title %}Worship Home - Worship Manager{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <style>
 .worship_container {
   display: flex;
@@ -65,7 +68,9 @@
     padding: 2px 2px 2px 2px;
 }
 </style>
-<body>
+{% endblock %}
+
+{% block content %}
 <div class="worship_container">
     <div class="worship-card">
         <button id="pre" class="nav" title="Last Week"></button>&nbsp;&nbsp;<span id="current"></span>&nbsp;&nbsp;<button id="next" class="nav" title="Next Week"></button>
@@ -75,7 +80,9 @@
     </div>
 </div>
 <div id="clipboard" style="display:none"></div>
-</body>
+{% endblock %}
+
+{% block extra_js %}
 <script>
     let content = [];
     let current_week;
@@ -229,3 +236,5 @@
         });
     }
 </script>
+
+{% endblock %}

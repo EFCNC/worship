@@ -1,19 +1,20 @@
-{% include 'header.html' %}
+{% extends 'base.html' %}
+
+{% block page_title %}Worship Home - Worship Manager{% endblock %}
+
+{% block extra_css %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-
-<script src="/static/bible.js"></script>
 <style>
-    #songs { text-align:left; list-style-type: none; margin: 0; padding: 0; width: 95%; }
-    .lyrics { text-align:center; list-style-type: none; margin: 0; padding: 0; width: 75%; }
-    #songs, .lyrics li { margin: 0 3px 3px 3px; padding: 0.2em; font-size: 1em}
-    #songs .title:hover{cursor: pointer}
-    .infotitle:hover{cursor: pointer}
-    .lyrics li span { position: absolute; margin-left: -1.3em;}
-    .lyrics li:hover {cursor: pointer}
-    .1, .2, .3, .4 .5 .6 .7 .8 { background-color: #da2c43; color: #fff}
-    .chorus, .Chorus, .c { background-color: #556b2f; color: #fff}
-    .bridge, .b, .b2, .b3, .b4 { background-color: #003153; color: #fff}
-
+#songs { text-align:left; list-style-type: none; margin: 0; padding: 0; width: 95%; }
+.lyrics { text-align:center; list-style-type: none; margin: 0; padding: 0; width: 75%; }
+#songs, .lyrics li { margin: 0 3px 3px 3px; padding: 0.2em; font-size: 1em}
+#songs .title:hover{cursor: pointer}
+.infotitle:hover{cursor: pointer}
+.lyrics li span { position: absolute; margin-left: -1.3em;}
+.lyrics li:hover {cursor: pointer}
+.1, .2, .3, .4 .5 .6 .7 .8 { background-color: #da2c43; color: #fff}
+.chorus, .Chorus, .c { background-color: #556b2f; color: #fff}
+.bridge, .b, .b2, .b3, .b4 { background-color: #003153; color: #fff}
 
 .lyrics_buttons {
     text-align: right;
@@ -145,38 +146,41 @@ li {
     width: 95%;
 }
 </style>
-</head>
-<body>
-    <div class="custom-loader" style="display:none"></div>
-    <h3><span class="arrow left" name="-1">&lt;</span> {{ w.date }} <span class="arrow ight" name="1">&gt;</span></h3>
-    <!-- Container of worship songs -->
-    <div id="sermon_data"></div>
-    <div class="action_btns">
-        <input id="keyword" style="display:none">
-        <button id="search_btn">Search</button>
-        <button id="add_song_btn">Add Song</button>
-        <!--<button id="add_note_btn">Add Notes</button>-->
-        <button class="save_btn" onclick="javascript:save({{ id }})">Save</button>
-            <!--<button class="export_btn" onclick="javascript:export_file({{ id }})">Export</button>-->
-            <button class="reset_btn" onclick="javascript:reset()">Reset</button>
-            <!--<button id="preview_btn">Present</button>-->
-        </div>
-    <div id="worship">
-        <!-- sortable songs -->
-    </div>
-        <div class="action_btns">
-    <button class="save_btn" onclick="javascript:save({{ id }})">Save</button>
-    <!--<button class="export_btn" onclick="javascript:export_file({{ id }})">Export</button>-->
-    &nbsp;&nbsp;<button class="reset_btn" onclick="javascript:reset()">Reset</button>
-        </div>
-    <div id="song_list" >
-        <div id="left_content"></div>
-        <div id="middle_content"></div>
-        <div id="right_content"></div>
-    </div>
-    <div id="preview" style="display:none"></div>
+{% endblock %}
 
-</body>
+{% block content %}
+<div class="custom-loader" style="display:none"></div>
+<h3><span class="arrow left" name="-1">&lt;</span> {{ w.date }} <span class="arrow ight" name="1">&gt;</span></h3>
+<!-- Container of worship songs -->
+<div id="sermon_data"></div>
+<div class="action_btns">
+    <input id="keyword" style="display:none">
+    <button id="search_btn">Search</button>
+    <button id="add_song_btn">Add Song</button>
+    <!--<button id="add_note_btn">Add Notes</button>-->
+    <button class="save_btn" onclick="javascript:save({{ id }})">Save</button>
+        <!--<button class="export_btn" onclick="javascript:export_file({{ id }})">Export</button>-->
+        <button class="reset_btn" onclick="javascript:reset()">Reset</button>
+        <!--<button id="preview_btn">Present</button>-->
+    </div>
+<div id="worship">
+    <!-- sortable songs -->
+</div>
+    <div class="action_btns">
+<button class="save_btn" onclick="javascript:save({{ id }})">Save</button>
+<!--<button class="export_btn" onclick="javascript:export_file({{ id }})">Export</button>-->
+&nbsp;&nbsp;<button class="reset_btn" onclick="javascript:reset()">Reset</button>
+    </div>
+<div id="song_list" >
+    <div id="left_content"></div>
+    <div id="middle_content"></div>
+    <div id="right_content"></div>
+</div>
+<div id="preview" style="display:none"></div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/bible.js"></script>
 <script>
     // Store worship set into object
     const songs = {{ songs|safe }};
@@ -733,4 +737,4 @@ li {
     });
 
 </script>
-</html>
+{% endblock %}
