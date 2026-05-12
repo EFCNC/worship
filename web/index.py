@@ -263,7 +263,7 @@ def calendar():
 	now = datetime.now()
 	year = str(now.year)
 	column, calendar = Utils.get_calendar(year)
-	return render_template('calendar.html', column=column, calendar=calendar)
+	return render_template('admin/calendar.html', column=column, calendar=calendar)
 
 @app.route("/schedule")
 def schedule():
@@ -301,7 +301,7 @@ def roll_call():
 		people = Utils.get_team_present(sundays['worship_id'])
 	else:
 		people = Utils.get_team_present(id)
-	return render_template('rollcall.html', people=people, groups=[x[1] for x in groups], sundays=sundays)
+	return render_template('admin/rollcall.html', people=people, groups=[x[1] for x in groups], sundays=sundays)
 
 @app.route("/report/<id>")
 def report(id):

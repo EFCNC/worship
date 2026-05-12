@@ -1,5 +1,8 @@
-{% include 'header.html' %}
+{% extends 'base.html' %}
 
+{% block page_title %}Worship Home - Worship Manager{% endblock %}
+
+{% block extra_css %}
 <link href="/static/datatables.min.css" rel="stylesheet">
 <script src="/static/datatables.js"></script>
 <style>
@@ -13,11 +16,12 @@
     border: 1px solid #d0d0d0;
 }
   button {
-  background-color: #fff;
-  border: 1px solid #04AA6D; /* Green border */
-  padding: 10px 10px; /* Some padding */
-  cursor: pointer; /* Pointer/hand icon */
-  border-radius: 2px;
+    color: black;
+    background-color: #fff;
+    border: 1px solid #04AA6D; /* Green border */
+    padding: 10px 10px; /* Some padding */
+    cursor: pointer; /* Pointer/hand icon */
+    border-radius: 2px;
   }
 
   button:hover {
@@ -38,11 +42,15 @@
     cursor: pointer;
   }
 </style>
-<body>
+{% endblock %}
+
+{% block content %}
 <div id="groups"></div>
 <table id="people" class="display compact cell-border">
 </table>
-</body>
+{% endblock %}
+
+{% block extra_js %}
 <script>
     let people = {{ people|safe }};
     let groups = {{ groups|safe }};
@@ -422,4 +430,4 @@
     });
 
 </script>
-</html>
+{% endblock %}
