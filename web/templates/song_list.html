@@ -15,126 +15,17 @@
     cursor: pointer;
 }
 
-span.chunk {
-    position:relative;
-}
+/* Language tags */
+.lang_en    { --lang-color: #009698; }
+.lang_zh    { --lang-color: #8b0000; }
+.lang_zhTW  { --lang-color: #556b2f; }
+.lang_zhpingyin { --lang-color: #856088; }
 
-span.chunk:before {
-    font-size:65%;
-    content:attr(data-chord);
-    position:absolute;
-    top:-120%;
-}
-
-.song_chord {
-    line-height: 200%;
-}
-
-.song_block {
-    text-align: center;
-    background-color: #e0e0e0;
-    width:50%;
-    position: relative;
-    color: #000;
-    margin: 5 5 5 5;
-}
-
-.song_block > span {
-    position: absolute;
-    top: 5px;
-    left: 5px;
-}
-
-.notes {
-    text-align: center;
-}
-
-.lang_en {
-  border: 4px solid #009698;
-  background-color: #009698;
-  color: #fff;
-  border-radius: 50px 20px;
-}
-
-.lang_zh {
-  border: 4px solid #8b0000;
-  background-color: #8b0000;
-  color: #fff;
-  border-radius: 50px 20px;
-}
-
-.lang_zhTW {
-  border: 4px solid #556b2f;
-  background-color: #556b2f;
-  color: #fff;
-  border-radius: 50px 20px;
-}
-
-.lang_zhpingyin {
-  border: 4px solid #856088;
-  background-color: #856088;
-  color: #fff;
-  border-radius: 50px 20px;
-}
-
-.info {
-    border: 2px solid #856088;
-    color: #000;
-    border-radius: 5px;
-}
-
-.songs {
-    border: 2px solid #556b2f;
-    color: #000;
-    border-radius: 5px;
-}
-
-.view {
-  background-color: white;
-  color: black;
-  border: 2px solid #04AA6D;
-}
-
-.view.on {
-  background-color: #04AA6D;
-  color: white;
-}
-
-.view:hover {
-  background-color: #04AA6D;
-  color: white;
-}
-
-.chord {
-  background-color: white;
-  color: black;
-  border: 2px solid #008CBA;
-}
-
-.chord.on {
-  background-color: #008CBA;
-  color: white;
-}
-
-.chord:hover {
-  background-color: #008CBA;
-  color: white;
-}
-
-.bi {
-  background-color: white;
-  color: black;
-  border: 2px solid #555555;
-}
-
-.bi.on {
-  background-color: #555555;
-  color: white;
-}
-
-.bi:hover {
-  background-color: #555555;
-  color: white;
+.lang_en, .lang_zh, .lang_zhTW, .lang_zhpingyin {
+    border-radius: 50px 20px;
+    color: #fff;
+    border: 4px solid var(--lang-color);
+    background-color: var(--lang-color);
 }
 </style>
 {% endblock %}
@@ -184,7 +75,7 @@ span.chunk:before {
     let $my_dialog;
 
 
-    for (song of songs) {
+    for (let song of songs) {
         if (keys.indexOf(song.key) < 0) {
             keys.push(song.key);
         }
@@ -218,7 +109,8 @@ span.chunk:before {
             div += '<input class="langs" type="checkbox" checked value="' + lang + '">' + lang_tag(lang) + '</input>';
         }
     }
-    $('#lang').html(div);*/
+    $('#lang').html(div);
+    */
 
     let table = new DataTable('#songs', {
         data: songs,
@@ -442,4 +334,3 @@ span.chunk:before {
     });
 </script>
 {% endblock %}
-</html>
