@@ -37,29 +37,28 @@
 </div>
     <!-- Container for songs -->
 <table id="songs" class="display" width="100%">
-            <thead>
-            <tr>
-                <th>Title</th>
-                <th>Key</th>
-                <th>Book</th>
-                <th>Lang</th>
-                <th>Lang2</th>
-                <th>Score</th>
-                <th>Video</th>
-            </tr>
-        </thead>
-        <tfoot>
-            <tr>
-                <th>Title</th>
-                <th>Key</th>
-                <th>Book</th>
-                <th>Lang</th>
-                <th>Lang2</th>
-                <th>Score</th>
-                <th>Video</th>
-            </tr>
-        </tfoot>
-
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Key</th>
+            <th>Book</th>
+            <th>Lang</th>
+            <th>Lang2</th>
+            <th>Score</th>
+            <th>Video</th>
+        </tr>
+    </thead>
+    <tfoot>
+        <tr>
+            <th>Title</th>
+            <th>Key</th>
+            <th>Book</th>
+            <th>Lang</th>
+            <th>Lang2</th>
+            <th>Score</th>
+            <th>Video</th>
+        </tr>
+    </tfoot>
 </table>
 <div id="dialog"></div>
 {% endblock %}
@@ -74,27 +73,43 @@
     let clicked = '';
     let $my_dialog;
 
+    /*  This code looks quite complex for getting all the keys...
+        The main use is only to make sure the keys exist in the songs...
+        The sorting also needs to be fixed (sort only works for #, not b)...
+        Just using a predefined list of keys might be easier..
+    */
+    
+    // Option 1: Old Code
+    // for (let song of songs) {
+    //     if (!keys.includes(song.key)) {
+    //         keys.push(song.key);
+    //     }
+    //     if (!langs.includes(song.lang)) {
+    //         langs.push(song.lang);
+    //     }
+    //     if (!langs.includes(song.lang_2)) {
+    //         langs.push(song.lang_2);
+    //     }
+    // }
+    // langs.sort();
+    // keys.sort();
+    // keys1 = keys.includes('A')? keys.splice(keys.indexOf('A'),1):keys1;
+    // keys1 = keys.includes('Ab')?keys1.concat(keys.splice(keys.indexOf('Ab'),1)):keys1;
+    // keys1 = keys.includes('B')?keys1.concat(keys.splice(keys.indexOf('B'),1)):keys1;
+    // keys1 = keys.includes('Bb')?keys1.concat(keys.splice(keys.indexOf('Bb'),1)):keys1;
+    // keys1.sort();
+    // keys = keys.concat(keys1);
 
-    for (let song of songs) {
-        if (keys.indexOf(song.key) < 0) {
-            keys.push(song.key);
-        }
+    // Option 2: Fast, not Dynamic
+    keys = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
 
-        if (langs.indexOf(song.lang) < 0) {
-            langs.push(song.lang);
-        }
-        if (langs.indexOf(song.lang_2) < 0) {
-            langs.push(song.lang_2);
-        }
-    }
-    langs.sort();
-    keys.sort();
-    keys1 = keys.includes('A')? keys.splice(keys.indexOf('A'),1):keys1;
-    keys1 = keys.includes('Ab')?keys1.concat(keys.splice(keys.indexOf('Ab'),1)):keys1;
-    keys1 = keys.includes('B')?keys1.concat(keys.splice(keys.indexOf('B'),1)):keys1;
-    keys1 = keys.includes('Bb')?keys1.concat(keys.splice(keys.indexOf('Bb'),1)):keys1;
-    keys1.sort();
-    keys = keys.concat(keys1);
+    // Option 3, Dynamic but with Set, requires sorting still
+    // let keySet = new Set();
+    // for (let song of songs) {
+    //     keySet.add(song.key);
+    // }
+    // keys = Array.from(keySet);
+    // keys.sort();
 
     div = 'Key: ';
     for (key of keys) {
@@ -188,10 +203,14 @@
     function get_score(data) {
         html = '';
         for (s of data.score) {
-            html += '<a href="' + s + '" target="new"><i style="font-size:24px" class="fa" title="Sheet Music">&#xf0f6;</i></a>&nbsp;&nbsp;';
+            html += `<a href="${s}" target="new">
+                    <i style="font-size:24px" class="fa" title="Sheet Music">&#xf0f6;</i>
+                    </a>&nbsp;`;
         }
         if (data.abc) {
-            html += '<a href="../sheets/' + data.id + '" target="new"><i style="font-size:24px" class="fa" title="Interacted Sheet Music">&#xf1c7;</i></a>';
+            html += `<a href="../sheets/${data.id}" target="new">
+                    <i style="font-size:24px" class="fa" title="Interacted Sheet Music">&#xf1c7;</i>
+                    </a>`;
         }
         return html;
     }
@@ -199,14 +218,21 @@
     function get_video(links) {
         html = '';
         for (v of links) {
-            html += '<a href="' + v + '" target="new"><i class="fa fa-play-circle" style="font-size:24px" title="Youtube Video"></i></a>&nbsp;&nbsp;';
+            html += `<a href="${v}" target="new">
+                    <i class="fa fa-play-circle" style="font-size:24px" title="Youtube Video"></i>
+                    </a>`;
         }
         return html;
     }
 
     function lang_tag(lang) {
         if(lang == '') { return ''; }
-        tags = {'en': '<span class="lang_en" title="English">en</span>', 'zh': '<span class="lang_zh" title="Chinese">zh</span>', 'zh-TW': '<span class="lang_zhTW" title="Taiwanese">tw</span>', 'zh-pingyin': '<span class="lang_zhpingyin" title="Zh PingYin">zh</span>', 'others': '<span class="others">na</span>'}
+        tags = {'en': '<span class="lang_en" title="English">en</span>', 
+                'zh': '<span class="lang_zh" title="Chinese">zh</span>', 
+                'zh-TW': '<span class="lang_zhTW" title="Taiwanese">tw</span>', 
+                'zh-pingyin': '<span class="lang_zhpingyin" title="Zh PingYin">zh</span>', 
+                'others': '<span class="others">na</span>'
+                }
         if (lang in tags) {
             return tags[lang];
         }
