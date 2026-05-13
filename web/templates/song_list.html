@@ -102,7 +102,7 @@
 
     // Option 2: Fast, not Dynamic
     keys = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
-
+    langs = ['en', 'zh', 'zh-TW', 'zh-pingyin'];
     // Option 3, Dynamic but with Set, requires sorting still
     // let keySet = new Set();
     // for (let song of songs) {
@@ -118,14 +118,15 @@
     div += '<input class="all_keys" type="checkbox" checked>All</input>';
     $('#key').html(div);
 
-    /*div = 'Language: ';
+    div = 'Language: ';
     for (lang of langs) {
         if (lang != '') {
             div += '<input class="langs" type="checkbox" checked value="' + lang + '">' + lang_tag(lang) + '</input>';
         }
     }
     $('#lang').html(div);
-    */
+    
+
 
     let table = new DataTable('#songs', {
         data: songs,
@@ -346,17 +347,29 @@
         table.column(1).search((d) => temp.includes(d)).draw();
     });
 
-    $('.langs').click(function() {
-        var temp = [];
-        $('.langs').each(function() {
-            if(this.checked) {
-                temp.push(this.value);
+    /* Language Filter */
+    // Use raw data values, not table.column(#).search() which only searches HTML values
+    // Ran every time table.draw is ran
+    $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
+        let checkedLangs = [];
+        $('.langs').each(function() { 
+            if(this.checked){
+                checkedLangs.push(this.value);
             }
         });
-        table.column(2).search((d) => temp.includes(d)).draw();
-        table.column(2).search(function(d) {
-        });
+        if(checkedLangs.length === 0) return false; // hide all if none selected
 
+        // row.lang and row.lang_2 are the raw language codes
+        let row = songs[dataIndex];
+
+        // If return is true, keep the row. If return is false, hide the row.
+        // In this case, Lang1 and Lang2 have to both be part of the checkedLangs.
+        return checkedLangs.includes(row.lang) && checkedLangs.includes(row.lang_2);
+    });
+
+    // Redraw table on checkbox click
+    $('.langs').click(function() {
+        table.draw();
     });
 </script>
 {% endblock %}
