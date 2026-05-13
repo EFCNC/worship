@@ -363,8 +363,8 @@
         let row = songs[dataIndex];
 
         // If return is true, keep the row. If return is false, hide the row.
-        // In this case, Lang1 and Lang2 have to both be part of the checkedLangs.
-        return checkedLangs.includes(row.lang) && checkedLangs.includes(row.lang_2);
+        // In this case, If Lang1 or Lang2 are checked, then keep it.
+        return checkedLangs.includes(row.lang) || checkedLangs.includes(row.lang_2);
     });
 
     // Redraw table on checkbox click
