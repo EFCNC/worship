@@ -122,12 +122,14 @@
                 </div>
                 <div class="card-back" {% if w.worship %}name="{{ w.worship.worship_id }}"{% endif %}>
                     {% if w.worship %}
-                        <b>Worship Team</b><br/>
-                        {% for team in w.worship.content %}
-                            {% if team.user_name != '' and team.role != '' %}
-                                {{ team.role }}:&nbsp;{{ team.user_name }}<br/>
-                            {% endif %}
-                        {% endfor %}
+                        <div class="team-info">
+                            <u><b>Worship Team</b></u><br/>
+                            {% for team in w.worship.content %}
+                                {% if team.user_name != '' and team.role != '' %}
+                                    <b>{{ team.role }}:</b>&nbsp;{{ team.user_name }}<br/>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
                         <div class="overlay_btns">
                             <button id="info_btn" name="{{ w.worship.date }}">Info</button>
                             <button id="sermon_btn" name="{{ w.worship.worship_id }}">Edit</button>
