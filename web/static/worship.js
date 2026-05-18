@@ -5,21 +5,16 @@ let API_URL = 'API/';
         device = 'mobile';
     }
 
-    if (document.addEventListener) {
-        document.addEventListener('fullscreenchange', exitHandler, false);
-        document.addEventListener('mozfullscreenchange', exitHandler, false);
-        document.addEventListener('MSFullscreenChange', exitHandler, false);
-        document.addEventListener('webkitfullscreenchange', exitHandler, false);
-    }
 
-    function exitHandler() {
-        if (!document.webkitIsFullScreen && !document.mozFullScreen && !document.msFullscreenElement) {
-            //$('#preview').hide();
-        }
-    }
 
     // functions for rendering UI
 
+    function move_top(tag) {
+        scrollTo = $('div[' + tag + ']');
+        $('html, body').animate({
+            scrollTop:$(scrollTo).offset().top - 80
+        }, 'slow');
+    }
     // UI for Adding song to song_set
     function add_song_to_worship(worship_list) {
         worship_list.empty();
