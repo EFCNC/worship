@@ -114,11 +114,13 @@ display:block;
     let team = {{ team|safe }};
     let booked = {{ booked|safe }};
     let marked = {{ marked|safe }};
+    let sunday = "{{ sunday|safe }}";
     let roles = ['', 'Lead', 'Co-lead', 'Piano']
 
     $(document).ready(function () {
         get_info();
         secondFunction();
+        move_top('date="'+sunday + '"');
     });
 
     const secondFunction = async () => {
@@ -219,7 +221,7 @@ display:block;
                 html += '</div>'
                 html += '<div class="grid-container"><div class="month_name" style="grid-column: 1 / span ' + count + '">' + d.toLocaleString('default', { month: 'long' }) + '</div><div class="sunday header">Role</div><nav class="nav"><div class="user header">Lead</div><div class="user header">Co-lead</div><div class="user header">Piano</div></nav>';
             }
-                html += '<div class="sunday">' + booked[m][0] + '</div>';
+                html += '<div date="' + booked[m][0] + '" class="sunday">' + booked[m][0] + '</div>';
                 html += '<nav class="nav">'
                 users = booked[m][1];
                 for (var i=1;i<=3;i++) {
@@ -235,6 +237,13 @@ display:block;
                 html += '</nav>';
         }
         $('#calendar-container').html(html);
+    }
+
+    function _move_top() {
+        scrollTo = $('div[date="'+sunday+'"]');
+        $('#calendar-container').animate({
+            scrollTop:$(scrollTo).offset().top-20
+        },'slow');
     }
 
     $(document).on('click', 'input[type=checkbox]', function() {

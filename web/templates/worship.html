@@ -124,6 +124,7 @@ let roster;
 let inst;
 let marked;
 let worship_id = -1;
+let sundays = {{ sundays|safe }};
 
 function pop_role(name) {
     for(i in taken_role) {
@@ -345,6 +346,8 @@ $(document).on('click', ".add_btn", function() {
 
 
 $(document).ready(function () {
+    move_top('date="'+sundays[0] + '"');
+
     $(".overlay_btns button").on('click', function () {
         id = $(this).attr('name');
         date = $(this).parent().parent().parent().attr('date')
