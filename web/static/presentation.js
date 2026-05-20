@@ -9,6 +9,7 @@
     let slides = [];
     let pos = 0;
     let order = 0;
+    let content_index = 0;
     let msg = '';
     let dynamic = '';
     let key_change = 0;
@@ -20,7 +21,7 @@
     let adding_slide = 0;
 
     // Socket Server url
-    let socket_url = window.location.hostname;
+    let socket_url = window.location.host;
     let socket = io.connect(socket_url);
 
     // init sharp and flat keys to be assigned to keys
@@ -84,14 +85,24 @@
         return html;
     }
 
+    function move_top(para) {
+        //scrollTo = $('div[' + para + ']');
+        scrollTo = $('div[class="inner present"]');
+        base = $('.preview').offset().top;
+        $('.preview').scrollTop(base);
+        console.log(base, $(scrollTo).offset().top,  $(scrollTo).position())
+        $('.preview').animate({
+            scrollTop:$(scrollTo).offset().top - base
+        },'linear');
+    }
+
     function save_slides() {
         var url = '/API/worship/' + w_id + '/edit';
         $.ajax({
             url: url,
             success: function(data) {
                 alert('Slides created');
-                //socket.emit('reload');
-                //location.reload;
+                socket.emit('reload');
                 window.location.href = '/slides/admin';
             },
             fail: function(data) {
@@ -100,126 +111,36 @@
         });
     }
 
-    function start_timer(div) {
-        /*
-            timer function to display every second
-            params div: target element to show timer
-        */
-
-        min = 0;
-        hr = 0;
-        setInterval(function() {
-            var sec = Math.floor((new Date % (1000 * 60)) / 1000);
-            sec_txt = sec;
-            if (sec < 10) {
-                sec_txt = '0'+sec;
+    function show_data(pos) {
+        data = slides[pos];
+        $('#top-left').html(data.title)
+        if (mode == 'admin') {
+            $('#fragment').empty();
+            for(var i=0;i<=5;i++) {
+                $('#fragment').append($('<option>', {
+                    value: i,
+                    text : i
+                }));
             }
-            if (sec == 0) {
-                min += 1;
-            }
-            if (min == 60) {
-                min = 0;
-                hr += 1;
-            }
-            min_txt = min;
-            if (min < 10) {
-                min_txt = '0'+min;
-            }
-            div.html(hr + ':' + min_txt + ':' + sec_txt);
-        }, 1000);
-    }
-
-    function move_remote(num) {
-        /*
-            function to move slide up and down, this will change the global variable for pos and order
-            params num: 1 or -1
-        */
-        order = order + num;
-        if (order >= slides[pos].content.length) {
-            pos += 1;
-            if(pos<=slides.length-1) {
-                order = 0;
-            }
-            else {
-                pos -= 1;
-                order -= 1;
-            }
-        }
-        else if (order < 0) {
-            pos -= 1;
-            if(pos<0) {
-                pos = 0;
-                order = 0;
-            }
-            else {
-                order = slides[pos].content.length-1;
-            }
-        }
-        socket.emit('control', {'type': 'pos', 'value': [pos, order]});
-    }
-
-
-    function move(type, num) {
-        /*
-            function to move song or slide, this will change the global variable for pos and order
-            params type: 0 is song order, 1 is slide order
-            params num: number to move
-        */
-
-        if (type == 0) {
-            pos = pos + num;
-            pos = pos<0 ? 0:pos;
-            pos = pos>=slides.length ? pos-1:pos;
-            order = 0;
+            $('#fragment').val(data.style.fragment);
         }
         else {
-            order = order + num;
-            order = order<0 ? 0:order;
-            if (mode=='lead') {
-                if (order >= slides[pos].content.length) {
-                    if (pos+1<slides.length-1) {
-                        order = 0;
-                        pos += 1;
-                    }
-                    else {
-                        order = order;
-                    }
-                }
-            }
-            else {
-                order = order>=slides[pos].content.length? order-1:order;
-            }
+            b_left = [data.book, data.copyright, data.ccli];
+            b_left = b_left.filter(n => n)
+            $('#bottom-left').html(b_left.join(' · '))
         }
-
-        // Load presentation with new pos, order
-        load(preview);
-
-        // Send data back to socket server
-        if (mode == 'admin' || mode == 'lead') {
-            socket.emit('control', {'type': 'pos', 'value': [pos, order]});
-        }
+        b_right = [data.author, data.lyricist];
+        b_right = b_right.filter(n => n)
+        $('#bottom-right').html(b_right.join(' / '));
     }
 
-    function preview_btn(data) {
-        /*
-            function to generate preview button
-            params data: data of current song/slide
-        */
-
-        div = '';
-        if (!Array.isArray(data)) {
-            $('#preview_div').html(div);
-            return false;
+    function show_msg() {
+        if (msg != '') {
+            $('#top-right').html(msg).fadeIn("slow");
         }
-        for (i in data) {
-            if (i == order) {
-                div += '<div class="inner current" id="current_' + i + '"><div>' + data[i].name + '</div>' + data[i].origin_text + '</div>';
-            }
-            else {
-                div += '<div class="inner" id="current_' + i + '"><div>' + data[i].name + '</div>' + data[i].origin_text + '</div>';
-            }
+        else {
+            $('#top-right').fadeOut("slow").empty();
         }
-        $('#preview_div').html(div);
     }
 
     function show_notes(text) {
@@ -249,11 +170,10 @@
 
     function load_container(mode_name) {
         container = {
-            'view': '<div id="top-left"></div><div id="top-right"></div><div id="preview" class="preview view"></div><div id="bottom-left"></div><div id="bottom-right"></div>',
+            'view': '<div id="top-left"></div><div id="top-right"></div><div id="preview" class="preview view"></div><div class="reveal"><div class="slides"></div></div><div id="bottom-left"></div><div id="bottom-right"></div>',
             'musician': '<div id="top-left"></div><div id="top-right"></div><div id="preview" class="preview view"></div><div id="bottom-left"></div><div id="bottom-right"></div>',
             'score': '<div id="top-left"></div><div id="top-right"></div><div id="preview" class="preview view"><object id="sheets" type="text/html" style="width:100%; height:100%; margin:1%;"></object></div><div id="bottom-left"></div><div id="bottom-right"></div>',
-            'lead': '<div id="top-right"></div><div class="preview_container"><div id="preview"></div><div id="menu"><div id="dynamic_btn"><br/><button name="dynamic" title="Intro">Intro</button><button name="dynamic" title="Interlude">Interlude</button><button name="dynamic" title="Ending">Ending</button><br/><button name="dynamic" title="Ready to Build up">Build Up</button><button name="dynamic" title="Slow Down">Slow Down</button><button name="dynamic" title="Speed Up">Speed Up</button><br/><button name="dynamic" title="Acapella">Acapella</button><button name="dynamic" title="Repeat Chorus">Repeat Chorus</button><button name="dynamic" title="Last Sentence">Last Sentence</button><div id="key_change"></div></div><div id="notes"></div></div><div id="preview_div"></div></div>',
-            'remote': '<div id=buttons><button id="btn_previous">Up</button><button id="btn_next">Down</button></div>'
+            'lead': '<div id="top-right"></div><div class="preview_container"><div id="preview"></div><div id="menu"><div id="dynamic_btn"><br/><button name="dynamic" title="Intro">Intro</button><button name="dynamic" title="Interlude">Interlude</button><button name="dynamic" title="Ending">Ending</button><br/><button name="dynamic" title="Ready to Build up">Build Up</button><button name="dynamic" title="Slow Down">Slow Down</button><button name="dynamic" title="Speed Up">Speed Up</button><br/><button name="dynamic" title="Acapella">Acapella</button><button name="dynamic" title="Repeat Chorus">Repeat Chorus</button><button name="dynamic" title="Last Sentence">Last Sentence</button><div id="key_change"></div></div><div id="notes"></div></div><div id="preview_div"></div></div>'
         }
         if (mode_name) {
             return container[mode_name];
@@ -261,142 +181,90 @@
         return container[mode]
     }
 
-    function load(div) {
-        /*
-            function to load presentation, it will display the content based on current pos and order
-            params div: target div to load presentation
-        */
-        if (!slides) {  // If no slides data, connect server to reload
-            socket.emit('reload');
+    function create_view(type, origin, region, name) {
+        let grid = document.createElement('div');
+        grid.setAttribute('name', name);
+        let grid_o = document.createElement('div');
+        if (mode == 'admin') {
+            grid_o.setAttribute('contentEditable', 'true');
         }
-
-        if (msg) {
-            $("#top-right").html(msg);
-            $("#top-right").fadeIn();
+        grid_o.setAttribute('class', type + ' origin');
+        let grid_r = document.createElement('div');
+        if (mode == 'admin') {
+            grid_r.setAttribute('contentEditable', 'true');
         }
-        else {
-            $("#top-right").fadeOut();
-        }
-
-        if (dynamic) {
-            if (mode == "musician" || mode == "score") { // only musician and score mode will see the dynamic notification
-                $("#top-left").html(dynamic);
-                $("#top-left").fadeIn();
-            }
-        }
-        else {
-            $("#top-left").fadeOut();
-        }
-
-        if(mode == 'score') {
-            if ($('#sheets').attr('data')) {
-                return false;
-            }
-                ids = slides.map((item, index)=>(item.id));
-                url = '/sheets/' + ids.toString();
-                $('#sheets').attr('data', url);
-            return false;
-        }
-        if (last_position[0] == pos && last_position[1] == order) { // If the change is not about position, then skip loading preview div
-            return;
-        }
-        data = slides[pos];
-        var slide = document.createElement('div');
-        slide.setAttribute('name', pos);
-        slide.setAttribute('class', 'content');
-        if (data.type == 'song') {
-            l = data.content[order];
-            transpose = key_change;
-            if (mode == 'musician') {     // musician mode will only show original lyrics with chord
-                chords = l.origin_chord;
-                if (transpose !=0 && dynamic.indexOf('Prepare to')<0) {
-                    chords = chords.replace(/(data-chord=")([^"]+)/g, (match, g1, g2) => {return g1+parse_chord(g2, transpose);});
-                }
-                temp = '<div class="song_chord" name="' + l.name + '">' + chords + '</div>';
-                next = order+1;
-                if (data.content[next]) {
-                    n = data.content[next];
-                    text = n.origin_chord.split('<br/>')[0]
-                    if (transpose !=0) {
-                        chords = chords.replace(/(data-chord=")([^"]+)/g, (match, g1, g2) => {return g1+parse_chord(g2, transpose);});
-                    }
-                    if (key_change!=0) {
-                        text = text.replace(/(data-chord=")([^"]+)/g, (match, g1, g2) => {return g1+parse_chord(g2, key_change);});
-                    }
-                    temp += '<div class="song_chord next"' + n.name + '">' + text + '</div>';
-                }
-                /*if (mode == 'score') {
-                    if(data.score) {
-                        if(['bmp', 'jpg', 'png', 'gif'].some(char => data.score.endsWith(char))) {
-                            temp = '<img src="' + data.score + '" style="max-width: 100%;max-height: 100vh;margin: auto;"/>';
-                        }
-                        else {
-                            temp = '<iframe id="score" src="' + data.score + '" frameborder="0" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true" onload="this.width=screen.width;this.height=screen.height;"></iframe>';
-                        }
-                    }
-                }*/
-                slide.innerHTML += temp;
-            }
-            else {  // show both original and region content
-                $("#bottom-left").html(data.title + ' (' + data.author + ')');
-                $("#bottom-right").html(data.copyright + ' ' + data.ccli);
-                $("#title").html('');
-                if (l) {
-                    slide.innerHTML += show_lyrics(l, data.lang, data.lang_2);
-                }
-            }
-        }
-        else if (data.type == 'info') {     // If slide type is info, display data.notes. TODO: info slide will be treated the same way song is displayed
-            $("#bottom-left").html(data.title);
-            $("#title").html(data.title);
-            $("#bottom-right").html(data.book);
-            html = show_info(data.content, data.style.align);
-            slide.innerHTML += html;
-        }
-        else if (data.type == 'link') {
-            $("#bottom-left").html(data.title);
-            $("#bottom-right").html(data.book);
-            if(mode=='admin' || mode=='lead') {
-                html = '<div class="' + mode + ' link"><iframe src="' + data.content + '" frameborder="0" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe><br/><textarea row="5" cols="60" id="google_url">' + data.content + '</textarea>';
-            }
-            else {
-                html = '<div class="' + mode + ' link"><iframe src="' + data.content + '" frameborder="0" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true" onload="this.width=screen.width;this.height=screen.height;"></iframe>';
-            }
-            slide.innerHTML += html;
-        }
-
-        if(mode=='admin' || mode=='lead') {     // for admin and lead, show slide notes
-            if ('transpose' in data) {
-                $('#key_change').html(get_transpose(data.key, data.transpose))
-            }
-            html = '<div class="' + mode + ' notes" ';
-            html += show_notes(data.notes);
-            $("#notes").html(html);
-            preview_btn(data.content);
-        }
-
-        div.empty();
-        div.append(slide);
-        if (mode != 'score' && mode != 'remote') {
-            fit_div(slide);
-        }
-
-        if (data.style.background) {
-            if (mode != 'musician' && mode != 'score') { // Musician mode doesn't need background
-                div.css('background-image', 'url("' + data.style.background + '")');
-                if(data.type == 'image') {
-                    div.css('background-size', 'contain');
-                }
-            }
-        }
-        else {
-            div.css('background-image', '');
-        }
-        last_position = [pos, order];
-        $('.content').hide().fadeIn('slow');
+        grid_r.setAttribute('class', type + ' region');
+        grid_o.innerHTML = origin;
+        grid_r.innerHTML = region;
+        grid.append(grid_o, grid_r);
+        return grid;
     }
 
-    function update_json() {
+    function load_slides() {
+        $('.slides').empty();
+        $('#slide_title').html(slides[0].title);
+        $('#slide_notes').html(slides[0].notes);
+        for(var i=0;i<slides.length;i++) {
+            data = slides[i];
+            bg = data.style.background;
+            let section = document.createElement('section');
+            if (bg) {
+                bg_url = bg;
+                bg_opacity = data.style.opacity
+                section.setAttribute('data-background-image', bg_url);
+                section.setAttribute('data-background-opacity', bg_opacity);
+            }
+            fragment = data.style.fragment;
+            if(data.type == 'info') {
+			    if (fragment > 0) {
+			        origin_ = data.content.origin_text.split('<br/>').filter(n => n);
+			        region_ = data.content.region_text.split('<br/>').filter(n => n);
+			        while(origin_.length>0) {
+			            o_fragment = origin_.splice(0, fragment).map(obj=>'<li>'+obj+'</li>').join('')
+			            r_fragment = region_.splice(0, fragment).map(obj=>'<li>'+obj+'</li>').join('')
+				        let sub_section = document.createElement('section');
+				        let ui = document.createElement('ui');
+				        ui.append(create_view(data.type, o_fragment, r_fragment));
+				        console.log(ui);
+				        sub_section.append(ui);
+      			        section.append(sub_section);
+			        }
+			    }
+			    else {
+                    section.append(create_view(data.type, data.content.origin_text, data.content.region_text, 'info'));
+                }
+		    }
+		    else if (data.type == 'song') {
+			    for(var j=0;j<data.content.length;j++) {
+			        s_name = data.content[j].name;
+			        if (fragment > 0) {
+			            origin_ = data.content[j].origin_text.split('<br/>').filter(n => n);
+			            region_ = data.content[j].region_text.split('<br/>').filter(n => n);
+			            while(origin_.length>0) {
+			                o_fragment = origin_.splice(0, fragment).join('<br/>')
+			                r_fragment = region_.splice(0, fragment).join('<br/>')
+				            let sub_section = document.createElement('section');
+				            sub_section.append(create_view(data.type, o_fragment, r_fragment, s_name));
+      			            section.append(sub_section);
+			            }
+			        }
+			        else {
+				        let sub_section = document.createElement('section');
+				        sub_section.append(create_view(data.type, data.content[j].origin_text, data.content[j].region_text, s_name));
+  			            section.append(sub_section);
+    			    }
+			    }
+		    }
+		    else if (data.type == 'media') {
+		        let sub_section = document.createElement('section');
+				sub_section.setAttribute('data-background-iframe', data.content.origin_text);
+  			    section.append(sub_section);
+		    }
+    		$('.slides').append(section);
+    	}
+    }
+
+    function update_json(download) {
     data = JSON.stringify(slides);
         $.ajax({
             type: "post",
@@ -406,44 +274,45 @@
             dataType: 'json',
             complete: function(response) {
                 if(response.status==200) {
-                    socket.emit('reload');
+                    if(download) {
+                        window.location = '/API/download?file=' + response.responseText;
+                    }
+                    else {
+                        socket.emit('reload');
+                    }
                 }
             }
         });
     }
 
-    function fit_div(div) {
-        $div = jQuery(div);
-        kids = $div.children();
-        var new_font_size = 0;
-        for (var i=0;i<kids.length;i++) {
-            var overflow = true;
-            counter = 0;
-            content_height = kids[i].scrollHeight;
-            if (mode == 'musician') {
-                div_height = $("#preview").height()-65;
-                if (i>0 && new_font_size > 0) { // For musician view only, if there is previous set new_font_size, then the remaining div will use it
-                    $temp = jQuery(kids[i]);
-                    $temp.css('font-size', new_font_size);
-                    break;
-                }
-            }
-            else {
-                div_height = $("#preview").height()/kids.length-65;
-            }
-            while (overflow && counter < 15) {
-                if (content_height <= div_height) {
-                    break;
-                }
-                counter++;
-                $temp = jQuery(kids[i])
-                console.log("Content is too long", $temp.css('font-size'));
-                new_font_size = parseInt($temp.css('font-size')) - 2;
-                $temp.css('font-size', new_font_size);
-                content_height = kids[i].scrollHeight;
-            }
-        }
-    }
+
+    // socket.io event
+
+    socket.on('connect', function () {
+        console.log('connected to the server. I am ' , mode);
+    });
+
+    socket.on('reload', function (presentation) {
+        console.log('Admin reload json data');
+        slides = presentation['data'];
+        w_id = presentation['id'];
+        adding_slide = 0;
+        location.reload()
+    });
+
+    socket.on('response', function (data) {
+        pos = data.pos[0];
+        order = data.pos[1];
+        msg = data.msg;
+        dynamic = data.dynamic;
+        // TODO: For musician key change
+        key_change = data.key;
+        console.log('Server sent: pos:', pos, 'order', order, 'msg:', msg, 'key:', key_change, 'dynamic:', dynamic);
+        Reveal.slide(pos, order);
+        show_data(pos);
+        show_msg();
+    });
+
 
     // contentEditable for origin, region, title, and notes
     let div_content = {};
@@ -495,95 +364,3 @@
         }
     });
 
-    // Events listener for admin view only
-    $(document).on('keyup',function(e) {
-
-        // If the keyup is inside content box, ignore them
-        if (Object.keys(div_content).length > 0 || adding_slide == 1) {
-            return false;
-        }
-
-        var code = e.keyCode || e.which;
-        /* left=37, previous set;
-           up=38, previous slide;
-           right=39, next set;
-           space=32, next slide;
-           down=40, next slide;
-           enter=13, next slide;
-        */
-        //key_code = [13, 32, 37, 38, 39, 40]; //remove 67 and 109 for now
-        key_code = [37, 38, 39, 40]; //remove 13 and 32 for now
-        if (key_code.indexOf(code)>=0) {
-            switch(code) {
-                case 13:
-                    move(1, 1);
-                    break;
-                case 32:
-                    move(1, 1);
-                    break;
-                case 40:
-                    move(1, 1);
-                    break;
-                case 38:
-                    move(1, -1);
-                    break;
-                case 37:
-                    move(0, -1);
-                    break;
-                case 39:
-                    move(0, 1);
-                    break;
-            }
-        }
-        return false;
-    });
-
-    $(window).on('resize', function() {
-        let width = $("#preview").height() * ratio;
-        $("#preview").width(width);
-        update_json();
-    });
-
-
-let touchstartX;
-let touchstartY;
-let touchendX;
-let touchendY;
-
-function valid_move(x, y) {
-    xx = Math.abs(x);
-    yy = Math.abs(y);
-    if (xx > 100 || yy > 100) {
-        direction = xx>yy? ['x', x]:['y', y];
-        return direction;
-    }
-    return false;
-}
-
-function handleGesture() {
-    x = touchendX - touchstartX;
-    y = touchendY - touchstartY;
-    position = valid_move(x, y);
-    if (position) {
-        if (position[0] == 'x') {
-            if (position[1] > 0) {
-                console.log('Swiped Right');
-                move(0, -1);
-            }
-            else {
-                console.log('Swiped Left');
-                move(0, 1);
-            }
-        }
-        else {
-            if (position[1] > 0) {
-                console.log('Swiped Down');
-                move(1, -1);
-            }
-            else {
-                console.log('Swiped Up');
-                move(1, 1);
-            }
-        }
-    }
-}

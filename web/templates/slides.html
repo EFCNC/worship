@@ -1,7 +1,13 @@
-{% include 'header.html' %}
+    <script src="../static/jquery.js"></script>
+    <script src="../static/jquery-ui.js"></script>
     <script src="../static/socket.io.js"></script>
     <script src="../static/presentation.js"></script>
-    <link href="../static/presentation.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/dist/reset.css">
+	<link rel="stylesheet" href="/static/dist/reveal.css">
+	<link rel="stylesheet" href="/static/dist/theme/black.css">
+	<link rel="stylesheet" href="/static/presentation.css">
+	<script src="/static/dist/reveal.js"></script>
+
     <style>
         html {
             height: 100%;
@@ -13,30 +19,6 @@
         }
     </style>
     <script>
-    // Prevent windows back button
-
-    history.pushState(null, null, document.URL);
-    window.addEventListener('popstate', function () {
-        history.pushState(null, null, document.URL);
-    });
-
-    let preview;    // Declare target div for load() function
-
-    socket.on('connect', function () {
-        console.log('connected to the server');
-    });
-
-    socket.on('response', function (data) {
-        console.log('Server sent: ' + data);
-        slides = data.data;
-        pos = data.pos[0];
-        order = data.pos[1];
-        msg = data.msg;
-        dynamic = data.dynamic;
-        key_change = data.key;
-        background = data.background;
-        load(preview);
-    });
 
     // init data from flask
         presentation = {{ presentation|safe }};
@@ -64,7 +46,7 @@
         }
     }
 
-    function show_msg(){
+    function _show_msg(){
         $('#top-right').html(msg);
         if (msg != '') {
             $('#top-right').show();
@@ -73,16 +55,6 @@
             $('#top-right').hide();
         }
     }
-
-    // function for remote view only
-
-    $(document).on('click', '#btn_previous', function(){
-        move_remote(-1);
-    });
-
-    $(document).on('click', '#btn_next', function(){
-        move_remote(1);
-    });
 
     // function for lead view only
     $(document).on('click', '#preview_div div', function(){
@@ -100,38 +72,37 @@
         socket.emit('control', {'type': 'dynamic', 'value': msg});
     });
 
-    // functions for init page
-    $(document).on('click', '#control_btn button', function() {
-        mode_ = $(this).attr('name');
-        document.location.href = 'slides/'+ mode_;
-    });
-
-    /*$(document).on('change', '#key', function (event) {
-        transpose = keys.indexOf(this.value)-keys.indexOf($(this).attr('init'));
-        socket.emit('control', {'type': 'key', 'value': transpose});
-    })*/
-
-    $(document).on('touchstart', '#preview', function (event) {
-        touchstartX = event.changedTouches[0].screenX;
-        touchstartY = event.changedTouches[0].screenY;
-    });
-
-    $(document).on('touchend', '#preview', function (event) {
-        touchendX = event.changedTouches[0].screenX;
-        touchendY = event.changedTouches[0].screenY;
-        handleGesture();
-    });
-
     $(document).ready(function() {
+        $('#header').hide();
+		Reveal.initialize({
+			hash: false,
+			slideNumber: false,
+			loop: false,
+			overview: false,
+			progress: false,
+			controls: false
+		});
         if (mode) {
-            init();
+            load_slides();
         }
+    });
+
+    Reveal.on('slidechanged', (event) => {
+        pos = event.indexh;
+        order = event.indexv;
+        console.log("slide changed", pos, order);
+        Reveal.slide(pos, order);
+        show_data(pos);
     });
 
 </script>
 </head>
 <body>
-<div id="control_btn"><button name="admin">Admin</button>&nbsp;<button name="lead">Lead</button>&nbsp;<button name="view">View</button>&nbsp;<button name="musician">Musician</button>&nbsp;<button name="score">Score</button>&nbsp;<!--<button name="remote">Remote</button>--></div>
-<div id="container"></div>
+<div id="top-left"></div><div id="top-right"></div>
+    <div class="reveal">
+		<div class="slides"></div>
+	</div>
+<div id="bottom-left"></div><div id="bottom-right"></div>
+<div id="popup"></div>
 </body>
 </html>

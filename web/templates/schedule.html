@@ -239,13 +239,6 @@ display:block;
         $('#calendar-container').html(html);
     }
 
-    function _move_top() {
-        scrollTo = $('div[date="'+sunday+'"]');
-        $('#calendar-container').animate({
-            scrollTop:$(scrollTo).offset().top-20
-        },'slow');
-    }
-
     $(document).on('click', 'input[type=checkbox]', function() {
         user_id = $.cookie("user_id");
         mark = $(this).is(':checked')? 1:0;

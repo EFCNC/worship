@@ -4,6 +4,7 @@ from app import tools as Tools
 import os
 
 api = Blueprint('api', __name__, template_folder='templates')
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 # Worship section
 @api.route("/worship/<id>/json", methods=["GET", "POST"])
@@ -85,6 +86,23 @@ def duplicate_info():
 @api.route("/info/delete/<id>")
 def del_info(id):
     return Utils.del_info_by_id(id)
+
+@api.route("/upload",  methods=["POST"])
+def upload():
+    if 'file' not in request.files:
+        msg = 'No file part'
+        return msg, 400
+    file = request.files['file']
+
+    # check if the file has been uploaded
+    if file and __allowed_file(file.filename):
+        filename = file.filename
+        root = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'web', 'static', 'img')
+        try:
+            file.save(os.path.join(root, filename))
+            return '/static/img/{}'.format(filename), 200
+        except Exception as e:
+            return e, 500
 
 @api.route("/download")
 def download():
@@ -214,7 +232,7 @@ def list_book():
     :return: bible books
     '''
 
-    result = Utils.bible_book()
+    result = Utils.bible_books('cmn_cuv')
     return result
 
 @api.route("/search/bible")
@@ -356,3 +374,6 @@ def edit_rollcall(id):
 def sql():
     sql = request.args.get('sql', None)
     return Utils.run_sql(sql)
+
+def __allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS

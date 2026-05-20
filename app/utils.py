@@ -52,6 +52,12 @@ def search_song_efcnc(keyword):
     titles = [{'id': x[0], 'title': x[1], 'lang': x[2] if x[2] else '', 'lang_2': x[3] if x[3] else '', 'key': x[4] if x[4] else '', 'video': x[5] if x[5] else '', 'score': x[6] if x[6] else '', 'abc': x[0] if x[7] else ''} for x in result]
     return titles
 
+def bible_books(translation):
+    url = 'https://bible.helloao.org/api/{translation}/books.json'.format(translation=translation)
+    headers = {'Content-Type': 'application/json'}
+    content = requests.get(url, headers=headers)
+    return content.json()
+
 def bible_book():
     key = conf["bibleAPI"]["key"]
     endpoint = conf["bibleAPI"]["url"]
@@ -59,7 +65,7 @@ def bible_book():
     url = 'https://api.scripture.api.bible/v1/bibles/de4e12af7f28f599-01/books'
     headers = {'api-key': key, 'Content-Type': 'application/json'}
     content = requests.get(url, headers=headers)
-    print(content)
+    print(content.json())
     return content.json()
 
 def search_bible(keyword, offset, range=None):
@@ -622,7 +628,7 @@ def get_worship_songs(id):
     result = dB.run_para(sql, id)
     songs = []
 
-    style = {'align': '', 'background': '', 'color': '', 'bgcolor': ''}
+    style = {'align': '', 'background': '', 'opacity': 1, 'color': '', 'bgcolor': '', 'fragment': 0}
     for r in result:
         if r[22] == 'info':
             songs.append({'type': r[22], 'title': r[19] if r[19] else r[18][0:10], 'author': '', 'lang': '', 'lang_2': '', 'key': '', 'sequence': '', 'bible': '', 'lyricist': '', 'book': '', 'copyright': '', 'ccli': '', 'lyrics_raw': '', 'content': '', 'video': '', 'score': '', 'date': r[14], 'id': r[21], 'transpose': r[16].split(','), 'alt_sequence': '', 'notes': r[18] if r[18] else '', 'version': r[20] if r[20] else '', 'style': style})

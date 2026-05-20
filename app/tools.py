@@ -119,22 +119,12 @@ def create_json(id, worship=None):
         template["sermon"]["content"]["origin_text"] = '<div>{title}</div><div><br></div><div>{bible}</div>'.format(bible=sermon['bible'], title=sermon['title'])
         template["sermon"]["content"]["region_text"] = '<div></div><div>{speaker}</div><div>{outline}</div>'.format(outline=sermon['outline'], speaker=sermon['speaker'])
 
-        '''
-        Adding slides in the order of the following, to switch order just move the block up and down
-            welcome page
-            announcement
-            worship songs
-            sermon
-            offering
-            caring/prayers
-            benediction
-        '''
-        worship.insert(0, template["welcome"])
-        worship.insert(1, template["announcement"])
-        worship.append(template["sermon"])
-        worship.append(template["offering"])
-        worship.append(template["caring"])
-        worship.append(template["benediction"])
+        order = template["order"]
+        temp = []
+        for item in order:
+            if item in template:
+                temp.append(template[item])
+        worship_json = {"setting": {"slide_order": order, "assets": []}, "slides": temp}
 
     else:
         worship_date = Utils.get_worship_date(id)[0]
@@ -145,7 +135,7 @@ def create_json(id, worship=None):
 
     json_file = os.path.join(path, '{}_{}.json'.format(worship_date, id))
     with open(json_file, "w", encoding="utf-8") as f:
-        json.dump(worship, f, indent=4, ensure_ascii=False)
+        json.dump(worship_json, f, indent=4, ensure_ascii=False)
 
     return json_file
 

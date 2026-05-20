@@ -23,7 +23,7 @@ app = Flask(__name__)
 # register blueprint of API
 app.register_blueprint(api, url_prefix='/API')
 
-slides_data = {'pos': [0, 0], 'data': [], 'msg': '', 'dynamic': '', 'key': 0, 'background': [], 'id': 0}
+slides_data = {'pos': [0, 0, 0], 'data': [], 'setting': {'slide_order': ["promote", "welcome", "announcement", "song", "sermon", "offering", "caring", "benediction"], 'assets': []}, 'msg': '', 'dynamic': '', 'key': 0, 'background': [], 'id': 0, 'assets': []}
 client = {'admin': [], 'lead': [], 'musician': [], 'view': []}
 client_mode = ''
 
@@ -254,11 +254,21 @@ def calendar():
 	column, calendar = Utils.get_calendar(year)
 	return render_template('calendar.html', column=column, calendar=calendar)
 
+@app.route("/assets")
+def assets():
+	setting = slides_data['setting']
+	assets = sorted(setting['assets'], key=lambda d: d['type'])
+	promote = [x for x in setting['assets'] if x['inused'] == 1]
+	print(assets, promote)
+
+	return render_template('slides_assets.html', setting=setting, assets=assets, promote=promote)
+
 @app.route("/schedule")
 def schedule():
 	now = datetime.now()
 	year = str(now.year)
-	allsundays = __get_sundays()['all']
+	sundays = __get_sundays()
+	allsundays = sundays['all']
 	assigned = []
 	booked = Utils.list_team(year)
 	for sun in allsundays:
@@ -268,7 +278,7 @@ def schedule():
 			assigned.append([sun, []])
 	team = Utils.list_team()
 	marked = Utils.get_marked_user()
-	return render_template('schedule.html', booked=assigned, team=team, marked=marked)
+	return render_template('schedule.html', booked=assigned, team=team, marked=marked, sunday=sundays['sunday'])
 
 
 @app.route("/profile")
@@ -326,7 +336,7 @@ def __get_sundays():
 
 def _init_slide():
 	global slides_data
-	slides_data = {'pos': [0, 0], 'data': [], 'msg': '', 'dynamic': '', 'key': 0, 'background': [], 'id': 0}
+	slides_data = {'pos': [0, 0], 'data': [], 'setting': {'slide_order': ["promote", "welcome", "announcement", "song", "sermon", "offering", "caring", "benediction"], 'assets': []}, 'msg': '', 'dynamic': '', 'key': 0, 'background': [], 'id': 0, 'assets': []}
 
 def __update_client(mode, id):
 	if mode:
@@ -349,8 +359,11 @@ def __get_slide_json():
 	global slides_data
 	if not slides:
 		return None
+	setting = slides['setting']
+	slides = slides['slides']
 	slides_data['id'] = id
 	slides_data['data'] = slides
+	slides_data['setting'] = setting
 	slides_data['pos'] = [0, 0]
 	if slides[0]['type'] == 'song':
 		slides_data['key'] = slides[0]['transpose'][0]

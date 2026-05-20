@@ -1,4 +1,5 @@
 {
+   "order": ["promote", "welcome", "announcement", "song", "sermon", "offering", "caring", "benediction"],
    "welcome":{
       "bible":"",
       "content":{
@@ -11,8 +12,10 @@
       "style":{
          "align":"center",
          "background":"",
+         "opacity": 1,
          "color":"",
-         "bgcolor":""
+         "bgcolor":"",
+         "fragment": 0
       },
       "title":"安靜心",
       "type":"info"
@@ -29,8 +32,10 @@
       "style":{
          "align":"left",
          "background":"",
+         "opacity": 1,
          "color":"",
-         "bgcolor":""
+         "bgcolor":"",
+         "fragment": 0
       },
       "title":"報告",
       "type":"info"
@@ -47,8 +52,10 @@
       "style":{
          "align":"left",
          "background":"",
+         "opacity": 1,
          "color":"",
-         "bgcolor":""
+         "bgcolor":"",
+         "fragment": 0
       },
       "title":"肢體交通",
       "type":"info"
@@ -78,8 +85,10 @@
       "style":{
          "align":"center",
          "background":"",
+         "opacity": 1,
          "color":"",
-         "bgcolor":""
+         "bgcolor":"",
+         "fragment": 0
       },
       "title":"我的性命獻互祢",
       "type":"song"
@@ -89,7 +98,11 @@
       "author": "",
       "style": {
          "align": "center",
-         "background": ""
+         "background": "",
+         "opacity": 1,
+         "color":"",
+         "bgcolor":"",
+         "fragment": 0
       },
       "bible": "",
       "book": "",
@@ -115,8 +128,10 @@
       "style":{
          "align":"center",
          "background":"",
+         "opacity": 1,
          "color":"",
-         "bgcolor":""
+         "bgcolor":"",
+         "fragment": 0
       },
       "title":"祝禱 BENEDICTION",
       "type":"info"
