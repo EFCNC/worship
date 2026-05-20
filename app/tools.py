@@ -112,6 +112,8 @@ def create_json(id, worship=None):
         c_origin = '<ul>' + c_origin + '</ul>' if c_origin else ''
         c_region = '<ul>' + c_region + '</ul>' if c_region else ''
 
+        template["promote"] = []
+        template["song"] = []
         template["announcement"]["content"]["origin_text"] = a_origin
         template["announcement"]["content"]["region_text"] = a_region
         template["caring"]["content"]["origin_text"] = c_origin
@@ -123,7 +125,11 @@ def create_json(id, worship=None):
         temp = []
         for item in order:
             if item in template:
-                temp.append(template[item])
+                if item == 'song':
+                    for song in worship:
+                        temp.append(song)
+                else:
+                    temp.append(template[item])
         worship_json = {"setting": {"slide_order": order, "assets": []}, "slides": temp}
 
     else:
