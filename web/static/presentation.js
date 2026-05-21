@@ -265,7 +265,7 @@
     }
 
     function update_json(download) {
-    data = JSON.stringify(slides);
+    data = JSON.stringify({"setting": setting, "slides": slides});
         $.ajax({
             type: "post",
             url: "/API/worship/" + w_id + "/json",

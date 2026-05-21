@@ -133,6 +133,7 @@ def create_json(id, worship=None):
 
     else:
         worship_date = Utils.get_worship_date(id)[0]
+        worship_json = worship
 
     path = os.path.join(root, 'json')
     if not os.path.exists(path):
