@@ -225,7 +225,6 @@
 				        let sub_section = document.createElement('section');
 				        let ui = document.createElement('ui');
 				        ui.append(create_view(data.type, o_fragment, r_fragment));
-				        console.log(ui);
 				        sub_section.append(ui);
       			        section.append(sub_section);
 			        }

@@ -17,6 +17,12 @@
         body {
             overflow: hidden;
         }
+        div {
+            padding: 30px 10px;
+        }
+        button {
+            font-size:30px
+        }
     </style>
     <script>
 
@@ -43,16 +49,6 @@
         }
         else if (mode == 'view' || mode == 'musician') {
             $('#header').hide();
-        }
-    }
-
-    function _show_msg(){
-        $('#top-right').html(msg);
-        if (msg != '') {
-            $('#top-right').show();
-        }
-        else {
-            $('#top-right').hide();
         }
     }
 
@@ -84,6 +80,13 @@
 		});
         if (mode) {
             load_slides();
+        }
+        else {
+            $('body').html('<div><button name="admin">Admin</button>&nbsp;<button name="lead">Lead</button>&nbsp;<button name="view">View</button>&nbsp;<button name="musician">Musician</button>&nbsp;<button name="score">Score</button>&nbsp;</div>');
+            $('button').click(function() {
+                name = $(this).attr('name');
+                window.location.href = '/slides/' + name;
+            });
         }
     });
 

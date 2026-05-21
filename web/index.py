@@ -130,7 +130,7 @@ def slides_viewer(mode=None):
 		if len(client['lead']) > 0:
 			__update_client_mode('')
 			return "<script>alert('Only one Lead mode can be connected, please use different mode.');window.location.replace('../slides');</script>"
-		return render_template('slides.html', presentation=slides_data, mode=mode)
+		return render_template('slides_lead.html', presentation=slides_data, mode=mode)
 	return render_template('slides.html', presentation=slides_data, mode=mode)
 
 
@@ -365,9 +365,6 @@ def __get_slide_json():
 	slides_data['data'] = slide
 	slides_data['setting'] = setting
 	slides_data['pos'] = [0, 0]
-	print(slides['slides'])
-	#if slide['type'] == 'song':
-	#	slides_data['key'] = slide['transpose'][0]
 	slides_data['msg'] = ''
 	slides_data['dynamic'] = ''
 	return True
