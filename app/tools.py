@@ -112,7 +112,6 @@ def create_json(id, worship=None):
         c_origin = '<ul>' + c_origin + '</ul>' if c_origin else ''
         c_region = '<ul>' + c_region + '</ul>' if c_region else ''
 
-        template["promote"] = []
         template["song"] = []
         template["announcement"]["content"]["origin_text"] = a_origin
         template["announcement"]["content"]["region_text"] = a_region

@@ -360,13 +360,14 @@ def __get_slide_json():
 	if not slides:
 		return None
 	setting = slides['setting']
-	slides = slides['slides']
+	slide = slides['slides']
 	slides_data['id'] = id
-	slides_data['data'] = slides
+	slides_data['data'] = slide
 	slides_data['setting'] = setting
 	slides_data['pos'] = [0, 0]
-	if slides[0]['type'] == 'song':
-		slides_data['key'] = slides[0]['transpose'][0]
+	print(slides['slides'])
+	#if slide['type'] == 'song':
+	#	slides_data['key'] = slide['transpose'][0]
 	slides_data['msg'] = ''
 	slides_data['dynamic'] = ''
 	return True
