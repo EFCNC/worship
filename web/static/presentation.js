@@ -21,7 +21,7 @@
     let adding_slide = 0;
 
     // Socket Server url
-    let socket_url = window.location.host;
+    let socket_url = window.location.hostname;
     let socket = io.connect(socket_url);
 
     // init sharp and flat keys to be assigned to keys
