@@ -141,11 +141,6 @@ def slides_viewer(mode=None):
 			return "<script>alert('Only one Lead mode can be connected, please use different mode.');window.location.replace('../slides');</script>"
 		return render_template('slides_lead.html', presentation=slides_data, mode=mode)
 	return render_template('slides.html', presentation=slides_data, mode=mode)
-		else:
-			return render_template('slides.html', presentation=slides_data, mode=mode)
-	else:
-		return render_template('slides.html', presentation=slides_data, mode=mode)
-
 
 @app.route("/notes")
 def get_notes():
