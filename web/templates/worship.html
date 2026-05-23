@@ -153,11 +153,12 @@
 
 {% block extra_js %}
 <script>
-    let team;
-    let roster;
-    let inst;
-    let marked;
-    let worship_id = -1;
+let team;
+let roster;
+let inst;
+let marked;
+let worship_id = -1;
+let sundays = {{ sundays|safe }};
 
     function pop_role(name) {
         for (i in taken_role) {
@@ -376,27 +377,37 @@
         });
     });
 
-    $(document).ready(function() {
-        $(".overlay_btns button").on('click', function() {
-            id = $(this).attr('name');
-            date = $(this).parent().parent().parent().attr('date')
-            if (!id) {
-                $("#popup").html();
-            } else {
-                worship_id = Number(id);
-                if (this.id == 'song_btn') {
-                    window.location.href = '?id=' + id;
-                } else if (this.id == 'team_btn') {
-                    popup(id, date);
-                } else if (this.id == 'sermon_btn') {
-                    get_sermon(worship_id);
-                } else if (this.id == 'info_btn') {
-                    location.href = '/info';
-                } else if (this.id == 'notes_btn') {
-                    location.href = '/worship/' + id;
-                }
+
+$(document).ready(function () {
+    move_top('date="'+sundays[0] + '"');
+
+    $(".overlay_btns button").on('click', function () {
+        id = $(this).attr('name');
+        date = $(this).parent().parent().parent().attr('date')
+        if(!id) {
+            $("#popup").html();
+        }
+        else {
+            worship_id = Number(id);
+            if (this.id == 'song_btn') {
+                window.location.href = '?id='+id;
             }
-        });
+            else if (this.id == 'team_btn') {
+                popup(id, date);
+            }
+            else if (this.id == 'sermon_btn') {
+                get_sermon(worship_id);
+            }
+            else if (this.id == 'info_btn') {
+                location.href = '/info';
+            }
+            else if (this.id == 'notes_btn') {
+                location.href = '/worship/'+id;
+            }
+        }
     });
+
+});
+
 </script>
 {% endblock %}

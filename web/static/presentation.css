@@ -2,21 +2,11 @@
             padding: 30px;
         }
 
-        .preview.view {
-        	display: flex;
-            color: #fff;
-            justify-content: center;
-            align-item: center;
-            text-align: center;
-            min-height: 80vh;
-            font-family: Arial, KaiTi;
-        }
-
         #bottom-left {
              position:absolute;
              font-size: 20px;
-             bottom:130;
-             left:10;
+             bottom:20;
+             left:20;
              padding: 10px;
              color: #fff;
         }
@@ -24,95 +14,91 @@
         #bottom-right {
              position:fixed;
              font-size: 20px;
-             bottom:130;
-             right:0;
+             bottom:20;
+             right:20;
              padding: 10px;
              color: #fff;
         }
 
         #top-left {
-             position:absolute;
+             position:fixed;
              font-size: 3vw;
-             top:340;
+             top:20;
              left:20;
              padding: 5px;
              color: #ffd800;
-             background-color: #404040;
-             display: none;
         }
 
         #top-right {
              position:fixed;
              font-size: 30px;
-             top:40;
-             right:0;
+             top:20;
+             right:20;
              padding: 10px;
              color: #ff3800;
              background-color: #c0c0c0;
              display: none;
         }
 
+       #popup {
+            display: none flex;
+            justify-content: center;
+            align-items: center;
+            height: 80%;
+            border: 3px solid green;
+        }
     /* Lead style */
 
     	.admin_container {
   		    display: grid;
   		    grid-template-areas:
-    		    "preview menu"
-    		    "control_div control_div";
-  		    grid-template-columns: 5fr 3fr;
+    		    "reveal menu";
+  		    grid-template-columns: 5fr 2fr;
   		    gap: 5px;
-  		    background-color: #8c92ac;
 	    }
 
-        .control_div {
-            grid-area: control_div;
-        }
+.lead_container {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: repeat(5, 1fr);
+    gap: 8px;
+    width: 100vw;
+    height: 100vh;
+}
 
-    	.preview_container {
-  		    display: grid;
-  		    grid-template-areas:
-    		    "preview menu"
-    		    "preview_div preview_div";
-  		    grid-template-columns: 4fr 3fr;
-  		    gap: 5px;
-  		    background-color: #2196F3;
-	    }
+.reveal {
+    grid-column: span 6 / span 6;
+    grid-row: span 4 / span 4;
+}
 
-	    .preview_container > div {
-  		    padding: 10px;
-	    }
+.control_panel {
+    grid-column: span 3 / span 3;
+    grid-row: span 4 / span 4;
+    grid-column-start: 7;
+}
 
-	    .preview_container > div#menu {
-	  	    grid-area: menu;
-	    }
-
-	    .preview_container > div#preview {
-  		    grid-area: preview;
-	    }
-
-        .preview_container > div#preview_div {
-  	    	grid-area: preview_div;
-            width: 100%;
-            height: 120px;
-            max-height: 120px;
-            padding: 5px 5px 5px 5px;
-            overflow: scroll;
-            flex-direction: column;
-            display: flex;
-            flex-wrap: wrap;
-	    }
-
-        #dynamic_btn button {
-            padding: 32px 16px;
-            width: 150px;
+.review {
+    grid-column: span 9 / span 9;
+    grid-row-start: 5;
+}
+        .control_panel button {
+            padding: 28px 16px;
+            width: 125px;
             margin: 5px;
         }
+#slide_notes {
+    color: #fff;
+    width: 300px;
+    word-wrap: break-word;
+    }
 
-        button {
-            padding: 5px 5px;
-            margin: 2px;
-            width: 100px;
+        #dynamic_btn button {
+            padding: 28px 16px;
+            width: 125px;
+            margin: 5px;
+            font-size: 50px;
         }
+
 
         #notes {
             font-size: 1.5vw;
@@ -122,53 +108,12 @@
             text-align: left;
         }
 
-        #preview {
-        	display: flex;
-            justify-content: center;
-            align-item: center;
-            text-align: center;
-            height: 90vh;
-            background-position: center;
-            background-repeat: no-repeat;
-            background-size: cover;
-        }
-
-        #preview_div {
-            overflow: hidden;
-        }
-
-        #preview_div .inner {
-            height: 160px;
-            border: 2px solid #000;
-            border-radius: 5px;
-            font-size: 1.2vw;
-        }
-
-        #preview_div .inner current {
-            border: 2px double #000;
-            border-radius: 5px;
-            opacity: 0.5;
-        }
-
         .inner.current {
             color: #fff;
             border-radius: 5px;
             opacity: 0.5;
         }
 
-        #preview_div .inner:hover {
-            cursor: pointer;
-        }
-
-        #preview_div .inner div {
-            background-color: #c0c0c0;
-            width:100%;
-            text-align: center;
-            position: relative;
-            opacity: 0.5;
-            color: #000;
-            margin: 5 5 5 5;
-        }
 
     /* Musician style */
 
@@ -209,6 +154,6 @@
             text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
         }
 
-        .info.region, .lyrics.region {
+        .info.region, .song.region {
             color: #ffd800;
         }

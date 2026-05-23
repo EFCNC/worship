@@ -1,0 +1,226 @@
+    <script src="../static/jquery.js"></script>
+    <script src="../static/jquery-ui.js"></script>
+    <script src="../static/socket.io.js"></script>
+    <script src="../static/worship.js"></script>
+    <script src="../static/presentation.js"></script>
+    <script src="../static/presentation.css"></script>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.14.2/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="/static/dist/reset.css">
+	<link rel="stylesheet" href="/static/dist/reveal.css">
+	<link rel="stylesheet" href="/static/dist/theme/black.css">
+	<script src="/static/dist/reveal.js"></script>
+<body>
+<style>
+    body {
+        background-color: #000;
+    }
+
+    .lead_container {
+        padding: 10;
+        display: grid;
+        grid-template-columns: repeat(9, 1fr);
+        grid-template-rows: repeat(7, 1fr);
+        gap: 20px;
+        height: 95vh;
+    }
+
+    .control_panel {
+        grid-column: span 9 / span 9;
+        display: flex;
+        align-items: center;
+    }
+
+    .dynamic_panel {
+        grid-column: span 1 / span 1;
+        grid-row: span 6 / span 6;
+        grid-row-start: 2;
+    }
+
+    #slide_notes {
+        grid-column: span 5 / span 5;
+        grid-row: span 2 / span 2;
+        grid-row-start: 7;
+        color: #fff;
+        word-wrap: break-word;
+    }
+
+    .reveal {
+        grid-column: span 6 / span 6;
+        grid-row: span 5 / span 5;
+        grid-row-start: 2;
+    }
+
+    .preview {
+        grid-column: span 2 / span 2;
+        grid-row: span 6 / span 6;
+        grid-column-start: 8;
+        grid-row-start: 2;
+        display: flex;
+        flex-direction: column;
+        text-align: center;
+        height: 100%;
+        width: 280px;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+        overflow: auto;
+    }
+
+    .preview .inner {
+        max-width:250px;
+        height:140px;
+        min-height:140px;
+        text-align: center;
+        position: relative;
+        border-radius: 5px;
+        border: 2px double #fff;
+        opacity: 0.5;
+        color: #fff;
+        margin: 5 5 5 5;
+        cursor: pointer;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .inner:hover .preview_name{
+        border: 2px double #008080;
+        background: #008080;
+        color: #fff;
+        opacity: 1;
+        cursor: pointer;
+    }
+
+    .inner div {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: hidden;
+    }
+
+    .inner.present {
+        border: 2px double #008080;
+        opacity: 1;
+    }
+
+    .preview_name {
+        opacity: 0.5;
+    }
+
+    .preview_name.present{
+        opacity: 1;
+        color: #fff;
+        background: #008080;
+    }
+
+    .control_panel button, .dynamic_panel button {
+        padding: 30px 10px;
+        min-width: 125px;
+        margin: 5px;
+        font-size: 16px;
+        border-radius: 10px;
+    }
+</style>
+<body>
+<div class="lead_container">
+        <div class="control_panel">
+            <!-- parts -->
+            <button name="dynamic" title="Intro">Intro</button>
+            <button name="dynamic" title="greeting">Greeting</button>
+            <button name="dynamic" title="Repeat">Repeat</button>
+            <button name="dynamic" title="Last Sentence">Last Sentence</button>
+            <button name="dynamic" title="Ending">Ending</button>
+        </div>
+        <div class="dynamic_panel">
+            <!-- Dynamic -->
+            <button name="dynamic" title="Ready to Build up">Build Up</button>
+            <button name="dynamic" title="Slow Down">Slow Down</button>
+            <button name="dynamic" title="A tempo">A tempo</button>
+            <button name="dynamic" title="A capella">A capella</button>
+            <div id="key_change"></div>
+        </div>
+    <div class="reveal">
+		<div class="slides"></div>
+	</div>
+    <div class="preview"></div>
+    <div id="slide_notes"></div>
+</div>
+</body>
+<script>
+    mode = 'lead';
+    presentation = {{ presentation|safe }};
+    slides = presentation['data'];
+    setting = presentation['setting'];
+    pos = presentation['pos'][0];
+    order = presentation['pos'][1];
+    background = presentation['background'];
+    w_id = presentation['id'];
+    focus_div = null;
+
+    if(device == 'mobile') {
+        $('body').html('<div class="reveal"><div class="slides"></div></div>');
+    }
+
+    function load_preview() {
+        slide_preview = '';
+        if(!Reveal.isVerticalSlide()||!Reveal.getSlide(pos, 1)) {
+            $('.preview').empty();
+            return true;
+        }
+        for(var i=0;i<99;i++) {
+            r = Reveal.getSlide(pos, i);
+            if(r=='undefined'|| r == null || !r) { break; }
+            class_name = r.getAttribute('class');
+            temp =  $(r.innerHTML);
+            temp_name = temp.attr('name');
+            temp_text = temp.find('.origin').html() + '<br/>' + temp.find('.region').html();
+            if(class_name == 'present') {
+                slide_preview += '<div class="inner present" id="' + i + '"><div class="preview_name present">' + temp_name + '</div>' + temp_text +'</div>';
+            }
+            else {
+                slide_preview += '<div class="inner" id="' + i + '"><div class="preview_name">' + temp_name + '</div>' + temp_text +'</div>';
+            }
+        }
+        $('.preview').html(slide_preview);
+        move_top('id="'+order+'"');
+    }
+
+    $(document).ready(function() {
+        // Init Reveal
+        Reveal.initialize({
+	        embedded: true,
+	    	loop: true,
+	    	hash: false,
+			slideNumber: true,
+			progress: true
+    	});
+
+    	load_slides();    // Load slides
+    });
+
+    $(document).on('click', '.inner', function () {
+        id = $(this).attr('id');
+        if (id) {
+            order = id;
+            Reveal.slide(pos, order);
+            show_data(pos);
+        }
+    });
+
+    Reveal.on('slidechanged', (event) => {
+        pos = event.indexh;
+        order = event.indexv;
+        pre = $(event.previousSlide).children().attr('name');
+        cur = $(event.currentSlide).children().attr('name');
+        $('#top-left').html(slides[pos].title);
+        if(slides[pos].type=='media') {
+            $('#slide_notes').html(slides[pos].content.origin_text);
+        }
+        else {
+            $('#slide_notes').html(slides[pos].notes);
+        }
+        load_preview();
+
+        console.log("slide changed, emit changes to server", pos, order);
+        socket.emit('control', {'type': 'pos', 'value': [pos, order]});
+    });
+
+</script>
