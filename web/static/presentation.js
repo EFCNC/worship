@@ -216,23 +216,96 @@
             }
             fragment = data.style.fragment;
             if(data.type == 'info') {
-			    if (fragment > 0) {
-			        origin_ = data.content.origin_text.split('<br/>').filter(n => n);
-			        region_ = data.content.region_text.split('<br/>').filter(n => n);
-			        while(origin_.length>0) {
-			            o_fragment = origin_.splice(0, fragment).map(obj=>'<li>'+obj+'</li>').join('')
-			            r_fragment = region_.splice(0, fragment).map(obj=>'<li>'+obj+'</li>').join('')
-				        let sub_section = document.createElement('section');
-				        let ui = document.createElement('ui');
-				        ui.append(create_view(data.type, o_fragment, r_fragment));
-				        sub_section.append(ui);
-      			        section.append(sub_section);
-			        }
-			    }
-			    else {
-                    section.append(create_view(data.type, data.content.origin_text, data.content.region_text, 'info'));
+                // SETTING: Tune these numbers based on your presentation font size!
+                let max_lines_per_slide = 5; 
+                let max_chars_per_slide = 120; 
+
+                // Helper function to safely extract lines from either a list or raw text
+                function parseContent(htmlString) {
+                    if (!htmlString) return { isList: false, lines: [] };
+                    
+                    let tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = htmlString;
+                    let listItems = tempDiv.querySelectorAll('li');
+                    
+                    if (listItems.length > 0) {
+                        return { isList: true, lines: Array.from(listItems).map(li => li.innerHTML) };
+                    } else {
+                        let rawText = htmlString.replaceAll('\n', '<br/>');
+                        return { isList: false, lines: rawText.split(/<br\s*\/?>/i).filter(n => n.trim() !== '') };
+                    }
                 }
-		    }
+
+                let parsedOrigin = parseContent(data.content.origin_text);
+                let parsedRegion = parseContent(data.content.region_text);
+
+                let origin_lines = parsedOrigin.lines;
+                let region_lines = parsedRegion.lines;
+                let isList = parsedOrigin.isList; 
+
+                if (fragment > 0) {
+                    // Fragment rendering remains unchanged
+                    while(origin_lines.length > 0) {
+                        let o_fragment = origin_lines.splice(0, fragment).map(obj => '<li>' + obj + '</li>').join('');
+                        let r_fragment = region_lines.splice(0, fragment).map(obj => '<li>' + obj + '</li>').join('');
+                        
+                        let sub_section = document.createElement('section');
+                        let ul = document.createElement('ul'); 
+                        ul.append(create_view(data.type, o_fragment, r_fragment, 'info'));
+                        sub_section.append(ul);
+                        section.append(sub_section);
+                    }
+                } 
+                else {
+                    // NEW: Dynamic chunking based on both character count and line count
+                    while (origin_lines.length > 0) {
+                        let current_chunk_o = [];
+                        let current_chunk_r = [];
+                        let current_char_count = 0;
+
+                        // Build the slide line-by-line
+                        while (origin_lines.length > 0) {
+                            let next_line_o = origin_lines[0];
+                            
+                            // Strip HTML tags to get an accurate count of visible characters
+                            let next_line_text_only = next_line_o.replace(/(<([^>]+)>)/gi, "");
+                            let next_line_length = next_line_text_only.length;
+
+                            // If we already have at least 1 line AND adding the next line 
+                            // pushes us over the char limit OR the line limit, stop building this slide.
+                            if (current_chunk_o.length > 0 && 
+                               (current_char_count + next_line_length > max_chars_per_slide || current_chunk_o.length >= max_lines_per_slide)) {
+                                break; 
+                            }
+
+                            // Safe to add! Remove the line from our master list and add it to the chunk
+                            current_chunk_o.push(origin_lines.shift());
+                            if (region_lines.length > 0) {
+                                current_chunk_r.push(region_lines.shift());
+                            }
+                            
+                            current_char_count += next_line_length;
+                        }
+
+                        // Reconstruct the HTML for this specific chunk
+                        let o_html = '';
+                        let r_html = '';
+
+                        if (isList) {
+                            o_html = '<ul>' + current_chunk_o.map(obj => '<li>' + obj + '</li>').join('') + '</ul>';
+                            r_html = current_chunk_r.length > 0 ? '<ul>' + current_chunk_r.map(obj => '<li>' + obj + '</li>').join('') + '</ul>' : '';
+                        } 
+                        else {
+                            o_html = current_chunk_o.join('<br/>');
+                            r_html = current_chunk_r.join('<br/>');
+                        }
+                        
+                        let sub_section = document.createElement('section');
+                        sub_section.append(create_view(data.type, o_html, r_html, 'info'));
+                        section.append(sub_section);
+                    }
+                }
+            }
 		    else if (data.type == 'song') {
 			    for(var j=0;j<data.content.length;j++) {
 			        s_name = data.content[j].name;
