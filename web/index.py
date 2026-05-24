@@ -126,7 +126,7 @@ def sildes_admin1():
 def slides_viewer(mode=None):
 	__update_client_mode(mode)
 	if not mode:
-		return render_template('slides.html', presentation=slides_data, mode='')
+		return render_template('slides/slides.html', presentation=slides_data, mode='')
 	if not slides_data['data']:
 		__get_slide_json()
 	if mode == 'admin':
@@ -134,16 +134,16 @@ def slides_viewer(mode=None):
 			__update_client_mode('')
 			return "<script>alert('Only one Admin mode can be connected, please use different mode.');window.location.replace('../slides');</script>"
 		else:
-			return render_template('slides_admin.html', presentation=slides_data, mode=mode)
+			return render_template('slides/slides_admin.html', presentation=slides_data, mode=mode)
 	elif mode == 'lead':
 		if len(client['lead']) > 0:
 			__update_client_mode('')
 			return "<script>alert('Only one Lead mode can be connected, please use different mode.');window.location.replace('../slides');</script>"
-		return render_template('slides_lead.html', presentation=slides_data, mode=mode)
+		return render_template('slides/slides_lead.html', presentation=slides_data, mode=mode)
 	elif mode == 'view':
 		__update_client_mode('')
-		return render_template('slides_view.html', presentation=slides_data, mode=mode)
-	return render_template('slides.html', presentation=slides_data, mode=mode)
+		return render_template('slides/slides_view.html', presentation=slides_data, mode=mode)
+	return render_template('slides/slides.html', presentation=slides_data, mode=mode)
 
 @app.route("/notes")
 def get_notes():
