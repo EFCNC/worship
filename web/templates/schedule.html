@@ -1,7 +1,8 @@
-{% include 'header.html' %}
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+{% extends 'base.html' %}
+
+{% block page_title %}Schedule - Worship Manager{% endblock %}
+
+{% block extra_css %}
 <style>
 .grid-container {
   display: grid;
@@ -105,11 +106,14 @@ display:block;
 
 }
 </style>
-</head>
-<body>
+{% endblock %}
+
+{% block content %}
 <div id="calendar-container">
 </div>
-</body>
+{% endblock %}
+
+{% block extra_js %}
 <script>
     let team = {{ team|safe }};
     let booked = {{ booked|safe }};
@@ -350,4 +354,5 @@ display:block;
             });
     });
 </script>
+{% endblock %}
 </html>

@@ -1,30 +1,31 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Slide Menu</title>
-    <style>
-        html {
-            height: 100%;
-            background-color: #000;
-        }
+{% extends 'base.html' %}
 
-        body {
-            margin: 0; 
-            color: white; 
-        }
+{% block page_title %}Slides Menu{% endblock %}
+{% block extra_css %}
+<style>
+    html {
+        height: 100%;
+    }
 
-        /* Targeted styling instead of styling all divs globally */
-        .menu-container {
-            padding: 30px 10px;
-        }
+    body {
+        margin: 0; 
+        color: white; 
+    }
 
-        .menu-btn {
-            font-size: 30px;
-            margin-right: 5px; /* Replaces the hardcoded &nbsp; in your old HTML */
-            cursor: pointer;
-        }
-    </style>
+    Targeted styling instead of styling all divs globally
+    .menu-container {
+        padding: 30px 10px;
+    }
+
+    .menu-btn {
+        font-size: 30px;
+        margin-right: 5px; /* Replaces the hardcoded &nbsp; in your old HTML */
+        cursor: pointer;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(document).ready(function() {
@@ -36,9 +37,8 @@
             });
         });
     </script>
-</head>
-<body>
-
+{% endblock %}
+{% block content %}
     <div class="menu-container">
         <button class="menu-btn" name="admin">Admin</button>
         <button class="menu-btn" name="lead">Lead</button>
@@ -46,6 +46,4 @@
         <button class="menu-btn" name="musician">Musician</button>
         <button class="menu-btn" name="score">Score</button>
     </div>
-
-</body>
-</html>
+{% endblock %}

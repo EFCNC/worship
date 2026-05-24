@@ -1,20 +1,30 @@
-{% include 'header.html' %}
-    <style>
-     textarea {
+{% extends 'base.html' %}
+
+{% block page_title %}Worship Home - Worship Manager{% endblock %}
+
+{% block extra_css %}
+<style>
+    textarea {
         position: fixed;
         left:10px; top:10px;
         width:  calc(100vw - 50px);
         height: calc(100vh - 50px);
-     }
-     button {
+    }
+    button {
         position: absolute;
         bottom: 10px;
-     }
-    </style>
+    }
+</style>
+{% endblock %}
+
+{% block content %}
 <body>
-        <textarea name="content" id="content">{{ json }}</textarea>
-        <button id="btn">Submit</button>
+    <textarea name="content" id="content">{{ json }}</textarea>
+    <button id="btn">Submit</button>
 </body>
+{% endblock %}
+
+{% block extra_js %}
 <script>
     $('#btn').click(function() {
         json_data = $("#content").val();
@@ -44,4 +54,4 @@
         return true;
     });
 </script>
-</html>
+{% endblock %}

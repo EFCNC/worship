@@ -1,5 +1,8 @@
-    <script src="../static/jquery.js"></script>
-    <script src="../static/jquery-ui.js"></script>
+{% extends 'base.html' %}
+
+{% block page_title %}Worship Home - Worship Manager{% endblock %}
+
+{% block extra_css %}
     <script src="../static/socket.io.js"></script>
     <script src="../static/presentation.js"></script>
     <link href="../static/presentation.css" rel="stylesheet">
@@ -116,6 +119,9 @@
     grid-column-start: 5;
 }
 </style>
+{% endblock %}
+
+{% block content %}
 <body>
 <div id="dialog"></div>
 <div class="admin_container">
@@ -150,7 +156,9 @@
         <b>Title</b><div id="slide_title" class="admin title" title="Slide Title" contenteditable="true"></div><br/><b>Notes</b><div id="slide_notes" class="admin notes" title="Slide Notes" contenteditable="true"></div>
     </div>
 </div>
-</body>
+{% endblock %}
+
+{% block extra_js %}
 <script>
         mode = 'admin';                 // Set mode to lead
         bg_url = '';
@@ -546,3 +554,4 @@
             socket.emit('control', {'type': 'pos', 'value': [pos, order]});
         });
 </script>
+{% endblock %}

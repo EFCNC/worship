@@ -1,0 +1,341 @@
+/**
+ * Layout Styles
+ * Header, navigation, main content areas, and page structure
+ */
+
+/* Exclude header, loading, and dialog from default margin */
+body > :not(#loading):not(#dialog):not(header) {
+    margin: var(--spacing-md);
+}
+
+/* Header Styles */
+header#header {
+    background: var(--primary-color);
+    color: var(--text-light);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 var(--spacing-lg);
+    margin: 0;
+    height: var(--header-height);
+    width: 100%;
+    box-sizing: border-box;
+    box-shadow: var(--shadow);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+/* Navigation Styles */
+.navigation {
+    display: flex;
+    gap: var(--spacing-sm);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.navigation a {
+    color: var(--text-light);
+    text-decoration: none;
+    text-align: center;
+    padding: 14px 16px;
+    border-radius: var(--border-radius-lg);
+    transition: color 0.3s ease, background-color 0.3s ease;
+    font-size: var(--font-size-base);
+    display: inline-block;
+}
+
+.navigation a:hover {
+    text-decoration: underline;
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.navigation a.active {
+    background-color: var(--tertiary-color);
+    color: var(--text-light);
+    font-weight: var(--font-weight-bold);
+}
+
+/* Profile Section */
+#profile {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.profile_bubble {
+    height: 35px;
+    width: 35px;
+    border-radius: 50%;
+    color: var(--text-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: var(--font-weight-bold);
+    font-size: var(--font-size-sm);
+    overflow: hidden;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    text-decoration: none;
+    background-color: var(--secondary-color);
+    transition: transform 0.2s ease;
+}
+
+.profile_bubble:hover {
+    transform: scale(1.1);
+}
+
+.profile_bubble img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile_bubble.use-initials {
+    background-color: var(--secondary-color);
+    color: var(--text-light);
+}
+
+/* Loading Overlay */
+#loading {
+    display: none;
+    z-index: 999;
+    background-color: rgba(0, 0, 0, 0.8);
+    position: fixed;
+    overflow: hidden;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+}
+
+#loading.show {
+    display: block;
+}
+
+/* Dialog Container */
+#dialog {
+    z-index: 1000;
+}
+
+/* Main Content Area */
+main#main-content {
+    min-height: calc(100vh - var(--header-height));
+    padding: var(--spacing-md);
+}
+
+/* Container for centered, max-width content */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--spacing-md);
+}
+
+.container-sm {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 0 var(--spacing-md);
+}
+
+.container-lg {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 var(--spacing-md);
+}
+
+/* Section Styling */
+section {
+    margin-bottom: var(--spacing-lg);
+}
+
+section > h2:first-child {
+    margin-top: 0;
+}
+
+/* Page Wrapper for content with flex layout */
+.page-wrapper {
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100vh - var(--header-height));
+}
+
+.page-content {
+    flex: 1;
+    padding: var(--spacing-md);
+}
+
+.page-footer {
+    background-color: var(--bg-white);
+    border-top: 1px solid var(--border-color);
+    padding: var(--spacing-lg);
+    text-align: center;
+    margin-top: auto;
+}
+
+/* Two-column layout */
+.layout-two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+}
+
+.layout-two-col > * {
+    min-width: 0;
+}
+
+/* Three-column layout */
+.layout-three-col {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+}
+
+.layout-three-col > * {
+    min-width: 0;
+}
+
+/* Mobile Adjustments */
+/* Tablet: 768px and below */
+@media (max-width: 768px) {
+    header#header {
+        padding: 0 var(--spacing-md);
+        flex-wrap: wrap;
+        height: auto;
+        min-height: var(--header-height);
+        row-gap: var(--spacing-sm);
+    }
+
+    #profile {
+        order: 1;
+    }
+
+    .navigation {
+        order: 2;
+        flex-wrap: wrap;
+        width: 100%;
+        gap: var(--spacing-xs);
+        margin-top: var(--spacing-xs);
+    }
+
+    .navigation a {
+        flex: 1 1 calc(25% - 6px);
+        min-width: 80px;
+        padding: 8px 6px;
+        font-size: 12px;
+        text-align: center;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .profile_bubble {
+        height: 35px;
+        width: 35px;
+    }
+
+    .layout-two-col {
+        grid-template-columns: 1fr;
+    }
+
+    .layout-three-col {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    main#main-content {
+        min-height: auto;
+    }
+}
+
+/* Mobile: 600px and below */
+@media (max-width: 600px) {
+    header#header {
+        padding: 0 var(--spacing-sm);
+        justify-content: flex-start;
+        gap: var(--spacing-sm);
+    }
+
+    #profile {
+        order: 1;
+        flex-shrink: 0;
+    }
+
+    .navigation {
+        order: 2;
+        flex: 1;
+        flex-wrap: wrap;
+        gap: var(--spacing-xs);
+        margin: 0;
+    }
+
+    .navigation a {
+        flex: 1 1 calc(25% - 4px);
+        min-width: 60px;
+        padding: 8px 4px;
+        font-size: 12px;
+        border-radius: var(--border-radius);
+    }
+
+    .profile_bubble {
+        height: 32px;
+        width: 32px;
+        font-size: 11px;
+    }
+
+    main#main-content {
+        padding: var(--spacing-sm);
+    }
+
+    .page-content {
+        padding: var(--spacing-sm);
+    }
+
+    .layout-three-col {
+        grid-template-columns: 1fr;
+    }
+
+    .container,
+    .container-sm,
+    .container-lg {
+        padding: 0 var(--spacing-sm);
+    }
+}
+
+/* Small Mobile: 400px and below */
+@media (max-width: 400px) {
+    header#header {
+        padding: 0 6px;
+        gap: 6px;
+    }
+
+    .navigation {
+        gap: 4px;
+    }
+
+    .navigation a {
+        flex: 1 1 calc(25% - 3px);
+        min-width: 50px;
+        padding: 6px 3px;
+        font-size: 12px;
+        border-radius: var(--border-radius);
+    }
+
+    .profile_bubble {
+        height: 30px;
+        width: 30px;
+        font-size: 10px;
+        flex-shrink: 0;
+    }
+
+    main#main-content {
+        padding: 8px;
+    }
+
+    .container,
+    .container-sm,
+    .container-lg {
+        padding: 0 8px;
+    }
+}

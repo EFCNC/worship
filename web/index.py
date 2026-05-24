@@ -23,6 +23,14 @@ app = Flask(__name__)
 # register blueprint of API
 app.register_blueprint(api, url_prefix='/API')
 
+# Add cache headers for static (profile picture) images to reduce bandwidth
+@app.after_request
+def add_cache_headers(response):
+    if request.path.startswith('/static/img/'):
+        # Cache images for 30 days
+        response.headers['Cache-Control'] = 'public, max-age=2592000, immutable'
+    return response
+
 slides_data = {'pos': [0, 0, 0], 'data': [], 'setting': {'slide_order': ["promote", "welcome", "announcement", "song", "sermon", "offering", "caring", "benediction"], 'assets': []}, 'msg': '', 'dynamic': '', 'key': 0, 'background': [], 'id': 0, 'assets': []}
 client = {'admin': [], 'lead': [], 'musician': [], 'view': []}
 client_mode = ''
@@ -68,7 +76,7 @@ def handle_control(data):
 @socketio.on('msg')
 def handle_announcement(data):
 	print("msg", data)
-	emit('announcement', data, brodcasr=True)
+	emit('announcement', data, broadcast=True)
 
 # Rendering interfaces
 
@@ -118,24 +126,24 @@ def sildes_admin1():
 def slides_viewer(mode=None):
 	__update_client_mode(mode)
 	if not mode:
-		return render_template('slides.html', presentation=slides_data, mode='')
+		return render_template('slides/slides.html', presentation=slides_data, mode='')
 	if not slides_data['data']:
 		__get_slide_json()
 	if mode == 'admin':
 		if len(client['admin']) > 0:
 			__update_client_mode('')
 			return "<script>alert('Only one Admin mode can be connected, please use different mode.');window.location.replace('../slides');</script>"
-		return render_template('slides_admin.html', presentation=slides_data)
+		else:
+			return render_template('slides/slides_admin.html', presentation=slides_data, mode=mode)
 	elif mode == 'lead':
 		if len(client['lead']) > 0:
 			__update_client_mode('')
 			return "<script>alert('Only one Lead mode can be connected, please use different mode.');window.location.replace('../slides');</script>"
-		return render_template('slides_lead.html', presentation=slides_data, mode=mode)
+		return render_template('slides/slides_lead.html', presentation=slides_data, mode=mode)
 	elif mode == 'view':
 		__update_client_mode('')
-		return render_template('slides_view.html', presentation=slides_data, mode=mode)
-	return render_template('slides.html', presentation=slides_data, mode=mode)
-
+		return render_template('slides/slides_view.html', presentation=slides_data, mode=mode)
+	return render_template('slides/slides.html', presentation=slides_data, mode=mode)
 
 @app.route("/notes")
 def get_notes():
@@ -186,7 +194,7 @@ def get_song_sheet(id):
 def get_song_chords(ids):
 	ids = ids.split(',')
 	chords = Utils.get_song_chords(ids)
-	return render_template('chords.html', chords=chords)
+	return render_template('/worship_notes/chords.html', chords=chords)
 
 @app.route("/sheets")
 @app.route("/sheets/<ids>")
@@ -223,7 +231,7 @@ def get_song_sheet1(ids=None):
 			sheet['keyof_name'] = keys
 			keyof_name = [keys[x] for x in keyof] # Translate int to key name
 			sheet['keyof'] = keyof_name
-	return render_template('sheet.html', sheets=sheets)
+	return render_template('worship_notes/sheets.html', sheets=sheets)
 
 @app.route("/song/<id>")
 def get_song_by_id(id):
@@ -255,7 +263,7 @@ def calendar():
 	now = datetime.now()
 	year = str(now.year)
 	column, calendar = Utils.get_calendar(year)
-	return render_template('calendar.html', column=column, calendar=calendar)
+	return render_template('admin/calendar.html', column=column, calendar=calendar)
 
 @app.route("/assets")
 def assets():

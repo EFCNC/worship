@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block page_title %}Worship Manager{% endblock %}</title>
+
+    <!-- Global JavaScript Libraries -->
+    <script src="/static/jquery.js"></script>
+    <script src="/static/jquery-ui.js"></script>
+    <script src="/static/jquery.cookie.js"></script>
+    <script src="/static/jquery.ui.touch-punch.min.js"></script>
+    <script src="/static/worship.js"></script>
+
+    <!-- Global Stylesheets -->
+    <link href="/static/jquery-ui.css" rel="stylesheet">
+    <link href="/static/css/global.css" rel="stylesheet">
+    <link href="/static/css/layout.css" rel="stylesheet">
+    <link href="/static/css/components.css" rel="stylesheet">
+
+    <!-- Page-Specific Styles -->
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+    <!-- Global Elements -->
+    <div id="loading"></div>
+    <div id="dialog"></div>
+
+    <!-- Header Navigation -->
+    {% include 'partials/_header.html' %}
+
+    <!-- Main Content Area -->
+    <main id="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Global Scripts -->
+    <script>
+        // Active Tab Logic - runs for all pages
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentPath = window.location.pathname;
+            
+            document.querySelectorAll('.navigation a').forEach(function(link) {
+                const linkPath = link.getAttribute('href');
+                
+                // Exact match for home ("/"), partial match for others
+                if (currentPath === linkPath || (linkPath !== '/' && currentPath.startsWith(linkPath))) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+
+    <!-- Page-Specific Scripts -->
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,20 +1,20 @@
-{% include 'header.html' %}
-<!DOCTYPE html>
-<html>
-<head>
+{% extends 'base.html' %}
+
+{% block page_title %}Worship Notes - Worship Manager{% endblock %}
+
+{% block extra_css %}
 <meta name="viewport" content="width=device-width, initial-scale=1" charset="utf-8">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<script src="/static/bible.js"></script>
 <style>
 span.chunk {
     position:relative;
 }
 
 span.chunk:before {
-    font-size:65%;
+    font-size: 0.65em;
     content:attr(data-chord);
     position:absolute;
-    top:-120%;
+    top:-2em;
 }
 
 .song_chord {
@@ -27,45 +27,13 @@ span.chunk:before {
     width:50%;
     position: relative;
     color: #000;
-    margin: 5 5 5 5;
+    margin: 5px;
 }
 
 .song_block > span {
     position: absolute;
     top: 5px;
     left: 5px;
-}
-
-.notes {
-    text-align: center;
-}
-
-.lang_en {
-  border: 4px solid #009698;
-  background-color: #009698;
-  color: #fff;
-  border-radius: 50px 20px;
-}
-
-.lang_zh {
-  border: 4px solid #8b0000;
-  background-color: #8b0000;
-  color: #fff;
-  border-radius: 50px 20px;
-}
-
-.lang_zhTW {
-  border: 4px solid #556b2f;
-  background-color: #556b2f;
-  color: #fff;
-  border-radius: 50px 20px;
-}
-
-.lang_zhpingyin {
-  border: 4px solid #856088;
-  background-color: #856088;
-  color: #fff;
-  border-radius: 50px 20px;
 }
 
 .info {
@@ -80,73 +48,66 @@ span.chunk:before {
     border-radius: 5px;
 }
 
-.view {
-  background-color: white;
-  color: black;
-  border: 2px solid #04AA6D;
+.notes {
+    text-align: center;
 }
 
-.view.on {
-  background-color: #04AA6D;
-  color: white;
+/* Language tags */
+.lang_en    { --lang-color: #009698; }
+.lang_zh    { --lang-color: #8b0000; }
+.lang_zhTW  { --lang-color: #556b2f; }
+.lang_zhpingyin { --lang-color: #856088; }
+
+.lang_en, .lang_zh, .lang_zhTW, .lang_zhpingyin {
+    border-radius: 50px 20px;
+    color: #fff;
+    border: 4px solid var(--lang-color);
+    background-color: var(--lang-color);
 }
 
-.view:hover {
-  background-color: #04AA6D;
-  color: white;
+/* Toggle buttons */
+.view  { --btn-color: #04AA6D; }
+.chord { --btn-color: #008CBA; }
+.bi    { --btn-color: #555555; }
+.video { --btn-color: #800000; }
+
+.toggle-btn {
+    background-color: white;
+    color: black;
+    border: 2px solid var(--btn-color);
 }
 
-.chord {
-  background-color: white;
-  color: black;
-  border: 2px solid #008CBA;
+.toggle-btn.on,
+.toggle-btn:hover {
+    background-color: var(--btn-color);
+    color: white;
 }
 
-.chord.on {
-  background-color: #008CBA;
-  color: white;
+.worship_controls_button_container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 1rem;
 }
 
-.chord:hover {
-  background-color: #008CBA;
-  color: white;
+/* Cotainer for Video (helps scale) */
+.video-container {
+    width: 100%;
+    max-width: 640px;
+    aspect-ratio: 16 / 9;
 }
 
-.bi {
-  background-color: white;
-  color: black;
-  border: 2px solid #555555;
-}
-
-.bi.on {
-  background-color: #555555;
-  color: white;
-}
-
-.bi:hover {
-  background-color: #555555;
-  color: white;
-}
-.video {
-  background-color: white;
-  color: black;
-  border: 2px solid #555555;
-}
-
-.video.on {
-  background-color: #800000;
-  color: white;
-}
-
-.video:hover {
-  background-color: #800000;
-  color: white;
+.video-container iframe {
+    width: 100%;
+    height: 100%;
 }
 </style>
-</head>
-<body>
+{% endblock %}
+
+{% block content %}
     <h3> {{ w.date }} 敬拜筆記 (Worship Notes):</h3>
-    <p><b>Title: {{ w.sermon_title }}<br/>
+    <p>
+        <b>Title: {{ w.sermon_title }}<br/>
         Speaker: {{ w.speaker }}<br/>
         Bible: <span id="bible_verse"></span><br/>
         Outline: {{ w.outline }}</b>
@@ -156,72 +117,168 @@ span.chunk:before {
             {{ team.role }}: {{ team.user_name }}<br/>
         {% endfor %}
     </p>
-    <p><b>Worship Leader's Notes:</b>
-    {{ w.notes }}
+    <p>
+        <b>Worship Leader's Notes:</b>
+        {{ w.notes }}
     </p>
 
     <!-- Container of worship songs -->
-    <button class="view" onclick="javascript:load(this.className)">View</button><button class="chord" onclick="javascript:load(this.className)">Chord</button><button class="bi" onclick="javascript:load(this.className)">Bilingual</button><button class="video" onclick="javascript:load(this.className)">Youtube</button><button onclick="javascript:load_chords()">All Chords</button><button onclick="javascript:load_sheets()">All Sheets</button>
-    <hr/>
-    <div id="worship">
+    <div class="worship_controls_button_container">
+        <button class="toggle-btn view" onclick="loadTab('view')">View</button>
+        <button class="toggle-btn chord" onclick="loadTab('chord')">Chord</button>
+        <button class="toggle-btn bi" onclick="loadTab('bi')">Bilingual</button>
+        <button class="toggle-btn video" onclick="loadTab('video')">Youtube</button>
+        <button class="toggle-btn" onclick="load_chords()">All Chords</button>
+        <button class="toggle-btn" onclick="load_sheets()">All Sheets</button>
     </div>
 
-</body>
+    <div id="worship">
+        <!-- Worship songs will be dynamically loaded here through the script -->
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/bible.js"></script>
 <script>
-    let tab = '{{ tab|safe }}';
-    let worship = {{ songs|safe }};
-    let w = {{ w|safe }};
-    let song_id = worship.map(o=> o.id);
+    // --- DATA INITIALIZATION ---
+    const sharp = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+    const flat = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"];
 
-    var bible = w.bible.replace(/(、|;)/g, '，'); // Replace possible symbols to Chinese comma
-    bible = bible.split('，');
-    var b = '';
-    for (var i=0;i<bible.length;i++) {
-        b += ' <a href="javascript:get_bible(show_verse, \'' + bible[i] + '\')">' + bible[i] + '</a>';
+    const worshipData = {{ songs|safe }};
+    const worshipInfo = {{ w|safe }};
+    const initialTab = '{{ tab|safe }}' || 'view';
+    const song_id = worshipData.map(o=> o.id);
+
+    // --- FUNCTIONS ---
+    /**
+    * Transposes a single chord string (e.g., "G/B") by a specific number of steps (diff).
+    */
+    function transposeChord(chord, diff) {
+        if (diff === 0) return chord;
+        
+        // Determine if we should use sharps or flats based on the input chord
+        let keys = sharp.indexOf(chord.split('/')[0]) >= 0 ? sharp : flat;
+        
+        return chord.split('/').map(part => {
+            let root = part;
+            let suffix = "";
+            
+            // Handle chords like C#m or Bb7
+            if (part[1] === 'b' || part[1] === '#') {
+                root = part.substring(0, 2);
+                suffix = part.substring(2);
+            } else {
+                root = part[0];
+                suffix = part.substring(1);
+            }
+
+            let pos = keys.indexOf(root) + diff;
+            
+            // Wrap around logic
+            if (pos >= keys.length) pos -= keys.length;
+            if (pos < 0) pos += keys.length;
+            
+            return keys[pos] + suffix;
+        }).join('/');
     }
-    $('#bible_verse').html(b);
 
-    // init sharp and flat keys to be assigned to keys
-    let sharp = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
-    let flat = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"];
-    let keys = flat;
+    /** 
+    * Generate Language Tag Bubbles
+    */
+    function getLangTag(lang) {
+        const tags = {
+            'en': {class:"lang_en", title: "English", label: "en"},
+            'zh': {class:"lang_zh", title: "Chinese", label: "zh"},
+            'zh-TW': {class:"lang_zhTW", title: "Taiwanese", label: "tw"},
+            'zh-pingyin': {class:"lang_zhpingyin", title: "Zh PingYin", label: "zh"}            
+        }
+        const config = tags[lang] || { class: 'others', label: 'na', title: 'N/A' };
+        return lang ? `<span class="${config.class}" title="${config.title}">${config.label}</span>` : "";
+    }
+    
+    /**
+    * Renders the song content based on the selected mode (view, chord, bi).
+    */
+    function renderSongContent(song, mode) {
+        let contentHtml = '';
+        let seenSections = new Set();
+        for (let section of song.content) {
+            if (seenSections.has(section.name)) continue; // Skip duplicate sections
+            seenSections.add(section.name);
 
-    // parse chord to different key by transpose number
-    function parse_chord(chord, diff) {
-        if (sharp.indexOf(chord)>=0) {
-    	    keys = sharp;
-        }
-	    diff = Number(diff);
-	    chord = chord.split('/');
-        new_chord = []
-        for(c in chord) {
-    	    if(chord[c][1] == 'b' || chord[c][1] == '#') {
-              	pos_ = keys.indexOf(chord[c].substring(0,2))+diff
-              	if(pos_>= keys.length) {
-          	    	pos_ = pos_-keys.length;
-                }
-                else if(pos_<0) {
-            	    pos_ = keys.length+pos_;
-                }
-            new_chord.push(keys[pos_]+chord[c].substring(2));
-        	chord[c] = chord[c].substring(0,2) + chord[c].substring(2);
+            contentHtml += `<div><span>${section.name}</span>`;
+            
+            switch(mode){
+                case 'view':
+                    contentHtml += `<div class="song">${section.origin_text.replace(/\n/g, '<br/>')}</div>`;
+                    break;
+
+                case 'chord':
+                    let chords = section.origin_chord.replace(/\n/g, '<br/>');
+                    if(song.transpose != '0') {
+                        let key_change = parseInt(song.transpose);
+                        chords = chords.replace(/(data-chord=")([^"]+)/g, (match, g1, g2) => {return g1+transposeChord(g2, key_change);});
+                    }
+                    contentHtml += `<div class="song_chord">${chords}</div>`;
+                    break;
+
+                case 'bi':
+                    contentHtml += `
+                        <div class="song">
+                            <div class="origin">${section.origin_text.replace(/\n/g, '<br/>')}</div>
+                            <div class="region">${section.region}</div>
+                        </div>`;
+                    break;
             }
-            else {
-			    pos_ = keys.indexOf(chord[c][0])+diff
-          	    if(pos_>= keys.length) {
-          		    pos_ = pos_-keys.length;
-                }
-                else if(pos_<0) {
-            	    pos_ = keys.length+pos_;
-                }
-                new_chord.push(keys[pos_]+chord[c].substring(1));
-                chord[c] = chord[c][0] + chord[c].substring(1);
+            contentHtml += '</div><br/>';
+        }
+        return contentHtml;
+    }
+
+    /**
+    * Loads the tab based on the button that was clicked (view, chord, bi, video) and updates the content accordingly.
+    */
+    function loadTab(mode) {
+        // Update button highlights
+        document.querySelectorAll('.toggle-btn').forEach(btn => btn.classList.remove('on'));
+        const activeBtn = document.querySelector(`.toggle-btn.${mode}`);
+        if (activeBtn) activeBtn.classList.add('on');
+
+        let finalHtml = '';
+
+        for (item of worshipData) {
+            if (item.type === 'info') {
+                finalHtml += `<div class="info">${item.notes.replace(/\n/g, '<br/>')}</div>`;
+                continue;
+            }
+
+            if (mode === 'video') {
+                let videoUrl = item.video.replace('youtu.be/', 'www.youtube.com/embed/').replace('watch?v=', 'embed/');
+                finalHtml += `<div class="video-container"><iframe src="${videoUrl}"></iframe></div><br/>`;
+            }else {
+                //Build the Header
+                let currentKey = transposeChord(item.key, parseInt(item.transpose));
+                let header = `
+                    <div class="songs">
+                        <div class="reference">
+                            ${item.title} (${currentKey})
+                            ${getLangTag(item.lang)} ${getLangTag(item.lang_2)} 
+                            [${item.alt_sequence}]
+                            ${item.score ? `&nbsp;&nbsp;<a href="${item.score}" target="_blank"><i style="font-size:24px" class="fa" title="Sheet Music">&#xf0f6;</i></a>` : ''}
+                            ${item.abc ? `&nbsp;&nbsp;<a href="/sheets/${item.id}" target="_blank"><i style="font-size:24px" class="fa" title="Interactive Sheet Music">&#xf1c7;</i></a>` : ''}
+                            ${item.video ? `&nbsp;&nbsp;<a href="${item.video}" target="_blank"><i class="fa fa-play-circle" style="font-size:24px" title="Youtube Video"></i></a>` : ''}
+                        </div>
+                        <table width="100%">
+                            <tr>
+                                <td class="song_block">${renderSongContent(item, mode)}</td>
+                                <td class="notes">${item.notes.replace(/\n/g, '<br/>')}</td>
+                            </tr>
+                        </table>
+                    </div>`;
+                finalHtml += header;
             }
         }
-        if(diff) {
-    	    return new_chord.join('/');
-        }
-	    return chord.join('/');
+        document.getElementById('worship').innerHTML = finalHtml;
     }
 
     function load_chords() {
@@ -232,90 +289,31 @@ span.chunk:before {
         window.open('/sheets/' + song_id.toString(), '_blank').focus();
     }
 
-    function lang_tag(lang) {
-        if(lang == '') { return ''; }
-        tags = {'en': '<span class="lang_en" title="English">en</span>', 'zh': '<span class="lang_zh" title="Chinese">zh</span>', 'zh-TW': '<span class="lang_zhTW" title="Taiwanese">tw</span>', 'zh-pingyin': '<span class="lang_zhpingyin" title="Zh PingYin">zh</span>', 'others': '<span class="others">na</span>'}
-        if (lang in tags) {
-            return tags[lang];
+    // console.log(tab)
+    // if(tab == '') {
+    //     load('view');
+    // }
+    // else {
+    //     load(tab);
+    // }
+
+    /**
+    * Thing that runs the thing on startup
+    */
+    window.onload = () => {
+        if (worshipInfo && worshipInfo.date) {
+            document.title = `${worshipInfo.date} Worship Notes - Worship Manager`;
         }
-        return tags['others'];
-    }
+        // Bible Link generation logic
+        const bibleContainer = document.getElementById('bible_verse');
+        const bibleVerses = worshipInfo.bible.replace(/(、|;)/g, '，').split('，');
+        
+        bibleContainer.innerHTML = bibleVerses.map(v => 
+            ` <a href="javascript:void(0)" onclick="get_bible(show_verse, '${v.trim()}')">${v.trim()}</a>`
+        ).join('');
 
-    function clicked(name) {
-        buttons = document.getElementsByTagName('button')
-        for (b of buttons) {
-            if (b.className == name) {
-                b.className += ' on';
-            }
-            else {
-                b.className = b.className.split(' ')[0];
-            }
-        }
-    }
-
-    function load(name) {
-        clicked(name);
-        html = ''
-        for (data of worship) {
-            if (data.type == 'info') {
-                html += '<div class="info">' + data.notes.replace('\n', '<br/>') + '</div>';
-            }
-            else {
-                if(name == 'video') {
-                    v = data.video.replace('youtu.be/', 'www.youtube.com/embed/');
-                    v = v.replace('watch?v=', 'embed/');
-                    html += '<iframe width="400" height="301" src="' + v + '"></iframe><br/>';
-                }
-                else {
-                    html += '<div class="songs"><div class="reference">' + data.title + ' (' + parse_chord(data.key, parseInt(data.transpose)) + ') ' + lang_tag(data.lang) + ' ' + lang_tag(data.lang_2) + ' [' + data.alt_sequence + ']';
-
-                    if (data.score) {
-                        html += '&nbsp;&nbsp;<a href="' + data.score + '" target="new"><i style="font-size:24px" class="fa" title="Sheet Music">&#xf0f6;</i></a>';
-                    }
-                    if (data.abc) {
-                        html += '&nbsp;&nbsp;<a href="/sheets/' + data.id + '" target="new"><i style="font-size:24px" class="fa" title="Interacted Sheet Music">&#xf1c7;</i></a>';
-                    }
-                    if (data.video) {
-                        html += '&nbsp;&nbsp;<a href="' + data.video + '" target="new"><i class="fa fa-play-circle" style="font-size:24px" title="Youtube Video"></i></a>';
-                    }
-                    html += '</div><table width="100%"><tr><td class="song_block">';
-                    ll = []
-                    for (l of data.content) {
-                        if(ll.indexOf(l.name) >= 0) {
-                            continue;
-                        }
-                        html += '<div><span>' + l.name + '</span>';
-                        if (name == 'view') {
-                            html += '<div class="song">' + l.origin_text.replace('\n', '<br/>');
-                        }
-                        else if (name == 'chord') {
-                            chords = l.origin_chord.replace('\n', '<br/>');
-                            if(data.transpose != '0') {
-                                key_change = parseInt(data.transpose);
-                                chords = chords.replace(/(data-chord=")([^"]+)/g, (match, g1, g2) => {return g1+parse_chord(g2, key_change);});
-                            }
-                            html += '<div class="song_chord">' + chords;
-                        }
-                        else if (name == 'bi') {
-                            html += '<div class="song"><div class="origin">' + l.origin_text.replace('\n', '<br/>') + '</div><div class="region">' + l.region + '</div>';
-                        }
-                        ll.push(l.name);
-                        html += '</div><br/>';
-                    }
-                    html += '</td><td class="notes">' + data.notes.replace('\n', '<br/>') + '</td></tr></table>';
-                }
-            }
-        }
-        target = document.getElementById("worship");
-        target.innerHTML = html;
-    }
-
-    console.log(tab)
-    if(tab == '') {
-        load('view');
-    }
-    else {
-        load(tab);
-    }
+        // Load initial view
+        loadTab(initialTab);
+    };
 </script>
-</html>
+{% endblock %}

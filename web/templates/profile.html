@@ -1,15 +1,38 @@
-{% include 'header.html' %}
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+{% extends 'base.html' %}
 
+{% block page_title %}Profile - Worship Manager{% endblock %}
+
+{% block extra_css %}
 <style>
+    .team {
+        text-align: center;
+        padding: var(--spacing-lg);
+        max-width: 400px;
+        margin: var(--spacing-xl) auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: var(--spacing-sm); 
+    }
 
+    .team select {
+        width: 100%;
+    }
+
+    .team button {
+        width: 100%;
+    }
 </style>
-<body>
+{% endblock %}
+
+{% block content %}
 <div class="team">
-    I am: <select id="user">
-    </select>&nbsp;<button id="ok_btn">OK</button>
+    I am: <select id="user"></select>
+    <button id="ok_btn" class="btn btn-primary">OK</button>
 </div>
-</body>
+{% endblock %}
+
+{% block extra_js %}
 <script>
     team = {{ team|safe }};
     html = '';
@@ -28,10 +51,11 @@
         console.log(user_id);
         user_name = $('#user :selected').text();
         if(confirm('Are you sure you are ' + user_name + '?')) {
-            $.cookie("user_id", user_id, { path: '/' }, { expires: 365 });
-            $.cookie("user_name", user_name, { path: '/' }, { expires: 365 });
+            $.cookie("user_id", user_id, { path: '/', expires: 365 });
+            $.cookie("user_name", user_name, { path: '/', expires: 365 });
             location.href= '/';
         }
         return true;
     });
 </script>
+{% endblock %}

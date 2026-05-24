@@ -1,8 +1,10 @@
-<!DOCTYPE html>
-{% include 'header.html' %}
+{% extends 'base.html' %}
+
+{% block page_title %}Songs - Worship Manager{% endblock %}
+
+{% block extra_css %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<link href="../static/datatables.min.css" rel="stylesheet">
-<script src="../static/datatables.js"></script>
+<link href="/static/datatables.min.css" rel="stylesheet">
 <style>
 #dialog {
     padding:5px;
@@ -13,162 +15,56 @@
     cursor: pointer;
 }
 
-span.chunk {
-    position:relative;
-}
+/* Language tags */
+.lang_en    { --lang-color: #009698; }
+.lang_zh    { --lang-color: #8b0000; }
+.lang_zhTW  { --lang-color: #556b2f; }
+.lang_zhpingyin { --lang-color: #856088; }
 
-span.chunk:before {
-    font-size:65%;
-    content:attr(data-chord);
-    position:absolute;
-    top:-120%;
-}
-
-.song_chord {
-    line-height: 200%;
-}
-
-.song_block {
-    text-align: center;
-    background-color: #e0e0e0;
-    width:50%;
-    position: relative;
-    color: #000;
-    margin: 5 5 5 5;
-}
-
-.song_block > span {
-    position: absolute;
-    top: 5px;
-    left: 5px;
-}
-
-.notes {
-    text-align: center;
-}
-
-.lang_en {
-  border: 4px solid #009698;
-  background-color: #009698;
-  color: #fff;
-  border-radius: 50px 20px;
-}
-
-.lang_zh {
-  border: 4px solid #8b0000;
-  background-color: #8b0000;
-  color: #fff;
-  border-radius: 50px 20px;
-}
-
-.lang_zhTW {
-  border: 4px solid #556b2f;
-  background-color: #556b2f;
-  color: #fff;
-  border-radius: 50px 20px;
-}
-
-.lang_zhpingyin {
-  border: 4px solid #856088;
-  background-color: #856088;
-  color: #fff;
-  border-radius: 50px 20px;
-}
-
-.info {
-    border: 2px solid #856088;
-    color: #000;
-    border-radius: 5px;
-}
-
-.songs {
-    border: 2px solid #556b2f;
-    color: #000;
-    border-radius: 5px;
-}
-
-.view {
-  background-color: white;
-  color: black;
-  border: 2px solid #04AA6D;
-}
-
-.view.on {
-  background-color: #04AA6D;
-  color: white;
-}
-
-.view:hover {
-  background-color: #04AA6D;
-  color: white;
-}
-
-.chord {
-  background-color: white;
-  color: black;
-  border: 2px solid #008CBA;
-}
-
-.chord.on {
-  background-color: #008CBA;
-  color: white;
-}
-
-.chord:hover {
-  background-color: #008CBA;
-  color: white;
-}
-
-.bi {
-  background-color: white;
-  color: black;
-  border: 2px solid #555555;
-}
-
-.bi.on {
-  background-color: #555555;
-  color: white;
-}
-
-.bi:hover {
-  background-color: #555555;
-  color: white;
+.lang_en, .lang_zh, .lang_zhTW, .lang_zhpingyin {
+    border-radius: 50px 20px;
+    color: #fff;
+    border: 4px solid var(--lang-color);
+    background-color: var(--lang-color);
 }
 </style>
-</head>
-<body>
+{% endblock %}
+
+{% block content %}
 <div id="filters">
     <div id="lang"></div>
     <div id="key"></div>
 </div>
     <!-- Container for songs -->
 <table id="songs" class="display" width="100%">
-            <thead>
-            <tr>
-                <th>Title</th>
-                <th>Key</th>
-                <th>Book</th>
-                <th>Lang</th>
-                <th>Lang2</th>
-                <th>Score</th>
-                <th>Video</th>
-            </tr>
-        </thead>
-        <tfoot>
-            <tr>
-                <th>Title</th>
-                <th>Key</th>
-                <th>Book</th>
-                <th>Lang</th>
-                <th>Lang2</th>
-                <th>Score</th>
-                <th>Video</th>
-            </tr>
-        </tfoot>
-
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Key</th>
+            <th>Book</th>
+            <th>Lang</th>
+            <th>Lang2</th>
+            <th>Score</th>
+            <th>Video</th>
+        </tr>
+    </thead>
+    <tfoot>
+        <tr>
+            <th>Title</th>
+            <th>Key</th>
+            <th>Book</th>
+            <th>Lang</th>
+            <th>Lang2</th>
+            <th>Score</th>
+            <th>Video</th>
+        </tr>
+    </tfoot>
 </table>
 <div id="dialog"></div>
-</body>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/datatables.js"></script>
 <script>
     let songs = {{ songs|safe }};
     let langs = [];
@@ -177,27 +73,43 @@ span.chunk:before {
     let clicked = '';
     let $my_dialog;
 
+    /*  This code looks quite complex for getting all the keys...
+        The main use is only to make sure the keys exist in the songs...
+        The sorting also needs to be fixed (sort only works for #, not b)...
+        Just using a predefined list of keys might be easier..
+    */
+    
+    // Option 1: Old Code
+    // for (let song of songs) {
+    //     if (!keys.includes(song.key)) {
+    //         keys.push(song.key);
+    //     }
+    //     if (!langs.includes(song.lang)) {
+    //         langs.push(song.lang);
+    //     }
+    //     if (!langs.includes(song.lang_2)) {
+    //         langs.push(song.lang_2);
+    //     }
+    // }
+    // langs.sort();
+    // keys.sort();
+    // keys1 = keys.includes('A')? keys.splice(keys.indexOf('A'),1):keys1;
+    // keys1 = keys.includes('Ab')?keys1.concat(keys.splice(keys.indexOf('Ab'),1)):keys1;
+    // keys1 = keys.includes('B')?keys1.concat(keys.splice(keys.indexOf('B'),1)):keys1;
+    // keys1 = keys.includes('Bb')?keys1.concat(keys.splice(keys.indexOf('Bb'),1)):keys1;
+    // keys1.sort();
+    // keys = keys.concat(keys1);
 
-    for (song of songs) {
-        if (keys.indexOf(song.key) < 0) {
-            keys.push(song.key);
-        }
-
-        if (langs.indexOf(song.lang) < 0) {
-            langs.push(song.lang);
-        }
-        if (langs.indexOf(song.lang_2) < 0) {
-            langs.push(song.lang_2);
-        }
-    }
-    langs.sort();
-    keys.sort();
-    keys1 = keys.includes('A')? keys.splice(keys.indexOf('A'),1):keys1;
-    keys1 = keys.includes('Ab')?keys1.concat(keys.splice(keys.indexOf('Ab'),1)):keys1;
-    keys1 = keys.includes('B')?keys1.concat(keys.splice(keys.indexOf('B'),1)):keys1;
-    keys1 = keys.includes('Bb')?keys1.concat(keys.splice(keys.indexOf('Bb'),1)):keys1;
-    keys1.sort();
-    keys = keys.concat(keys1);
+    // Option 2: Fast, not Dynamic
+    keys = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
+    langs = ['en', 'zh', 'zh-TW', 'zh-pingyin'];
+    // Option 3, Dynamic but with Set, requires sorting still
+    // let keySet = new Set();
+    // for (let song of songs) {
+    //     keySet.add(song.key);
+    // }
+    // keys = Array.from(keySet);
+    // keys.sort();
 
     div = 'Key: ';
     for (key of keys) {
@@ -206,13 +118,15 @@ span.chunk:before {
     div += '<input class="all_keys" type="checkbox" checked>All</input>';
     $('#key').html(div);
 
-    /*div = 'Language: ';
+    div = 'Language: ';
     for (lang of langs) {
         if (lang != '') {
             div += '<input class="langs" type="checkbox" checked value="' + lang + '">' + lang_tag(lang) + '</input>';
         }
     }
-    $('#lang').html(div);*/
+    $('#lang').html(div);
+    
+
 
     let table = new DataTable('#songs', {
         data: songs,
@@ -290,10 +204,14 @@ span.chunk:before {
     function get_score(data) {
         html = '';
         for (s of data.score) {
-            html += '<a href="' + s + '" target="new"><i style="font-size:24px" class="fa" title="Sheet Music">&#xf0f6;</i></a>&nbsp;&nbsp;';
+            html += `<a href="${s}" target="new">
+                    <i style="font-size:24px" class="fa" title="Sheet Music">&#xf0f6;</i>
+                    </a>&nbsp;`;
         }
         if (data.abc) {
-            html += '<a href="../sheets/' + data.id + '" target="new"><i style="font-size:24px" class="fa" title="Interacted Sheet Music">&#xf1c7;</i></a>';
+            html += `<a href="../sheets/${data.id}" target="new">
+                    <i style="font-size:24px" class="fa" title="Interacted Sheet Music">&#xf1c7;</i>
+                    </a>`;
         }
         return html;
     }
@@ -301,14 +219,21 @@ span.chunk:before {
     function get_video(links) {
         html = '';
         for (v of links) {
-            html += '<a href="' + v + '" target="new"><i class="fa fa-play-circle" style="font-size:24px" title="Youtube Video"></i></a>&nbsp;&nbsp;';
+            html += `<a href="${v}" target="new">
+                    <i class="fa fa-play-circle" style="font-size:24px" title="Youtube Video"></i>
+                    </a>`;
         }
         return html;
     }
 
     function lang_tag(lang) {
         if(lang == '') { return ''; }
-        tags = {'en': '<span class="lang_en" title="English">en</span>', 'zh': '<span class="lang_zh" title="Chinese">zh</span>', 'zh-TW': '<span class="lang_zhTW" title="Taiwanese">tw</span>', 'zh-pingyin': '<span class="lang_zhpingyin" title="Zh PingYin">zh</span>', 'others': '<span class="others">na</span>'}
+        tags = {'en': '<span class="lang_en" title="English">en</span>', 
+                'zh': '<span class="lang_zh" title="Chinese">zh</span>', 
+                'zh-TW': '<span class="lang_zhTW" title="Taiwanese">tw</span>', 
+                'zh-pingyin': '<span class="lang_zhpingyin" title="Zh PingYin">zh</span>', 
+                'others': '<span class="others">na</span>'
+                }
         if (lang in tags) {
             return tags[lang];
         }
@@ -422,17 +347,29 @@ span.chunk:before {
         table.column(1).search((d) => temp.includes(d)).draw();
     });
 
-    $('.langs').click(function() {
-        var temp = [];
-        $('.langs').each(function() {
-            if(this.checked) {
-                temp.push(this.value);
+    /* Language Filter */
+    // Use raw data values, not table.column(#).search() which only searches HTML values
+    // Ran every time table.draw is ran
+    $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
+        let checkedLangs = [];
+        $('.langs').each(function() { 
+            if(this.checked){
+                checkedLangs.push(this.value);
             }
         });
-        table.column(2).search((d) => temp.includes(d)).draw();
-        table.column(2).search(function(d) {
-        });
+        if(checkedLangs.length === 0) return false; // hide all if none selected
 
+        // row.lang and row.lang_2 are the raw language codes
+        let row = songs[dataIndex];
+
+        // If return is true, keep the row. If return is false, hide the row.
+        // In this case, If Lang1 or Lang2 are checked, then keep it.
+        return checkedLangs.includes(row.lang) || checkedLangs.includes(row.lang_2);
+    });
+
+    // Redraw table on checkbox click
+    $('.langs').click(function() {
+        table.draw();
     });
 </script>
-</html>
+{% endblock %}
