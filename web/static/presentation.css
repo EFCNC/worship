@@ -1,61 +1,44 @@
-        .content {
-            padding: 30px;
-        }
+.content {
+    padding: 30px;
+}
 
-        #bottom-left {
-             position:absolute;
-             font-size: 20px;
-             bottom:20;
-             left:20;
-             padding: 10px;
-             color: #fff;
-        }
+#top-left, #top-right, #bottom-left, #bottom-right {
+position: fixed;
+padding: 10px;
+z-index: 10; /* Ensure they stay above the slides */
+}
 
-        #bottom-right {
-             position:fixed;
-             font-size: 20px;
-             bottom:20;
-             right:20;
-             padding: 10px;
-             color: #fff;
-        }
+#top-left, #top-right {
+    top: 20px;
+    font-size: 3vh;
+}
 
-        #top-left {
-             position:fixed;
-             font-size: 3vw;
-             top:20;
-             left:20;
-             padding: 5px;
-             color: #ffd800;
-        }
+#bottom-left, #bottom-right {
+    bottom: 20px;
+    font-size: 2vh;
+}
 
-        #top-right {
-             position:fixed;
-             font-size: 30px;
-             top:20;
-             right:20;
-             padding: 10px;
-             color: #ff3800;
-             background-color: #c0c0c0;
-             display: none;
-        }
+#top-left     { left: 20px; color: #ffd800; }
+#top-right    { right: 20px; color: #ff3800; background-color: #c0c0c0; display: none; }
+#bottom-left  { left: 20px; color: #fff; }
+#bottom-right { right: 20px; color: #fff; }
 
-       #popup {
-            display: none flex;
-            justify-content: center;
-            align-items: center;
-            height: 80%;
-            border: 3px solid green;
-        }
-    /* Lead style */
+#popup {
+    display: none flex;
+    justify-content: center;
+    align-items: center;
+    height: 80%;
+    border: 3px solid green;
+}
 
-    	.admin_container {
-  		    display: grid;
-  		    grid-template-areas:
-    		    "reveal menu";
-  		    grid-template-columns: 5fr 2fr;
-  		    gap: 5px;
-	    }
+/* Lead style */
+.admin_container {
+    display: grid;
+    grid-template-areas:
+        "reveal menu";
+    grid-template-columns: 5fr 2fr;
+    gap: 5px;
+}
 
 .lead_container {
     display: grid;
@@ -81,79 +64,79 @@
     grid-column: span 9 / span 9;
     grid-row-start: 5;
 }
-        .control_panel button {
-            padding: 28px 16px;
-            width: 125px;
-            margin: 5px;
-        }
+.control_panel button {
+    padding: 28px 16px;
+    width: 125px;
+    margin: 5px;
+}
 #slide_notes {
     color: #fff;
     width: 300px;
     word-wrap: break-word;
     }
 
-        #dynamic_btn button {
-            padding: 28px 16px;
-            width: 125px;
-            margin: 5px;
-            font-size: 50px;
-        }
+#dynamic_btn button {
+    padding: 28px 16px;
+    width: 125px;
+    margin: 5px;
+    font-size: 50px;
+}
 
 
-        #notes {
-            font-size: 1.5vw;
-        }
+#notes {
+    font-size: 1.5vw;
+}
 
-        .notes {
-            text-align: left;
-        }
+.notes {
+    text-align: left;
+}
 
-        .inner.current {
-            color: #fff;
-            border-radius: 5px;
-            opacity: 0.5;
-        }
+.inner.current {
+    color: #fff;
+    border-radius: 5px;
+    opacity: 0.5;
+}
 
 
-    /* Musician style */
+/* Musician style */
 
-    /* For chord */
-        span.chunk {
-           position:relative;
-        }
+/* For chord */
+span.chunk {
+    position:relative;
+}
 
-        span.chunk:before {
-            font-size:60%;
-            content:attr(data-chord);
-            position:absolute;
-            top:-110%;
-            color: #ff3800;
-        }
+span.chunk:before {
+    font-size:60%;
+    content:attr(data-chord);
+    position:absolute;
+    top:-110%;
+    color: #ff3800;
+}
 
-        .song_chord {
-            font-size: 5vw;
-            line-height: 200%;
-        }
+.song_chord {
+    font-size: 5vw;
+    line-height: 200%;
+}
 
-        .next {
-            opacity: 0.3;
-        }
+.next {
+    opacity: 0.3;
+}
 
-        .lyrics {
-            font-size: clamp(100%, 1rem + 3vw, 60px);
-            line-height: 120%;
-            color: #fff;
-            text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
-        }
+.lyrics {
+    font-size: clamp(100%, 1rem + 3vw, 60px);
+    line-height: 120%;
+    color: #fff;
+    text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+}
 
-        .info {
-            font-size: clamp(100%, 1rem + 2vw, 55px);
-            line-height: 120%;
-            color: #fff;
-            text-align: left;
-            text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
-        }
+.info {
+    font-size: clamp(100%, 1rem + 2vw, 55px);
+    line-height: 120%;
+    color: #fff;
+    text-align: left;
+    text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+}
 
-        .info.region, .song.region {
-            color: #ffd800;
-        }
+.info.region, .song.region {
+    color: #ffd800;
+}
