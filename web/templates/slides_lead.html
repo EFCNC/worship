@@ -223,4 +223,15 @@
         socket.emit('control', {'type': 'pos', 'value': [pos, order]});
     });
 
+    // Stuff copied from original slides.html, I believe it was for buttons
+    // Uncomment if useful
+    // $(document).on('click', '#dynamic_btn button', function() {
+    //     msg = $(this).attr('title');
+    //     name = $(this).attr('name');
+    //     if (name=='transpose') {
+    //         socket.emit('control', {'type': 'key', 'value': $(this).attr('transpose')});
+    //     }
+    //     socket.emit('control', {'type': 'dynamic', 'value': msg});
+    // });
+
 </script>

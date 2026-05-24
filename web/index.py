@@ -140,6 +140,9 @@ def slides_viewer(mode=None):
 			__update_client_mode('')
 			return "<script>alert('Only one Lead mode can be connected, please use different mode.');window.location.replace('../slides');</script>"
 		return render_template('slides_lead.html', presentation=slides_data, mode=mode)
+	elif mode == 'view':
+		__update_client_mode('')
+		return render_template('slides_view.html', presentation=slides_data, mode=mode)
 	return render_template('slides.html', presentation=slides_data, mode=mode)
 
 @app.route("/notes")
@@ -378,4 +381,4 @@ def __get_slide_json():
 	return True
 
 if __name__ == '__main__':
-	app.run(host="0.0.0.0", port=80, debug=True)
+	app.run(host="0.0.0.0", port=5000, debug=True)
