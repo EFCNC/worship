@@ -1,17 +1,41 @@
 ---
-name: Feature request
-about: Suggest an idea for this project
-title: "[Enhancement]"
+name: ⭐ Feature request
+description: Create a detailed request for a new feature.
+title: 'feat: '
 labels: enhancement
-assignees: ''
-
 ---
 
-**Is your feature request related to a problem? Please describe.**
-A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        # Website feature request
 
-**Describe the solution you'd like**
-A clear and concise description of what you want to happen.
+        Before creating a new feature request, please keep the following in mind:
 
-**Additional context**
-Add any other context or screenshots about the feature request here.
+        - **Do not submit a duplicate feature request**: Search for existing feature requests, including closed issues, [here](https://github.com/EFCNC/worship/issues?q=is%3Aissue).
+  - type: textarea
+    attributes:
+      label: Feature description
+      description: |
+        - Describe your feature in detail
+  - type: textarea
+    attributes:
+      label: Motivation
+      description: | 
+        A strong motivation is necessary for a feature request to be considered.
+        
+        - Why should this feature be implemented? 
+        - What is the explicit use case?
+        - What are the benefits?
+        - What makes this feature important?
+    validations:
+      required: true
+  - type: checkboxes
+    id: acknowledgements
+    attributes:
+      label: Acknowledgements
+      description: Your feature request will be closed if you don't follow the checklist below.
+      options:
+        - label: I have checked all open and closed feature requests and this is not a duplicate
+          required: true
