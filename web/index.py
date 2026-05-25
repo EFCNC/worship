@@ -311,7 +311,7 @@ def roll_call():
 		people = Utils.get_team_present(sundays['worship_id'])
 	else:
 		people = Utils.get_team_present(id)
-	return render_template('rollcall.html', people=people, groups=[x[1] for x in groups], sundays=sundays)
+	return render_template('admin/rollcall.html', people=people, groups=[x[1] for x in groups], sundays=sundays)
 
 @app.route("/report/<id>")
 def report(id):
