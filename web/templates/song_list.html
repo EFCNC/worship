@@ -197,7 +197,13 @@
     }
 
     function show_lyrics(data) {
-        html = '<span song_id="' + data.id + '">' + data.title + '</span>&nbsp;<i style="display:none" style="font-size:14px" class="fa" title="Edit Song" id="edit_' + data.id + '" name="' + data.title + '">&#xf044;</i>&nbsp;<i style="display:none" style="font-size:14px" class="fa" id="pin_' + data.id + '"' + pinned(data.id) + '</i></span>';
+        let editLink = '<a href="/song/' + data.id + '/edit" style="text-decoration:none; color:inherit;">' +
+                    '<i style="display:none; font-size:14px" class="fa" title="Edit Song">&#xf044;</i>' +
+                    '</a>';
+                    
+        html = '<span song_id="' + data.id + '">' + data.title + '</span>&nbsp;' + 
+            editLink + 
+            '&nbsp;<i style="display:none; font-size:14px" class="fa" id="pin_' + data.id + '"' + pinned(data.id) + '</i>';
         return html;
     }
 
@@ -309,18 +315,12 @@
         clicked = '';
     });
 
-    $(document).on('click', '.title i', function() {
-        var url = this.id.split('_')[1];
-        title = $(this).attr('name');
-        if ($(this).attr('name')) {
-            $my_dialog.load(url, function() {
-                $(this).dialog({ title: title}).dialog('open');
-            });
-            clicked = 'edit';
-        }
-        else {
-            set_cookies(url, $(this).attr('title'));
-            console.log($.cookie('pinned'))
+    $(document).on('click', '.title i', function(e) {
+        // If it's a heart icon
+        // Not sure how this code works... not sure what the heart is rn
+        if (!$(this).attr('name')) {
+            var id = this.id.split('_')[1];
+            set_cookies(id, $(this).attr('title'));
         }
     });
 
