@@ -155,20 +155,24 @@
     // --- Editor Interaction ---
     function insertAtCursor(tag, isPaired) {
         const txtarea = document.getElementsByName("content")[0];
+        txtarea.focus();
+
         const start = txtarea.selectionStart;
         const finish = txtarea.selectionEnd;
         const sel = txtarea.value.substring(start, finish);
-        
-        let replacement = isPaired 
-            ? `<${tag}>\n${sel}\n</${tag}>` 
-            : `[${tag}]`;
 
-        txtarea.value = txtarea.value.substring(0, start) + replacement + txtarea.value.substring(finish);
-        
-        const newPos = start + replacement.length;
-        txtarea.focus();
-        txtarea.setSelectionRange(newPos, newPos);
+        let textToInsert = isPaired 
+            ? `<${tag}>\n${sel}\n</${tag}>` 
+            : `[${tag}] `;
+
+        // Preserve Undo (Ctrl+Z) and prevents scroll-jump
+        if (!document.execCommand('insertText', false, textToInsert)) {
+            // Fallback for very old browsers if execCommand fails
+            const value = txtarea.value;
+            txtarea.value = value.substring(0, start) + textToInsert + value.substring(finish);
+        }
     }
+    
 
     // --- Event Listeners ---
     $(document).ready(function() {
