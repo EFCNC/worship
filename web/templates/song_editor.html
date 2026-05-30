@@ -42,8 +42,13 @@
     }
 
     .lyrics-area {
-        min-height: 500px; /* Give yourself a nice tall workspace */
-        resize: vertical;  /* Allow users to pull it down further */
+        min-height: 500px;
+        resize: vertical;
+
+        /* Strict line alignment */
+        line-height: 1.8;       /* Forces equal vertical spacing */
+        font-size: 14px;
+        overflow-x: auto;       /* Shows horizontal scrollbar for long lines */
     }
 
     /* Highlight the active textarea slightly */
@@ -146,7 +151,7 @@
 
         <div class="form-group">
             <label>ABC Notation</label>
-            <textarea name="abc" rows="5" class="lyrics-area">{{ content.abc }}</textarea>
+            <textarea name="abc" rows="5">{{ content.abc }}</textarea>
         </div>
 
         <div class="actions">
