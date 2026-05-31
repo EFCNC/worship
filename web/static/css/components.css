@@ -330,7 +330,7 @@ textarea:focus {
     margin-left: auto;
 }
 
-/* Tables */
+/* Tables
 table {
     width: 100%;
     border-collapse: collapse;
@@ -355,7 +355,7 @@ td {
 
 tbody tr:hover {
     background-color: rgba(26, 188, 156, 0.05);
-}
+} */
 
 /* Badges */
 .badge {
