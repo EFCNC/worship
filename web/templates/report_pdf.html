@@ -5,6 +5,21 @@
 {% block extra_css %}
 <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 <style>
+    /* Override global body things from global.css */
+    body {
+        margin: initial;
+        padding: initial;
+        font-family: initial;
+        font-size: initial;
+        line-height: initial;
+        color: initial;
+        background-color: initial;
+    }
+
+    @media print {
+        footer {page-break-after: always;}
+    }
+
     .report {
     display: grid;
     grid-template-columns: 48% 48%;
@@ -15,6 +30,7 @@
     .container {
     display: flex;
     flex-direction: column;
+    width: 100%;
     }
 
     .container div {
@@ -27,8 +43,7 @@
     #task_table {
     display: grid;
     grid-template-columns: 25% 25% 25% 25%;
-    padding: 3px;
-    border: 1px double;
+    margin-bottom: 3px;
     position: relative;
     }
 
@@ -84,11 +99,6 @@
 
     .header {
     background-color: #c0c0c0;
-    }
-
-    @media print {
-    footer {page-break-after: always;}
-    -webkit-print-color-adjust: exact;
     }
 
     .line {
