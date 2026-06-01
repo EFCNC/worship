@@ -19,6 +19,7 @@
     let touchableElement;
     let w_id;
     let adding_slide = 0;
+    let slide_refreshed = false;
 
     // Socket Server url
     let socket_url = window.location.host;
@@ -86,14 +87,10 @@
     }
 
     function move_top(para) {
-        //scrollTo = $('div[' + para + ']');
         scrollTo = $('div[class="inner present"]');
         base = $('.preview').offset().top;
         $('.preview').scrollTop(base);
-        console.log(base, $(scrollTo).offset().top,  $(scrollTo).position())
-        $('.preview').animate({
-            scrollTop:$(scrollTo).offset().top - base
-        },'linear');
+        $('.preview').scrollTop($(scrollTo).offset().top - base);
     }
 
     function save_slides() {
@@ -143,44 +140,6 @@
         }
     }
 
-    function show_notes(text) {
-        text = text.replaceAll('\n', '<br/>');
-        return '>'+ text + '</div>';
-    }
-
-    function show_info(content, align) {
-        text = content.origin_text;
-        text = text.replaceAll('\n', '<br/>');
-        html = '<div class="' + mode + ' info origin" style="text-align:' + align + '">'  + text + '</div>';
-        if (content.region_text) {
-            text = content.region_text;
-            text = text.replaceAll('\n', '<br/>');
-            html += '<div class="' + mode + ' info region" style="text-align:' + align + '">'  + text + '</div>';
-        }
-        return html;
-    }
-
-    function show_lyrics(l, lang, lang_2) {
-        html = '<div class="' + mode + ' lyrics origin">' + l.origin_text + '</div>';
-        if (l.region_text) {
-            html += '<div class="' + mode + ' lyrics region">' + l.region_text + '</div>';
-        }
-        return html;
-    }
-
-    // function load_container(mode_name) {
-    //     container = {
-    //         'view': '<div id="top-left"></div><div id="top-right"></div><div id="preview" class="preview view"></div><div class="reveal"><div class="slides"></div></div><div id="bottom-left"></div><div id="bottom-right"></div>',
-    //         'musician': '<div id="top-left"></div><div id="top-right"></div><div id="preview" class="preview view"></div><div id="bottom-left"></div><div id="bottom-right"></div>',
-    //         'score': '<div id="top-left"></div><div id="top-right"></div><div id="preview" class="preview view"><object id="sheets" type="text/html" style="width:100%; height:100%; margin:1%;"></object></div><div id="bottom-left"></div><div id="bottom-right"></div>',
-    //         'lead': '<div id="top-right"></div><div class="preview_container"><div id="preview"></div><div id="menu"><div id="dynamic_btn"><br/><button name="dynamic" title="Intro">Intro</button><button name="dynamic" title="Interlude">Interlude</button><button name="dynamic" title="Ending">Ending</button><br/><button name="dynamic" title="Ready to Build up">Build Up</button><button name="dynamic" title="Slow Down">Slow Down</button><button name="dynamic" title="Speed Up">Speed Up</button><br/><button name="dynamic" title="Acapella">Acapella</button><button name="dynamic" title="Repeat Chorus">Repeat Chorus</button><button name="dynamic" title="Last Sentence">Last Sentence</button><div id="key_change"></div></div><div id="notes"></div></div><div id="preview_div"></div></div>'
-    //     }
-    //     if (mode_name) {
-    //         return container[mode_name];
-    //     }
-    //     return container[mode]
-    // }
-
     function create_view(type, origin, region, name) {
         let grid = document.createElement('div');
         grid.setAttribute('name', name);
@@ -206,10 +165,9 @@
         $('#slide_notes').html(slides[0].notes);
         for(var i=0;i<slides.length;i++) {
             data = slides[i];
-            bg = data.style.background;
+            bg_url = data.style.background;
             let section = document.createElement('section');
-            if (bg) {
-                bg_url = bg;
+            if (bg_url) {
                 bg_opacity = data.style.opacity
                 section.setAttribute('data-background-image', bg_url);
                 section.setAttribute('data-background-opacity', bg_opacity);
@@ -337,6 +295,7 @@
     }
 
     function update_json(download) {
+    $('#loading').show();
     data = JSON.stringify({"setting": setting, "slides": slides});
         $.ajax({
             type: "post",
@@ -355,6 +314,7 @@
                 }
             }
         });
+        $('#loading').hide();
     }
 
 
@@ -365,11 +325,15 @@
     });
 
     socket.on('reload', function (presentation) {
-        console.log('Admin reload json data');
         slides = presentation['data'];
+        console.log('Admin reload json data', slides);
         w_id = presentation['id'];
         adding_slide = 0;
-        location.reload()
+
+        // When reload is broadcast, load the slide from the data and sync it before move to current pos and order
+        load_slides();
+        Reveal.sync();
+        Reveal.slide(pos, order);
     });
 
     socket.on('response', function (data) {
@@ -377,13 +341,30 @@
         order = data.pos[1];
         msg = data.msg;
         dynamic = data.dynamic;
+        from = data.from;
         // TODO: For musician key change
         key_change = data.key;
-        console.log('Server sent: pos:', pos, 'order', order, 'msg:', msg, 'key:', key_change, 'dynamic:', dynamic);
-        Reveal.slide(pos, order);
-        show_data(pos);
-        show_msg();
+        console.log('Server sent: pos:', pos, 'order', order, 'msg:', msg, 'key:', key_change, 'dynamic:', dynamic, 'from:', from);
+        if (from!= mode) {
+            slide_refreshed = true;
+            Reveal.slide(pos, order);
+            change_slide();
+        }
     });
+
+    function change_slide() {
+        show_msg();
+        $('#top-left').html(slides[pos].title);
+        if(slides[pos].type=='media') {
+            $('#slide_notes').html(slides[pos].content.origin_text);
+        }
+        else {
+            $('#slide_notes').html(slides[pos].notes);
+        }
+        if(mode=='lead') {
+            load_preview();
+        }
+    }
 
 
     // contentEditable for origin, region, title, and notes

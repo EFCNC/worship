@@ -44,27 +44,6 @@
         order = presentation['pos'][1];
         msg = presentation['msg'];
 
-    function init() {
-        if (slides.length == 0 || mode == '') {
-            alert("No slide is currently running!!");
-            //mode = '';
-            return false;
-        }
-
-        // $("#control_btn").hide();
-        // $("#container").html(load_container());
-
-        // preview = $('#preview');
-        // load(preview);
-
-        // if (mode == 'lead') {
-        //     $("#preview").css('height', '75vh');
-        // }
-        // else if (mode == 'view' || mode == 'musician') {
-        //     $('#header').hide();
-        // }
-    }
-
     $(document).ready(function() {
         $('#header').hide();
 		Reveal.initialize({
@@ -75,17 +54,11 @@
 			progress: false,
 			controls: false
 		});
-
         load_slides();
-        
     });
 
-    Reveal.on('slidechanged', (event) => {
-        pos = event.indexh;
-        order = event.indexv;
-        console.log("slide changed", pos, order);
+    Reveal.on('ready', (event) => {
         Reveal.slide(pos, order);
-        show_data(pos);
     });
 
 </script>

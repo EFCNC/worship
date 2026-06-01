@@ -71,6 +71,7 @@ def handle_control(data):
 		if slides_data['pos'][0] != data['value'][0]: # When pos is different (new slide), change key to 0
 			slides_data['key'] = 0
 	slides_data[data['type']] = data['value']
+	slides_data['from'] = data['from']
 	emit('response', slides_data, broadcast=True)
 
 @socketio.on('msg')

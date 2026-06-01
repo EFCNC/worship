@@ -160,7 +160,7 @@
 
 {% block extra_js %}
 <script>
-        mode = 'admin';                 // Set mode to lead
+        mode = 'admin';                 // Set mode to admin
         bg_url = '';
         bg_opacity = 1;
         a_type = '';
@@ -408,6 +408,7 @@
             update_current_bg();
             $('#edit_btn').css('left', $('.reveal').width()-100);
             $('#edit_btn').show();
+            a_type = 'bg';
         });
 
         function update_current_bg() {
@@ -529,17 +530,16 @@
         });
 
         Reveal.on('slidechanged', (event) => {
+            if(slide_refreshed) {            // slide refreshed by socket, reset flag
+                slide_refreshed = false;
+                return true;
+            }
             pos = event.indexh;
             order = event.indexv;
             pre = $(event.previousSlide).children().attr('name');
             cur = $(event.currentSlide).children().attr('name');
-            $('#slide_title').html(slides[pos].title);
-            if(slides[pos].type=='media') {
-                $('#slide_notes').html(slides[pos].content.origin_text);
-            }
-            else {
-                $('#slide_notes').html(slides[pos].notes);
-            }
+            change_slide();
+
             if (order == 0) {
                 content_index = 0;
             }
@@ -551,7 +551,7 @@
                 load_slides();
             }
             console.log("slide changed", pos, order, content_index);
-            socket.emit('control', {'type': 'pos', 'value': [pos, order]});
+            socket.emit('control', {'type': 'pos', 'value': [pos, order], 'from': 'admin'});
         });
 </script>
 {% endblock %}
