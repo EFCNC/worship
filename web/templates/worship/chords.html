@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Worship Home - Worship Manager{% endblock %}
+
+{% block extra_css %}
+<link href="../static/presentation.css" rel="stylesheet">
+<style>
+span.chunk {
+    position: relative;
+}
+
+span.chunk:before {
+    font-size: 0.65em;
+    content: attr(data-chord);
+    position: absolute;
+    top: -2em;
+}
+
+#sheet {
+    font-size: 1.25em;
+    line-height: 200%;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="my_score">
+    <div id="top">
+        <span id="sheet_title"></span>&nbsp;<span id="sheet_btn"></span>
+    </div>
+    <div id="abc">
+        <div id="keys"></div>
+    </div>
+    <div style="text-align:center" id="sheet"></div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // --- DATA INITIALIZATION ---
+    const sharp = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+    const flat = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"];
+
+    const chords = {{ chords|safe }};
+    let index = 0;
+
+    // --- FUNCTIONS ---
+    /**
+     * Transposes a single chord string by a specific number of steps (diff).
+     * Imported from worship notes file to replace the older parse_chord logic.
+     */
+    function transposeChord(chord, diff) {
+        if (diff === 0) return chord;
+        
+        let keys = sharp.indexOf(chord.split('/')[0]) >= 0 ? sharp : flat;
+        
+        return chord.split('/').map(part => {
+            let root = part;
+            let suffix = "";
+            
+            if (part[1] === 'b' || part[1] === '#') {
+                root = part.substring(0, 2);
+                suffix = part.substring(2);
+            } else {
+                root = part[0];
+                suffix = part.substring(1);
+            }
+
+            let pos = keys.indexOf(root) + diff;
+            
+            if (pos >= keys.length) pos -= keys.length;
+            if (pos < 0) pos += keys.length;
+            
+            return keys[pos] + suffix;
+        }).join('/');
+    }
+
+    function load_sheet(ii, targetKey) {
+        const data = chords[ii];
+        const seenNames = [];
+        
+        // Determine if we should use sharps or flats based on the original key
+        const activeKeys = sharp.indexOf(data.key) >= 0 ? sharp : flat;
+        
+        // Render key toggle buttons
+        let keyHtml = '';
+        const currentKey = targetKey || data.key;
+        
+        for (let i = 0; i < activeKeys.length; i++) {
+            if (currentKey === activeKeys[i]) {
+                keyHtml += `<button title="Original Key" name="${activeKeys[i]}"><b>${activeKeys[i]}</b></button>`;
+            } else {
+                keyHtml += `<button name="${activeKeys[i]}">${activeKeys[i]}</button>`;
+            }
+        }
+        $('#keys').html(keyHtml);
+
+        // Calculate transposition difference
+        let transpose = 0;
+        if (currentKey) {
+            transpose = activeKeys.indexOf(currentKey) - activeKeys.indexOf(data.key);
+        }
+
+        // Render sheet content
+        let sheetHtml = '';
+        for (let i = 0; i < data.content.length; i++) {
+            if (seenNames.indexOf(data.content[i].name) < 0) {
+                let chordStr = data.content[i].origin_chord;
+                
+                if (transpose !== 0) {
+                    chordStr = chordStr.replace(/(data-chord=")([^"]+)/g, (match, g1, g2) => {
+                        return g1 + transposeChord(g2, transpose);
+                    });
+                }
+                
+                sheetHtml += `<div class="block">${data.content[i].name}<br/>${chordStr}</div>`;
+                seenNames.push(data.content[i].name);
+            }
+        }
+        
+        $('#sheet').empty().html(sheetHtml).show();
+    }
+
+    $(document).ready(function() {
+        // Form select box with song title
+        if (chords.length >= 1) {
+            let songsHtml = '<select name="songs" id="song_list">';
+            for (let s = 0; s < chords.length; s++) {
+                songsHtml += `<option value="${s}">${chords[s].title} (${chords[s].key})</option>`;
+            }
+            songsHtml += '</select>';
+            
+            $("#sheet_title").html(songsHtml);
+            load_sheet(0, chords[0].key);
+        }
+
+        $('#song_list').change(function() {
+            index = this.value;
+            load_sheet(index, chords[index].key);
+        });
+    });
+
+    $(document).on('click', 'button', function() {
+        load_sheet(index, this.name);
+    });
+</script>
+{% endblock %}
