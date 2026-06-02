@@ -17,11 +17,7 @@
         padding: 30px 10px;
     }
 
-    .menu-btn {
-        font-size: 30px;
-        margin-right: 5px; /* Replaces the hardcoded &nbsp; in your old HTML */
-        cursor: pointer;
-    }
+
 </style>
 {% endblock %}
 
@@ -30,7 +26,7 @@
     <script>
         $(document).ready(function() {
             // Target the buttons specifically by their class
-            $('.menu-btn').click(function() {
+            $('.button').click(function() {
                 // Added 'const' to properly declare the variable
                 const name = $(this).attr('name');
                 window.location.href = '/slides/' + name;
@@ -40,10 +36,10 @@
 {% endblock %}
 {% block content %}
     <div class="menu-container">
-        <button class="menu-btn" name="admin">Admin</button>
-        <button class="menu-btn" name="lead">Lead</button>
-        <button class="menu-btn" name="view">View</button>
-        <button class="menu-btn" name="musician">Musician</button>
-        <button class="menu-btn" name="score">Score</button>
+        <button class="button" name="admin">Admin</button>
+        <button class="button" name="lead">Lead</button>
+        <button class="button" name="view">View</button>
+        <button class="button" name="musician">Musician</button>
+        <button class="button" name="score">Score</button>
     </div>
 {% endblock %}
