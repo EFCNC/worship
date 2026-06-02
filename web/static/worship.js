@@ -78,9 +78,10 @@ let API_URL = 'API/';
         // Lyrics can not be empty
         content = $("textarea[name='content']").val();
         if(content == '') {
-            alert("Please enter the lyrics!!");
+            alert("Are there... lyrics?");
             return false;
         }
+        // Maybe I should change this to <textarea id="lyrics_lang1"> being not empty. Currently just checks that the combined XML content is not empty.
 
         // Sequence sections are using paired tag
         temp = content.replace(/(<\/?)(\d)+(>)/g, '$1temp$2$3')

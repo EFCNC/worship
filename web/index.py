@@ -86,7 +86,7 @@ def index():
 	if id:
 		songs = Utils.get_worship_songs(id)
 		w = Utils.get_worship(id)
-		return render_template('song.html', songs=songs, id=id, w=w)
+		return render_template('worship_notes/songs.html', songs=songs, id=id, w=w)
 	sundays = Tools.allsundays()
 	worship = Utils.worship_list()
 	worship = [{'date': x, 'worship': next((y for y in worship if y['date'] == x), -1)} for x in sundays[1]]
@@ -112,7 +112,7 @@ def worship_notes(id, tab=''):
 	w = Utils.worship_list(id)
 	if w:
 		w = w[0]
-	return render_template('worship_notes.html', songs=songs, id=id, w=w, tab=tab)
+	return render_template('worship_notes/notes.html', songs=songs, id=id, w=w, tab=tab)
 
 @app.route("/slides/admin1")
 def sildes_admin1():
@@ -233,30 +233,58 @@ def get_song_sheet1(ids=None):
 			sheet['keyof'] = keyof_name
 	return render_template('worship_notes/sheets.html', sheets=sheets)
 
-@app.route("/song/<id>")
-def get_song_by_id(id):
-	'''
-	:param id: song_id
-	:param db: dB name, default worship.db
-	:param lang: lang of the song
-	:return: pre-filled data in song_editor
-	'''
+# @app.route("/song/<id>")
+# def get_song_by_id(id):
+# 	'''
+# 	:param id: song_id
+# 	:param db: dB name, default worship.db
+# 	:param lang: lang of the song
+# 	:return: pre-filled data in song_editor
+# 	'''
 
-	if id == '-1':
-		return render_template('song_editor.html', content={'id':-1})
-	db = request.args.get('db', 'worship.db')
-	lang = request.args.get('lang', None)
-	if db != 'worship.db':
-		content = Utils.get_song_by_id_(id, db)
-		if "lang" not in content:
-			content["lang"] = lang
-		if "bible" not in content:
-			content["bible"] = ''
-		return render_template('song_editor.html', content=content)
-	else:
-		content = Utils.get_song_by_id(id)
-		content["lyrics"] = content["lyrics_raw"]  # add key lyrics to be used by song_editor
-		return render_template('song_editor.html', content=content)
+# 	if id == '-1':
+# 		return render_template('song_editor.html', content={'id':-1})
+# 	db = request.args.get('db', 'worship.db')
+# 	lang = request.args.get('lang', None)
+# 	if db != 'worship.db':
+# 		content = Utils.get_song_by_id_(id, db)
+# 		if "lang" not in content:
+# 			content["lang"] = lang
+# 		if "bible" not in content:
+# 			content["bible"] = ''
+# 		return render_template('song_editor.html', content=content)
+# 	else:
+# 		content = Utils.get_song_by_id(id)
+# 		content["lyrics"] = content["lyrics_raw"]  # add key lyrics to be used by song_editor
+# 		return render_template('song_editor.html', content=content)
+
+@app.route("/song/<id>/edit") # Changed path
+def edit_song(id): # Renamed for clarity
+    '''
+    :param id: song_id
+    :return: song_editor.html
+    '''
+
+    # Handle creating a new song
+    if id == '-1':
+        return render_template('song_editor.html', content={'id': -1})
+    
+    db = request.args.get('db', 'worship.db')
+    lang = request.args.get('lang', None)
+    
+    if db != 'worship.db':
+        content = Utils.get_song_by_id_(id, db)
+        if "lang" not in content:
+            content["lang"] = lang
+        if "bible" not in content:
+            content["bible"] = ''
+    else:
+        content = Utils.get_song_by_id(id)
+        # add key lyrics to be used by song_editor
+        content["lyrics"] = content["lyrics_raw"] 
+        
+    return render_template('song_editor.html', content=content)
+
 
 @app.route("/calendar")
 def calendar():
