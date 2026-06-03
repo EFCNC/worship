@@ -61,6 +61,11 @@
         Reveal.slide(pos, order);
     });
 
+    Reveal.on('slidechanged', (event) => {
+        pos = event.indexh;
+        order = event.indexv;
+        change_slide()
+    });
 </script>
 </head>
 <body>

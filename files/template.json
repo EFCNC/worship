@@ -15,7 +15,7 @@
          "opacity": 1,
          "color":"",
          "bgcolor":"",
-         "fragment": 0
+         "fragment": 4
       },
       "title":"安靜心",
       "type":"info"
@@ -35,7 +35,7 @@
          "opacity": 1,
          "color":"",
          "bgcolor":"",
-         "fragment": 0
+         "fragment": 4
       },
       "title":"報告",
       "type":"info"
@@ -55,7 +55,7 @@
          "opacity": 1,
          "color":"",
          "bgcolor":"",
-         "fragment": 0
+         "fragment": 4
       },
       "title":"肢體交通",
       "type":"info"
@@ -88,7 +88,7 @@
          "opacity": 1,
          "color":"",
          "bgcolor":"",
-         "fragment": 0
+         "fragment": 4
       },
       "title":"我的性命獻互祢",
       "type":"song"
@@ -102,7 +102,7 @@
          "opacity": 1,
          "color":"",
          "bgcolor":"",
-         "fragment": 0
+         "fragment": 4
       },
       "bible": "",
       "book": "",
@@ -131,7 +131,7 @@
          "opacity": 1,
          "color":"",
          "bgcolor":"",
-         "fragment": 0
+         "fragment": 4
       },
       "title":"祝禱 BENEDICTION",
       "type":"info"
