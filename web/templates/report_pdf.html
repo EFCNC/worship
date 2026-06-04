@@ -1,225 +1,241 @@
-<!-- template for weekly bulletin -->
-{% include 'header1.html' %}
+{% extends 'base.html' %}
 
+{% block page_title %}Weekly Bulletin{% endblock %}
+
+{% block extra_css %}
 <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 <style>
-.report {
-  display: grid;
-  grid-template-columns: 48% 48%;
-  padding: 5px;
-  gap: 35px;
-}
+    /* Override global body things from global.css */
+    body {
+        margin: initial;
+        padding: initial;
+        font-family: initial;
+        font-size: initial;
+        line-height: initial;
+        color: initial;
+        background-color: initial;
+    }
 
-.container {
-  display: flex;
-  flex-direction: column;
-}
+    @media print {
+        footer {page-break-after: always;}
+    }
 
-.container div {
-  border: 1px solid;
-  padding: 1px;
-  height: 18px;
-  font-size:14px;
-}
+    .report {
+    display: grid;
+    grid-template-columns: 48% 48%;
+    padding: 5px;
+    gap: 35px;
+    }
 
-#task_table {
-  display: grid;
-  grid-template-columns: 25% 25% 25% 25%;
-  padding: 3px;
-  border: 1px double;
-  position: relative;
-}
+    .container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    }
 
-.info_table {
-  border-collapse: collapse;
-  width: 100%;
-}
+    .container div {
+    border: 1px solid;
+    padding: 1px;
+    height: 18px;
+    font-size:14px;
+    }
 
-.info_table td {
-  border: 1px solid #ddd;
-  padding: 0px;
-}
-
-.info_table tr:nth-child(odd) {
-  background-color: #d0d0d0;
-}
-
-.logo {
-  float: left;
-  content: url('/static/img/efc_logo.png');
-}
-
-.title {
-  font-size: 40px;
-  font-family: DFKai-sb;
-}
-
-.topic {
-  font-size: 18px;
-  font-weight: bold;
-}
-
-.large {
-  font-size: 18px;
-}
-
-.medium {
-  font-size: 16px;
-}
-
-.small {
-  font-size: 14px;
-}
-
-.tiny {
-  font-size: 12px;
-}
-
-.time_table td {
-  border: 1px solid #000;
-  padding: 3 3 3 3;
-}
-
-.header {
-  background-color: #c0c0c0;
-}
-
-@media print {
-  footer {page-break-after: always;}
-  -webkit-print-color-adjust: exact;
-}
-
-.line {
-  content: url('/static/img/line.jpg');
-  height: 20px;
-  width: 20px;
-}
-
-.youtube {
-  content: url('/static/img/youtube.jpg');
-  height: 20px;
-  width: 20px;
-}
-
-.zelle {
-  content: url('/static/img/zelle.jpg');
-  height: 20px;
-  width: 20px;
-}
-
-.zoom {
-  content: url('/static/img/zoom.jpg');
-  height: 20px;
-  width: 20px;
-}
-
-.editable {
-  contenteditable: true;
-}
-
-#overflow {
-  text-align: 'center'
-}
-
-.number, .currency {
-  text-align: center;
-}
-
-.dollar::before {
-  content: "$";
-}
-
-.task_table_btn {
-    position: absolute;
-    top: 0;
-    right: 0;
-    visibility: hidden;
-}
-
-#task_table:hover .task_table_btn {
-    visibility: visible;
-}
-
-.info_table_btn {
-    position: absolute;
-    top: 0;
-    right: 0;
-    visibility: hidden;
-}
-
-.info_table {
+    #task_table {
+    display: grid;
+    grid-template-columns: 25% 25% 25% 25%;
+    margin-bottom: 3px;
     position: relative;
-}
+    }
 
-.info_table:hover .info_table_btn {
-    visibility: visible;
-}
+    .info_table {
+    border-collapse: collapse;
+    width: 100%;
+    }
 
-.sermons_btn {
-    position: absolute;
-    top: 0;
-    right: 0;
-    visibility: hidden;
-}
+    .info_table td {
+    border: 1px solid #ddd;
+    padding: 0px;
+    }
 
-#sermons {
-    position: relative;
-}
+    .info_table tr:nth-child(odd) {
+    background-color: #d0d0d0;
+    }
 
-#sermons:hover .sermons_btn {
-    visibility: visible;
-}
+    .logo {
+    float: left;
+    content: url('/static/img/efc_logo.png');
+    }
 
-.info_btn {
-    position: absolute;
-    top: 0;
-    right: 0;
-    visibility: hidden;
-}
+    .title {
+    font-size: 40px;
+    font-family: DFKai-sb;
+    }
 
-#info {
-    position: relative;
-}
+    .topic {
+    font-size: 18px;
+    font-weight: bold;
+    }
 
-#info:hover .info_btn {
-    visibility: visible;
-}
+    .large {
+    font-size: 18px;
+    }
 
-.front_right_btn {
-    position: absolute;
-    top: 0;
-    right: 0;
-    visibility: hidden;
-}
+    .medium {
+    font-size: 16px;
+    }
 
-.right {
-    position: relative;
-}
+    .small {
+    font-size: 14px;
+    }
 
-.right:hover .front_right_btn {
-    visibility: visible;
-}
+    .tiny {
+    font-size: 12px;
+    }
 
-.overflow_btn {
-    position: absolute;
-    top: 0;
-    right: 0;
-    visibility: hidden;
-}
+    .time_table td {
+    border: 1px solid #000;
+    padding: 3 3 3 3;
+    }
 
-#overflow_ {
-    position: relative;
-}
+    .header {
+    background-color: #c0c0c0;
+    }
 
-#overflow_:hover .overflow_btn {
-    visibility: visible;
-}
+    .line {
+    content: url('/static/img/line.jpg');
+    height: 20px;
+    width: 20px;
+    }
+
+    .youtube {
+    content: url('/static/img/youtube.jpg');
+    height: 20px;
+    width: 20px;
+    }
+
+    .zelle {
+    content: url('/static/img/zelle.jpg');
+    height: 20px;
+    width: 20px;
+    }
+
+    .zoom {
+    content: url('/static/img/zoom.jpg');
+    height: 20px;
+    width: 20px;
+    }
+
+    .editable {
+    contenteditable: true;
+    }
+
+    #overflow {
+    text-align: 'center'
+    }
+
+    .number, .currency {
+    text-align: center;
+    }
+
+    .dollar::before {
+    content: "$";
+    }
+
+    .task_table_btn {
+        position: absolute;
+        top: 0;
+        right: 0;
+        visibility: hidden;
+    }
+
+    #task_table:hover .task_table_btn {
+        visibility: visible;
+    }
+
+    .info_table_btn {
+        position: absolute;
+        top: 0;
+        right: 0;
+        visibility: hidden;
+    }
+
+    .info_table {
+        position: relative;
+    }
+
+    .info_table:hover .info_table_btn {
+        visibility: visible;
+    }
+
+    .sermons_btn {
+        position: absolute;
+        top: 0;
+        right: 0;
+        visibility: hidden;
+    }
+
+    #sermons {
+        position: relative;
+    }
+
+    #sermons:hover .sermons_btn {
+        visibility: visible;
+    }
+
+    .info_btn {
+        position: absolute;
+        top: 0;
+        right: 0;
+        visibility: hidden;
+    }
+
+    #info {
+        position: relative;
+    }
+
+    #info:hover .info_btn {
+        visibility: visible;
+    }
+
+    .front_right_btn {
+        position: absolute;
+        top: 0;
+        right: 0;
+        visibility: hidden;
+    }
+
+    .right {
+        position: relative;
+    }
+
+    .right:hover .front_right_btn {
+        visibility: visible;
+    }
+
+    .overflow_btn {
+        position: absolute;
+        top: 0;
+        right: 0;
+        visibility: hidden;
+    }
+
+    #overflow_ {
+        position: relative;
+    }
+
+    #overflow_:hover .overflow_btn {
+        visibility: visible;
+    }
 </style>
-<body>
+{% endblock %}
+
+{% block content %}
 <div id="weekly_report">
 {{ report|safe }}
 </div>
-</body>
+{% endblock %}
+
+{% block extra_js %}
 <script>
     // variables
     let worship = {};
@@ -490,3 +506,4 @@
         }
     });
 </script>
+{% endblock %}

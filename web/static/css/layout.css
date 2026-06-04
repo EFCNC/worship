@@ -125,77 +125,6 @@ main#main-content {
     padding: var(--spacing-md);
 }
 
-/* Container for centered, max-width content */
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 var(--spacing-md);
-}
-
-.container-sm {
-    max-width: 640px;
-    margin: 0 auto;
-    padding: 0 var(--spacing-md);
-}
-
-.container-lg {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 0 var(--spacing-md);
-}
-
-/* Section Styling */
-section {
-    margin-bottom: var(--spacing-lg);
-}
-
-section > h2:first-child {
-    margin-top: 0;
-}
-
-/* Page Wrapper for content with flex layout */
-.page-wrapper {
-    display: flex;
-    flex-direction: column;
-    min-height: calc(100vh - var(--header-height));
-}
-
-.page-content {
-    flex: 1;
-    padding: var(--spacing-md);
-}
-
-.page-footer {
-    background-color: var(--bg-white);
-    border-top: 1px solid var(--border-color);
-    padding: var(--spacing-lg);
-    text-align: center;
-    margin-top: auto;
-}
-
-/* Two-column layout */
-.layout-two-col {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--spacing-lg);
-    margin-bottom: var(--spacing-lg);
-}
-
-.layout-two-col > * {
-    min-width: 0;
-}
-
-/* Three-column layout */
-.layout-three-col {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--spacing-lg);
-    margin-bottom: var(--spacing-lg);
-}
-
-.layout-three-col > * {
-    min-width: 0;
-}
 
 /* Mobile Adjustments */
 /* Tablet: 768px and below */
@@ -234,14 +163,6 @@ section > h2:first-child {
     .profile_bubble {
         height: 35px;
         width: 35px;
-    }
-
-    .layout-two-col {
-        grid-template-columns: 1fr;
-    }
-
-    .layout-three-col {
-        grid-template-columns: repeat(2, 1fr);
     }
 
     main#main-content {
@@ -292,15 +213,6 @@ section > h2:first-child {
         padding: var(--spacing-sm);
     }
 
-    .layout-three-col {
-        grid-template-columns: 1fr;
-    }
-
-    .container,
-    .container-sm,
-    .container-lg {
-        padding: 0 var(--spacing-sm);
-    }
 }
 
 /* Small Mobile: 400px and below */
@@ -331,11 +243,5 @@ section > h2:first-child {
 
     main#main-content {
         padding: 8px;
-    }
-
-    .container,
-    .container-sm,
-    .container-lg {
-        padding: 0 8px;
     }
 }

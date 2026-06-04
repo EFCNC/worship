@@ -31,7 +31,7 @@
 
     /* Typography */
     --font-family-base: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    --font-size-base: 16px;     /* Possible change to 16px for better readability, 16px was default previously - Joseph */
+    --font-size-base: 16px;
     --font-size-sm: 12px;
     --font-size-lg: 16px;
     --font-size-xl: 18px;
@@ -51,11 +51,6 @@
     --transition-default: all 0.3s ease;
 }
 
-/* Reset and Base Styles */
-* {
-    box-sizing: border-box;
-}
-
 html {
     font-size: 16px;
     scroll-behavior: smooth;
@@ -73,33 +68,11 @@ body {
 }
 
 /* Typography */
-h1 {
-    font-size: var(--font-size-h1);
-    font-weight: var(--font-weight-bold);
-    margin: var(--spacing-lg) 0;
-}
-
-h2 {
-    font-size: var(--font-size-h2);
-    font-weight: var(--font-weight-bold);
-    margin: var(--spacing-lg) 0;
-}
-
-h3 {
-    font-size: var(--font-size-h3);
-    font-weight: var(--font-weight-bold);
-    margin: var(--spacing-md) 0;
-}
-
-h4 {
-    font-size: var(--font-size-h4);
-    font-weight: var(--font-weight-bold);
-    margin: var(--spacing-md) 0;
-}
-
-p {
-    margin: 0 0 var(--spacing-md) 0;
-}
+h1 { font-size: var(--font-size-h1); font-weight: var(--font-weight-bold); margin: var(--spacing-lg) 0; }
+h2 { font-size: var(--font-size-h2); font-weight: var(--font-weight-bold); margin: var(--spacing-lg) 0; }
+h3 { font-size: var(--font-size-h3); font-weight: var(--font-weight-bold); margin: var(--spacing-md) 0; }
+h4 { font-size: var(--font-size-h4); font-weight: var(--font-weight-bold); margin: var(--spacing-md) 0; }
+p { margin: 0 0 var(--spacing-md) 0; }
 
 a {
     color: var(--primary-color);
@@ -113,9 +86,7 @@ a:hover {
 }
 
 /* Form Elements */
-input,
-textarea,
-select {
+input, textarea, select {
     font-family: inherit;
     font-size: inherit;
     padding: var(--spacing-sm) var(--spacing-md);
@@ -124,14 +95,13 @@ select {
     transition: border-color var(--transition-default), box-shadow var(--transition-default);
 }
 
-input:focus,
-textarea:focus,
-select:focus {
+input:focus, textarea:focus, select:focus {
     outline: none;
     border-color: var(--primary-color);
     box-shadow: 0 0 0 3px rgba(26, 188, 156, 0.1);
 }
 
+/* Kept and Cleaned Buttons */
 button {
     cursor: pointer;
     font-family: inherit;
@@ -154,91 +124,62 @@ button:active {
     transform: translateY(0);
 }
 
-/* Utility Classes */
-.text-center {
-    text-align: center;
-}
-
-.text-left {
-    text-align: left;
-}
-
-.text-right {
-    text-align: right;
-}
-
-.text-muted {
-    color: var(--text-muted);
-}
-
-.mt-0 { margin-top: 0; }
-.mt-xs { margin-top: var(--spacing-xs); }
-.mt-sm { margin-top: var(--spacing-sm); }
-.mt-md { margin-top: var(--spacing-md); }
-.mt-lg { margin-top: var(--spacing-lg); }
-.mt-xl { margin-top: var(--spacing-xl); }
-
-.mb-0 { margin-bottom: 0; }
-.mb-xs { margin-bottom: var(--spacing-xs); }
-.mb-sm { margin-bottom: var(--spacing-sm); }
-.mb-md { margin-bottom: var(--spacing-md); }
-.mb-lg { margin-bottom: var(--spacing-lg); }
-.mb-xl { margin-bottom: var(--spacing-xl); }
-
-.p-0 { padding: 0; }
-.p-xs { padding: var(--spacing-xs); }
-.p-sm { padding: var(--spacing-sm); }
-.p-md { padding: var(--spacing-md); }
-.p-lg { padding: var(--spacing-lg); }
-.p-xl { padding: var(--spacing-xl); }
-
-.hidden {
-    display: none !important;
-}
-
-.invisible {
-    visibility: hidden;
-}
-
-/* Flex Utilities */
-.flex {
-    display: flex;
-}
-
-.flex-center {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.flex-column {
-    display: flex;
-    flex-direction: column;
-}
-
-.flex-gap-sm { gap: var(--spacing-sm); }
-.flex-gap-md { gap: var(--spacing-md); }
-.flex-gap-lg { gap: var(--spacing-lg); }
-
-/* Responsive Media Queries */
-@media (max-width: 768px) {
+/* Screen Viewport Adjustments */
+@media screen and (max-width: 768px) {
     h1 { font-size: 28px; }
     h2 { font-size: 24px; }
     h3 { font-size: 20px; }
 }
-
-@media (max-width: 600px) {
+@media screen and (max-width: 600px) {
     html { font-size: 15px; }
-    
     h1 { font-size: 24px; }
     h2 { font-size: 20px; }
     h3 { font-size: 18px; }
 }
 
-@media (max-width: 400px) {
-    html { font-size: 14px; }
+/* ==========================================================================
+   BULLETIN ISOLATION SHIELD & PRINT CLEANUP
+   ========================================================================== */
+
+/* 1. Prevent global styles from leaking into your specific weekly report view */
+#weekly_report, 
+#weekly_report * {
+    box-sizing: content-box !important; /* Restores layout math for fixed elements */
+    line-height: normal !important;     /* Prevents text from pushing out of 18px cells */
+}
+
+/* Remove default margin pushes from headings/paragraphs generated inside the report */
+#weekly_report h1, #weekly_report h2, #weekly_report h3, #weekly_report h4, #weekly_report p {
+    font-size: revert !important;
+    font-weight: revert !important;
+    margin: revert !important;
+    font-family: revert !important;
+}
+
+/* Global Print Overrides */
+@media print {
     
-    h1 { font-size: 20px; }
-    h2 { font-size: 18px; }
-    h3 { font-size: 16px; }
+    /* Hide the entire top navigation bar */
+    #header {
+        display: none !important;
+    }
+    
+    /* Hide all edit UI buttons, refresh tags, and icons from the printout */
+    button, 
+    .material-icons,
+    [class*="_btn"] {
+        display: none !important;
+    }
+
+    @page {
+        margin: 0;
+    }
+    
+    /* Ensure background table row colors show up when printing */
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+
 }
