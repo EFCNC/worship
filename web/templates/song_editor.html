@@ -4,6 +4,23 @@
 
 {% block extra_css %}
 <style>
+    /* Hide header and navigation when in popup/dialog mode */
+    body.popup-mode #main-content,
+    body.popup-mode main {
+        margin: 0;
+        padding: 0;
+    }
+    
+    #dialog header,
+    #dialog nav {
+        display: none;
+    }
+    
+    /* Hide form buttons when dialog is present */
+    body.dialog-mode .actions {
+        display: none !important;
+    }
+    
     .editor-container { 
         max-width: 95%; 
         margin: 20px auto; 
@@ -182,10 +199,10 @@
 
 {% block extra_js %}
 <script>
-    const originalData = {{ content | tojson | safe }};
+    var originalData = {{ content | tojson | safe }};
     console.log("1. Original Data from Server (Raw Snapshot):", JSON.parse(JSON.stringify(originalData)));
 
-    const songId = "{{ content.id }}";
+    var songId = "{{ content.id }}";
 
     // --- Data Normalization (Fixing types and line endings) ---
     originalData.id = Number(originalData.id);
@@ -450,9 +467,34 @@
     }
 
     let lastFocusedTextarea = null;
+    
+    // --- Detect Popup Mode ---
+    function isInPopup() {
+        // Check if we're inside a jQuery dialog
+        return $(window).parent() !== window || $('#dialog').length > 0 || 
+               window !== window.parent || $('body').closest('.ui-dialog').length > 0;
+    }
 
     // --- Event Listeners ---
     $(document).ready(function() {
+        // Detect if we're in popup/dialog mode
+        const inPopup = window !== window.parent || parent.document.body.classList.contains('popup-mode');
+        if (inPopup) {
+            $('body').addClass('popup-mode');
+        }
+        
+        // When dialog buttons are rendered, hide form buttons
+        $(document).one('dialogopen', function() {
+            $('body').addClass('dialog-mode');
+        });
+        
+        // Also check after a short delay (for when content is loaded into dialog)
+        setTimeout(function() {
+            if ($('.ui-dialog-buttonset').length > 0) {
+                $('body').addClass('dialog-mode');
+            }
+        }, 100);
+        
         // Populate the dynamic fields (video and score) and textareas (lyrics)
         populateDynamicFields();
         loadAndSplitLyrics();
@@ -480,43 +522,49 @@
             insertAtCursor($(this).data('tag'), true);
         });
 
-        $('#btn_save').click(function() {
-            const currentState = getCurrentState();
-
-            if (!validate_form(currentState)) return;
-
-            const changedFields = getChangedFields(originalData, currentState);
-
-            // Check if the object has any keys
-            if (changedFields.length === 0) {
-                alert("No changes detected.");
-                return;
-            }
-
-            // --- Debug Stuff ---
-            console.group("🚀 Song Save Preview");  
-            console.log("New Final Object:\n", currentState);
-            console.log(changedFields);
-            console.groupEnd();
-            // alert("Check the Console (F12) to see the combined output!");
-
-            // Submit to API
-            const url = '/API/song/' + songId + '/edit';
-            
-            submit_song(url, JSON.stringify(changedFields))
-                .done(function(response) {
-                    alert("Song saved successfully!");
-                    window.location.href = "/song/list";
-                })
-                .fail(function(jqXHR) {
-                    if (jqXHR.status === 200) {
-                        alert("Song saved successfully!");
-                        //window.location.href = "/song/list";
-                    } else {
-                        alert("Error saving song: " + (jqXHR.responseText || "Unknown error"));
-                    }
-                });
+        // Form button handler - works when used as standalone page
+        $('#btn_save').click(function(e) {
+            e.preventDefault();
+            performSave();
         });
     });
+    
+    // --- Extracted Save Logic ---
+    function performSave() {
+        const currentState = getCurrentState();
+
+        if (!validate_form(currentState)) return;
+
+        const changedFields = getChangedFields(originalData, currentState);
+
+        // Check if the object has any keys
+        if (changedFields.length === 0) {
+            alert("No changes detected.");
+            return;
+        }
+
+        // --- Debug Stuff ---
+        console.group("🚀 Song Save Preview");  
+        console.log("New Final Object:\n", currentState);
+        console.log(changedFields);
+        console.groupEnd();
+
+        // Submit to API
+        const url = '/API/song/' + songId + '/edit';
+        
+        submit_song(url, JSON.stringify(changedFields))
+            .done(function(response) {
+                alert("Song saved successfully!");
+                window.location.href = "/song/list";
+            })
+            .fail(function(jqXHR) {
+                if (jqXHR.status === 200) {
+                    alert("Song saved successfully!");
+                    window.location.href = "/song/list";
+                } else {
+                    alert("Error saving song: " + (jqXHR.responseText || "Unknown error"));
+                }
+            });
+    }
 </script>
 {% endblock %}
