@@ -303,15 +303,15 @@ span.chunk:before {
     window.onload = () => {
         if (worshipInfo && worshipInfo.date) {
             document.title = `${worshipInfo.date} Worship Notes - Worship Manager`;
-        }
-        // Bible Link generation logic
-        const bibleContainer = document.getElementById('bible_verse');
-        const bibleVerses = worshipInfo.bible.replace(/(、|;)/g, '，').split('，');
-        
-        bibleContainer.innerHTML = bibleVerses.map(v => 
-            ` <a href="javascript:void(0)" onclick="get_bible(show_verse, '${v.trim()}')">${v.trim()}</a>`
-        ).join('');
 
+            // Bible Link generation logic
+            const bibleContainer = document.getElementById('bible_verse');
+            const bibleVerses = worshipInfo.bible.replace(/(、|;)/g, '，').split('，');
+        
+            bibleContainer.innerHTML = bibleVerses.map(v =>
+                ` <a href="javascript:void(0)" onclick="get_bible(show_verse, '${v.trim()}')">${v.trim()}</a>`
+            ).join('');
+        }
         // Load initial view
         loadTab(initialTab);
     };
