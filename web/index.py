@@ -86,7 +86,7 @@ def index():
 	if id:
 		songs = Utils.get_worship_songs(id)
 		w = Utils.get_worship(id)
-		return render_template('worship_notes/songs.html', songs=songs, id=id, w=w)
+		return render_template('worship/songs.html', songs=songs, id=id, w=w)
 	sundays = Tools.allsundays()
 	worship = Utils.worship_list()
 	worship = [{'date': x, 'worship': next((y for y in worship if y['date'] == x), -1)} for x in sundays[1]]
@@ -100,7 +100,7 @@ def info():
 
 @app.route("/worship/<id>")
 @app.route("/worship/<id>/<tab>")
-def worship_notes(id, tab=''):
+def worship(id, tab=''):
 	json_file = request.args.get('json', None)
 	if json_file:
 		json_file = Tools.get_worship_json(id)
@@ -112,7 +112,7 @@ def worship_notes(id, tab=''):
 	w = Utils.worship_list(id)
 	if w:
 		w = w[0]
-	return render_template('worship_notes/notes.html', songs=songs, id=id, w=w, tab=tab)
+	return render_template('worship/notes.html', songs=songs, id=id, w=w, tab=tab)
 
 @app.route("/slides/admin1")
 def sildes_admin1():
@@ -194,7 +194,7 @@ def get_song_sheet(id):
 def get_song_chords(ids):
 	ids = ids.split(',')
 	chords = Utils.get_song_chords(ids)
-	return render_template('/worship_notes/chords.html', chords=chords)
+	return render_template('/worship/chords.html', chords=chords)
 
 @app.route("/sheets")
 @app.route("/sheets/<ids>")
@@ -231,7 +231,7 @@ def get_song_sheet1(ids=None):
 			sheet['keyof_name'] = keys
 			keyof_name = [keys[x] for x in keyof] # Translate int to key name
 			sheet['keyof'] = keyof_name
-	return render_template('worship_notes/sheets.html', sheets=sheets)
+	return render_template('worship/sheets.html', sheets=sheets)
 
 # @app.route("/song/<id>")
 # def get_song_by_id(id):
@@ -409,4 +409,4 @@ def __get_slide_json():
 	return True
 
 if __name__ == '__main__':
-	app.run(host="0.0.0.0", port=80, debug=True)
+	app.run(host="0.0.0.0", port=5000, debug=True)

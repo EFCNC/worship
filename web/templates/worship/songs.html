@@ -510,7 +510,10 @@ li {
         mouseout: function () {
             $(".remove_btn", this).hide();
         },
-        click: function () {
+        click: function (event) {
+            if($(event.target).attr('class') == 'remove_btn') {
+                return false;
+            }
             lang = $(this).attr('lang');
             id = $(this).attr('name');
             $.when(render_song(id, 'worship.db', lang), function() {

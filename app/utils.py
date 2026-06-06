@@ -450,7 +450,7 @@ def add_info(content):
         return "Error", 400
 
 def add_song(content):
-    content = [x for x in content if x['value'] != '']
+    content = [x for x in content if x['value']]
     media = [x for x in content if x['name'] in ('video', 'score', 'abc')]
     content = [x for x in content if x['name'] not in ('video', 'score', 'abc')]
     sql = "insert into songs("
@@ -460,22 +460,28 @@ def add_song(content):
     for i in range(len(content)):
         sql += '?,'
     sql = sql[:-1] + ")"
-    values = [x['value'].replace("'", "''") for x in content]
+    values = [x['value'].replace("'", "''") if isinstance(x['value'], str) else x['value'] for x in content]
     song_id = dB.insert(sql, values)
     if not song_id:
         return None
     if len(media) > 0:
-        sql = "insert into media(song_id, link, m_type) values"
-        for m in media:
-            sql += "(?, ?, ?),"
-        sql = sql[:-1]
         values = []
         for m in media:
-            values.append(song_id)
-            values.append(m['value'])
-            values.append(m['name'])
-
-        result = dB.insert(sql, values)
+            # Handle both array and single value inputs
+            values_list = m['value'] if isinstance(m['value'], list) else [m['value']]
+            for value in values_list:
+                if not value:  # Skip empty values
+                    continue
+                values.append(song_id)
+                values.append(value)
+                values.append(m['name'])
+        
+        if values:
+            sql = "insert into media(song_id, link, m_type) values"
+            # Build the correct number of (?, ?, ?) placeholders
+            num_rows = len(values) // 3
+            sql += ", ".join(["(?, ?, ?)"] * num_rows)
+            result = dB.insert(sql, values)
         return song_id
     return song_id
 
@@ -507,19 +513,24 @@ def edit_song(id, content):
     return '', 200
 
 def edit_media(id, content):
-    sql = 'select * from media where m_type = ? and song_id = ?'
     for c in content:
-        if dB.run_para(sql, [c["name"], id]):
+        # Delete all existing entries for this media type and song
+        sql = 'delete from media where m_type = ? and song_id = ?'
+        dB.run_para(sql, [c["name"], id])
+        
+        # Handle both array and single value inputs
+        values_list = c['value'] if isinstance(c['value'], list) else [c['value']]
+        
+        # Insert each value as a separate database row
+        for value in values_list:
+            if not value:  # Skip empty values
+                continue
+                
             if c["name"] == 'abc':
-                sql = 'update media set abc = ? where song_id = ? and m_type = ?'
+                sql = 'insert into media(abc, song_id, m_type) values(?, ?, ?)'
             else:
-                sql = 'update media set link = ? where song_id = ? and m_type = ?'
-        else:
-            if c["name"] == 'abc':
-                sql = 'insert into media(abc, song_id, m_type) values(? ,? ,?)'
-            else:
-                sql = 'insert into media(link, song_id, m_type) values(? ,? ,?)'
-        dB.run_para(sql, [c['value'], id, c['name']])
+                sql = 'insert into media(link, song_id, m_type) values(?, ?, ?)'
+            dB.run_para(sql, [value, id, c['name']])
 
 def edit_song_set_row(id, content):
     sql = 'select * from presentation where {} = ? and song_id = ?'

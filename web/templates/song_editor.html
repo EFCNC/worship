@@ -4,6 +4,23 @@
 
 {% block extra_css %}
 <style>
+    /* Hide header and navigation when in popup/dialog mode */
+    body.popup-mode #main-content,
+    body.popup-mode main {
+        margin: 0;
+        padding: 0;
+    }
+    
+    #dialog header,
+    #dialog nav {
+        display: none;
+    }
+    
+    /* Hide form buttons when dialog is present */
+    body.dialog-mode .actions {
+        display: none !important;
+    }
+    
     .editor-container { 
         max-width: 95%; 
         margin: 20px auto; 
@@ -48,7 +65,11 @@
         /* Strict line alignment */
         line-height: 1.8;       /* Forces equal vertical spacing */
         font-size: 14px;
-        overflow-x: auto;       /* Shows horizontal scrollbar for long lines */
+
+        /* Horizontal Scrollbar and preventing overflowrapping */
+        white-space: pre;
+        overflow-wrap: normal;
+        overflow-x: auto;
     }
 
     /* Highlight the active textarea slightly */
@@ -57,6 +78,13 @@
         box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
         outline: none;
     }
+
+    /* Dynamic Inputs for Videos/Scores */
+    .dynamic-input-group { display: flex; gap: 5px; margin-bottom: 8px; }
+    .dynamic-input-group input { flex-grow: 1; }
+    .btn-remove { background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; padding: 0 12px; font-weight: bold; }
+    .btn-add { background: #e2e8f0; color: #333; border: 1px dashed #cbd5e1; border-radius: 4px; padding: 6px; cursor: pointer; font-size: 0.85rem; margin-top: 5px; transition: 0.2s; }
+    .btn-add:hover { background: #cbd5e1; }
     
     .actions { 
         margin-top: 20px; 
@@ -119,8 +147,6 @@
             <span class="chord" data-num="7">VII</span>
         </div>
 
-        <div id="hidden_raw_original_content" style="display:none;">{{ content.lyrics }}</div>
-
         <div class="lyrics-split-container">
             <div class="form-group">
                 <label style="color: #3182ce; display: flex; align-items: center; gap: 5px;">
@@ -136,8 +162,6 @@
             </div>
         </div>
 
-        <textarea name="content" id="content" style="display:none;"></textarea>
-
         <div class="form-row" style="margin-top:15px;">
             <div class="form-group"><label>Copyright</label><input name="copyright" type="text" value="{{ content.copyright }}"/></div>
             <div class="form-group"><label>CCLI</label><input name="ccli" type="text" value="{{ content.ccli }}"/></div>
@@ -145,13 +169,24 @@
         </div>
 
         <div class="form-row">
-            <div class="form-group"><label>Youtube URL</label><input name="video" type="text" value="{{ content.video|join(',') }}"/></div>
-            <div class="form-group"><label>Score PDF URL</label><input name="score" type="text" value="{{ content.score|join(',') }}"/></div>
+            <div class="form-group" id="video_container">
+                <label>Youtube URLs</label>
+                <div id="video_inputs_wrapper"></div>
+                <button type="button" class="btn-add" onclick="addDynamicInput('video_inputs_wrapper', 'video[]', 'Enter YouTube URL')">+ Add Video</button>
+            </div>
+            <div class="form-group" id="score_container">
+                <label>Score PDF URLs</label>
+                <div id="score_inputs_wrapper"></div>
+                <button type="button" class="btn-add" onclick="addDynamicInput('score_inputs_wrapper', 'score[]', 'Enter Score PDF URL')">+ Add Score</button>
+            </div>
         </div>
 
-        <div class="form-group">
-            <label>ABC Notation</label>
-            <textarea name="abc" rows="5">{{ content.abc }}</textarea>
+        <div class="form-row">
+            <div class="form-group" id="abc_container" style="flex: 100%;">
+                <label>ABC Notation (Sheets)</label>
+                <div id="abc_inputs_wrapper"></div>
+                <button type="button" class="btn-add" onclick="addDynamicTextarea('abc_inputs_wrapper', 'abc[]', 'Enter ABC notation here...')">+ Add ABC Sheet</button>
+            </div>
         </div>
 
         <div class="actions">
@@ -164,7 +199,95 @@
 
 {% block extra_js %}
 <script>
-    const songId = "{{ content.id }}";
+    var originalData = {{ content | tojson | safe }};
+    console.log("1. Original Data from Server (Raw Snapshot):", JSON.parse(JSON.stringify(originalData)));
+
+    var songId = "{{ content.id }}";
+
+    // --- Data Normalization (Fixing types and line endings) ---
+    originalData.id = Number(originalData.id);
+
+    // Maintain sheets as whole strings, just clean up the carriage returns.
+    originalData.abc = Array.isArray(originalData.abc) 
+        ? originalData.abc.map(sheet => sheet.replace(/\r\n/g, '\n').trim()).filter(sheet => sheet !== "") 
+        : [];
+    
+    originalData.video = Array.isArray(originalData.video) ? originalData.video : [];
+    originalData.score = Array.isArray(originalData.score) ? originalData.score : [];
+    
+    // // This can be deleted once ALL songs have had \r\n normalized
+    if (originalData.lyrics) {
+        originalData.lyrics = originalData.lyrics.replace(/\r\n/g, '\n');
+    }
+    
+    console.log("Normalized Original Data:", originalData);
+
+    // --- Dynamic Inputs Logic ---
+    function addDynamicInput(wrapperId, inputName, placeholder, value = "") {
+        const wrapper = document.getElementById(wrapperId);
+        const group = document.createElement('div');
+        group.className = 'dynamic-input-group';
+        
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.name = inputName;
+        input.placeholder = placeholder;
+        input.value = value;
+        
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'btn-remove';
+        removeBtn.innerHTML = '✕';
+        removeBtn.onclick = function() { wrapper.removeChild(group); };
+        
+        group.appendChild(input);
+        group.appendChild(removeBtn);
+        wrapper.appendChild(group);
+    }
+
+    // Handles multi-line dynamic inputs like ABC sheets
+    function addDynamicTextarea(wrapperId, inputName, placeholder, value = "") {
+        const wrapper = document.getElementById(wrapperId);
+        const group = document.createElement('div');
+        group.className = 'dynamic-input-group';
+        group.style.alignItems = 'flex-start'; // Keeps the 'X' button at the top left
+        
+        const textarea = document.createElement('textarea');
+        textarea.name = inputName;
+        textarea.placeholder = placeholder;
+        textarea.value = value;
+        textarea.rows = 6;
+        textarea.style.flexGrow = '1';
+        textarea.style.fontFamily = 'monospace'; // Better for reading notation
+        
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'btn-remove';
+        removeBtn.innerHTML = '✕';
+        removeBtn.onclick = function() { wrapper.removeChild(group); };
+        
+        group.appendChild(textarea);
+        group.appendChild(removeBtn);
+        wrapper.appendChild(group);
+    }
+
+
+    function populateDynamicFields() {
+        // Populate Videos
+        originalData.video.forEach(url => {
+            if (url.trim()) addDynamicInput('video_inputs_wrapper', 'video[]', 'Enter YouTube URL', url);
+        });
+        
+        // Populate Scores
+        originalData.score.forEach(url => {
+            if (url.trim()) addDynamicInput('score_inputs_wrapper', 'score[]', 'Enter Score PDF URL', url);
+        });
+
+        // Loop through and create a distinct textarea for each saved sheet
+        originalData.abc.forEach(sheet => {
+            if (sheet.trim()) addDynamicTextarea('abc_inputs_wrapper', 'abc[]', 'Enter ABC notation here...', sheet);
+        });
+    }
 
     // --- Musical Logic ---
     function getNoteFromKey(num) {
@@ -200,7 +323,6 @@
 
     // --- Editor Interaction ---
     function insertAtCursor(tag, isPaired) {
-        // Use the tracked textarea, or default to the first one
         const txtarea = lastFocusedTextarea || document.getElementById('lyrics_lang1');
         txtarea.focus();
 
@@ -220,26 +342,19 @@
     
     // --- Pulling and Loading Lyrics from Database ---
     function loadAndSplitLyrics() {
-        // 1. Get the raw content from the database
-        // We use a hidden div or a variable to avoid JS syntax errors with newlines
-        const rawContent = document.getElementById('hidden_raw_original_content').textContent.trim();
-        
+        const rawContent = (originalData.lyrics || "").trim();
         if (!rawContent) return;
 
         let lang1Result = "";
         let lang2Result = "";
 
-        // 2. Regex to find tags like <chorus>...</chorus> or <1>...</1>
-        // Groups: 1 = tag name, 2 = inner content
         const sectionRegex = /<([^>]+)>([\s\S]*?)<\/\1>/g;
         let match;
-        let lastIndex = 0;
 
         while ((match = sectionRegex.exec(rawContent)) !== null) {
             const tagName = match[1];
             const innerContent = match[2];
 
-            // 3. Split the inner content by the [region 2] marker
             let p1 = innerContent;
             let p2 = "";
 
@@ -249,14 +364,10 @@
                 p2 = parts[1].trim();
             }
 
-            // 4. Reconstruct the blocks for each window
             lang1Result += `<${tagName}>\n${p1}\n</${tagName}>\n\n`;
             lang2Result += `<${tagName}>\n${p2}\n</${tagName}>\n\n`;
-            
-            lastIndex = sectionRegex.lastIndex;
         }
 
-        // 5. Fallback: If no tags were found, just dump everything into box 1
         if (lang1Result === "") {
             $('#lyrics_lang1').val(rawContent);
         } else {
@@ -270,61 +381,68 @@
         const lang1Raw = $('#lyrics_lang1').val();
         const lang2Raw = $('#lyrics_lang2').val();
 
-        // Regex to find content inside <tag>...</tag>
         const sectionRegex = /<([^>]+)>([\s\S]*?)<\/\1>/g;
         
         let combinedResult = "";
         let match;
 
-        // We iterate through the Primary language as the master structure
         while ((match = sectionRegex.exec(lang1Raw)) !== null) {
             const tagName = match[1];
             const content1 = match[2].trim();
 
-            // Now find the same tag in the second textarea
-            const escapedTagName = tagName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // Safety first
+            const escapedTagName = tagName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
             const secondRegex = new RegExp(`<${escapedTagName}>([\\s\\S]*?)<\\/${escapedTagName}>`, 'g');
             const match2 = secondRegex.exec(lang2Raw);
             
             const content2 = match2 ? match2[1].trim() : "";
 
-            // Build the combined XML string
             combinedResult += `<${tagName}>\n${content1}\n[region 2]\n${content2}\n</${tagName}>\n\n`;
         }
 
         return combinedResult.trim();
     }
 
-    let lastFocusedTextarea = null;
+    function getCurrentState() {
+        return {
+            id: Number(songId),
+            title: $('input[name="title"]').val(),
+            key: $('input[name="song_key"]').val(),
+            book: $('input[name="book"]').val(),
+            lang: $('input[name="lang"]').val(),
+            lang_2: $('input[name="lang_2"]').val(),
+            author: $('input[name="author"]').val(),
+            sequence: $('input[name="sequence"]').val(),
+            copyright: $('input[name="copyright"]').val(),
+            ccli: $('input[name="ccli"]').val(),
+            bible: $('input[name="bible_verse"]').val(),
+            
+            // Gather dynamic inputs and filter out empty strings
+            video: $('input[name="video[]"]').map(function(){ return this.value.trim(); }).get().filter(v => v !== ""),
+            score: $('input[name="score[]"]').map(function(){ return this.value.trim(); }).get().filter(v => v !== ""),
+            
+            // Grabs each textarea block whole without splitting into individual lines
+            abc: $('textarea[name="abc[]"]').map(function(){ return this.value.trim(); }).get().filter(sheet => sheet !== ""),
+            
+            content: combineLyrics() 
+        };
+    }
 
+     function getChangedFields(original, current) {
+        let changedFields = [];    
+        for (let key in current) {
+            let originalValue = original[key] === null ? "" : original[key];
+            let currentValue = current[key] === null ? "" : current[key];
+            if (JSON.stringify(originalValue) !== JSON.stringify(currentValue)) {
+                changedFields.push({
+                    name: key,
+                    value: current[key]
+                });
+            }
+        }
+        return changedFields;
+    }
 
-    // --- Event Listeners ---
-    $(document).ready(function() {
-        // Load and split the lyrics into the two textboxes
-        loadAndSplitLyrics();
-        
-        // Combine them back immediately to set a "normalized" baseline, hidden in #content
-        // --- Note, I might not need to do this as loadAndSplitLyrics should also be pulling this raw data. Maybe I can combine the logic. ---
-        $('#content').val(combineLyrics());
-
-        // Capture the baseline form data (it will grab the normalized #content), used for change detection by changed_fields() in worship.js
-        form_data = $("#song_form").serializeArray();
-
-        // --- Focus Tracking for Smart Insertions ---
-        // Initialize lastFocused with the first textarea
-        lastFocusedTextarea = document.getElementById('lyrics_lang1');
-
-        // Track which textarea the user is currently using
-        $('#lyrics_lang1, #lyrics_lang2').on('focus', function() {
-            lastFocusedTextarea = this;
-        });
-        
-        // Update smart chord labels based on the initial key
-        updateSmartChordLabels();
-
-        $('input[name="song_key"]').on('input', updateSmartChordLabels);
-
-        // Syncing Scrollbars
+    function syncScrollbars(){
         const $left = $('#lyrics_lang1');
         const $right = $('#lyrics_lang2');
 
@@ -346,9 +464,54 @@
             }
             isSyncingRight = false;
         });
+    }
 
+    var lastFocusedTextarea = null;
+    
+    // --- Detect Popup Mode ---
+    function isInPopup() {
+        // Check if we're inside a jQuery dialog
+        return $(window).parent() !== window || $('#dialog').length > 0 || 
+               window !== window.parent || $('body').closest('.ui-dialog').length > 0;
+    }
 
-        // Buttons
+    // --- Event Listeners ---
+    $(document).ready(function() {
+        // Detect if we're in popup/dialog mode
+        const inPopup = window !== window.parent || parent.document.body.classList.contains('popup-mode');
+        if (inPopup) {
+            $('body').addClass('popup-mode');
+        }
+        
+        // When dialog buttons are rendered, hide form buttons
+        $(document).one('dialogopen', function() {
+            $('body').addClass('dialog-mode');
+        });
+        
+        // Also check after a short delay (for when content is loaded into dialog)
+        setTimeout(function() {
+            if ($('.ui-dialog-buttonset').length > 0) {
+                $('body').addClass('dialog-mode');
+            }
+        }, 100);
+        
+        // Populate the dynamic fields (video and score) and textareas (lyrics)
+        populateDynamicFields();
+        loadAndSplitLyrics();
+
+        // TEST: Capture the generated 'content' layout right now so the baseline matches perfectly
+        originalData.content = combineLyrics();
+
+        lastFocusedTextarea = document.getElementById('lyrics_lang1');
+        $('#lyrics_lang1, #lyrics_lang2').on('focus', function() {
+            lastFocusedTextarea = this;
+        });
+        
+        updateSmartChordLabels();
+        $('input[name="song_key"]').on('input', updateSmartChordLabels);
+
+        syncScrollbars();
+
         $('.chord').click(function() {
             const note = getNoteFromKey(parseInt($(this).data('num')));
             if (note) insertAtCursor(note, false);
@@ -359,60 +522,49 @@
             insertAtCursor($(this).data('tag'), true);
         });
 
-        $('#btn_save').click(function() {
-            // Combine the two boxes back into one string
-            const finalContent = combineLyrics();
-            
-            // Put it into a hidden input: <input type="hidden" name="content" id="content">
-            $('#content').val(finalContent);
-
-            // Validate data
-            if (!validate_form()) return false;
-
-            // Detect changes
-            const currentFormState = $("#song_form").serializeArray();
-            const changedFields = data_changed(currentFormState);
-
-            if (changedFields.length === 0) {
-                alert("No changes detected.");
-                window.location.href = "/song/list";
-                return;
-            }
-
-            // // --- DEBUG LOGGING ---
-            // console.group("🚀 Song Save Preview");
-            // console.log("Original Hidden Input Name:", $('#content').attr('name'));
-            // console.log("Combined XML String:\n", finalContent);
-            
-            // if (changedFields.length === 0) {
-            //     console.info("No changes detected relative to the baseline.");
-            // } else {
-            //     console.table(changedFields); // Displays changes in a nice table
-            // }
-            // console.groupEnd();
-
-            // alert("Check the Console (F12) to see the combined output!");
-
-            const url = '/API/song/' + songId + '/edit';
-
-            // Submit Delta changes to the API as a JSON string using your imported submit_song script
-            submit_song(url, JSON.stringify(changedFields))
-                .done(function(response) {
-                    alert("Song saved successfully!");
-                    //window.location.href = "/song/list"; // Redirect back to list
-                })
-                .fail(function(jqXHR, textStatus, errorThrown) {
-                    // Check if the backend write actually succeeded (200 Status) but triggered .fail() 
-                    // because the server's successful plain-text response couldn't be parsed as JSON.
-                    if (jqXHR.status === 200) {
-                        alert("Song saved successfully!");
-                        window.location.href = "/song/list";
-                    } else {
-                        console.error("Save failed:", jqXHR, textStatus, errorThrown);
-                        alert("Error saving song: " + (jqXHR.responseText || "Unknown error"));
-                    }
-                });
+        // Form button handler - works when used as standalone page
+        $('#btn_save').click(function(e) {
+            e.preventDefault();
+            performSave();
         });
     });
+    
+    // --- Extracted Save Logic ---
+    function performSave() {
+        const currentState = getCurrentState();
+
+        if (!validate_form(currentState)) return;
+
+        const changedFields = getChangedFields(originalData, currentState);
+
+        // Check if the object has any keys
+        if (changedFields.length === 0) {
+            alert("No changes detected.");
+            return;
+        }
+
+        // --- Debug Stuff ---
+        console.group("🚀 Song Save Preview");  
+        console.log("New Final Object:\n", currentState);
+        console.log(changedFields);
+        console.groupEnd();
+
+        // Submit to API
+        const url = '/API/song/' + songId + '/edit';
+        
+        submit_song(url, JSON.stringify(changedFields))
+            .done(function(response) {
+                alert("Song saved successfully!");
+                window.location.href = "/song/list";
+            })
+            .fail(function(jqXHR) {
+                if (jqXHR.status === 200) {
+                    alert("Song saved successfully!");
+                    window.location.href = "/song/list";
+                } else {
+                    alert("Error saving song: " + (jqXHR.responseText || "Unknown error"));
+                }
+            });
+    }
 </script>
 {% endblock %}

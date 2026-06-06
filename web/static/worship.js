@@ -1,5 +1,5 @@
-let device = 'desktop';
-let API_URL = 'API/';
+var device = 'desktop';
+var API_URL = 'API/';
 
     if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
         device = 'mobile';
@@ -66,51 +66,49 @@ let API_URL = 'API/';
     }
 
     // Validate form values
-    function validate_form() {
+    function validate_form(data) {
+        // Have to use content instead of lyrics field right now. content is what the API accepts for changes to the lyrics
 
         // Sequence can not be empty
-        sequence = $("input[name='sequence']").val();
-        if(sequence == '') {
-            alert("Sequence needs value!!");
+        if (!data.sequence || data.sequence.trim() === '') {
+            alert("Sequence needs a value!");
             return false;
         }
 
         // Lyrics can not be empty
-        content = $("textarea[name='content']").val();
-        if(content == '') {
-            alert("Are there... lyrics?");
-            return false;
-        }
-        // Maybe I should change this to <textarea id="lyrics_lang1"> being not empty. Currently just checks that the combined XML content is not empty.
-
-        // Sequence sections are using paired tag
-        temp = content.replace(/(<\/?)(\d)+(>)/g, '$1temp$2$3')
-        var doc = document.createElement('div');
-        doc.innerHTML = temp;
-        if ( doc.innerHTML !== temp ) {
-            alert("The Song Sequence tags are not matched, please make sure sequence is using open and close tags as a pair. ex: <1>...</1>");
+        if (!data.content || data.content.trim() === '') {
+            alert("Are there... lyrics? The editor seems empty.");
             return false;
         }
 
-        // No duplicated sequence section
-        let tags = content.match(/<\/?[^>]+>/g);
-        if (!tags) {
-            alert('Please mark lyrics with sequence tags!!');
+        // Check for paired tags (e.g., <chorus>...</chorus>)
+        // We temporarily rename numeric tags so the browser's DOM parser doesn't get confused
+        const tagCompatibilityCheck = data.content.replace(/(<\/?)(\d)+(>)/g, '$1temp$2$3');
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = tagCompatibilityCheck;
+        
+        if (tempDiv.innerHTML !== tagCompatibilityCheck) {
+            alert("Tag mismatch! Ensure all tags are paired correctly (e.g., <1>...</1> or <chorus>...</chorus>).");
             return false;
         }
-        let duplicates = tags.filter((item, index) => tags.indexOf(item) !== index);
+
+        // Check for duplicated section tags
+        const tags = data.content.match(/<\/?[^>]+>/g) || [];
+        const duplicates = tags.filter((item, index) => tags.indexOf(item) !== index);
+        
         if (duplicates.length > 0) {
-            alert('Duplicated sequence tag been used. ' + duplicates.toString());
+            alert("Duplicated sequence tags found: " + [...new Set(duplicates)].join(', '));
             return false;
         }
 
-        // chords symbols are in []
-        let pattern = /\[[^\]]+\[/g;
-        let result = content.match(pattern);
-        if (result) {
-            alert("Please make sure Chords and region are marked in '[' and ']'. The following are not correct..." + result);
+        // Check for malformed chord brackets [C [D]
+        const malformedPattern = /\[[^\]]+\[/g;
+        const malformedMatch = data.content.match(malformedPattern);
+        if (malformedMatch) {
+            alert("Check your chord brackets. It looks like some aren't closed properly: " + malformedMatch);
             return false;
         }
+
         return true;
     }
 
@@ -197,14 +195,16 @@ let API_URL = 'API/';
     }
 
     function render_song(id, db, lang, num) {
-        url = 'song/' + id;
+        let url = 'song/' + id + '/edit';
         if (db && lang) {
             url += '?db=' + db + '&lang=' + lang;
         }
         if (!num) {
             num = 0
         }
-        dialog_title = [{'title': 'Save Worship Song', 'text': 'Save', 'cancel': 'Cancel', 'action': 'edit'}, {'title': 'Add Worship Song', 'text': 'Add', 'cancel': 'Cancel', 'action': 'add'}]
+        let dialog_title = [{'title': 'Save Worship Song', 'text': 'Save', 'cancel': 'Cancel', 'action': 'edit'},
+                            {'title': 'Add Worship Song', 'text': 'Add', 'cancel': 'Cancel', 'action': 'add'}];
+        
         $.when( $.ajax( url ) ).then(function( response, textStatus, jqXHR ) {
             $("#dialog").html(response);
             $("#dialog").dialog({
@@ -215,44 +215,62 @@ let API_URL = 'API/';
     	                id: "button-add",
                         text : dialog_title[num]['text'],
                         click: function() {
-                            if (!validate_form()) {
-                                return false;
-                            }
-                            if (num ==0) {
-                                click_url = API_URL + 'song/' + id + '/' +  dialog_title[num]['action'];
-                                temp = data_changed($("#song_form").serializeArray());
-                                if (temp) {
-                                    submit_song(click_url, JSON.stringify(temp));
-                                }
-                                $( this ).dialog( "close" );
-                            }
-                            else {
-                                click_url = API_URL + 'song/' +  dialog_title[num]['action'];
-                                const promised = new Promise(function(resolve, reject) {
-                                    const song_id = submit_song(click_url, JSON.stringify($("#song_form").serializeArray()));
-                                    if (song_id) {
-                                        return resolve(song_id);
-                                    }
-                                    else {
-                                        return reject('Failed adding new song.');
-                                    }
+
+                            const currentState = window.getCurrentState();
+
+                            if (!window.validate_form(currentState)) return;
+
+                            var tempSubmit = [];
+                            for (let key in currentState) {
+                                if (key === 'id') continue;
+
+                                tempSubmit.push({
+                                    name: key,
+                                    value: currentState[key]
                                 });
-                                promised.then(function(result) {
-                                    console.log('before closing', result);
-                                    get_song(result).done(function(data) {
-                                        console.log('song_data', data);
-                                        data['date'] = worship_data.date;
-                                        songs_temp.push(data);
-                                        $.when( add_song_to_worship(worship)).then(function() {
-                                            init();
-                                        });
+                            }
+
+                            console.log('tempSubmit', tempSubmit);
+
+                            // Submit to API
+                            var click_url = API_URL + 'song/add';
+                            
+                            const promised = new Promise(function(resolve, reject) {
+                                submit_song(click_url, JSON.stringify(tempSubmit))
+                                    .done(function(response) {
+                                        // The API successfully added the song!
+                                        // Pass the returned ID to the resolve function.
+                                        resolve(response); 
+                                    })
+                                    .fail(function(jqXHR) {
+                                        // The API failed. Pass the error text to the reject function.
+                                        reject(jqXHR.responseText || 'Failed adding new song.');
                                     });
-                                    $('#dialog').dialog( "close" );
-                                })
-                                .catch(function(error) {
-                                    alert(error);
+                            });
+                            
+                            // Handle the successful addition and link it to the worship set
+                            promised.then(function(result) {
+                                console.log('before closing, new song id:', result);
+                                
+                                get_song(result).done(function(data) {
+                                    console.log('song_data', data);
+                                    data['date'] = worship_data.date;
+                                    songs_temp.push(data);
+                                    
+                                    $.when( add_song_to_worship(worship) ).then(function() {
+                                        init(); // Refresh the UI
+                                    });
+                                }).fail(function(err) {
+                                    alert("Song was saved, but failed to fetch data for UI update.");
                                 });
-                            }
+                                
+                                $(this).dialog("close");
+                            })
+                            .catch(function(error) {
+                                // This will now print the actual error text from your backend API
+                                alert("Error: " + error);
+                            });
+       
                         }
                     },
 	                {
