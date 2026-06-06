@@ -264,12 +264,14 @@
 			                r_fragment = region_.splice(0, fragment).join('<br/>')
 				            let sub_section = document.createElement('section');
 				            sub_section.append(create_view(data.type, o_fragment, r_fragment, s_name));
+      			            sub_section.setAttribute('order', j);
       			            section.append(sub_section);
 			            }
 			        }
 			        else {
 				        let sub_section = document.createElement('section');
 				        sub_section.append(create_view(data.type, data.content[j].origin_text, data.content[j].region_text, s_name));
+      			        sub_section.setAttribute('order', j);
   			            section.append(sub_section);
     			    }
 			    }

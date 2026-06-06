@@ -377,18 +377,25 @@
 
         $(document).on('change', '[contenteditable]', function() {
             element_class = $(this).attr('class');
+            order_num = $(this).parent().parent().attr('order');
             // Getting the root section of the changed div in order to loop through all content
             section_root = $(this).parent().parent().parent();
-            new_data = '';
+            var new_data = [];
             section_root.children().each(function() {
-                html = $(this).find('.'+element_class.replace(' ','.')).html();
-                new_data += html + '<br/>'; // Add <br> for the last line
+                if ($(this).attr('order') == order_num) {
+                    sub_section = $(this).find('.'+element_class.replace(' ','.'));
+                    if(sub_section.text()!='') {
+                        html = sub_section.html();
+                        new_data.push(html);
+                    }
+                }
             });
-            new_data = new_data.slice(0, -5); // Remove last <br/>
+            new_data = new_data.filter(n => n); // Remove empty entries
+            new_data = new_data.join('<br/>');
 
             if(element_class.indexOf('origin')>0) {
                 if(element_class.indexOf('song')>=0) {
-                    slides[pos].content[order].origin_text = new_data;
+                    slides[pos].content[order_num].origin_text = new_data;
                 }
                 else {
                     slides[pos].content.origin_text = new_data;
@@ -396,7 +403,7 @@
             }
             else if(element_class.indexOf('region')>0) {
                 if(element_class.indexOf('song')>=0) {
-                    slides[pos].content[order].region_text = new_data;
+                    slides[pos].content[order_num].region_text = new_data;
                 }
                 else {
                     slides[pos].content.region_text = new_data;
