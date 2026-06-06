@@ -639,7 +639,7 @@ def get_worship_songs(id):
     result = dB.run_para(sql, id)
     songs = []
 
-    style = {'align': '', 'background': '', 'opacity': 1, 'color': '', 'bgcolor': '', 'fragment': 0}
+    style = {'align': '', 'background': '', 'opacity': 1, 'color': '', 'bgcolor': '', 'fragment': 4}
     for r in result:
         if r[22] == 'info':
             songs.append({'type': r[22], 'title': r[19] if r[19] else r[18][0:10], 'author': '', 'lang': '', 'lang_2': '', 'key': '', 'sequence': '', 'bible': '', 'lyricist': '', 'book': '', 'copyright': '', 'ccli': '', 'lyrics_raw': '', 'content': '', 'video': '', 'score': '', 'date': r[14], 'id': r[21], 'transpose': r[16].split(','), 'alt_sequence': '', 'notes': r[18] if r[18] else '', 'version': r[20] if r[20] else '', 'style': style})

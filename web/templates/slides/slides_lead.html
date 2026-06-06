@@ -145,7 +145,7 @@
 </div>
 </body>
 <script>
-    mode = 'lead';
+    mode = 'lead';                 // Set mode to lead
     presentation = {{ presentation|safe }};
     slides = presentation['data'];
     setting = presentation['setting'];
@@ -205,22 +205,25 @@
         }
     });
 
+    Reveal.on('ready', (event) => {
+        // Move slide to current pos and order when it's ready
+        Reveal.slide(pos, order);
+    });
+
     Reveal.on('slidechanged', (event) => {
-        pos = event.indexh;
-        order = event.indexv;
+        if(slide_refreshed) {            // slide refreshed by socket, reset flag
+            slide_refreshed = false;
+            return true;
+        }
+        console.log('here', event.indexh, pos, event.indexv, order)
         pre = $(event.previousSlide).children().attr('name');
         cur = $(event.currentSlide).children().attr('name');
-        $('#top-left').html(slides[pos].title);
-        if(slides[pos].type=='media') {
-            $('#slide_notes').html(slides[pos].content.origin_text);
-        }
-        else {
-            $('#slide_notes').html(slides[pos].notes);
-        }
-        load_preview();
+        pos = event.indexh;
+        order = event.indexv;
+        change_slide()
 
         console.log("slide changed, emit changes to server", pos, order);
-        socket.emit('control', {'type': 'pos', 'value': [pos, order]});
+        socket.emit('control', {'type': 'pos', 'value': [pos, order], 'from': 'lead'});
     });
 
     // Stuff copied from original slides.html, I believe it was for buttons

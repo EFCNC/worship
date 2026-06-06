@@ -19,6 +19,7 @@
     let touchableElement;
     let w_id;
     let adding_slide = 0;
+    let slide_refreshed = false;
 
     // Socket Server url
     let socket_url = window.location.host;
@@ -86,14 +87,10 @@
     }
 
     function move_top(para) {
-        //scrollTo = $('div[' + para + ']');
         scrollTo = $('div[class="inner present"]');
         base = $('.preview').offset().top;
         $('.preview').scrollTop(base);
-        console.log(base, $(scrollTo).offset().top,  $(scrollTo).position())
-        $('.preview').animate({
-            scrollTop:$(scrollTo).offset().top - base
-        },'linear');
+        $('.preview').scrollTop($(scrollTo).offset().top - base);
     }
 
     function save_slides() {
@@ -113,6 +110,9 @@
 
     function show_data(pos) {
         data = slides[pos];
+        // update admin/lead mode as well
+        $('#slide_title').html(data.title);
+        $('#slide_notes').html(data.notes)
         $('#top-left').html(data.title)
         if (mode == 'admin') {
             $('#fragment').empty();
@@ -143,44 +143,6 @@
         }
     }
 
-    function show_notes(text) {
-        text = text.replaceAll('\n', '<br/>');
-        return '>'+ text + '</div>';
-    }
-
-    function show_info(content, align) {
-        text = content.origin_text;
-        text = text.replaceAll('\n', '<br/>');
-        html = '<div class="' + mode + ' info origin" style="text-align:' + align + '">'  + text + '</div>';
-        if (content.region_text) {
-            text = content.region_text;
-            text = text.replaceAll('\n', '<br/>');
-            html += '<div class="' + mode + ' info region" style="text-align:' + align + '">'  + text + '</div>';
-        }
-        return html;
-    }
-
-    function show_lyrics(l, lang, lang_2) {
-        html = '<div class="' + mode + ' lyrics origin">' + l.origin_text + '</div>';
-        if (l.region_text) {
-            html += '<div class="' + mode + ' lyrics region">' + l.region_text + '</div>';
-        }
-        return html;
-    }
-
-    // function load_container(mode_name) {
-    //     container = {
-    //         'view': '<div id="top-left"></div><div id="top-right"></div><div id="preview" class="preview view"></div><div class="reveal"><div class="slides"></div></div><div id="bottom-left"></div><div id="bottom-right"></div>',
-    //         'musician': '<div id="top-left"></div><div id="top-right"></div><div id="preview" class="preview view"></div><div id="bottom-left"></div><div id="bottom-right"></div>',
-    //         'score': '<div id="top-left"></div><div id="top-right"></div><div id="preview" class="preview view"><object id="sheets" type="text/html" style="width:100%; height:100%; margin:1%;"></object></div><div id="bottom-left"></div><div id="bottom-right"></div>',
-    //         'lead': '<div id="top-right"></div><div class="preview_container"><div id="preview"></div><div id="menu"><div id="dynamic_btn"><br/><button name="dynamic" title="Intro">Intro</button><button name="dynamic" title="Interlude">Interlude</button><button name="dynamic" title="Ending">Ending</button><br/><button name="dynamic" title="Ready to Build up">Build Up</button><button name="dynamic" title="Slow Down">Slow Down</button><button name="dynamic" title="Speed Up">Speed Up</button><br/><button name="dynamic" title="Acapella">Acapella</button><button name="dynamic" title="Repeat Chorus">Repeat Chorus</button><button name="dynamic" title="Last Sentence">Last Sentence</button><div id="key_change"></div></div><div id="notes"></div></div><div id="preview_div"></div></div>'
-    //     }
-    //     if (mode_name) {
-    //         return container[mode_name];
-    //     }
-    //     return container[mode]
-    // }
-
     function create_view(type, origin, region, name) {
         let grid = document.createElement('div');
         grid.setAttribute('name', name);
@@ -200,16 +162,32 @@
         return grid;
     }
 
+    // Helper function to safely extract lines from either a list or raw text
+    function parseContent(htmlString) {
+        if (!htmlString) return { isList: false, lines: [] };
+
+        let tempDiv = document.createElement('div');
+        tempDiv.innerHTML = htmlString;
+        let listItems = tempDiv.querySelectorAll('li');
+
+        if (listItems.length > 0) {
+            return { isList: true, lines: Array.from(listItems).map(li => li.innerHTML) };
+        }
+        else {
+            let rawText = htmlString.replaceAll('\n', '<br/>');
+            return { isList: false, lines: rawText.split(/<br\s*\/?>/i).filter(n => n.trim() !== '') };
+        }
+    }
+
     function load_slides() {
         $('.slides').empty();
-        $('#slide_title').html(slides[0].title);
-        $('#slide_notes').html(slides[0].notes);
+        $('#slide_title').html(slides[pos].title);
+        $('#slide_notes').html(slides[pos].notes);
         for(var i=0;i<slides.length;i++) {
             data = slides[i];
-            bg = data.style.background;
+            bg_url = data.style.background;
             let section = document.createElement('section');
-            if (bg) {
-                bg_url = bg;
+            if (bg_url) {
                 bg_opacity = data.style.opacity
                 section.setAttribute('data-background-image', bg_url);
                 section.setAttribute('data-background-opacity', bg_opacity);
@@ -217,24 +195,8 @@
             fragment = data.style.fragment;
             if(data.type == 'info') {
                 // SETTING: Tune these numbers based on your presentation font size!
-                let max_lines_per_slide = 5; 
+                //let max_lines_per_slide = 5;
                 let max_chars_per_slide = 120; 
-
-                // Helper function to safely extract lines from either a list or raw text
-                function parseContent(htmlString) {
-                    if (!htmlString) return { isList: false, lines: [] };
-                    
-                    let tempDiv = document.createElement('div');
-                    tempDiv.innerHTML = htmlString;
-                    let listItems = tempDiv.querySelectorAll('li');
-                    
-                    if (listItems.length > 0) {
-                        return { isList: true, lines: Array.from(listItems).map(li => li.innerHTML) };
-                    } else {
-                        let rawText = htmlString.replaceAll('\n', '<br/>');
-                        return { isList: false, lines: rawText.split(/<br\s*\/?>/i).filter(n => n.trim() !== '') };
-                    }
-                }
 
                 let parsedOrigin = parseContent(data.content.origin_text);
                 let parsedRegion = parseContent(data.content.region_text);
@@ -243,20 +205,6 @@
                 let region_lines = parsedRegion.lines;
                 let isList = parsedOrigin.isList; 
 
-                if (fragment > 0) {
-                    // Fragment rendering remains unchanged
-                    while(origin_lines.length > 0) {
-                        let o_fragment = origin_lines.splice(0, fragment).map(obj => '<li>' + obj + '</li>').join('');
-                        let r_fragment = region_lines.splice(0, fragment).map(obj => '<li>' + obj + '</li>').join('');
-                        
-                        let sub_section = document.createElement('section');
-                        let ul = document.createElement('ul'); 
-                        ul.append(create_view(data.type, o_fragment, r_fragment, 'info'));
-                        sub_section.append(ul);
-                        section.append(sub_section);
-                    }
-                } 
-                else {
                     // NEW: Dynamic chunking based on both character count and line count
                     while (origin_lines.length > 0) {
                         let current_chunk_o = [];
@@ -274,7 +222,7 @@
                             // If we already have at least 1 line AND adding the next line 
                             // pushes us over the char limit OR the line limit, stop building this slide.
                             if (current_chunk_o.length > 0 && 
-                               (current_char_count + next_line_length > max_chars_per_slide || current_chunk_o.length >= max_lines_per_slide)) {
+                               (current_char_count + next_line_length > max_chars_per_slide || current_chunk_o.length >= fragment)) {
                                 break; 
                             }
 
@@ -304,25 +252,26 @@
                         sub_section.append(create_view(data.type, o_html, r_html, 'info'));
                         section.append(sub_section);
                     }
-                }
             }
 		    else if (data.type == 'song') {
 			    for(var j=0;j<data.content.length;j++) {
 			        s_name = data.content[j].name;
 			        if (fragment > 0) {
-			            origin_ = data.content[j].origin_text.split('<br/>').filter(n => n);
-			            region_ = data.content[j].region_text.split('<br/>').filter(n => n);
+			            origin_ = data.content[j].origin_text.split(/<br\/?>/).filter(n => n);
+			            region_ = data.content[j].region_text.split(/<br\/?>/).filter(n => n);
 			            while(origin_.length>0) {
 			                o_fragment = origin_.splice(0, fragment).join('<br/>')
 			                r_fragment = region_.splice(0, fragment).join('<br/>')
 				            let sub_section = document.createElement('section');
 				            sub_section.append(create_view(data.type, o_fragment, r_fragment, s_name));
+      			            sub_section.setAttribute('order', j);
       			            section.append(sub_section);
 			            }
 			        }
 			        else {
 				        let sub_section = document.createElement('section');
 				        sub_section.append(create_view(data.type, data.content[j].origin_text, data.content[j].region_text, s_name));
+      			        sub_section.setAttribute('order', j);
   			            section.append(sub_section);
     			    }
 			    }
@@ -337,6 +286,7 @@
     }
 
     function update_json(download) {
+    $('#loading').show();
     data = JSON.stringify({"setting": setting, "slides": slides});
         $.ajax({
             type: "post",
@@ -355,6 +305,7 @@
                 }
             }
         });
+        $('#loading').hide();
     }
 
 
@@ -365,11 +316,16 @@
     });
 
     socket.on('reload', function (presentation) {
-        console.log('Admin reload json data');
         slides = presentation['data'];
+        console.log('Admin reload json data', slides);
         w_id = presentation['id'];
         adding_slide = 0;
-        location.reload()
+
+        // When reload is broadcast, load the slide from the data and sync it before move to current pos and order
+        load_slides();
+        Reveal.sync();
+        Reveal.slide(pos, order);
+        change_slide();
     });
 
     socket.on('response', function (data) {
@@ -377,13 +333,24 @@
         order = data.pos[1];
         msg = data.msg;
         dynamic = data.dynamic;
+        from = data.from;
         // TODO: For musician key change
         key_change = data.key;
-        console.log('Server sent: pos:', pos, 'order', order, 'msg:', msg, 'key:', key_change, 'dynamic:', dynamic);
-        Reveal.slide(pos, order);
+        console.log('Server sent: pos:', pos, 'order', order, 'msg:', msg, 'key:', key_change, 'dynamic:', dynamic, 'from:', from);
+        if (from!= mode) {
+            slide_refreshed = true;
+            Reveal.slide(pos, order);
+            change_slide();
+        }
+    });
+
+    function change_slide() {
         show_data(pos);
         show_msg();
-    });
+        if(mode=='lead') {
+            load_preview();
+        }
+    }
 
 
     // contentEditable for origin, region, title, and notes

@@ -160,7 +160,7 @@
 
 {% block extra_js %}
 <script>
-        mode = 'admin';                 // Set mode to lead
+        mode = 'admin';                 // Set mode to admin
         bg_url = '';
         bg_opacity = 1;
         a_type = '';
@@ -267,7 +267,7 @@
         function add_media_slide() {
             link = prompt('Enter the link to insert to current slide');
             if(link) {
-                info = {"alt_sequence": "", "author": "", "style": {"align": "", "background": "", "opacity": 1, "fragment": 0, "color": ""}, "bible": "", "book": "", "ccli": "", "content": {"origin_text": link, "region_text": ""}, "copyright": "", "date": "", "id": -1, "key": "", "lang": "", "lang_2": "", "lyricist": "", "lyrics_raw": "", "notes": "Media", "score": "", "sequence": "", "title": "Media", "transpose": "0", "type": "media", "version": "", "video": ""};
+                info = {"alt_sequence": "", "author": "", "style": {"align": "", "background": "", "opacity": 1, "fragment": 4, "color": ""}, "bible": "", "book": "", "ccli": "", "content": {"origin_text": link, "region_text": ""}, "copyright": "", "date": "", "id": -1, "key": "", "lang": "", "lang_2": "", "lyricist": "", "lyrics_raw": "", "notes": "Media", "score": "", "sequence": "", "title": "Media", "transpose": "0", "type": "media", "version": "", "video": ""};
                 slides.splice(pos+1, 0, info);
                 adding_slide = 0;
                 update_json();
@@ -355,12 +355,59 @@
             }
         });
 
-        $('div').on('change', '[contenteditable]', function() {
-            if($(this).attr('class').indexOf('origin')>0) {
-                slides[pos].content.origin_text = $(this).html();
+        // Helper to use the correct tag when return is enter in the div
+        $(document).on('keydown', '[contenteditable=true]', function(e) {
+            // trap the return key being pressed
+            if (e.keyCode == 13) {
+                if(e.target.innerHTML.includes('<li>')) {
+                    console.log('<li>', 'Do nothing...');
+                }
+                else if(e.target.innerHTML.includes('<p>')){
+                    console.log('<p>', 'insert line break');
+                    document.execCommand('insertLineBreak');
+                    return false;
+                }
+                else {
+                    console.log('<div>', 'insert br');
+                    document.execCommand('insertLineBreak');
+                    return false;
+                }
             }
-            else if($(this).attr('class').indexOf('region')>0) {
-                slides[pos].content.region_text = $(this).html();
+        });
+
+        $(document).on('change', '[contenteditable]', function() {
+            element_class = $(this).attr('class');
+            order_num = $(this).parent().parent().attr('order');
+            // Getting the root section of the changed div in order to loop through all content
+            section_root = $(this).parent().parent().parent();
+            var new_data = [];
+            section_root.children().each(function() {
+                if ($(this).attr('order') == order_num) {
+                    sub_section = $(this).find('.'+element_class.replace(' ','.'));
+                    if(sub_section.text()!='') {
+                        html = sub_section.html();
+                        new_data.push(html);
+                    }
+                }
+            });
+            new_data = new_data.filter(n => n); // Remove empty entries
+            new_data = new_data.join('<br/>');
+
+            if(element_class.indexOf('origin')>0) {
+                if(element_class.indexOf('song')>=0) {
+                    slides[pos].content[order_num].origin_text = new_data;
+                }
+                else {
+                    slides[pos].content.origin_text = new_data;
+                }
+            }
+            else if(element_class.indexOf('region')>0) {
+                if(element_class.indexOf('song')>=0) {
+                    slides[pos].content[order_num].region_text = new_data;
+                }
+                else {
+                    slides[pos].content.region_text = new_data;
+                }
             }
             else if($(this).attr('id') == 'slide_title') {
                 slides[pos].title = $(this).html();
@@ -408,6 +455,7 @@
             update_current_bg();
             $('#edit_btn').css('left', $('.reveal').width()-100);
             $('#edit_btn').show();
+            a_type = 'bg';
         });
 
         function update_current_bg() {
@@ -450,7 +498,7 @@
                     return false;
                 }
                 else {
-                    info = {"alt_sequence": "", "author": "", "style": {"align": "", "background": "", "opacity": 1, "fragment": 0, "color": ""}, "bible": "", "book": "", "ccli": "", "content": {"origin_text": origin, "region_text": region}, "copyright": "", "date": "", "id": 115, "key": "", "lang": "", "lang_2": "", "lyricist": "", "lyrics_raw": "", "notes": "歡迎報告", "score": "", "sequence": "", "title": "Information", "transpose": "0", "type": "info", "version": "", "video": ""};
+                    info = {"alt_sequence": "", "author": "", "style": {"align": "", "background": "", "opacity": 1, "fragment": 4, "color": ""}, "bible": "", "book": "", "ccli": "", "content": {"origin_text": origin, "region_text": region}, "copyright": "", "date": "", "id": 115, "key": "", "lang": "", "lang_2": "", "lyricist": "", "lyrics_raw": "", "notes": "歡迎報告", "score": "", "sequence": "", "title": "Information", "transpose": "0", "type": "info", "version": "", "video": ""};
                     slides.splice(pos+1, 0, info);
                     $('#edit_btn').hide();
                     adding_slide = 0;
@@ -529,17 +577,16 @@
         });
 
         Reveal.on('slidechanged', (event) => {
+            if(slide_refreshed) {            // slide refreshed by socket, reset flag
+                slide_refreshed = false;
+                return true;
+            }
             pos = event.indexh;
             order = event.indexv;
             pre = $(event.previousSlide).children().attr('name');
             cur = $(event.currentSlide).children().attr('name');
-            $('#slide_title').html(slides[pos].title);
-            if(slides[pos].type=='media') {
-                $('#slide_notes').html(slides[pos].content.origin_text);
-            }
-            else {
-                $('#slide_notes').html(slides[pos].notes);
-            }
+            change_slide();
+
             if (order == 0) {
                 content_index = 0;
             }
@@ -551,7 +598,7 @@
                 load_slides();
             }
             console.log("slide changed", pos, order, content_index);
-            socket.emit('control', {'type': 'pos', 'value': [pos, order]});
+            socket.emit('control', {'type': 'pos', 'value': [pos, order], 'from': 'admin'});
         });
 </script>
 {% endblock %}
