@@ -81,7 +81,6 @@ def handle_announcement(data):
 
 # Rendering interfaces
 
-# -------- Worship Pages ---------
 @app.route("/")
 def index():
 	id = request.args.get('id', None)
@@ -93,6 +92,12 @@ def index():
 	worship = Utils.worship_list()
 	worship = [{'date': x, 'worship': next((y for y in worship if y['date'] == x), -1)} for x in sundays[1]]
 	return render_template('worship.html', worship=worship, sundays=sundays)
+
+@app.route("/info")
+def info():
+	coming_sunday = __get_sundays()["sunday"]
+	id = Utils.get_worship_id(coming_sunday)[0]
+	return render_template('info.html', id=id)
 
 @app.route("/worship/<id>")
 @app.route("/worship/<id>/<tab>")
@@ -282,6 +287,13 @@ def edit_song(id): # Renamed for clarity
     return render_template('song_editor.html', content=content)
 
 
+@app.route("/calendar")
+def calendar():
+	now = datetime.now()
+	year = str(now.year)
+	column, calendar = Utils.get_calendar(year)
+	return render_template('admin/calendar.html', column=column, calendar=calendar)
+
 @app.route("/assets")
 def assets():
 	setting = slides_data['setting']
@@ -314,20 +326,12 @@ def profile():
 	team = Utils.list_team()
 	return render_template('profile.html', team=team)
 
-# @app.route("/people")
-# def people():
-# 	people = Utils.get_teams()
-# 	return render_template('people.html', people=people)
+@app.route("/people")
+def people():
+	people = Utils.get_teams()
+	return render_template('people.html', people=people)
 
-# --------- Admin Pages ---------
-@app.route("/admin/info")
-def info():
-	coming_sunday = __get_sundays()["sunday"]
-	id = Utils.get_worship_id(coming_sunday)[0]
-	return render_template('admin/info.html', id=id)
-
-
-@app.route("/admin/people")
+@app.route("/rollcall")
 def roll_call():
 	id = request.args.get('id', None)
 	groups = Utils.get_groups()
@@ -336,21 +340,12 @@ def roll_call():
 		people = Utils.get_team_present(sundays['worship_id'])
 	else:
 		people = Utils.get_team_present(id)
-	return render_template('admin/people.html', people=people, groups=[x[1] for x in groups], sundays=sundays)
+	return render_template('admin/rollcall.html', people=people, groups=[x[1] for x in groups], sundays=sundays)
 
-@app.route("/admin/calendar")
-def calendar():
-	now = datetime.now()
-	year = str(now.year)
-	column, calendar = Utils.get_calendar(year)
-	return render_template('admin/calendar.html', column=column, calendar=calendar)
-
-@app.route("/admin/report/<id>")
+@app.route("/report/<id>")
 def report(id):
 	report, saved = Tools.get_report(id)
-	return render_template('admin/report_pdf.html', saved=saved, report=report, id=id)
-
-# --------- Other Pages ---------
+	return render_template('report_pdf.html', saved=saved, report=report, id=id)
 
 @app.route("/files")
 def file_list():
