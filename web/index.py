@@ -84,6 +84,10 @@ def handle_announcement(data):
 # -------- Worship Pages ---------
 @app.route("/")
 def index():
+	return render_template('home.html')
+
+@app.route("/worship")
+def worship_home():
 	id = request.args.get('id', None)
 	if id:
 		songs = Utils.get_worship_songs(id)
@@ -92,7 +96,7 @@ def index():
 	sundays = Tools.allsundays()
 	worship = Utils.worship_list()
 	worship = [{'date': x, 'worship': next((y for y in worship if y['date'] == x), -1)} for x in sundays[1]]
-	return render_template('worship.html', worship=worship, sundays=sundays)
+	return render_template('worship/home.html', worship=worship, sundays=sundays)
 
 @app.route("/worship/<id>")
 @app.route("/worship/<id>/<tab>")
@@ -110,37 +114,6 @@ def worship(id, tab=''):
 		w = w[0]
 	return render_template('worship/notes.html', songs=songs, id=id, w=w, tab=tab)
 
-@app.route("/slides/admin1")
-def sildes_admin1():
-	_init_slide()
-	global client
-	client = {'admin': [], 'lead': [], 'musician': [], 'view': []}
-	return slides_data
-
-@app.route("/slides")
-@app.route("/slides/<mode>")
-def slides_viewer(mode=None):
-	__update_client_mode(mode)
-	if not mode:
-		return render_template('slides/slides.html', presentation=slides_data, mode='')
-	if not slides_data['data']:
-		__get_slide_json()
-	if mode == 'admin':
-		if len(client['admin']) > 0:
-			__update_client_mode('')
-			return "<script>alert('Only one Admin mode can be connected, please use different mode.');window.location.replace('../slides');</script>"
-		else:
-			return render_template('slides/slides_admin.html', presentation=slides_data, mode=mode)
-	elif mode == 'lead':
-		if len(client['lead']) > 0:
-			__update_client_mode('')
-			return "<script>alert('Only one Lead mode can be connected, please use different mode.');window.location.replace('../slides');</script>"
-		return render_template('slides/slides_lead.html', presentation=slides_data, mode=mode)
-	elif mode == 'view':
-		__update_client_mode('')
-		return render_template('slides/slides_view.html', presentation=slides_data, mode=mode)
-	return render_template('slides/slides.html', presentation=slides_data, mode=mode)
-
 @app.route("/notes")
 def get_notes():
 	'''
@@ -155,7 +128,7 @@ def get_notes():
 	return render_template("notes.html", content=content)
 
 @app.route("/song/list")
-def get_songs():
+def song_list():
 	'''
 	:param: none
 	:return: all song
@@ -308,7 +281,6 @@ def schedule():
 	marked = Utils.get_marked_user()
 	return render_template('schedule.html', booked=assigned, team=team, marked=marked, sunday=sundays['sunday'])
 
-
 @app.route("/profile")
 def profile():
 	team = Utils.list_team()
@@ -318,6 +290,41 @@ def profile():
 # def people():
 # 	people = Utils.get_teams()
 # 	return render_template('people.html', people=people)
+
+# -------- Slides Pages ---------
+@app.route("/slides/admin1")
+def sildes_admin1():
+	_init_slide()
+	global client
+	client = {'admin': [], 'lead': [], 'musician': [], 'view': []}
+	return slides_data
+
+@app.route("/slides")
+def slides():
+	return render_template('slides/slides.html')
+
+@app.route("/slides/<mode>")
+def slides_viewer(mode=None):
+	__update_client_mode(mode)
+	if not mode:
+		return render_template('slides/slides.html', presentation=slides_data, mode='')
+	if not slides_data['data']:
+		__get_slide_json()
+	if mode == 'admin':
+		if len(client['admin']) > 0:
+			__update_client_mode('')
+			return "<script>alert('Only one Admin mode can be connected, please use different mode.');window.location.replace('../slides');</script>"
+		else:
+			return render_template('slides/slides_admin.html', presentation=slides_data, mode=mode)
+	elif mode == 'lead':
+		if len(client['lead']) > 0:
+			__update_client_mode('')
+			return "<script>alert('Only one Lead mode can be connected, please use different mode.');window.location.replace('../slides');</script>"
+		return render_template('slides/slides_lead.html', presentation=slides_data, mode=mode)
+	elif mode == 'view':
+		__update_client_mode('')
+		return render_template('slides/slides_view.html', presentation=slides_data, mode=mode)
+	return render_template('slides/slides.html', presentation=slides_data, mode=mode)
 
 # --------- Admin Pages ---------
 @app.route("/admin")
@@ -331,7 +338,6 @@ def admin_info():
 	coming_sunday = __get_sundays()["sunday"]
 	id = Utils.get_worship_id(coming_sunday)[0]
 	return render_template('admin/info.html', id=id)
-
 
 @app.route("/admin/people")
 def admin_people():

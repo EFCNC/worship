@@ -13,18 +13,18 @@
 
 <header id="header">
     <div id="profile">
-        <a href="/profile" id="profile-container" class="profile_bubble" style="display: none;">
+        <a href="{{ url_for('profile') }}" id="profile-container" class="profile_bubble" style="display: none;">
             <!-- Image loads immediately, initials shown only if image fails -->
             <span id="profile-initials" style="font-weight: bold; display: none;"></span>
             <img id="profile-img" src="" alt="Profile" style="width: 100%; height: 100%; object-fit: cover;">
         </a>
     </div>
     <nav class="navigation">
-        <a href="/admin">Home</a>
-        <a href="/admin/info">Info</a>
-        <a href="/admin/people">People</a>
-        <a href="/admin/calendar">Calendar</a>
-        <a href="/admin/report/<id>">Reports</a>
+        <a href="{{ url_for('index') }}">Home</a>
+        <a href="{{ url_for('admin_info') }}">Info</a>
+        <a href="{{ url_for('admin_people') }}">People</a>
+        <a href="{{ url_for('admin_calendar') }}">Calendar</a>
+        <a href="{{ url_for('admin_report', id='<id>') }}">Reports</a>
     </nav>
 </header>
 

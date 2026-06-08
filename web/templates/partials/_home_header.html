@@ -1,4 +1,16 @@
 <!-- Consolidated Header Fragment - included in base.html -->
+
+<!-- Overriding header styles for admin pages -->
+<style>
+    #header {
+        background-color: var(--tertiary-color) !important;
+    }
+    #header .navigation a.active {
+        background-color: #5a41e9 !important;
+    }
+</style>
+
+
 <header id="header">
     <div id="profile">
         <a href="{{ url_for('profile') }}" id="profile-container" class="profile_bubble" style="display: none;">
@@ -9,9 +21,9 @@
     </div>
     <nav class="navigation">
         <a href="{{ url_for('index') }}">Home</a>
-        <a href="{{ url_for('song_list') }}">Songs</a>
-        <a href="{{ url_for('schedule') }}">Schedule</a>
         <a href="{{ url_for('worship_home') }}">Worship</a>
+        <a href="{{ url_for('slides') }}">Slides</a>
+        <a href="{{ url_for('song_list') }}">Song List</a>
     </nav>
 </header>
 
