@@ -31,7 +31,13 @@
     <div id="dialog"></div>
 
     <!-- Header Navigation -->
-    {% include 'partials/_header.html' %}
+    {% if 'admin' in request.path %}
+        {% include 'partials/_admin_header.html' %}
+    {% elif 'worship' in request.path %}
+        {% include 'partials/_worship_header.html' %}
+    {% else %}
+        {% include 'partials/_worship_header.html' %}
+    {% endif %}
 
     <!-- Main Content Area -->
     <main id="main-content">
