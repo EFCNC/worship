@@ -320,15 +320,21 @@ def profile():
 # 	return render_template('people.html', people=people)
 
 # --------- Admin Pages ---------
+@app.route("/admin")
+def admin_home():
+	coming_sunday = __get_sundays()["sunday"]
+	id = Utils.get_worship_id(coming_sunday)[0]
+	return render_template('admin/home.html', id=id)
+
 @app.route("/admin/info")
-def info():
+def admin_info():
 	coming_sunday = __get_sundays()["sunday"]
 	id = Utils.get_worship_id(coming_sunday)[0]
 	return render_template('admin/info.html', id=id)
 
 
 @app.route("/admin/people")
-def roll_call():
+def admin_people():
 	id = request.args.get('id', None)
 	groups = Utils.get_groups()
 	sundays = __get_sundays()
@@ -339,14 +345,14 @@ def roll_call():
 	return render_template('admin/people.html', people=people, groups=[x[1] for x in groups], sundays=sundays)
 
 @app.route("/admin/calendar")
-def calendar():
+def admin_calendar():
 	now = datetime.now()
 	year = str(now.year)
 	column, calendar = Utils.get_calendar(year)
 	return render_template('admin/calendar.html', column=column, calendar=calendar)
 
 @app.route("/admin/report/<id>")
-def report(id):
+def admin_report(id):
 	report, saved = Tools.get_report(id)
 	return render_template('admin/report_pdf.html', saved=saved, report=report, id=id)
 

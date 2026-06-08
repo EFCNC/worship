@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Admin Home{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+    .menu-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 20px;
+        max-width: 800px;
+        margin: 40px auto;
+        padding: 0 20px;
+    }
+
+    .admin-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background-color: #ffffff;
+        color: #333333;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 25px 15px;
+        text-decoration: none;
+        font-size: 1.1rem;
+        font-weight: 600;
+        transition: all 0.2s ease-in-out;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .admin-card:hover {
+        background-color: #3182ce;
+        color: #ffffff;
+        transform: translateY(-3px);
+        box-shadow: 0 4px 12px rgba(49, 130, 206, 0.3);
+        border-color: #3182ce;
+    }
+
+    .admin-card i {
+        font-size: 2.5rem;
+        margin-bottom: 12px;
+        color: #4a5568;
+        transition: color 0.2s ease-in-out;
+    }
+
+    .admin-card:hover i {
+        color: #ffffff;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+    <div class="menu-container">
+        <a href="{{ url_for('admin_info') }}" class="admin-card">
+            <i class="fa-solid fa-circle-info"></i>
+            <span>Info</span>
+        </a>
+
+        <a href="{{ url_for('admin_people') }}" class="admin-card">
+            <i class="fa-solid fa-users"></i>
+            <span>People</span>
+        </a>
+
+        <a href="{{ url_for('admin_calendar') }}" class="admin-card">
+            <i class="fa-solid fa-calendar-days"></i>
+            <span>Calendar</span>
+        </a>
+
+        <a href="{{ url_for('admin_report', id=id) }}" class="admin-card">
+            <i class="fa-solid fa-file-invoice"></i>
+            <span>Reports</span>
+        </a>
+    </div>
+{% endblock %}

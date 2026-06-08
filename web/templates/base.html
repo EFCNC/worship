@@ -53,9 +53,16 @@
             document.querySelectorAll('.navigation a').forEach(function(link) {
                 const linkPath = link.getAttribute('href');
                 
-                // Exact match for home ("/"), partial match for others
-                if (currentPath === linkPath || (linkPath !== '/' && currentPath.startsWith(linkPath))) {
+                // Exact match works for everything
+                const isExactMatch = currentPath === linkPath;
+                
+                // Partial match ONLY if it's not the root path ("/") AND not the admin dashboard root ("/admin")
+                const isPartialMatch = (linkPath !== '/' && linkPath !== '/admin') && currentPath.startsWith(linkPath);
+                
+                if (isExactMatch || isPartialMatch) {
                     link.classList.add('active');
+                } else {
+                    link.classList.remove('active'); 
                 }
             });
         });
