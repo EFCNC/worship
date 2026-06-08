@@ -1,5 +1,5 @@
 var device = 'desktop';
-var API_URL = 'API/';
+var API_URL = '/API/';
 
     if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
         device = 'mobile';
