@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block page_title %}Worship Notes - Worship Manager{% endblock %}
+{% block page_title %}{{ w.date }} Worship Notes{% endblock %}
 
 {% block extra_css %}
 <meta name="viewport" content="width=device-width, initial-scale=1" charset="utf-8">
@@ -17,17 +17,30 @@ span.chunk:before {
     top:-2em;
 }
 
+.reference {
+    padding: 0.5em;
+}
 .song_chord {
     line-height: 200%;
+}
+
+.song_container {
+    display: flex;
+    width: 100%;
+    align-items: center;
 }
 
 .song_block {
     text-align: center;
     background-color: #e0e0e0;
-    width:50%;
+    width: 50%;
     position: relative;
     color: #000;
-    margin: 5px;
+}
+
+.notes {
+    text-align: center;
+    flex: 1; /* Takes up the remaining 50% width */
 }
 
 .song_block > span {
@@ -46,6 +59,7 @@ span.chunk:before {
     border: 2px solid #556b2f;
     color: #000;
     border-radius: 5px;
+    padding: 0px 10px 10px 10px;
 }
 
 .notes {
@@ -268,12 +282,10 @@ span.chunk:before {
                             ${item.abc ? `&nbsp;&nbsp;<a href="/sheets/${item.id}" target="_blank"><i style="font-size:24px" class="fa" title="Interactive Sheet Music">&#xf1c7;</i></a>` : ''}
                             ${item.video ? `&nbsp;&nbsp;<a href="${item.video}" target="_blank"><i class="fa fa-play-circle" style="font-size:24px" title="Youtube Video"></i></a>` : ''}
                         </div>
-                        <table width="100%">
-                            <tr>
-                                <td class="song_block">${renderSongContent(item, mode)}</td>
-                                <td class="notes">${item.notes.replace(/\n/g, '<br/>')}</td>
-                            </tr>
-                        </table>
+                        <div class="song_container">
+                            <div class="song_block">${renderSongContent(item, mode)}</div>
+                            <div class="notes">${item.notes.replace(/\n/g, '<br/>')}</div>
+                        </div>
                     </div>`;
                 finalHtml += header;
             }

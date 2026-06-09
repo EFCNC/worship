@@ -33,7 +33,7 @@
     <!-- Header Navigation -->
     {% if 'admin' in request.path %}
         {% include 'partials/_admin_header.html' %}
-    {% elif 'worship' in request.path %}
+    {% elif 'worship' in request.path or 'song' in request.path %}
         {% include 'partials/_worship_header.html' %}
     {% else %}
         {% include 'partials/_home_header.html' %}

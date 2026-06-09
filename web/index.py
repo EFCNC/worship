@@ -81,11 +81,17 @@ def handle_announcement(data):
 
 # Rendering interfaces
 
-# -------- Worship Pages ---------
+# --------- Home and Profile Page ---------
 @app.route("/")
 def index():
 	return render_template('home.html')
 
+@app.route("/profile")
+def profile():
+	team = Utils.list_team()
+	return render_template('profile.html', team=team)
+
+# -------- Worship Pages ---------
 @app.route("/worship")
 def worship_home():
 	id = request.args.get('id', None)
@@ -114,18 +120,6 @@ def worship(id, tab=''):
 		w = w[0]
 	return render_template('worship/notes.html', songs=songs, id=id, w=w, tab=tab)
 
-@app.route("/notes")
-def get_notes():
-	'''
-	:param id (rowid) from song_set
-	:return: pre-filled or empty notes.html template
-	'''
-
-	id = request.args.get('id', None)
-	content = []
-	if id:
-		content = Utils.get_info_by_id(id)
-	return render_template("notes.html", content=content)
 
 @app.route("/song/list")
 def song_list():
@@ -281,10 +275,7 @@ def schedule():
 	marked = Utils.get_marked_user()
 	return render_template('schedule.html', booked=assigned, team=team, marked=marked, sunday=sundays['sunday'])
 
-@app.route("/profile")
-def profile():
-	team = Utils.list_team()
-	return render_template('profile.html', team=team)
+
 
 # @app.route("/people")
 # def people():
