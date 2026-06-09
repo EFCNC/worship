@@ -102,7 +102,7 @@ def worship_home():
 	sundays = Tools.allsundays()
 	worship = Utils.worship_list()
 	worship = [{'date': x, 'worship': next((y for y in worship if y['date'] == x), -1)} for x in sundays[1]]
-	return render_template('worship/home.html', worship=worship, sundays=sundays)
+	return render_template('worship/worship.html', worship=worship, sundays=sundays)
 
 @app.route("/worship/<id>")
 @app.route("/worship/<id>/<tab>")
@@ -120,6 +120,22 @@ def worship(id, tab=''):
 		w = w[0]
 	return render_template('worship/notes.html', songs=songs, id=id, w=w, tab=tab)
 
+@app.route("/worship/schedule")
+def schedule():
+	now = datetime.now()
+	year = str(now.year)
+	sundays = __get_sundays()
+	allsundays = sundays['all']
+	assigned = []
+	booked = Utils.list_team(year)
+	for sun in allsundays:
+		if any(x for x in booked if x['date'] == sun):
+			assigned.append([sun, [x for x in booked if x['date'] == sun]])
+		else:
+			assigned.append([sun, []])
+	team = Utils.list_team()
+	marked = Utils.get_marked_user()
+	return render_template('worship/schedule.html', booked=assigned, team=team, marked=marked, sunday=sundays['sunday'])
 
 @app.route("/song/list")
 def song_list():
@@ -129,29 +145,6 @@ def song_list():
 	'''
 	songs = Utils.get_songs()
 	return render_template('song_list.html', songs=songs)
-
-@app.route("/sheet/<id>")
-def get_song_sheet(id):
-	'''
-	:param id: song_id
-	:param keys: comma number
-	:return: sheet object with ABC content, sheet link, and transpose numbers
-	'''
-	keys = ['C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B']
-	keys_1 = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B']
-	keyof = request.args.get('keyof', '0,1,2,3,4,5,6,7,8,9,10,11') # when no key is present, return all keys
-	keyof = keyof.split(',')
-
-	sheet, key = Utils.get_song_sheet(id)
-	if key:
-		k_init = keys.index(key) if key in keys else keys_1.index(key)
-		keyof_ = [k_init+int(x) for x in keyof]
-		for i in range(0, len(keyof_)): # adjust index when value is 12 or over
-			keyof_[i] = keyof_[i]-12 if keyof_[i] > 11 else keyof_[i]
-		sheet['keyof_name'] = [keys[x] for x in keyof_]
-		keyof = [keys[int(x)] for x in keyof] # Translate int to key name
-		sheet['keyof'] = keyof
-	return render_template('sheet.html', sheets=sheet)
 
 @app.route("/chords/<ids>")
 def get_song_chords(ids):
@@ -258,31 +251,14 @@ def assets():
 
 	return render_template('slides_assets.html', setting=setting, assets=assets, promote=promote)
 
-@app.route("/schedule")
-def schedule():
-	now = datetime.now()
-	year = str(now.year)
-	sundays = __get_sundays()
-	allsundays = sundays['all']
-	assigned = []
-	booked = Utils.list_team(year)
-	for sun in allsundays:
-		if any(x for x in booked if x['date'] == sun):
-			assigned.append([sun, [x for x in booked if x['date'] == sun]])
-		else:
-			assigned.append([sun, []])
-	team = Utils.list_team()
-	marked = Utils.get_marked_user()
-	return render_template('schedule.html', booked=assigned, team=team, marked=marked, sunday=sundays['sunday'])
-
-
-
 # @app.route("/people")
 # def people():
 # 	people = Utils.get_teams()
 # 	return render_template('people.html', people=people)
 
 # -------- Slides Pages ---------
+
+# I think this one is specifically to reset a locked admin or lead page. We could make it slides/reset in the future.
 @app.route("/slides/admin1")
 def sildes_admin1():
 	_init_slide()

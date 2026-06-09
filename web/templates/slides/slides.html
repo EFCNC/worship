@@ -1,45 +1,49 @@
 {% extends 'base.html' %}
 
-{% block page_title %}Slides Menu{% endblock %}
+{% block page_title %}Admin Home{% endblock %}
+
 {% block extra_css %}
-<style>
-    html {
-        height: 100%;
-    }
+    <link href="/static/css/home.css" rel="stylesheet">
+{% endblock %}
 
-    body {
-        margin: 0; 
-        color: white; 
-    }
+{% block content %}
+    <div class="menu-container">
+        <a name="admin" class="menu-card">
+            <i class="fa-solid fa-circle-info"></i>
+            <span>Admin</span>
+        </a>
 
-    Targeted styling instead of styling all divs globally
-    .menu-container {
-        padding: 30px 10px;
-    }
+        <a name="lead" class="menu-card">
+            <i class="fa-solid fa-users"></i>
+            <span>Lead</span>
+        </a>
 
+        <a name="view" class="menu-card">
+            <i class="fa-solid fa-eye"></i>
+            <span>View</span>
+        </a>
 
-</style>
+        <a name="musician" class="menu-card">
+            <i class="fa-solid fa-music"></i>
+            <span>Musician</span>
+        </a>
+
+        <a name="score" class="menu-card">
+            <i class="fa-solid fa-file-alt"></i>
+            <span>Score</span>
+        </a>
+    </div>
 {% endblock %}
 
 {% block extra_js %}
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(document).ready(function() {
-            // Target the buttons specifically by their class
-            $('.button').click(function() {
+            $('.menu-card').click(function() {
                 // Added 'const' to properly declare the variable
                 const name = $(this).attr('name');
                 window.location.href = '/slides/' + name;
             });
         });
     </script>
-{% endblock %}
-{% block content %}
-    <div class="menu-container">
-        <button class="button" name="admin">Admin</button>
-        <button class="button" name="lead">Lead</button>
-        <button class="button" name="view">View</button>
-        <button class="button" name="musician">Musician</button>
-        <button class="button" name="score">Score</button>
-    </div>
 {% endblock %}

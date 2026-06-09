@@ -21,6 +21,9 @@
     <link href="/static/css/layout.css" rel="stylesheet">
     <link href="/static/css/components.css" rel="stylesheet">
 
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <!-- Page-Specific Styles -->
     {% block extra_css %}{% endblock %}
 </head>
@@ -57,7 +60,7 @@
                 const isExactMatch = currentPath === linkPath;
                 
                 // Partial match ONLY if it's not the root path ("/") AND not the admin dashboard root ("/admin")
-                const isPartialMatch = (linkPath !== '/' && linkPath !== '/admin') && currentPath.startsWith(linkPath);
+                const isPartialMatch = (linkPath !== '/' && linkPath !== '/admin' && linkPath !== '/worship') && currentPath.startsWith(linkPath);
                 
                 if (isExactMatch || isPartialMatch) {
                     link.classList.add('active');
