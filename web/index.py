@@ -106,7 +106,7 @@ def worship(id, tab=''):
 	if json_file:
 		json_file = Tools.get_worship_json(id)
 		if json_file:
-			return render_template('json.html', json=json.dumps(json_file, indent=2, ensure_ascii=False), id=id)
+			return render_template('json.html', json=json.dumps(json_file, indent=2, ensure_ascii=False, sort_keys=True), id=id)
 		return "No Slides available", 400
 
 	songs = Utils.get_worship_songs(id)
@@ -398,7 +398,8 @@ def __get_slide_json():
 	slides = Tools.get_worship_json(id)
 	global slides_data
 	if not slides:
-		return None
+		Tools.create_json(id)
+		slides = Tools.get_worship_json(id)
 	setting = slides['setting']
 	slide = slides['slides']
 	slides_data['id'] = id
@@ -410,4 +411,4 @@ def __get_slide_json():
 	return True
 
 if __name__ == '__main__':
-	app.run(host="0.0.0.0", port=5000, debug=True)
+	app.run(host="0.0.0.0", port=80, debug=True)
