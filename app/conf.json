@@ -1,7 +1,6 @@
 {
   "googleTranslate": {
-    "url": "https://translation.googleapis.com/language/translate/v2?key=",
-    "key": "AIzaSyB-tS7-SPKYUEvtipdBG7ai4b0TpRFSk-U"
+    "url": "https://translation.googleapis.com/language/translate/v2?key="
   },
   "bibleAPI": {
     "version": {

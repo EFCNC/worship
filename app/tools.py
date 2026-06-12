@@ -20,7 +20,7 @@ def get_translation(q, target):
     '''
     headers = {'Content-Type': 'application/json; charset=utf-8'}
     url = conf["googleTranslate"]["url"]
-    key = conf["googleTranslate"]["key"]
+    key = Utils.get_api_key('googleTranslate')[0]
     url = url + key
     json = {"q": q, "target": target}
     response = requests.post(url, headers=headers, json=json)
@@ -117,7 +117,6 @@ def create_json(id, worship=None):
     root = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'files')
     if not worship:
         songs = Utils.get_worship_songs(id)
-        print(songs)
         if not songs:
             songs = []
             worship_date = Utils.get_worship_date(id)[0]
@@ -175,6 +174,9 @@ def create_json(id, worship=None):
 
         order = template["order"]
         temp = []
+        # compare songs in the slides with latest song, remove the one that's not match
+        song_ids = [x['id'] for x in songs]
+        slides = [x for x in slides if x['id'] in song_ids or x['type'] != 'song']
         for item in order:
             if item in template:
                 if item == 'song':
