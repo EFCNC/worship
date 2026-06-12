@@ -79,6 +79,14 @@ def handle_announcement(data):
 	print("msg", data)
 	emit('announcement', data, broadcast=True)
 
+# Inject ID into page using context processor
+@app.context_processor
+def inject_worship_id():
+    # This runs automatically before any template is rendered
+    coming_sunday = __get_sundays()["sunday"]
+    worship_id = Utils.get_worship_id(coming_sunday)[0]
+    return dict(worship_id=worship_id)
+
 # Rendering interfaces
 
 # --------- Home and Profile Page ---------
@@ -329,8 +337,8 @@ def admin_report(id):
 	report, saved = Tools.get_report(id)
 	return render_template('admin/report_pdf.html', saved=saved, report=report, id=id)
 
-# --------- Other Pages ---------
 
+# --------- Other Pages ---------
 @app.route("/files")
 def file_list():
 	'''
