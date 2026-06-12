@@ -152,7 +152,7 @@ def song_list():
 	:return: all song
 	'''
 	songs = Utils.get_songs()
-	return render_template('song_list.html', songs=songs)
+	return render_template('song/song_list.html', songs=songs)
 
 @app.route("/chords/<ids>")
 def get_song_chords(ids):
@@ -231,7 +231,7 @@ def edit_song(id): # Renamed for clarity
 
     # Handle creating a new song
     if id == '-1':
-        return render_template('song_editor.html', content={'id': -1})
+        return render_template('song/song_editor.html', content={'id': -1})
     
     db = request.args.get('db', 'worship.db')
     lang = request.args.get('lang', None)
@@ -247,7 +247,7 @@ def edit_song(id): # Renamed for clarity
         # add key lyrics to be used by song_editor
         content["lyrics"] = content["lyrics_raw"] 
         
-    return render_template('song_editor.html', content=content)
+    return render_template('song/song_editor.html', content=content)
 
 
 @app.route("/assets")

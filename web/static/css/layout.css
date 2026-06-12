@@ -52,7 +52,7 @@ header#header {
 }
 
 .navigation a.active {
-    background-color: var(--tertiary-color);
+    background-color: var(--primary-color-dark);
     color: var(--text-light);
     font-weight: var(--font-weight-bold);
 }
