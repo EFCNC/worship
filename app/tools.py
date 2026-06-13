@@ -176,7 +176,8 @@ def create_json(id, worship=None):
         temp = []
         # compare songs in the slides with latest song, remove the one that's not match
         song_ids = [x['id'] for x in songs]
-        slides = [x for x in slides if x['id'] in song_ids or x['type'] != 'song']
+        if slides:
+            slides = [x for x in slides if x['id'] in song_ids or x['type'] != 'song']
         for item in order:
             if item in template:
                 if item == 'song':
