@@ -21,6 +21,9 @@
     <link href="/static/css/layout.css" rel="stylesheet">
     <link href="/static/css/components.css" rel="stylesheet">
 
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <!-- Page-Specific Styles -->
     {% block extra_css %}{% endblock %}
 </head>
@@ -31,7 +34,13 @@
     <div id="dialog"></div>
 
     <!-- Header Navigation -->
-    {% include 'partials/_header.html' %}
+    {% if 'admin' in request.path %}
+        {% include 'partials/_admin_header.html' %}
+    {% elif 'worship' in request.path or 'song' in request.path %}
+        {% include 'partials/_worship_header.html' %}
+    {% else %}
+        {% include 'partials/_home_header.html' %}
+    {% endif %}
 
     <!-- Main Content Area -->
     <main id="main-content">
@@ -47,9 +56,16 @@
             document.querySelectorAll('.navigation a').forEach(function(link) {
                 const linkPath = link.getAttribute('href');
                 
-                // Exact match for home ("/"), partial match for others
-                if (currentPath === linkPath || (linkPath !== '/' && currentPath.startsWith(linkPath))) {
+                // Exact match works for everything
+                const isExactMatch = currentPath === linkPath;
+                
+                // Partial match ONLY if it's not the root path ("/") AND not the admin dashboard root ("/admin")
+                const isPartialMatch = (linkPath !== '/' && linkPath !== '/admin' && linkPath !== '/worship') && currentPath.startsWith(linkPath);
+                
+                if (isExactMatch || isPartialMatch) {
                     link.classList.add('active');
+                } else {
+                    link.classList.remove('active'); 
                 }
             });
         });

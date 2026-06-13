@@ -1,17 +1,27 @@
 <!-- Consolidated Header Fragment - included in base.html -->
+
+<!-- Overriding header styles for admin pages -->
+<style>
+    :root {
+        --primary-color: #c85550;
+    }
+</style>
+
+
 <header id="header">
     <div id="profile">
-        <a href="/profile" id="profile-container" class="profile_bubble" style="display: none;">
+        <a href="{{ url_for('profile') }}" id="profile-container" class="profile_bubble" style="display: none;">
             <!-- Image loads immediately, initials shown only if image fails -->
             <span id="profile-initials" style="font-weight: bold; display: none;"></span>
             <img id="profile-img" src="" alt="Profile" style="width: 100%; height: 100%; object-fit: cover;">
         </a>
     </div>
     <nav class="navigation">
-        <a href="/">Home</a>
-        <a href="/song/list">Songs</a>
-        <a href="/schedule">Schedule</a>
-        <a href="/slides">Slides</a>
+        <a href="{{ url_for('index') }}">Home</a>
+        <a href="{{ url_for('admin_info') }}">Info</a>
+        <a href="{{ url_for('admin_people') }}">People</a>
+        <a href="{{ url_for('admin_calendar') }}">Calendar</a>
+        <a href="{{ url_for('admin_report', id = worship_id) }}">Reports</a>
     </nav>
 </header>
 

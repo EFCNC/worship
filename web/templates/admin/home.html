@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Admin Home{% endblock %}
+
+{% block extra_css %}
+    <link href="/static/css/home.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+    <div class="menu-container">
+        <a href="{{ url_for('admin_info') }}" class="menu-card">
+            <i class="fa-solid fa-circle-info"></i>
+            <span>Info</span>
+        </a>
+
+        <a href="{{ url_for('admin_people') }}" class="menu-card">
+            <i class="fa-solid fa-users"></i>
+            <span>People</span>
+        </a>
+
+        <a href="{{ url_for('admin_calendar') }}" class="menu-card">
+            <i class="fa-solid fa-calendar-days"></i>
+            <span>Calendar</span>
+        </a>
+
+        <a href="{{ url_for('admin_report', id=id) }}" class="menu-card">
+            <i class="fa-solid fa-file-invoice"></i>
+            <span>Reports</span>
+        </a>
+    </div>
+{% endblock %}
