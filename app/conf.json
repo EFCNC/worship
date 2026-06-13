@@ -1,4 +1,7 @@
 {
+  "googleTranslate": {
+    "url": "https://translation.googleapis.com/language/translate/v2?key="
+  },
   "bibleAPI": {
     "version": {
       "en": [

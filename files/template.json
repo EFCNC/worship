@@ -1,6 +1,7 @@
 {
    "order": ["promote", "welcome", "announcement", "song", "sermon", "offering", "caring", "benediction"],
    "welcome":{
+      "id": -1,
       "bible":"",
       "content":{
          "origin_text":"<p>主日禮拜即將開始<br/>請安靜預備心<br/><br/>歡迎您參加今日的主日崇拜</p>",
@@ -17,10 +18,11 @@
          "bgcolor":"",
          "fragment": 4
       },
-      "title":"安靜心",
+      "title": "前奏",
       "type":"info"
    },
    "announcement":{
+      "id": -1,
       "bible":"",
       "content":{
          "origin_text":"",
@@ -28,7 +30,7 @@
       },
       "lang":"",
       "lang_2":"",
-      "notes":"報告",
+      "notes":"本周報告",
       "style":{
          "align":"left",
          "background":"",
@@ -37,10 +39,11 @@
          "bgcolor":"",
          "fragment": 4
       },
-      "title":"報告",
+      "title": "報告",
       "type":"info"
    },
    "caring":{
+      "id": -1,
       "bible":"",
       "content":{
          "origin_text":"",
@@ -57,10 +60,11 @@
          "bgcolor":"",
          "fragment": 4
       },
-      "title":"肢體交通",
+      "title": "肢體交通",
       "type":"info"
    },
    "offering":{
+      "id": -1,
       "author": "Mozart",
       "lang": "zh-TW",
       "lang_2": "en",
@@ -90,10 +94,11 @@
          "bgcolor":"",
          "fragment": 4
       },
-      "title":"我的性命獻互祢",
+      "title": "奉獻歌",
       "type":"song"
    },
    "sermon": {
+      "id": -1,
       "alt_sequence": "",
       "author": "",
       "style": {
@@ -117,6 +122,7 @@
       "type": "info"
    },
    "benediction":{
+      "id": -1,
       "bible":"",
       "content":{
          "origin_text":"<p><i>願上帝賜福您</i></p><p>默禱散會</p>",
@@ -133,7 +139,7 @@
          "bgcolor":"",
          "fragment": 4
       },
-      "title":"祝禱 BENEDICTION",
+      "title": "祝禱",
       "type":"info"
    }
 }
