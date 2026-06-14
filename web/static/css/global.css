@@ -110,14 +110,17 @@ button {
     padding: var(--spacing-sm) var(--spacing-md);
     border: none;
     border-radius: var(--border-radius);
-    background-color: var(--primary-color);
+    background-color: #1abc9c;
     color: var(--text-light);
     transition: background-color var(--transition-default), transform var(--transition-default);
 }
 
-button:hover {
-    background-color: var(--primary-color-dark);
-    transform: translateY(-2px);
+@media(hover: hover) and (pointer: fine) {
+    button:hover {
+        background-color: #3e8e41;
+        color: #fff;
+        transform: translateY(-2px);
+    }
 }
 
 button:active {
