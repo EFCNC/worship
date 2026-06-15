@@ -264,7 +264,7 @@ var API_URL = '/API/';
                                     alert("Song was saved, but failed to fetch data for UI update.");
                                 });
                                 
-                                $(this).dialog("close");
+                                $("#dialog").dialog("close");
                             })
                             .catch(function(error) {
                                 // This will now print the actual error text from your backend API
