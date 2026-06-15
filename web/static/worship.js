@@ -231,6 +231,15 @@ var API_URL = '/API/';
                             }
 
                             console.log('tempSubmit', tempSubmit);
+                            if (num==0) {   // When popup is for edit
+                                var click_url = API_URL + 'song/' + id;
+                                submit_song(click_url, JSON.stringify(tempSubmit)).done(function(response) {
+                                    console.log(response);
+                                });
+                                $("#dialog").dialog("close");
+                                location.reload();
+                                return false;
+                            }
 
                             // Submit to API
                             var click_url = API_URL + 'song/add';
