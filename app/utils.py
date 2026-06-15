@@ -434,6 +434,12 @@ def get_song_by_title(title):
     result = dB.run_para(sql, title)
     return result
 
+def delete_song_by_id(id):
+    sql = "delete from songs where song_id = ?"
+    result = dB.run_para(sql, id)
+    print(result)
+    return result
+
 def duplicate_info(d1, d2):
     sql = 'insert into info(content, type, date) select d0.content, d0.type, ? from info d0 where d0.date = ? and d0.content not in (select d1.content from info d1 inner join info d2 on d1.content = d2.content where d1.date = ? and d2.date = ?)'
     return dB.run_para(sql, [d1, d2, d2, d1])
