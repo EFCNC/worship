@@ -131,8 +131,10 @@ def create_json(id, worship=None):
         slides = get_worship_json(id)
         if slides:  # if previous slide already saved, use the style from there
             slides = slides['slides']
-            template["announcement"]["style"] = next(x['style'] for x in slides if x['title'] == '報告')
-            template["caring"]["style"] = next(x['style'] for x in slides if x['title'] == '肢體交通')
+            if any(x['style'] for x in slides if x['title'] == '報告'):
+                template["announcement"]["style"] = next(x['style'] for x in slides if x['title'] == '報告')
+            if any(x['style'] for x in slides if x['title'] == '肢體交通'):
+                template["caring"]["style"] = next(x['style'] for x in slides if x['title'] == '肢體交通')
             template["sermon"]["style"] = next(x['style'] for x in slides if x['title'] == '主日信息')
             template["welcome"]["style"] = next(x['style'] for x in slides if x['title'] == '前奏')
             template["welcome"] = next(x for x in slides if x['title'] == '前奏')
