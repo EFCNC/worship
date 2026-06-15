@@ -135,11 +135,15 @@ def create_json(id, worship=None):
                 template["announcement"]["style"] = next(x['style'] for x in slides if x['title'] == '報告')
             if any(x['style'] for x in slides if x['title'] == '肢體交通'):
                 template["caring"]["style"] = next(x['style'] for x in slides if x['title'] == '肢體交通')
-            template["sermon"]["style"] = next(x['style'] for x in slides if x['title'] == '主日信息')
-            template["welcome"]["style"] = next(x['style'] for x in slides if x['title'] == '前奏')
-            template["welcome"] = next(x for x in slides if x['title'] == '前奏')
-            template["benediction"] = next(x for x in slides if x['title'] == '祝禱')
-            template["offering"] = next(x for x in slides if x['title'] == '奉獻歌')
+            if any(x['style'] for x in slides if x['title'] == '主日信息'):
+                template["sermon"]["style"] = next(x['style'] for x in slides if x['title'] == '主日信息')
+            if any(x['style'] for x in slides if x['title'] == '前奏'):
+                template["welcome"]["style"] = next(x['style'] for x in slides if x['title'] == '前奏')
+                template["welcome"] = next(x for x in slides if x['title'] == '前奏')
+            if any(x['style'] for x in slides if x['title'] == '祝禱'):
+                template["benediction"] = next(x for x in slides if x['title'] == '祝禱')
+            if any(x['style'] for x in slides if x['title'] == '奉獻歌'):
+                template["offering"] = next(x for x in slides if x['title'] == '奉獻歌')
 
         sermon = Utils.get_worship(id)
         info = Utils.get_info(id)
