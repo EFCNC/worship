@@ -70,7 +70,7 @@
         color: #555;
     }
 
-    input[type="text"], textarea { 
+    input[type="text"], textarea, select { 
         box-sizing: border-box;
         width: 100%;            
         max-width: 100%;        
@@ -78,6 +78,7 @@
         border: 1px solid #ccc; 
         border-radius: 4px; 
         font-size: 1rem; 
+        background-color: #fff;
     }
     
     /* =========================================
@@ -235,11 +236,11 @@
         <input type="hidden" name="id" value="{{ content.id }}">
         
         <div class="form-row">
-            <div class="form-group" style="flex: 3;">
+            <div class="form-group" style="flex-grow: 3;">
                 <label>Title</label>
                 <input name="title" type="text" value="{{ content.title }}"/>
             </div>
-            <div class="form-group">
+            <div class="form-group" style="flex: 0 1 80px;">
                 <label>Key</label>
                 <input name="song_key" type="text" value="{{ content.key }}" placeholder="C"/>
             </div>
@@ -250,9 +251,30 @@
         </div>
 
         <div class="form-row">
-            <div class="form-group"><label>Lang 1</label><input name="lang" type="text" value="{{ content.lang }}"/></div>
-            <div class="form-group"><label>Lang 2</label><input name="lang_2" type="text" value="{{ content.lang_2 }}"/></div>
-            <div class="form-group"><label>Author</label><input name="author" type="text" value="{{ content.author }}"/></div>
+            <div class="form-group" style="flex: 0 1 120px;">
+                <label>Lang 1</label>
+                <select name="lang">
+                    <option value="" {% if not content.lang %}selected{% endif %}></option>
+                    <option value="en" {% if content.lang == 'en' %}selected{% endif %}>en</option>
+                    <option value="zh" {% if content.lang == 'zh' %}selected{% endif %}>zh</option>
+                    <option value="tw" {% if content.lang == 'tw' %}selected{% endif %}>tw</option>
+                    <option value="pinyin" {% if content.lang == 'pinyin' %}selected{% endif %}>pinyin</option>
+                </select>
+            </div>
+            <div class="form-group" style="flex: 0 1 120px;">
+                <label>Lang 2</label>
+                <select name="lang_2">
+                    <option value="" {% if not content.lang_2 %}selected{% endif %}></option>
+                    <option value="en" {% if content.lang_2 == 'en' %}selected{% endif %}>en</option>
+                    <option value="zh" {% if content.lang_2 == 'zh' %}selected{% endif %}>zh</option>
+                    <option value="tw" {% if content.lang_2 == 'tw' %}selected{% endif %}>tw</option>
+                    <option value="pinyin" {% if content.lang_2 == 'pinyin' %}selected{% endif %}>pinyin</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Author</label>
+                <input name="author" type="text" value="{{ content.author }}"/>
+            </div>
         </div>
 
         <div class="tag-container">
@@ -541,8 +563,8 @@
             title: $('input[name="title"]').val(),
             song_key: $('input[name="song_key"]').val(),
             book: $('input[name="book"]').val(),
-            lang: $('input[name="lang"]').val(),
-            lang_2: $('input[name="lang_2"]').val(),
+            lang: $('select[name="lang"]').val(),
+            lang_2: $('select[name="lang_2"]').val(),
             author: $('input[name="author"]').val(),
             sequence: $('input[name="sequence"]').val(),
             copyright: $('input[name="copyright"]').val(),
