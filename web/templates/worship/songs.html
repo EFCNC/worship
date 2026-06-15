@@ -12,7 +12,7 @@
 .infotitle:hover{cursor: pointer}
 .lyrics li span { position: absolute; margin-left: -1.3em;}
 .lyrics li:hover {cursor: pointer}
-.1, .2, .3, .4 .5 .6 .7 .8 { background-color: #da2c43; color: #fff}
+.1, .2, .3, .4, .5, .6, .7, .8 { background-color: #da2c43; color: #fff}
 .chorus, .Chorus, .c { background-color: #556b2f; color: #fff}
 .bridge, .b, .b2, .b3, .b4 { background-color: #003153; color: #fff}
 
@@ -73,7 +73,7 @@
 li {
   border-radius: 5px;
   margin: 5px;
-  adding: 5px;
+  padding: 5px;
 }
 
 .song_title {
@@ -145,12 +145,27 @@ li {
     margin: 5px;
     width: 95%;
 }
+
+/* Default rules for mobile devices */
+.ui-dialog {
+    width: 95% !important; /* Almost full screen on mobile */
+    box-sizing: border-box;
+    left: 50% !important;
+    transform: translateX(-50%);
+}
+
+/* Rules for desktop screens (screens wider than 768px) */
+@media (min-width: 768px) {
+    .ui-dialog {
+        width: 75% !important; /* 75% width on desktop */
+    }
+}
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="custom-loader" style="display:none"></div>
-<h3><span class="arrow left" name="-1">&lt;</span> {{ w.date }} <span class="arrow ight" name="1">&gt;</span></h3>
+<h3><span class="arrow left" name="-1">&lt;</span> {{ w.date }} <span class="arrow right" name="1">&gt;</span></h3>
 <!-- Container of worship songs -->
 <div id="sermon_data"></div>
 <div class="action_btns">
