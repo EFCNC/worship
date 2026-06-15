@@ -4,6 +4,9 @@
 
 {% block extra_css %}
 <style>
+    /* =========================================
+        Dialog and Popup
+    ========================================= */
     /* Hide header and navigation when in popup/dialog mode */
     body.popup-mode #main-content,
     body.popup-mode main {
@@ -21,6 +24,9 @@
         display: none !important;
     }
     
+    /* =========================================
+        Main Thingys
+    ========================================= */
     .editor-container { 
         max-width: 95%; 
         margin: 20px auto; 
@@ -29,14 +35,41 @@
         border-radius: 8px; 
         box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
     }
-    .form-row { display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; }
+
+    .editor-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    /* Remove default margin from h2 so it centers perfectly in the flex container */
+    .editor-header h2 {
+        margin: 0; 
+    }
+
+    /* =========================================
+        Form Crap
+    ========================================= */
+    .form-row { display: flex; 
+        gap: 15px; 
+        margin-bottom: 15px; 
+        flex-wrap: wrap; 
+    }
+
     .form-group { 
         display: flex; 
         flex-direction: column; 
         flex-grow: 1; 
         min-width: 0;
     }
-    .form-group label { font-weight: bold; font-size: 0.85rem; margin-bottom: 5px; color: #555; }
+
+    .form-group label { font-weight: bold;
+        font-size: 0.85rem;
+        margin-bottom: 5px;
+        color: #555;
+    }
+
     input[type="text"], textarea { 
         box-sizing: border-box;
         width: 100%;            
@@ -47,20 +80,9 @@
         font-size: 1rem; 
     }
     
-    .tag-container { background: #f9f9f9; padding: 10px; border-radius: 4px; margin-bottom: 10px; border: 1px solid #eee; }
-    .sequence, .chord {
-        display: inline-block;
-        padding: 4px 10px;
-        border: 2px solid #333;
-        border-radius: 4px;
-        margin: 3px;
-        cursor: pointer;
-        font-weight: bold;
-        transition: all 0.2s;
-        background: white;
-    }
-    .sequence:hover, .chord:hover { background: #333; color: #fff; }
-    
+    /* =========================================
+        Lyrics Crap
+    ========================================= */
     .lyrics-split-container {
         display: flex;
         gap: 20px;
@@ -92,7 +114,36 @@
         outline: none;
     }
 
-    /* Dynamic Inputs for Videos/Scores/Sheets */
+    /* =========================================
+        Chords/Tags and Sequence
+    ========================================= */
+    .tag-container { background: #f9f9f9;
+        padding: 10px;
+        border-radius: 4px;
+        margin-bottom: 10px;
+        border: 1px solid #eee;
+    }
+
+    .sequence, .chord {
+        display: inline-block;
+        padding: 4px 10px;
+        border: 2px solid #333;
+        border-radius: 4px;
+        margin: 3px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: all 0.2s;
+        background: white;
+    }
+
+    .sequence:hover, .chord:hover {
+        background: #333;
+        color: #fff;
+    }
+    
+    /* =========================================
+        Dynamic Video/Score/Sheet Inputs
+   ========================================= */
     .dynamic-input-group { 
         display: flex; 
         gap: 5px; 
@@ -105,10 +156,16 @@
         width: 0;
         min-width: 0;
     }
-    .btn-remove { background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; padding: 0 12px; font-weight: bold; }
-    .btn-add { background: #e2e8f0; color: #333; border: 1px dashed #cbd5e1; border-radius: 4px; padding: 6px; cursor: pointer; font-size: 0.85rem; margin-top: 5px; transition: 0.2s; }
-    .btn-add:hover { background: #cbd5e1; }
-    
+
+    /* =========================================
+        Buttons
+   ========================================= */
+    /* Shared Button Styles */
+    .btn, .btn-remove, .btn-add, .btn-delete {
+        border-radius: 4px; 
+        cursor: pointer; 
+    }
+
     .actions { 
         margin-top: 20px; 
         padding-top: 20px; 
@@ -117,36 +174,49 @@
         justify-content: flex-end; 
         gap: 10px; 
     }
-    .btn { padding: 10px 25px; border-radius: 4px; cursor: pointer; border: none; font-weight: bold; }
+
+    .btn { 
+        padding: 10px 25px;
+        border: none;
+        font-weight: bold;
+    }
+
+    /* For Dynamic X Input */
+    .btn-remove {
+        background: #dc3545;
+        color: white;
+        border: none;
+        padding: 0 12px;
+        font-weight: bold;
+    }
+
+    .btn-add {
+        background: #e2e8f0;
+        color: #333;
+        border: 1px dashed #cbd5e1;
+        padding: 6px;
+        font-size: 0.85rem;
+        margin-top: 5px;
+        transition: 0.2s;
+    }
+
+    .btn-add:hover { background: #cbd5e1; }
+       
     .btn-save { background-color: #28a745; color: white; }
     .btn-cancel { background-color: #dc3545; color: white; text-decoration: none; display: inline-block; text-align: center; }
 
-    .editor-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1rem;
-    }
-
+    /* For Delete Song button */
     .btn-delete {
         background: none;
         border: none;
         color: #dc3545;
-        cursor: pointer;
         padding: 0.5rem;
-        border-radius: 4px;
         transition: background-color 0.2s ease;
     }
 
     .btn-delete:hover {
         background-color: #ffe6e6;
     }
-
-    /* Remove default margin from h2 so it centers perfectly in the flex container */
-    .editor-header h2 {
-        margin: 0; 
-    }
-
 </style>
 {% endblock %}
 
@@ -279,6 +349,11 @@
     }
     
     console.log("Normalized Original Data:", originalData);
+
+    // --- Delete Song Logic ---
+    function deleteSong(){
+        console.log ("No clue what to do :)")
+    }
 
     // --- Dynamic Inputs Logic ---
     function addDynamicInput(wrapperId, inputName, placeholder, value = "") {
