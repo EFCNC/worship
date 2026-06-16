@@ -40,8 +40,9 @@ def edit_worship(id):
 @api.route("/worship/<id>/export")
 def export(id):
     '''
+    function allows slides to be export to html in the case when internet is down
     :param id: worship_id
-    :return: return zip file name when done
+    :return: return zip file name, so it can be downloaded
     '''
 
     try:
@@ -364,6 +365,20 @@ def edit_rollcall(id):
     if r[1] == 200:
         return Utils.get_team_present(id), 200
     return r[0], 400
+
+@api.route("/translate", methods=["POST"])
+def translate():
+    content = request.get_json()
+    if 'text' not in content:
+        return "Please provide text in the POST", 400
+    if content["text"] == '':
+        return "Please provide the text you would like to be translated!", 400
+    target = content["target"]
+    q = content["text"]
+    if target == 'pinyin':
+        pinyin = content["pinyin"]
+        return Tools.get_pinyin(q, pinyin)
+    return Tools.get_translation(q, target)
 
 @api.route("/query", methods=["GET"])
 def sql():
