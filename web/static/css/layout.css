@@ -120,17 +120,54 @@ header#header {
 }
 
 /* Main Content Area */
+/* Unsure if needed */
 main#main-content {
     min-height: calc(100vh - var(--header-height));
     padding: var(--spacing-md);
 }
 
+/* Home Icon */
+.home-icon {
+    position: absolute;     /* Required because hamburger will be hidden on desktop */
+    left: 50%;
+    top: 50%;
+    translate: -50% -50%;   /* Pulls it back exactly half its own width for true center */
+    scale: 1;
+    color: var(--text-light);
+    font-size: 1.5rem;
+    transition: scale 0.2s ease, opacity 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.home-icon:hover {
+    scale: 1.1;
+    opacity: 0.8;
+}
+
+/* Base styles for the hamburger button */
+.hamburger {
+    /* Hidden on desktop */
+    display: none;
+    background: none;
+    border: none;
+    color: var(--text-light);
+    font-size: 1.5rem;
+    cursor: pointer;
+    /* Force to exactly match profile width for symmetry */
+    width: 35px; 
+    height: 35px;
+    padding: 0;
+    align-items: center;
+    justify-content: center;
+}
 
 /* Mobile Adjustments */
-/* Tablet: 768px and below */
+/* Tablet, Phones: 768px and below */
 @media (max-width: 768px) {
     header#header {
-        padding: 0 var(--spacing-md);
+        padding: var(--spacing-sm) var(--spacing-md);
         flex-wrap: wrap;
         height: auto;
         min-height: var(--header-height);
@@ -140,108 +177,46 @@ main#main-content {
     #profile {
         order: 1;
     }
+    .home-icon {
+        position: static; /* Puts it back into the normal flexbox flow */
+        translate: none;  /* Removes the translation centering */
+        order: 2;         /* Places it between profile and nav */
+    }
+    .hamburger {
+        display: block;
+        order: 3; 
+    }
 
     .navigation {
-        order: 2;
-        flex-wrap: wrap;
+        display: none;              /* Hidden by default on mobile */
+        position: absolute;
+        top: 100%;                  /* Positions it directly below the header */
+        left: 0;
         width: 100%;
-        gap: var(--spacing-xs);
-        margin-top: var(--spacing-xs);
+        background-color: var(--primary-color-dark);
+        flex-direction: column;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        padding: var(--spacing-sm) 0;
     }
 
     .navigation a {
-        flex: 1 1 calc(25% - 6px);
-        min-width: 80px;
-        padding: 8px 6px;
-        font-size: 12px;
-        text-align: center;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
+        padding: 16px var(--spacing-md);
+        text-align: left;
+        border-radius: 0;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .navigation a:last-child {
+        border-bottom: none;
+    }
+
+    /* The class we will toggle with Javascript */
+    .navigation.show-menu {
+        display: flex;
     }
 
     .profile_bubble {
         height: 35px;
         width: 35px;
-    }
-
-    main#main-content {
-        min-height: auto;
-    }
-}
-
-/* Mobile: 600px and below */
-@media (max-width: 600px) {
-    header#header {
-        padding: 0 var(--spacing-sm);
-        justify-content: flex-start;
-        gap: var(--spacing-sm);
-    }
-
-    #profile {
-        order: 1;
-        flex-shrink: 0;
-    }
-
-    .navigation {
-        order: 2;
-        flex: 1;
-        flex-wrap: wrap;
-        gap: var(--spacing-xs);
-        margin: 0;
-    }
-
-    .navigation a {
-        flex: 1 1 calc(25% - 4px);
-        min-width: 60px;
-        padding: 8px 4px;
-        font-size: 12px;
-        border-radius: var(--border-radius);
-    }
-
-    .profile_bubble {
-        height: 32px;
-        width: 32px;
-        font-size: 11px;
-    }
-
-    main#main-content {
-        padding: var(--spacing-sm);
-    }
-
-    .page-content {
-        padding: var(--spacing-sm);
-    }
-
-}
-
-/* Small Mobile: 400px and below */
-@media (max-width: 400px) {
-    header#header {
-        padding: 0 6px;
-        gap: 6px;
-    }
-
-    .navigation {
-        gap: 4px;
-    }
-
-    .navigation a {
-        flex: 1 1 calc(25% - 3px);
-        min-width: 50px;
-        padding: 6px 3px;
-        font-size: 12px;
-        border-radius: var(--border-radius);
-    }
-
-    .profile_bubble {
-        height: 30px;
-        width: 30px;
-        font-size: 10px;
-        flex-shrink: 0;
-    }
-
-    main#main-content {
-        padding: 8px;
     }
 }
