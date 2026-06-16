@@ -98,7 +98,7 @@
         $.ajax({
             url: url,
             success: function(data) {
-                alert('Slides created');
+                alert('Slides Refreshed');
                 socket.emit('reload');
                 window.location.href = '/slides/admin';
             },

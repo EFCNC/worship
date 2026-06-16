@@ -6,30 +6,45 @@ from datetime import date, timedelta, datetime
 from zipfile import ZipFile
 import json
 import base64
+import requests
+from pypinyin import pinyin, lazy_pinyin, Style
 
 conf = Utils.conf
+
+def get_translation(q, target):
+    '''
+    google Translate API, the url and key information are stored in cconf.json file
+    :param: q - text to be translated
+    :param: target - target language
+    :return translated text, or error with code
+    '''
+    headers = {'Content-Type': 'application/json; charset=utf-8'}
+    url = conf["googleTranslate"]["url"]
+    key = Utils.get_api_key('googleTranslate')[0]
+    url = url + key
+    json = {"q": q, "target": target}
+    response = requests.post(url, headers=headers, json=json)
+    if response.status_code == 200:
+        return response.json()["data"]["translations"][0]["translatedText"]
+    return response.json(), response.status_code
+
+def get_pinyin(t, s=0):
+    '''
+    Get the pinyin from input Chinese
+    :param - t: text to be converted
+    :param - s: default 0, 1=Bopomofo
+    :return - converted pinyin or bopomofo
+    '''
+    if s == 0:
+        h = lazy_pinyin(t, style=Style.TONE)
+    elif s == 1:
+        h = lazy_pinyin(t, style=Style.BOPOMOFO)
+    return " ".join(h)
 
 def convert_image(file):
     with open(file, 'rb') as image_file:
         base64_bytes = base64.b64encode(image_file.read())
         return base64_bytes
-
-def edit_worship_json(id, content, pos):
-    '''
-
-    :param id: worship id
-    :param content: content that's going to be added to the slides object
-    :param pos: current position of slide
-    :return: updated json
-    '''
-
-    json = get_worship_json(id)
-    type = content[0]
-    if type == 0:
-        json.push(content[1])
-    elif type == 1:
-        json.insert(pos, content[1])
-    return json
 
 def get_background_files(name=None):
     if not name:
@@ -45,20 +60,26 @@ def get_background_files(name=None):
         return bgs
 
 def get_worship_json(id):
+    '''
+    return worship json data, create one
+    :param id - worship id
+    :return worship data in json format, or None
+    '''
     w = Utils.get_worship_date(id)
     json_file = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'files', 'json', '{}_{}.json'.format(w[0], id))
     if not os.path.exists(json_file):
-        create_json(id)
+        return None
     with open(json_file, 'r', encoding='utf8') as f:
         slides = json.load(f)
     return slides
 
-def list_worship_file():
-    path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'files', 'json')
-    files = sorted(os.listdir(path))
-    return [{'filename': x.split('.')[0].split('_')[0], 'id': x.split('.')[0].split('_')[1]} for x in files if os.path.isfile(os.path.join(path, x))]
-
 def create_html(id):
+    '''
+    Create a revealjs html and zip it up for standalone play
+    :param id - worship id
+    :return zip file name
+    '''
+    # TODO: read json and create html out of it, include revealjs files and zip them up
     slides = get_worship_json(id)
     path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'files', 'html')
     if not os.path.exists(path):
@@ -74,18 +95,56 @@ def create_html(id):
 
     return html_file
 
+def simplify_json(json):
+    slides = json['slides']
+    simple = []
+    for slide in slides:
+        contents = slide['content']
+        cc = []
+        temp = {key: slide[key] for key in slide.keys() & {'id', 'title', 'notes', 'style', 'author', 'lyricist', 'ccli', 'book', 'copyright', 'key', 'type'}}
+        if isinstance(contents, list):
+            for content in contents:
+                cc.append(
+                    {key: content[key] for key in content.keys() & {'name', 'origin_text', 'region_text'}})
+            temp['content'] = cc
+        else:
+            temp['content'] = contents
+        simple.append(temp)
+    json['slides'] = simple
+    return json
+
 def create_json(id, worship=None):
     root = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'files')
     if not worship:
-        worship = Utils.get_worship_songs(id)
-        if not worship:
-            worship = []
+        songs = Utils.get_worship_songs(id)
+        if not songs:
+            songs = []
             worship_date = Utils.get_worship_date(id)[0]
         else:
-            worship_date = worship[0]["date"]
+            worship_date = songs[0]["date"]
+            style = {'align': '', 'background': '', 'opacity': 1, 'color': '', 'bgcolor': '', 'fragment': 4}
+
         template_file = os.path.join(root, 'template.json')
         with open(template_file, "r", encoding="utf-8") as f:
             template = json.loads(f.read())
+
+        slides = get_worship_json(id)
+        if slides:  # if previous slide already saved, use the style from there
+            slides = slides['slides']
+            if any(x['style'] for x in slides if x['title'] == '報告'):
+                template["announcement"]["style"] = next(x['style'] for x in slides if x['title'] == '報告')
+            if any(x['style'] for x in slides if x['title'] == '肢體交通'):
+                template["caring"]["style"] = next(x['style'] for x in slides if x['title'] == '肢體交通')
+            if any(x['style'] for x in slides if x['title'] == '主日信息'):
+                template["sermon"]["style"] = next(x['style'] for x in slides if x['title'] == '主日信息')
+            if any(x['style'] for x in slides if x['title'] == '前奏'):
+                template["welcome"]["style"] = next(x['style'] for x in slides if x['title'] == '前奏')
+                template["welcome"] = next(x for x in slides if x['title'] == '前奏')
+            if any(x['style'] for x in slides if x['title'] == '祝禱'):
+                template["benediction"] = next(x for x in slides if x['title'] == '祝禱')
+            if any(x['style'] for x in slides if x['title'] == '奉獻歌'):
+                template["offering"] = next(x for x in slides if x['title'] == '奉獻歌')
+
         sermon = Utils.get_worship(id)
         info = Utils.get_info(id)
         announce = [[re.search('(^[^\[]+)', x['info'])[0], re.findall('\[[^\]]+\](.+)$', x['info'])] for x in info if
@@ -117,15 +176,26 @@ def create_json(id, worship=None):
         template["announcement"]["content"]["region_text"] = a_region
         template["caring"]["content"]["origin_text"] = c_origin
         template["caring"]["content"]["region_text"] = c_region
-        template["sermon"]["content"]["origin_text"] = '<div>{title}</div><div><br></div><div>{bible}</div>'.format(bible=sermon['bible'], title=sermon['title'])
-        template["sermon"]["content"]["region_text"] = '<div></div><div>{speaker}</div><div>{outline}</div>'.format(outline=sermon['outline'], speaker=sermon['speaker'])
+        template["sermon"]["content"]["origin_text"] = '{title}<br/>{bible}<br/>{speaker}<br/>{outline}'.format(bible=sermon['bible'], title=sermon['title'], outline=sermon['outline'], speaker=sermon['speaker'])
 
         order = template["order"]
         temp = []
+        # compare songs in the slides with latest song, remove the one that's not match
+        song_ids = [x['id'] for x in songs]
+        if slides:
+            slides = [x for x in slides if x['id'] in song_ids or x['type'] != 'song']
         for item in order:
             if item in template:
                 if item == 'song':
-                    for song in worship:
+                    for song in songs:
+                        if slides:
+                            match_style = next((x['style'] for x in slides if x['id'] == song['id']), None)
+                            if match_style:
+                                song['style'] = match_style
+                            else:
+                                song['style'] = style
+                        else:
+                            song['style'] = style
                         temp.append(song)
                 else:
                     temp.append(template[item])
@@ -140,8 +210,10 @@ def create_json(id, worship=None):
         os.makedirs(path, exist_ok=True)
 
     json_file = os.path.join(path, '{}_{}.json'.format(worship_date, id))
+    # simplify json data
+    worship_json = simplify_json(worship_json)
     with open(json_file, "w", encoding="utf-8") as f:
-        json.dump(worship_json, f, indent=4, ensure_ascii=False)
+        json.dump(worship_json, f, indent=4, ensure_ascii=False, sort_keys=True)
 
     return json_file
 
