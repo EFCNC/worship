@@ -5,31 +5,18 @@
 {% block extra_css %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <style>
+
+/* =========================================
+    General Stuff
+   ========================================= */
 #songs { text-align:left; list-style-type: none; margin: 0; padding: 0; width: 95%; }
-.lyrics { text-align:center; list-style-type: none; margin: 0; padding: 0; width: 75%; }
+.lyrics {
+    text-align:center;
+    list-style-type: none;
+    margin: 0; padding: 0;
+    width: 100%;
+}
 #songs, .lyrics li { margin: 0 3px 3px 3px; padding: 0.2em; font-size: 1em}
-#songs .title:hover{cursor: pointer}
-.infotitle:hover{cursor: pointer}
-.lyrics li span { position: absolute; margin-left: -1.3em;}
-.lyrics li:hover {cursor: pointer}
-.1, .2, .3, .4, .5, .6, .7, .8 { background-color: #da2c43; color: #fff}
-.chorus, .Chorus, .c { background-color: #556b2f; color: #fff}
-.bridge, .b, .b2, .b3, .b4 { background-color: #003153; color: #fff}
-
-.lyrics_buttons {
-    text-align: right;
-    position: absolute;
-    margin-top: -10px;
-}
-
-.action_btns {
-    display: flex;
-    align-items: stretch;
-}
-
-.action_btns button {
-    margin: 5px;
-}
 
 #worship, #song_list {
     display: flex;
@@ -41,16 +28,123 @@
     margin: 5px;
 }
 
-.edit_btn img {
-    position: relative;
-    background-color: transparent;
-    width: 15px;
-    height: 15px;
+#songs .title:hover, .lyrics li:hover, .infotitle:hover{cursor: pointer}
+
+.lyrics li span { position: absolute; margin-left: -1.3em;}
+
+.arrow {
+    padding: 2px;
+    margin: 2px;
 }
 
-.edit_btn:hover, .sequence:hover {
+.arrow:hover {
     cursor: pointer;
+    border: 1px solid #d0d0d0;
 }
+
+/* =========================================
+   Sermon Box
+   ========================================= */
+#sermon_data {
+    margin: 15px 5px;
+    padding: 5px;
+    width: 95%;
+}
+.sermon-card {
+    background: #fdfdfd;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+}
+.sermon-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 8px;
+    margin-bottom: 12px;
+}
+.sermon-title { margin: 0; font-size: 1.3em; color: #2c3e50; }
+.sermon-speaker { font-weight: 600; color: #7f8c8d; background: #eaeded; padding: 4px 8px; border-radius: 4px; font-size: 0.9em;}
+.sermon-bible { font-size: 1.05em; margin-bottom: 12px; }
+.sermon-outline { color: #34495e; line-height: 1.6; background: #f9f9f9; padding: 10px; border-radius: 4px; border-left: 3px solid #bdc3c7; }
+
+/* Bible Link */
+.bible-link { color: #009698; text-decoration: none; font-weight: bold; margin-right: 6px; padding: 2px 6px; border: 1px solid #009698; border-radius: 4px; background: #f0fbfc; }
+.bible-link:hover { background: #009698; color: #fff; }
+
+/* =========================================
+   Song Card Flexbox (3 Rows)
+   ========================================= */
+/* Stacks the three rows vertically */
+.song-content-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* Adds clean spacing between the rows */
+    width: 100%;
+}
+
+/* Flexbox for the top row */
+.song-header-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between; /* Pushes title to the left, delete button to the right */
+    align-items: flex-start; /* Aligns items to the top */
+}
+
+/* Flexbox for the middle row (keys and icons) */
+.song-details-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center; /* Vertically centers the text, dropdowns, and icons */
+    gap: 15px; /* Spaces out the items nicely without needing &nbsp; */
+    flex-wrap: wrap; /* Allows items to drop to a new line on very small screens */
+}
+
+/* Keeps notes looking clean */
+.song-notes-row p {
+    margin: 0 0 10px 0;
+}
+
+.song-notes-row textarea {
+    width: 100%; /* Makes the text area span the full width of the card */
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+
+/* =========================================
+    Lyrics Flexbox and Sequence Highlighting
+   ========================================= */
+.lyric-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 10px;
+    margin: 10px 0px;
+    /* background-color: #fcfcfc; */
+    border: 1px solid #eee;
+    border-radius: 4px;
+}
+.lyric-content {
+    flex-grow: 0.5;
+    text-align: center;
+    padding: 5px;
+    margin: 5px;
+    border-radius: 4px;
+}
+
+.lyrics_buttons { display: flex; gap: 8px; flex-shrink: 0; }
+
+.v, [class~="1"], [class~="2"], [class~="3"], [class~="4"], [class~="5"], [class~="6"], [class~="7"], [class~="8"] { 
+    background-color: #D6B588; 
+    color: #fff; 
+}
+.chorus, .Chorus, .c { background-color: #556b2f; color: #fff}
+.bridge, .b, .b2, .b3, .b4 { background-color: #003153; color: #fff}
+
+
 
 .title {
     margin: 3px 3px 3px 3px;
@@ -81,10 +175,65 @@ li {
 }
 
 .highlighted {
-    font-weight: 400px;
+    font-weight: 400;
     color: red;
 }
 
+/* =========================================
+   Buttons
+   ========================================= */
+.action_btns {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.action_btns button {
+    margin: 5px;
+}
+
+.action_btns .save_btn {
+    background-color: #28a745;
+    color: white;
+    border-color: #28a745;
+}
+.action_btns .save_btn:hover { background-color: #218838; }
+
+.action_btns .reset_btn {
+    background-color: #dc3545;
+    color: white;
+    border-color: #dc3545;
+}
+.action_btns .reset_btn:hover { background-color: #c82333; }
+
+.edit_btn img {
+    position: relative;
+    background-color: transparent;
+    width: 15px;
+    height: 15px;
+}
+
+.edit_btn:hover, .sequence:hover {
+    cursor: pointer;
+}
+
+.btn-remove {
+    background: none;
+    border: none;
+    color: #dc3545;
+    padding: 0.5rem;
+    transition: background-color 0.2s ease;
+    margin-left: auto;
+}
+
+.btn-remove:hover {
+    background-color: #ffe6e6;
+}
+
+
+/* =========================================
+   Badge Tag Things
+   ========================================= */
 .keynote {
   border: 4px solid #000;
   background-color: #000;
@@ -92,32 +241,17 @@ li {
   border-radius: 5px;
 }
 
-.lang_en {
-  border: 4px solid #009698;
-  background-color: #009698;
-  color: #fff;
-  border-radius: 50px 20px;
-}
+/* Language tags */
+.lang_en    { --lang-color: #009698; }
+.lang_zh    { --lang-color: #8b0000; }
+.lang_zhTW  { --lang-color: #556b2f; }
+.lang_zhpingyin { --lang-color: #856088; }
 
-.lang_zh {
-  border: 4px solid #8b0000;
-  background-color: #8b0000;
-  color: #fff;
-  border-radius: 50px 20px;
-}
-
-.lang_zhTW {
-  border: 4px solid #556b2f;
-  background-color: #556b2f;
-  color: #fff;
-  border-radius: 50px 20px;
-}
-
-.lang_zhpingyin {
-  border: 4px solid #856088;
-  background-color: #856088;
-  color: #fff;
-  border-radius: 50px 20px;
+.lang_en, .lang_zh, .lang_zhTW, .lang_zhpingyin {
+    border-radius: 50px 20px;
+    color: #fff;
+    border: 4px solid var(--lang-color);
+    background-color: var(--lang-color);
 }
 
 .custom-loader {
@@ -130,21 +264,9 @@ li {
 }
 @keyframes s3 {to{transform: rotate(1turn)}}
 
-.arrow {
-    padding: 2px;
-    margin: 2px;
-}
 
-.arrow:hover {
-    cursor: pointer;
-    border: 1px solid #d0d0d0;
-}
 
-#sermon_data {
-    padding: 5px;
-    margin: 5px;
-    width: 95%;
-}
+
 
 /* Default rules for mobile devices */
 .ui-dialog {
@@ -168,24 +290,29 @@ li {
 <h3><span class="arrow left" name="-1">&lt;</span> {{ w.date }} <span class="arrow right" name="1">&gt;</span></h3>
 <!-- Container of worship songs -->
 <div id="sermon_data"></div>
+
 <div class="action_btns">
-    <input id="keyword" style="display:none">
-    <button id="search_btn">Search</button>
+    <div class="search_container">
+        <input id="keyword" type="text" placeholder="Search songs..."">
+        <button id="search_btn">Search</button>
+    </div>
     <button id="add_song_btn">Add Song</button>
     <!--<button id="add_note_btn">Add Notes</button>-->
-    <button class="save_btn" onclick="javascript:save({{ id }})">Save</button>
+    <button class="save_btn" style="display: none;">Save</button>
         <!--<button class="export_btn" onclick="javascript:export_file({{ id }})">Export</button>-->
-        <button class="reset_btn" onclick="javascript:reset()">Reset</button>
+        <button class="reset_btn" style="display: none;">Reset</button>
         <!--<button id="preview_btn">Present</button>-->
     </div>
-<div id="worship">
-    <!-- sortable songs -->
+    
+ <!-- sortable songs -->
+<div id="worship"></div>
+
+<div class="action_btns">
+    <button class="save_btn" style="display: none;">Save</button>
+    <!--<button class="export_btn" onclick="javascript:export_file({{ id }})">Export</button>-->
+    <button class="reset_btn" style="display: none;">Reset</button>
 </div>
-    <div class="action_btns">
-<button class="save_btn" onclick="javascript:save({{ id }})">Save</button>
-<!--<button class="export_btn" onclick="javascript:export_file({{ id }})">Export</button>-->
-&nbsp;&nbsp;<button class="reset_btn" onclick="javascript:reset()">Reset</button>
-    </div>
+
 <div id="song_list" >
     <div id="left_content"></div>
     <div id="middle_content"></div>
@@ -197,8 +324,12 @@ li {
 {% block extra_js %}
 <script src="/static/bible.js"></script>
 <script>
+
+    /* =================================
+        Global Variables
+    ================================== */
     // Store worship set into object
-    const songs = {{ songs|safe }};
+    let songs = {{ songs|safe }};
     let songs_temp = JSON.parse(JSON.stringify(songs));
     let lyrics_raw = '';
     let worship_data = {{ w|safe }};
@@ -210,10 +341,62 @@ li {
     let flat = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"];
     let keys;
 
+    // ========================
+    // Action Button Listners
+    // ========================
+    $(document).on('click', '.save_btn', function() {
+        save(worship_id);
+    });
+
+    $(document).on('click', '.reset_btn', function() {
+        reset();
+    });
+
+    // Reactive State Management (Show/Hide Save & Reset Buttons)
+    function checkActionButtons() {
+        let orderChanged = false;
+        if ($('#songs').data('ui-sortable')) {
+            let currentOrder = $('#songs').sortable('toArray', {attribute: 'name'});
+            let originalOrder = songs.map(item => String(item.id));
+            orderChanged = JSON.stringify(currentOrder) !== JSON.stringify(originalOrder);
+        }
+        
+        let contentChanged = false;
+        
+        // Check if songs were added or removed
+        if (songs.length !== songs_temp.length) {
+            contentChanged = true;
+        } else {
+            // Compare the specific fields that matter to avoid false positives
+            for (let song of songs) {
+                let tempSong = songs_temp.find(s => s.id === song.id);
+                
+                // Force both transposes to be integers so "0", ["0"], and 0 all match perfectly
+                let origTranspose = parseInt(song.transpose) || 0;
+                let tempTranspose = parseInt(tempSong.transpose) || 0;
+
+                if (!tempSong || 
+                    origTranspose !== tempTranspose || 
+                    song.notes != tempSong.notes || 
+                    song.alt_sequence != tempSong.alt_sequence) {
+                    contentChanged = true;
+                    break;
+                }
+            }
+        }
+
+        if (orderChanged || contentChanged) {
+            $('.save_btn, .reset_btn').show();
+        } else {
+            $('.save_btn, .reset_btn').hide();
+        }
+    }
+
     // Events listener
 
     // When lyrics sequence is clicked, open up movable lyrics sections
     $(document).on({
+        // Chewie note, not sure what the point of this mouseover is for mobile
         mouseover: function () {
             if(device=='mobile') {
                 id = $(this).attr('name');
@@ -230,53 +413,78 @@ li {
 
     // When lyrics sequence is added
     $(document).on('click', '.add_btn', function () {
-        $(this).parent().parent().clone().appendTo($(this).parent().parent().parent());
-        $(".lyrics").sortable( "destroy" );
+        let listElement = $(this).closest('li');
+        let ulElement = $(this).closest('ul');
+        
+        listElement.clone().appendTo(ulElement);
+        $(".lyrics").sortable("destroy");
+
         init();
+        checkActionButtons();
     });
 
     // When lyrics sequence is removed
     $(document).on('click', '.remove_sequence_btn', function () {
-        $(this).parent().parent().remove();
+        let ulElement = $(this).closest('ul');
+        $(this).closest('li').remove();
+
         $(".lyrics").sortable( "destroy" );
         init();
+        checkActionButtons();
     });
 
     // When key changed
     $(document).on('change', '.key', function () {
-        transpose = keys.indexOf(this.value)-keys.indexOf($(this).attr('init'));
-        id = $(this).parent().attr('name');
-        for(song of songs_temp) {
+        let transposeVal = keys.indexOf(this.value) - keys.indexOf($(this).attr('init'));
+        
+        // FIX: Use .closest('li') to find the ID, because Flexbox added new wrapper elements!
+        let id = $(this).closest('li').attr('name');
+        
+        $(this).attr('name', transposeVal); 
+        
+        for (let song of songs_temp) {
             if (song.id == id) {
-                song.transpose = transpose;
+                song.transpose = transposeVal;
                 break;
             }
         }
+        checkActionButtons();
     });
 
     // When notes are changed
     $(document).on('change', 'textarea[name="song_notes"]', function() {
         index = $(this).attr('index');
         songs_temp[index].notes = $(this).val();
+        checkActionButtons();
     });
 
+    // ======================
     // Functions
+    // ======================
 
     function get_sermon() {
-        var html = [];
-        var bible = worship_data.bible.replace(/(、|;)/g, '，'); // Replace possible symbols to Chinese comma
-        bible = bible.split('，');
+        var bible = worship_data.bible.replace(/(、|;)/g, '，').split('，');; // Replace possible symbols to Chinese comma, then split by commas
         var b = '';
-        for (var i=0;i<bible.length;i++) {
-            b += ' <a href="javascript:get_bible(show_verse, \'' + bible[i] + '\')">' + bible[i] + '</a>';
+        for (var i=0; i<bible.length; i++) {
+            if(bible[i].trim() !== "") {
+                b += ' <a class="bible-link" href="javascript:get_bible(show_verse, \'' + bible[i] + '\')">' + bible[i] + '</a>';
+            }
         }
-        html.push('Title: ' + worship_data.title + b);
-        html.push('Speaker: ' + worship_data.speaker);
-        html.push(worship_data.outline);
-        $('#sermon_data').html(html.join('<br/>'));
+
+        var cardHtml = `
+            <div class="sermon-card">
+                <div class="sermon-header">
+                    <h4 class="sermon-title"><strong>Title:</strong> ${worship_data.title}</h4>
+                    <span class="sermon-speaker">By: ${worship_data.speaker}</span>
+                </div>
+                <div class="sermon-bible"><strong>Scripture Reference:</strong> ${b}</div>
+                <div class="sermon-outline"><strong>Sermon Outline:</strong><br/>${worship_data.outline}</div>
+            </div>
+        `;
+        $('#sermon_data').html(cardHtml);
     }
 
-    // Presentation mode
+    // Presentation mode (not used currently, used by future preview)
     function presentation() {
         url = API_URL + 'worship/' + worship_id + '/preview';
         $.when( $.ajax( url ) ).then(function( data, textStatus, jqXHR ) {
@@ -291,11 +499,19 @@ li {
 
     // Save current arrangement, if no changes won't do anything
     function save(id) {
-        temp = is_changed($('#songs').sortable('toArray', {attribute: 'name'}), $('#lyrics').sortable('toArray', {attribute: 'name'}))
+        let temp = is_changed($('#songs').sortable('toArray', {attribute: 'name'}), $('#lyrics').sortable('toArray', {attribute: 'name'}))
         if (temp) {
-            changed = temp.map((item, i)=> ({'song_order': i+1, 'type': item.type, 'song_id': item.id, 'sequence': item.alt_sequence, 'notes': item.notes, 'transpose': [item.transpose.toString()], 'scheduled_date': item.date}));
+            changed = temp.map((item, i)=> ({
+                'song_order': i+1,
+                'type': item.type,
+                'song_id': item.id,
+                'sequence': item.alt_sequence,
+                'notes': item.notes,
+                'transpose': [item.transpose.toString()],
+                'scheduled_date': item.date
+            }));
 
-            url = API_URL + 'worship/' + id + '/edit';
+            let url = API_URL + 'worship/' + id + '/edit';
             data = JSON.stringify(changed);
 
             $.ajax({
@@ -304,7 +520,24 @@ li {
 			    data: data,
                 complete: function(response) {
             	    if(response.status==200) {
-            	        alert("Worship Arrangement Saved!!");
+            	        alert("Worship Arrangement Saved!");
+
+                        // Rebuild the 'songs' baseline to match the newly saved state!
+                        let newOrder = $('#songs').sortable('toArray', {attribute: 'name'});
+                        let newBaseline = [];
+                        
+                        for (let currentId of newOrder) {
+                            let songData = songs_temp.find(s => s.id == currentId);
+                            if (songData) {
+                                newBaseline.push(songData);
+                            }
+                        }
+                        
+                        // Overwrite the original songs array with this new baseline
+                        songs = JSON.parse(JSON.stringify(newBaseline));
+                        
+                        // Re-run the checker to hide the Save/Reset buttons
+                        checkActionButtons();
     	            }
         	        else {
         	            alert(response);
@@ -343,30 +576,16 @@ li {
         songs_temp = JSON.parse(JSON.stringify(songs));
         $.when( add_song_to_worship(worship)).then(function() {
             init();
+            checkActionButtons();
         });
-    }
-
-    // TODO, can be removed or rework the logic
-    function enable_btn(enable) {
-        if(enable) {
-            $(".save_btn").removeAttr('disabled');
-            $(".reset_btn").removeAttr('disabled');
-        }
-        else {
-            $(".save_btn").attr('disabled', 'disabled');
-            $(".reset_btn").attr('disabled', 'disabled');
-        }
     }
 
     // init sortable, triggered after the worship div is loaded
     function init() {
         $("#songs").sortable({
-            /*create: function( event, ui ) {
-                is_changed($(this).sortable('toArray', {attribute: 'name'}));
-            },
             update: function () {
-                is_changed($(this).sortable('toArray', {attribute: 'name'}));
-            }*/
+                checkActionButtons();
+            }
         });
         $("#songs").disableSelection();
         $(".lyrics").sortable({
@@ -377,6 +596,7 @@ li {
             update: function(event, ui) {
                 //is_changed($(this).sortable('toArray', {attribute: 'name'}));
                 update_alt($(this).sortable('toArray'));
+                checkActionButtons();
             }
         });
         $(".lyrics").disableSelection();
@@ -449,24 +669,29 @@ li {
 
     // Create drop down list based on original key, flat based or sharp based
     function get_transpose() {
-	    var key = $('.key');
-	    $.each(key, function(index, element) {
-	        var original_key = $(this).attr('init');
+        var key = $('.key');
+        $.each(key, function(index, element) {
+            var original_key = $(this).attr('init');
+            
+            // 1. Determine if we are using sharps or flats FIRST
             keys = flat;
-            transposed_key = parse_chord(original_key, this.name)[0];
-            if (sharp.indexOf(original_key)>=0) {
-    	        keys = sharp;
+            if (sharp.indexOf(original_key) >= 0) {
+                keys = sharp;
             }
+            
+            // 2. Parse the chord without the [0] at the end!
+            var transposed_key = parse_chord(original_key, this.name);
+            
             $(this).empty();
-            for(var i=0;i<keys.length;i++) {
-    	        o = document.createElement('option');
+            for(var i = 0; i < keys.length; i++) {
+                var o = document.createElement('option');
                 o.text = keys[i];
-    	        if(keys[i] == transposed_key) {
-        	        o.selected = true;
+                if(keys[i] === transposed_key) {
+                    o.selected = true;
                 }
                 $(this).append(o);
             }
-	    })
+        });
     }
 
     $(document).ready(function () {
@@ -594,66 +819,8 @@ li {
         });
     });
 
-    $('#search_btn').hover(function() {
-        $("#keyword").show('slow', function() {
-        });
-    });
-
     $(document).on('click', '#add_song_btn', function() {
         render_song(-1, '', '', 1);
-    });
-
-    $(document).on('click', '#add_note_btn', function() {
-        url = 'notes';
-        $.when( $.ajax( url ) ).then(function( data, textStatus, jqXHR ) {
-            $("#dialog").html(data);
-            $("#dialog").dialog({
-                title: "Add Info to Song",
-                width: 'auto',
-                buttons: [
-	                {
-    	                id: "button-add",
-                        text : "Add",
-                        click: function() {
-                            notes = $("#mynotes").val();
-                            data = {'id': -1, 'transpose': 0, 'date': worship_data.date, 'alt_sequence': '', 'sequence': '', 'notes': notes, 'type': 'info'};
-                            songs_temp.push(data);
-                            console.log(songs_temp);
-                            $( this ).dialog( "close" );
-                            $.when( add_song_to_worship(worship)).then(function() {
-                                init();
-                            });
-
-                            url = API_URL + 'info';
-                            data = JSON.stringify($("#info").serialize());
-                            $.ajax({
-                                type: "post",
-                                url: url,
-	                            data: data,
-                                complete: function(response) {
-          	                        if(response.status==200) {
-           	                            //location.reload();
-                                        $( this ).dialog( "close" );
-    	                            }
-                                    else {
-                                        alert(response);
-		                            }
-                                },
-                                contentType: "application/json",
-                                dataType: 'json'
-                            });
-                        }
-                    },
-	                {
-	                    id: "button-cancel",
-                        text : "Cancel",
-                        click: function() {
-                            $( this ).dialog( "close" );
-                        }
-                    }
-                ]
-            });
-        });
     });
 
     $(document).on('click', '#search_btn', function() {
@@ -683,7 +850,60 @@ li {
         });
     });
 
-    // Event handlers for inset_btn
+    // $(document).on('click', '#add_note_btn', function() {
+    //     url = 'notes';
+    //     $.when( $.ajax( url ) ).then(function( data, textStatus, jqXHR ) {
+    //         $("#dialog").html(data);
+    //         $("#dialog").dialog({
+    //             title: "Add Info to Song",
+    //             width: 'auto',
+    //             buttons: [
+	//                 {
+    // 	                id: "button-add",
+    //                     text : "Add",
+    //                     click: function() {
+    //                         notes = $("#mynotes").val();
+    //                         data = {'id': -1, 'transpose': 0, 'date': worship_data.date, 'alt_sequence': '', 'sequence': '', 'notes': notes, 'type': 'info'};
+    //                         songs_temp.push(data);
+    //                         console.log(songs_temp);
+    //                         $( this ).dialog( "close" );
+    //                         $.when( add_song_to_worship(worship)).then(function() {
+    //                             init();
+    //                         });
+
+    //                         url = API_URL + 'info';
+    //                         data = JSON.stringify($("#info").serialize());
+    //                         $.ajax({
+    //                             type: "post",
+    //                             url: url,
+	//                             data: data,
+    //                             complete: function(response) {
+    //       	                        if(response.status==200) {
+    //        	                            //location.reload();
+    //                                     $( this ).dialog( "close" );
+    // 	                            }
+    //                                 else {
+    //                                     alert(response);
+	// 	                            }
+    //                             },
+    //                             contentType: "application/json",
+    //                             dataType: 'json'
+    //                         });
+    //                     }
+    //                 },
+	//                 {
+	//                     id: "button-cancel",
+    //                     text : "Cancel",
+    //                     click: function() {
+    //                         $( this ).dialog( "close" );
+    //                     }
+    //                 }
+    //             ]
+    //         });
+    //     });
+    // });
+
+    // Event handlers for insert_btn
     $(document).on({
         mouseover: function () {
             $(".insert_btn", this).show();
@@ -714,6 +934,7 @@ li {
                 songs_temp.push(data);
                 $.when( add_song_to_worship(worship)).then(function() {
                     init();
+                    checkActionButtons();
                 });
             });
         }
@@ -721,7 +942,8 @@ li {
 
     // Remove song from song set, when click save song_set table will be updated
     $(document).on('click', '.remove_btn', function() {
-        id = $(this).parent().parent().attr('name');
+        let id = $(this).closest('li').attr('name');
+
         for (i in songs_temp) {
             if (songs_temp[i].id == id) {
                 songs_temp.splice(i,1);
@@ -730,6 +952,7 @@ li {
         }
          $.when( add_song_to_worship(worship)).then(function() {
             init();
+            checkActionButtons();
          });
     });
 
@@ -750,9 +973,9 @@ li {
         //presentation();
     });
 
-    $("#home").click(function() {
-        window.location.href = '/';
-    });
+    // $("#home").click(function() {
+    //     window.location.href = '/';
+    // });
 
 </script>
 {% endblock %}

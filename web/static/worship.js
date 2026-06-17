@@ -15,6 +15,7 @@ var API_URL = '/API/';
             scrollTop:$(scrollTo).offset().top - 80
         }, 'slow');
     }
+    
     // UI for Adding song to song_set
     function add_song_to_worship(worship_list) {
         worship_list.empty();
@@ -25,33 +26,67 @@ var API_URL = '/API/';
             var list = document.createElement('li');
             list.setAttribute('class', 'ui-state-default');
             list.setAttribute('name', data.id);
+
             if (data.type == 'song') {
-                //list.innerHTML = '<span class="title" name="' + data.id + '" lang="' + data.lang + '"><b>' + data.title + '</b>&nbsp;' + lang_tag(data.lang) + '&nbsp;' + lang_tag(data.lang_2) + ' Author: ' + data.author + '/' + data.lyricist + '&nbsp;<button class="remove_btn" style="display:none"> - </button></span><br/>Current Key: <select class="key" name="' + data.transpose + '" init="' + data.key + '"><option>' + data.key + '</option></select>&nbsp;Original Key: ' +  data.key + '<p>Notes: <span name="song_notes" contenteditable="true">' + data.notes + '</p><span class="lyrics_section" title="Click to arrange song sequence" name="' + data.id + '">Song Sequence: <span class="sequence" id="song-' +  data.id + '_alt">' + data.sequence + '</span>&nbsp;&nbsp;<span class="edit_btn"><img style="display:none" src="../static/img/edit-button-icon.png" title="edit lyrics" name="' + data.id + '"/></span></span><br/><textarea rows="10" cols="100" class="lyrics_raw" name="lyrics_raw" id="lyrics_raw_' + data.id + '" style="display:none">' + data.lyrics_raw + '</textarea>';
-                html = '<span class="title" name="' + data.id + '" lang="' + data.lang + '"><b>' + data.title + '</b>&nbsp;' + lang_tag(data.lang) + '&nbsp;' + lang_tag(data.lang_2) + ' Author: ' + data.author + '/' + data.lyricist + '&nbsp;<button class="remove_btn" style="display:none"> - </button></span><br/>Current Key: <select class="key" name="' + data.transpose + '" init="' + data.key + '"><option>' + data.key + '</option></select>&nbsp;Original Key: ' +  data.key
+                var html = '<div class="song-content-wrapper">';
+
+                // Row 1: Title, Metadata, Delete Button
+                html += '<div class="song-header-row">';
+                html += '<span class="title" name="' + data.id + '" lang="' + data.lang + '"><b>' + data.title + '</b>&nbsp;' + lang_tag(data.lang) + '&nbsp;' + lang_tag(data.lang_2) + ' Author: ' + data.author + '/' + data.lyricist + '</span>';
+                html += '<button type="button" class="btn-delete remove_btn" aria-label="Delete Song"><i class="fa-solid fa-trash"></i></button>';
+                html += '</div>';
+
+                // Row 2: Key, Media Links
+                html += '<div class="song-details-row">';
+                html += '<span>Current Key: <select class="key" name="' + data.transpose + '" init="' + data.key + '"><option>' + data.key + '</option></select></span>';
+                html += '<span>&nbsp;Original Key: ' + data.key + '</span>';
+                
                 if (data.score) {
-                    html += '&nbsp;&nbsp;<a href="' + data.score + '" target=new><i style="font-size:24px" class="fa" title="Sheet Music">&#xf0f6;</i></a>';
+                    html += '<a href="' + data.score + '" target="new"><i style="font-size:24px" class="fa" title="Sheet Music">&#xf0f6;</i></a>';
                 }
                 if (data.abc) {
-                    html += '&nbsp;&nbsp;<a href="sheets/' + data.id + '" target=new><i class="fa" style="font-size:24px" title="Interacted Sheet Music">&#xf1c7;</i></a>';
+                    html += '<a href="sheets/' + data.id + '" target="new"><i class="fa" style="font-size:24px" title="Interacted Sheet Music">&#xf1c7;</i></a>';
                 }
                 if (data.video) {
-                    html += '&nbsp;&nbsp;<a href="' + data.video + '" target=new><i class="fa fa-play-circle" style="font-size:24px" title="Youtube Video"></i></a>';
+                    html += '<a href="' + data.video + '" target="new"><i class="fa fa-play-circle" style="font-size:24px" title="Youtube Video"></i></a>';
                 }
-                //notes = data.notes?data.notes:'Enter Notes';
-                //html += '<p>Notes: <span name="song_notes" contenteditable="true">' + notes + '</span></p>';
-                html += '<p>Notes: <textarea name="song_notes" index="' + i + '" rols="5" cols="60">' + data.notes + '</textarea></p>';
-                html += '<span class="lyrics_section" title="Click to arrange song sequence" name="' + data.id + '">Song Sequence: <span class="sequence" id="song-' +  data.id + '_alt">' + data.sequence + '</span></span>';
+                html += '</div>';
+
+                // Row 3: Notes and Sequence
+                html += '<div class="song-notes-row">';
+                html += '<p>Notes: <textarea name="song_notes" index="' + i + '" rows="5" cols="60">' + data.notes + '</textarea></p>';
+                html += '<span class="lyrics_section" title="Click to arrange song sequence" name="' + data.id + '">Song Sequence: <span class="sequence" id="song-' + data.id + '_alt">' + data.sequence + '</span></span>';
+                html += '</div>';
+
+                html += '</div>'; // End main wrapper
+                
                 list.innerHTML = html;
+
                 var ul = document.createElement('ul');
-                ul.setAttribute('id', 'sequence_' + data.id)
-                ul.setAttribute('class', 'lyrics')
+                ul.setAttribute('id', 'sequence_' + data.id);
+                ul.setAttribute('class', 'lyrics');
                 ul.setAttribute('style', 'display:none');
-                for(let l of data.content) {
+
+                for (let l of data.content) {
                     var list_1 = document.createElement('li');
-                    list_1.setAttribute('class', 'ui-state-default');
+                    // Added 'lyric-item' for flexbox targeting
+                    list_1.setAttribute('class', 'ui-state-default lyric-item'); 
                     list_1.setAttribute('id', 'song-' + data.id + '_' + l.name);
-                    list_1.innerHTML = '<div name="lyrics_parts" class="' + l.name + '">[' + l.name + ']' + '<br/>' + l.origin_text.split("\n").join("<br />") + '</div><div class="lyrics_buttons"><button class="add_btn"> + </button><button class="remove_sequence_btn"> - </button></div>';
-                    ul.append(list_1)
+                    
+                    // Store the formatted text in a variable to keep the HTML string clean
+                    var formatted_lyrics = l.origin_text.split("\n").join("<br />");
+
+                    list_1.innerHTML = 
+                        '<div name="lyrics_parts" class="lyric-content ' + l.name + '">' + 
+                            '<strong>[' + l.name + ']</strong><br/>' + 
+                            formatted_lyrics + 
+                        '</div>' + 
+                        '<div class="lyrics_buttons">' + 
+                            '<button type="button" class="btn-lyric btn-lyric-add add_btn" title="Add Section"><i class="fa-solid fa-plus"></i></button>' + 
+                            '<button type="button" class="btn-lyric btn-lyric-remove remove_sequence_btn" title="Remove Section"><i class="fa-solid fa-trash"></i></button>' + 
+                        '</div>';
+                        
+                    ul.append(list_1);
                 }
                 list.append(ul);
             }
