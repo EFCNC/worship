@@ -4,7 +4,7 @@
  */
 
 /* Exclude header, loading, and dialog from default margin */
-body > :not(#loading):not(#dialog):not(header) {
+body > :not(#loading):not(#dialog):not(.ui-dialog):not(header) {
     margin: var(--spacing-md);
 }
 
@@ -121,10 +121,10 @@ header#header {
 
 /* Main Content Area */
 /* Unsure if needed */
-main#main-content {
+/* main#main-content {
     min-height: calc(100vh - var(--header-height));
     padding: var(--spacing-md);
-}
+} */
 
 /* Home Icon */
 .home-icon {

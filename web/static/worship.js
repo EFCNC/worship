@@ -32,8 +32,17 @@ var API_URL = '/API/';
 
                 // Row 1: Title, Metadata, Delete Button
                 html += '<div class="song-header-row">';
-                html += '<span class="title" name="' + data.id + '" lang="' + data.lang + '"><b>' + data.title + '</b>&nbsp;' + lang_tag(data.lang) + '&nbsp;' + lang_tag(data.lang_2) + ' Author: ' + data.author + '/' + data.lyricist + '</span>';
-                html += '<button type="button" class="btn-delete remove_btn" aria-label="Delete Song"><i class="fa-solid fa-trash"></i></button>';
+                html += '<span class="song-title" name="' + data.id + '" lang="' + data.lang + '">';
+                html += '<b>' + data.title + '</b>&nbsp;' + lang_tag(data.lang) + '&nbsp;' + lang_tag(data.lang_2) + ' Author: ' + data.author;
+                html += ' <button type="button" class="edit_btn icon-button" title="Edit Song"><i class="fa fa-edit"></i></button>';                
+                html += '</span>';
+                
+                // Check if the screen is mobile (e.g., 768px or smaller)
+                var isMobile = window.innerWidth <= 768;
+                // Set the text based on the screen size
+                var buttonText = isMobile ? '' : 'Remove Song ';
+
+                html += '<button type="button" class="remove_btn" aria-label="Remove Song">' + buttonText + '<i class="fa-solid fa-trash"></i></button>';
                 html += '</div>';
 
                 // Row 2: Key, Media Links
@@ -245,6 +254,24 @@ var API_URL = '/API/';
             $("#dialog").dialog({
                 title: dialog_title[num]['title'],
                 width: 'auto',
+                position: {
+                    my: "center top",
+                    at: "center top+50",
+                    of: window
+                },
+                // Workaround for position not working immediately
+                open: function() {
+                    var $thisDialog = $(this);
+                    requestAnimationFrame(function() {
+                        $thisDialog.dialog("option", "position", {
+                            my: "center top",
+                            at: "center top+50",
+                            of: window
+                        });
+                    });
+                },
+
+
                 buttons: [
 	                {
     	                id: "button-add",

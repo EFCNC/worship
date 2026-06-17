@@ -19,8 +19,9 @@
 #songs, .lyrics li { margin: 0 3px 3px 3px; padding: 0.2em; font-size: 1em}
 
 #worship, #song_list {
+    box-sizing: border-box;
     display: flex;
-    width: 95%;
+    /* width: 100%; */
     justify-content: center;
     align-self: center;
     border: 3px solid #0c0c0c;
@@ -28,7 +29,7 @@
     margin: 5px;
 }
 
-#songs .title:hover, .lyrics li:hover, .infotitle:hover{cursor: pointer}
+.lyrics li:hover, .infotitle:hover{cursor: pointer}
 
 .lyrics li span { position: absolute; margin-left: -1.3em;}
 
@@ -48,7 +49,7 @@
 #sermon_data {
     margin: 15px 5px;
     padding: 5px;
-    width: 95%;
+    /* width: 95%; */
 }
 .sermon-card {
     background: #fdfdfd;
@@ -81,7 +82,7 @@
 .song-content-wrapper {
     display: flex;
     flex-direction: column;
-    gap: 10px; /* Adds clean spacing between the rows */
+    gap: 10px;
     width: 100%;
 }
 
@@ -89,20 +90,25 @@
 .song-header-row {
     display: flex;
     flex-direction: row;
-    justify-content: space-between; /* Pushes title to the left, delete button to the right */
-    align-items: flex-start; /* Aligns items to the top */
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.song-title {
+    margin: 3px 3px 3px 3px;
+    border: 1px solid transparent;
 }
 
 /* Flexbox for the middle row (keys and icons) */
 .song-details-row {
     display: flex;
     flex-direction: row;
-    align-items: center; /* Vertically centers the text, dropdowns, and icons */
-    gap: 15px; /* Spaces out the items nicely without needing &nbsp; */
-    flex-wrap: wrap; /* Allows items to drop to a new line on very small screens */
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
 }
 
-/* Keeps notes looking clean */
+/* Notes bottom margin */
 .song-notes-row p {
     margin: 0 0 10px 0;
 }
@@ -145,12 +151,6 @@
 .bridge, .b, .b2, .b3, .b4 { background-color: #003153; color: #fff}
 
 
-
-.title {
-    margin: 3px 3px 3px 3px;
-    border: 1px solid transparent;
-}
-
 .lyrics_section:hover {
     cursor: pointer;
     background: #e1e1e1;
@@ -170,9 +170,9 @@ li {
   padding: 5px;
 }
 
-.song_title {
+/* .song_title {
     cursor: pointer;
-}
+} */
 
 .highlighted {
     font-weight: 400;
@@ -182,42 +182,20 @@ li {
 /* =========================================
    Buttons
    ========================================= */
-.action_btns {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-}
+.action_btns { display: flex; align-items: center; flex-wrap: wrap;}
 
 .action_btns button {
     margin: 5px;
 }
 
-.action_btns .save_btn {
-    background-color: #28a745;
-    color: white;
-    border-color: #28a745;
-}
-.action_btns .save_btn:hover { background-color: #218838; }
+.save_btn { background-color: #28a745; color: white; border-color: #28a745; }
+.save_btn:hover { background-color: #218838; }
 
-.action_btns .reset_btn {
-    background-color: #dc3545;
-    color: white;
-    border-color: #dc3545;
-}
-.action_btns .reset_btn:hover { background-color: #c82333; }
+.reset_btn { background-color: #dc3545; color: white; border-color: #dc3545; }
+.reset_btn:hover { background-color: #c82333; }
 
-.edit_btn img {
-    position: relative;
-    background-color: transparent;
-    width: 15px;
-    height: 15px;
-}
 
-.edit_btn:hover, .sequence:hover {
-    cursor: pointer;
-}
-
-.btn-remove {
+.remove_btn {
     background: none;
     border: none;
     color: #dc3545;
@@ -226,10 +204,18 @@ li {
     margin-left: auto;
 }
 
-.btn-remove:hover {
-    background-color: #ffe6e6;
+.remove_btn:hover {
+    background-color: #ee8686;
 }
 
+/* This resets your global button styles for specific icon buttons */
+.icon-button {
+    background: none !important;
+    padding: 0 !important;
+    border: none !important;
+    color: inherit !important;
+    transform: none !important;
+}
 
 /* =========================================
    Badge Tag Things
@@ -265,15 +251,10 @@ li {
 @keyframes s3 {to{transform: rotate(1turn)}}
 
 
-
-
-
 /* Default rules for mobile devices */
 .ui-dialog {
     width: 95% !important; /* Almost full screen on mobile */
     box-sizing: border-box;
-    left: 50% !important;
-    transform: translateX(-50%);
 }
 
 /* Rules for desktop screens (screens wider than 768px) */
@@ -296,7 +277,7 @@ li {
         <input id="keyword" type="text" placeholder="Search songs..."">
         <button id="search_btn">Search</button>
     </div>
-    <button id="add_song_btn">Add Song</button>
+    <button id="add_song_btn">Add New Song</button>
     <!--<button id="add_note_btn">Add Notes</button>-->
     <button class="save_btn" style="display: none;">Save</button>
         <!--<button class="export_btn" onclick="javascript:export_file({{ id }})">Export</button>-->
@@ -743,24 +724,18 @@ li {
         });
     });
 
-    $(document).on({
-        mouseover: function () {
-            $(".remove_btn", this).show();
-        },
-        mouseout: function () {
-            $(".remove_btn", this).hide();
-        },
-        click: function (event) {
-            if($(event.target).attr('class') == 'remove_btn') {
-                return false;
-            }
-            lang = $(this).attr('lang');
-            id = $(this).attr('name');
-            $.when(render_song(id, 'worship.db', lang), function() {
-                console.log('saved');
-            });
-        }
-    }, ".title");
+
+    // THIS IS THE SONG EDITOR CODE
+    $(document).on('click', '.edit_btn', function(event) {
+        // Stop the click from bubbling up to the .title row
+        event.stopPropagation(); 
+
+        let parentContainer = $(this).closest('.song-title');
+        let lang = parentContainer.attr('lang');
+        let id = parentContainer.attr('name');
+
+        render_song(id, 'worship.db', lang);
+    });
 
     $(document).on({
         mouseover: function () {
@@ -771,53 +746,57 @@ li {
         }
     }, ".infotitle");
 
-    $(document).on('click', '.infotitle', function() {
-        id = $(this).attr('name');
-        url = API_URL + 'notes/id=?' + id;
-        console.log($(this).attr('bible'));
-        $.when( $.ajax( url ) ).then(function( data, textStatus, jqXHR ) {
-            $("#dialog").html(data);
-            $("#dialog").dialog({
-                title: "Edit Note",
-                width: 'auto',
-                buttons: [
-	                {
-    	                id: "button-add",
-                        text : "Save",
-                        click: function() {
-                            notes = $("#mynotes").val();
-                            //data = {'id': -1, 'transpose': 0, 'date': worship_data.date, 'alt_sequence': '', 'sequence': '', 'notes': notes, 'type': 'i'};
-                            url = API_URL + 'notes';
-                            $( this ).dialog( "close" );
-                            data = $("#content").serialize();
-                            console.log(data);
-                            /*$.ajax({
-                                type: "post",
-                                url: url,
-	                            data: data,
-                                complete: function(response) {
-          	                        if(response.status==200) {
-           	                            //location.reload();
-                                        $( this ).dialog( "close" );
-    	                            }
-                                    else {
-                                        alert(response);
-		                            }
-                                }
-                            });*/
-                        }
-                    },
-	                {
-	                    id: "button-cancel",
-                        text : "Cancel",
-                        click: function() {
-                            $( this ).dialog( "close" );
-                        }
-                    }
-                ]
-            });
-        });
-    });
+
+    // Not sure what this is, looks old???
+
+    
+    // $(document).on('click', '.infotitle', function() {
+    //     id = $(this).attr('name');
+    //     url = API_URL + 'notes/id=?' + id;
+    //     console.log($(this).attr('bible'));
+    //     $.when( $.ajax( url ) ).then(function( data, textStatus, jqXHR ) {
+    //         $("#dialog").html(data);
+    //         $("#dialog").dialog({
+    //             title: "Edit Note",
+    //             width: 'auto',
+    //             buttons: [
+	//                 {
+    // 	                id: "button-add",
+    //                     text : "Save",
+    //                     click: function() {
+    //                         notes = $("#mynotes").val();
+    //                         //data = {'id': -1, 'transpose': 0, 'date': worship_data.date, 'alt_sequence': '', 'sequence': '', 'notes': notes, 'type': 'i'};
+    //                         url = API_URL + 'notes';
+    //                         $( this ).dialog( "close" );
+    //                         data = $("#content").serialize();
+    //                         console.log(data);
+    //                         /*$.ajax({
+    //                             type: "post",
+    //                             url: url,
+	//                             data: data,
+    //                             complete: function(response) {
+    //       	                        if(response.status==200) {
+    //        	                            //location.reload();
+    //                                     $( this ).dialog( "close" );
+    // 	                            }
+    //                                 else {
+    //                                     alert(response);
+	// 	                            }
+    //                             }
+    //                         });*/
+    //                     }
+    //                 },
+	//                 {
+	//                     id: "button-cancel",
+    //                     text : "Cancel",
+    //                     click: function() {
+    //                         $( this ).dialog( "close" );
+    //                     }
+    //                 }
+    //             ]
+    //         });
+    //     });
+    // });
 
     $(document).on('click', '#add_song_btn', function() {
         render_song(-1, '', '', 1);
