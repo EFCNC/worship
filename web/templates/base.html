@@ -34,7 +34,7 @@
     <div id="dialog"></div>
 
     <!-- Header Navigation -->
-    {% if 'admin' in request.path %}
+    {% if 'admin' in request.path and 'slides' not in request.path %}
         {% include 'partials/_admin_header.html' %}
     {% elif 'worship' in request.path or 'song' in request.path %}
         {% include 'partials/_worship_header.html' %}
