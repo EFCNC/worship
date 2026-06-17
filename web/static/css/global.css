@@ -80,10 +80,10 @@ a {
     transition: color var(--transition-default);
 }
 
-a:hover {
+/* a:hover {
     color: var(--tertiary-color);
     text-decoration: underline;
-}
+} */
 
 /* Form Elements */
 input, textarea, select {
