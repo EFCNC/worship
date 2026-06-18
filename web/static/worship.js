@@ -61,11 +61,21 @@ var API_URL = '/API/';
                 }
                 html += '</div>';
 
-                // Row 3: Notes and Sequence
+                // Row 3: Notes
                 html += '<div class="song-notes-row">';
                 html += '<p>Notes: <textarea name="song_notes" index="' + i + '" rows="5" cols="60">' + data.notes + '</textarea></p>';
-                html += '<span class="lyrics_section" title="Click to arrange song sequence" name="' + data.id + '">Song Sequence: <span class="sequence" id="song-' + data.id + '_alt">' + data.sequence + '</span></span>';
                 html += '</div>';
+
+                // Row 4: Sequence Container
+                html += '<div class="sequence-container">';
+
+                html += `<div class="song_sequence_toggle" name="${data.id}" title="Click to arrange song sequence">`;
+                html += '<i class="fa-solid fa-caret-right toggle-icon"></i>'; // The toggle triangle
+                html += `<span class="song_sequence">Song Sequence: <span class="sequence" id="song-${data.id}_alt">${data.sequence}</span></span>`;
+
+                html += '</div>'; // End toggle button
+
+                html += '</div>'; // End sequence container
 
                 html += '</div>'; // End main wrapper
                 
@@ -74,7 +84,7 @@ var API_URL = '/API/';
                 var ul = document.createElement('ul');
                 ul.setAttribute('id', 'sequence_' + data.id);
                 ul.setAttribute('class', 'lyrics');
-                ul.setAttribute('style', 'display:none');
+                ul.setAttribute('style', 'display:none'); // Keeps it hidden initially
 
                 for (let l of data.content) {
                     var list_1 = document.createElement('li');
@@ -97,7 +107,9 @@ var API_URL = '/API/';
                         
                     ul.append(list_1);
                 }
-                list.append(ul);
+                
+                var sequenceContainer = list.querySelector('.sequence-container');
+                sequenceContainer.appendChild(ul);
             }
             else if (data.type == 'info') {
                 list.innerHTML = '<span class="infotitle" name="' + data.id + '" bible="' + data.bible + '">' + data.notes + '&nbsp;<button class="remove_btn" style="display:none"> - </button></span>';
@@ -371,9 +383,9 @@ var API_URL = '/API/';
     // Return media links
     function get_links(video, score, id) {
         var links = '';
-        links += video ? "<a href='" + video + "' target='new'><i class='fa fa-play-circle' style='font-size:24px' title='Youtube Video'></i></a>&nbsp;" : "";
-        links += score ? "<a href='" + score + "' target='new'><i style='font-size:24px' class='fa' title='Sheet Music'>&#xf0f6;</i></a>&nbsp;" : "";
-        links += id? "<a href='sheets/" + id + "' target='new'><i style='font-size:24px' class='fa' title='Interacted Sheet Music'>&#xf1c7;</i></a>&nbsp;" : "";
+        links += video ? "<a href='" + video + "' target='new'><i class='fa fa-play-circle' style='font-size:24px' title='Youtube Video'></i></a>" : "";
+        links += score ? "<a href='" + score + "' target='new'><i style='font-size:24px' class='fa' title='Sheet Music'>&#xf0f6;</i></a>" : "";
+        links += id? "<a href='sheets/" + id + "' target='new'><i style='font-size:24px' class='fa' title='Interacted Sheet Music'>&#xf1c7;</i></a>" : "";
         return links;
     }
 
