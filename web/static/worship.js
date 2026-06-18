@@ -101,7 +101,7 @@ var API_URL = '/API/';
                             formatted_lyrics + 
                         '</div>' + 
                         '<div class="lyrics_buttons">' + 
-                            '<button type="button" class="btn-lyric btn-lyric-add add_btn" title="Add Section"><i class="fa-solid fa-plus"></i></button>' + 
+                            '<button type="button" class="btn-lyric btn-lyric-add add_sequence_btn" title="Add Section"><i class="fa-solid fa-plus"></i></button>' + 
                             '<button type="button" class="btn-lyric btn-lyric-remove remove_sequence_btn" title="Remove Section"><i class="fa-solid fa-trash"></i></button>' + 
                         '</div>';
                         
