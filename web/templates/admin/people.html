@@ -1,0 +1,601 @@
+{% extends 'base.html' %}
+
+{% block page_title %}EFCNC People{% endblock %}
+
+{% block extra_css %}
+<link href="/static/datatables.min.css" rel="stylesheet">
+<script src="/static/datatables.js"></script>
+<style>
+    .arrow { padding: 2px; margin: 2px; }
+    .arrow:hover { cursor: pointer; border: 1px solid #d0d0d0; }
+
+    button {
+        color: black;
+        background-color: #fff;
+        border: 1px solid #04AA6D;
+        padding: 8px 12px;
+        cursor: pointer;
+        border-radius: 4px;
+        transition: background-color 0.2s;
+    }
+
+    .highlight { background-color: #3e8e41; color: #fff; }
+    .user_name:hover { cursor: pointer; text-decoration: underline; color: #04AA6D; }
+    .fellowship:hover { cursor: pointer; }
+
+    /* --- Sticky Header & Chips Styles --- */
+    .sticky-header {
+        position: sticky;
+        background-color: #ffffff;
+        padding: 0px 10px;
+        z-index: 10;
+    }
+    .chip-btn {
+        border-radius: 20px;
+        margin: 3px 2px;
+        font-size: 13px;
+    }
+
+    .badge-count { font-size: 11px; opacity: 0.8; margin-left: 4px;}
+
+    .groups-header-bar {
+        display: flex;
+        align-items: center;
+        padding: 5px 0;
+    }
+    .groups-container {
+        display: none;
+        padding: 5px 0;
+        border-top: 1px dashed #eee;
+    }
+
+    /* --- Modal (Popup) Styles --- */
+  .modal {
+    display: none; 
+    position: fixed; 
+    z-index: 1000; 
+    left: 0; 
+    top: 0; 
+    width: 100%; 
+    height: 100%; 
+    background-color: rgba(0,0,0,0.5); /* Dimmed background */
+
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+  .modal-content {
+    background-color: #fefefe;
+    box-sizing: border-box;
+    margin: 5vh auto;
+    padding: 25px;
+    border: 1px solid #888;
+    width: 90%;
+    max-width: 600px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  }
+  .close-modal {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: -10px;
+  }
+  .close-modal:hover, .close-modal:focus { color: black; text-decoration: none; cursor: pointer; }
+  .modal-footer { margin-top: 20px; text-align: right; border-top: 1px solid #eee; padding-top: 15px;}
+  
+  /* --- NEW: Responsive Modal Form Grid --- */
+  .modal-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* 2 equal columns on desktop */
+    gap: 15px; /* Spacing between inputs */
+  }
+  
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px; /* Space between label and input */
+  }
+  
+  .form-group.full-width {
+    grid-column: 1 / -1; /* Forces the element to span all available columns */
+  }
+  
+  .form-group label {
+    font-size: 13px;
+    font-weight: bold;
+    color: #555;
+  }
+  
+  .form-group input {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    width: 100%;
+    box-sizing: border-box; /* Ensures padding doesn't break the width */
+  }
+
+  .checkbox-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    border-radius: 4px;
+    align-items: center;
+    font-size:12px; 
+  }
+
+  /* --- Override jQuery UI Checkbox Styles --- */
+  .checkbox-group .ui-checkboxradio-label {
+    background-color: #ffffff !important;
+    border: 1px solid #04AA6D !important;
+    color: black !important;
+    padding: 6px 12px !important;
+    transition: background-color 0.2s;
+  }
+
+  .checkbox-group .ui-checkboxradio-label:hover {
+    background-color: #f0fbf7 !important;
+  }
+
+  .checkbox-group .ui-checkboxradio-label.ui-state-active {
+    background-color: #3e8e41 !important;
+    border-color: #3e8e41 !important;
+    color: #ffffff !important;
+  }
+
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="groups" class="sticky-header"></div>
+
+<table id="people" class="display compact cell-border"></table>
+
+<div id="editModal" class="modal">
+  <div class="modal-content">
+    <span class="close-modal">&times;</span>
+    <h3 style="margin-top: 0;">Edit Details</h3>
+    <div id="modal-body">
+        </div>
+    <div class="modal-footer">
+        <button id="saveUserBtn" class="highlight">Save Changes</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+
+    // --- Global Variables ---
+    let people = {{ people|safe }};
+    let groups = {{ groups|safe }};
+    let sundays = {{ sundays|safe }};
+    let worship_id = sundays.worship_id;
+    let roll_call = []
+    let in_person = 0;
+    let zoom = 0;
+    let total = 0;
+    let keyword = '';
+    let $group_focused;
+    let currentRow;
+
+    // ============================================
+    // --- Initialization and UI Rendering ---
+    // ============================================
+
+    // --- Dynamic Sticky Header Offset ---
+    function updateStickyHeader() {
+        let mainHeader = document.getElementById('header');
+        let stickyChips = document.querySelector('.sticky-header');
+        
+        if (mainHeader && stickyChips) {
+            let currentHeaderHeight = mainHeader.offsetHeight;
+            stickyChips.style.top = currentHeaderHeight + 'px';
+        }
+    }
+
+    updateStickyHeader();
+    // Run it again anytime the user resizes their window or flips their phone
+    $(window).on('resize', updateStickyHeader);
+
+
+    function renderGroups() {
+        // Check if the container is currently visible before we destroy it
+        let isOpen = $('#groups-container').is(':visible');
+
+        let html = '<div class="groups-header-bar">';
+        html += '<button id="hamburger-btn" class="chip-btn" style="background-color: #f8f9fa; border-color: #ddd; color: black;">☰ Toggle Groups</button>';
+        html += '</div>';
+        
+        // Wrap the actual group buttons in a hidden container
+        let displayStyle = isOpen ? 'style="display: block;"' : '';
+        html += `<div id="groups-container" class="groups-container" ${displayStyle}>`;
+        for(let g of groups) {
+            // Count how many people are in this group
+            let count = people.filter(p => p[4] && p[4].includes(g)).length;
+
+            let activeClass = (g === keyword) ? 'highlight' : '';
+
+            html += `<button class="group_key chip-btn ${activeClass}" name="${g}">${g} <span class="badge-count">(${count})</span></button>`;
+        }
+        html += '</div>';
+        $('#groups').html(html);
+    }
+    renderGroups();
+
+    function count_panel() {
+        let toolbar = document.createElement('div');
+        toolbar.innerHTML = '<span id="total_label">總人數</span>：<span id="total">0</span>&nbsp;實體：<span id="in_person">0</span>&nbsp;線上：<span id="zoom">0</span>&nbsp;&nbsp;&nbsp;&nbsp;<button id="addRow">Add Guest</button>';
+        return toolbar;
+    }
+
+    let table = new DataTable('#people', {
+        info: false,
+        data: people,
+        columns: [
+            {'title' : '<span class="arrow left" name="-1">&lt;</span>&nbsp;&nbsp;<span id="today">' + sundays.sunday + '</span>&nbsp;&nbsp;<span class="arrow ight" name="1">&gt;</span>', data: null, render: (data, type, row) => create_checkbox(data[0], data[5]), orderable: false},
+            { title: 'Name', data: null, render: (data, type, row) => data[1]?'<span title="Edit">'+data[2]+' ('+data[1]+')</span>':'<span title="Edit">'+data[2]+'</span>', searchable: true, className: 'user_name' },
+            { title: 'Family', visible: false, data: null, render: (data, type, row) => data[6], searchable: true },
+            { title: 'Name_2', visible: false },
+            { title: '團契/團體' , visible: false, searchable: true},
+            { title: 'title', visible: false, searchable: false},
+            { title: 'f_id', visible: false, data: null, render: (data, type, row) => data[7], searchable: false }
+        ],
+        ordering: true,
+        paging: false,
+        layout: {
+            topStart: count_panel()
+        },
+        drawCallback: function (settings) {
+            calculate_total();
+        }
+
+    });
+
+
+    // ============================================
+    // --- API and Logic ---
+    // ============================================
+    function create_checkbox(id, present) {
+        let html = '<div id="' + id + '"><button name="in"';
+        if(present==1) { html += ' class="highlight"'; }
+        html += '>實體</button> <button name="out"';
+        if(present==0) { html += ' class="highlight"'; }
+        html += '>線上</button></div>';
+        return html;
+    }
+
+    // Update present status when button is checked
+    function update_present(id, present) {
+        console.log('submitting...', id, present)
+        let url = API_URL + 'rollcall/' + (worship_id);
+        let data = {'user_id': id, 'present': present};
+        //$('#loading').show();
+        $.ajax({
+            type: "post",
+            url: url,
+	        data: JSON.stringify(data),
+            contentType: "application/json",
+            dataType: 'json',
+            complete: function(response) {
+                if(response.status==200) {
+                    table.clear().rows.add(response.responseJSON).draw();
+                    console.log('search keyword is', keyword)
+                }
+                //$('#loading').hide();
+            }
+        });
+    }
+
+    function calculate_total() {
+        roll_call = [];
+        $('button').each(function() {
+            if(this.className == 'highlight') {
+                let user_id = $(this).parent().attr('id');
+                if(this.name == "out") {
+                    roll_call.push([user_id, 0])
+                }
+                else if(this.name == "in") {
+                    roll_call.push([user_id, 1])
+                }
+                else {
+                    //$(this).removeClass('highlight');
+                }
+            }
+        });
+
+        if(roll_call.length>0) {
+            $('#submit').removeAttr('disabled');
+        }
+        else {
+            $('#submit').attr('disabled', true);
+        }
+        zoom = roll_call.filter(obj=>obj[1] == 0).length;
+        in_person = roll_call.filter(obj=>obj[1] == 1).length;
+        total = in_person + zoom;
+
+        $('#in_person').text(in_person);
+        $('#zoom').text(zoom);
+        $('#total').text(total);
+    }
+
+    // ============================================
+    // --- Modal (Popup) Logic ---
+    // ============================================
+
+    function openModal(d) {
+        $('#modal-body').html(user_details(d));
+        $('#editModal').fadeIn('fast');
+        $( "#modal-body input[type='checkbox']" ).checkboxradio({ icon: false });
+    }
+
+    function closeModal() {
+        $('#editModal').fadeOut('fast');
+    }
+
+    function user_details(d) {
+        let html = '<div class="modal-grid" init-data="' + d[0] + '">';
+        html += '<div class="form-group"><label>Name:</label><input name="user_name" init-data="' + d[1] + '" value="' + d[1] + '"/></div>';
+        html += '<div class="form-group"><label>Name (Chinese):</label><input name="user_name_2" init-data="' + d[2] + '" value="' + d[2] + '"/></div>';
+        html += '<div class="form-group"><label>稱謂 (Goes By):</label><input name="user_title" init-data="' + d[3] + '" value="' + d[3] + '"/></div>';
+        html += '<div class="form-group"><label>Family ID:</label><input name="user_family_id" init-data="' + d[6] + '" value="' + d[6] + '"/></div>';
+        html += '<div class="form-group"><label>Email:</label><input name="user_email" init-data="' + d[8] + '" value="' + d[8] + '"/></div>';
+        html += '<div class="form-group"><label>Phone:</label><input name="user_phone" init-data="' + d[12] + '" value="' + d[12] + '"/></div>';
+        html += '<div class="form-group"><label>Line:</label><input name="user_line_id" init-data="' + d[9] + '" value="' + d[9] + '"/></div>';
+        html += '<div class="form-group"><label>Discord:</label><input name="user_discord_id" init-data="' + d[10] + '" value="' + d[10] + '"/></div>';
+        html += '<div class="form-group full-width"><label>註 (Notes):</label><input name="user_other" init-data="' + d[11] + '" value="' + d[11] + '"/></div>';
+        html += '<div class="form-group full-width"><label>團契/團體 (Groups):</label><div class="checkbox-group">' + get_groups(d[4], get_group_labels) + '</div></div>';
+        
+        // Only show delete button if it's an existing user
+        if (d[0] !== 0) {
+            html += '<div class="form-group full-width" style="margin-top: 15px;"><button class="delete" name="' + d[0] + '" title="Delete User" style="background-color: #d32f2f; color: white; border: none; padding: 10px;">Delete User</button></div>';
+        }
+        html += '</div>';
+        return html;
+    }
+
+    function get_groups(element, callback) {
+        if (groups.length==0) {
+            url = API_URL + 'groups';
+            $.when( $.ajax( url ) ).then(function( data ) {
+                groups = data;
+                return callback(element);
+            });
+        }
+        else {
+            return callback(element);
+        }
+    }
+
+    function get_group_labels(name) {
+        let html = '<div name="user_groups" class="checkbox-group" init-data="' + name + '">';
+        for(var i=0;i<groups.length;i++) {
+            html += '<label for="radio-' + (i+1) + '">' + groups[i] + '</label>';
+            init_names = name.split(',');
+            if (init_names.indexOf(groups[i]) >= 0) {
+                html += '<input type="checkbox" checked init-id="' + groups[i] + '" init-data="' + groups[i] + '" name="radio-' + (i+1) + '" id="radio-' + (i+1) + '">';
+            }
+            else {
+                html += '<input type="checkbox" init-id="' + groups[i] + '" init-data="' + groups[i] + '" name="radio-' + (i+1) + '" id="radio-' + (i+1) + '">';
+            }
+        }
+        html += '</div>';
+        return html;
+    }
+
+    function selected_group_name(element) {
+        temp = [];
+        element.find('input[type="checkbox"]').each(function() {
+            if(this.checked) {
+                temp.push($(this).attr('init-data'));
+            }
+        });
+        return temp.join(',');
+    }
+
+    function submit_modal_data() {
+        let container = $('#modal-body');
+        let data = [];
+
+       
+        if(container.find('input[name="user_name"]').attr('init-data') != container.find('input[name="user_name"]').val()) { data.push({'name': container.find('input[name="user_name"]').val()}); }
+        if(container.find('input[name="user_name_2"]').attr('init-data') != container.find('input[name="user_name_2"]').val()) { data.push({'name_2': container.find('input[name="user_name_2"]').val()}); }
+        if(container.find('input[name="user_title"]').attr('init-data') != container.find('input[name="user_title"]').val()) { data.push({'title': container.find('input[name="user_title"]').val()}); }
+        if(container.find('input[name="user_email"]').attr('init-data') != container.find('input[name="user_email"]').val()) { data.push({'email': container.find('input[name="user_email"]').val()}); }
+        if(container.find('input[name="user_line"]').attr('init-data') != container.find('input[name="user_line"]').val()) { data.push({'line': container.find('input[name="user_line"]').val()}); }
+        if(container.find('input[name="user_discord"]').attr('init-data') != container.find('input[name="user_discord"]').val()) { data.push({'discord': container.find('input[name="user_discord"]').val()}); }
+        if(container.find('input[name="user_family_id"]').attr('init-data') != container.find('input[name="user_family_id"]').val()) { data.push({'family_id': container.find('input[name="user_family_id"]').val()}); }
+        if(container.find('input[name="user_other"]').attr('init-data') != container.find('input[name="user_other"]').val()) { data.push({'other': container.find('input[name="user_other"]').val()}); }
+        if(container.find('input[name="user_phone"]').attr('init-data') != container.find('input[name="user_phone"]').val()) { data.push({'phone': container.find('input[name="user_phone"]').val()}); }
+
+        let selected_groups = selected_group_name(container.find('[name="user_groups"]'))
+        if(container.find('span[name="user_groups"]').attr('init-data') != selected_groups) {
+            data.push({'group': selected_groups.split(',')});
+        }
+
+        let user_id = container.find('.modal-grid').attr('init-data');
+
+        if (data.length > 0) {
+            url = API_URL + 'people/' + user_id;
+            data.push({'worship_id': worship_id});
+            $('#loading').show();
+            $.ajax({
+                type: "post",
+                url: url,
+                data: JSON.stringify(data),
+                contentType: "application/json",
+                dataType: 'json',
+                complete: function(response) {
+                    if(response.status==200) {
+                        // Update the people array (so group_count works)
+                        people = response.responseJSON;
+                        // Redraw table with new data
+                        table.clear().rows.add(people).draw();
+                        // Re-render groups to update counts
+                        renderGroups();
+                    } else {
+                        table.column(4).search('').draw(false).order([6, 'asc']).draw();
+                    }
+                    $('#loading').hide();
+                    closeModal();
+                }
+            });
+        }
+
+        else if(container.find('input[name="user_name"]').attr('init-data') == 'Guest') {
+
+            table.clear().rows.add(people).draw();
+
+            closeModal();
+
+        } else {
+
+            closeModal(); // No changes made, just close it
+
+        }
+
+    }
+
+    // ============================================
+    // --- Event Listeners ---
+    // ============================================
+
+    // --- Toggle Hamburger Menu ---
+    $(document).on('click', '#hamburger-btn', function() {
+        $('#groups-container').slideToggle('fast');
+    });
+
+    // --- Open Modal on Name Click ---
+    $(document).on('click', '.user_name', function (e) {
+        let tr = e.target.closest('tr');
+        currentRow = table.row(tr);
+        openModal(currentRow.data());
+    });
+
+    // --- Open Modal for Adding New Guest ---
+    $(document).on('click', '#addRow', function() {
+        // ID is 0 so the backend knows to create a new record
+        let new_data = [0, 'Guest', '訪客', '', '訪客', 1, '', 0, '', '', '', '', ''];
+        openModal(new_data); 
+    });
+
+    // --- Close Modal Button ---
+    $('.close-modal').on('click', closeModal);
+
+    // --- Save User Button in Modal ---
+    $('#saveUserBtn').on('click', submit_modal_data);
+
+    // --- Delete Button Logic in Modal ---
+    $(document).on('click', 'button.delete', function() {
+        id = this.name;
+        if(confirm('This will delete this user, are you sure?')) {
+            url = API_URL + 'people/' + id + '?worship_id=' + worship_id;
+            $('#loading').show();
+            $.ajax({
+                type: "delete",
+                url: url,
+                contentType: "application/json",
+                dataType: 'json',
+                complete: function(response) {
+                    if(response.status==200) {
+                        if(response.responseJSON.length>0) {
+                            people = response.responseJSON; 
+                            table.clear().rows.add(people).draw();
+                        } else { 
+                            people = [];
+                            table.clear().draw(); 
+                         }
+                         renderGroups();
+                    }
+                    $('#loading').hide();
+                    closeModal(); // Close modal after delete
+                }
+            });
+        }
+    });
+
+    // --- Group Filter Chips ---
+    function is_highlight(className) {
+        return className.trim().split(' ').pop() == 'highlight';
+    }
+
+    $(document).on('click', 'button.group_key', function() {
+        toggle = true;
+        keyword = this.name;
+        div = $(this).parent();
+        div.children('button').each(function() {
+            if(this.name==keyword&&is_highlight(this.className)) {
+                toggle = false;
+                keyword = '';
+            }
+            $(this).removeClass('highlight');
+        });
+        if(toggle) {
+            $(this).addClass('highlight');
+            $('#total_label').text(keyword);
+            table.column(4).search((d) => d.indexOf(keyword)>=0).draw();
+        }
+        else {
+            console.log('reset')
+            $('#total_label').text('總人數');
+            table.column(4).search('').draw();
+        }
+    });
+
+    // --- Attendance Buttons ---
+    $(document).on('click', 'button', function() {
+        let clicked = this.name;
+        if(clicked=='in' || clicked=='out') {
+            div = $(this).parent();
+            toggle = true;
+            id = div.attr('id');
+            
+            div.children('button').each(function() {
+                if(this.name==clicked&&this.className=='highlight') {
+                    toggle = false;
+                }
+                $(this).removeClass('highlight');
+            });
+
+            if (toggle) {
+                $(this).addClass('highlight');
+                update_present(id, clicked=='in'?1:0);
+            }
+            else {
+                update_present(id, -1);
+            }
+        }
+    });
+
+    // --- Sunday Navigation Arrows ---
+    $('.arrow').click(function() {
+        let increment = Number($(this).attr('name'));
+        let id = sundays.all.indexOf($('#today').text());
+        id = (id > sundays.all.length || id == 0) ? id : id += increment;
+        worship_id = (worship_id + increment);
+
+        url = API_URL + 'rollcall/' + worship_id;
+        $('#loading').show();
+        $.ajax({
+            type: "get",
+            url: url,
+            contentType: "application/json",
+            dataType: 'json',
+            complete: function(response) {
+                if(response.status==200) {
+                    table.clear().rows.add(response.responseJSON).draw();
+                    $('#today').html(sundays.all[id]);
+                    //calculate_total();
+                }
+                $('#loading').hide();
+            }
+        });
+    });
+
+
+</script>
+{% endblock %}

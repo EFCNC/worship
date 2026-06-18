@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block page_title %}EFCNC Dashboard{% endblock %}
+
+{% block extra_css %}
+    <link href="/static/css/home.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+    <div class="menu-container">
+        <a href="{{ url_for('worship_home') }}" class="menu-card">
+            <i class="fa-solid fa-music"></i>
+            <span>Worship</span>
+        </a>
+
+        <a href="{{ url_for('admin_home') }}" class="menu-card">
+            <i class="fa-solid fa-bank"></i>
+            <span>Admin</span>
+        </a>
+
+        <a href="{{ url_for('slides') }}" class="menu-card">
+            <i class="fa-brands fa-slideshare"></i>
+            <span>Slides</span>
+        </a>
+
+        <a href="{{ url_for('song_list') }}" class="menu-card">
+            <i class="fa-solid fa-folder"></i>
+            <span>Song List</span>
+        </a>
+    </div>
+{% endblock %}

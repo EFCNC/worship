@@ -111,14 +111,21 @@ def download():
     return send_file(file, as_attachment=True)
 
 # Song section
-@api.route("/song/<id>")
+@api.route("/song/<id>", methods=["POST", "DELETE", "GET"])
 def get_song(id):
     '''
     :param id: song_id
     :return: return song content
     '''
-    content = Utils.get_song_by_id(id)
-    return content
+    if request.method == "POST":
+        song = request.get_json()
+        result = Utils.edit_song(id, song)
+        return result
+    if request.method == "GET":
+        content = Utils.get_song_by_id(id)
+        return content
+    if request.method == "DELETE":
+        return Utils.delete_song_by_id(id)
 
 @api.route("/songs")
 @api.route("/songs/<ids>")
@@ -142,18 +149,6 @@ def get_song_ranking(days, yes=None):
     '''
     content = Utils.get_songs_para(days, yes)
     return content
-
-@api.route("/song/<id>/edit", methods=["POST"])
-def edit_song(id):
-    '''
-    :param id: song_id
-    :return: 200 when song is updated successfully. error message with 500
-    :POST: content of edited song
-    '''
-
-    song = request.get_json()
-    result = Utils.edit_song(id, song)
-    return result
 
 @api.route("/song/add", methods=["POST"])
 def add_song():

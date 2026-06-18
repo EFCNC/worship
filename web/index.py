@@ -79,10 +79,29 @@ def handle_announcement(data):
 	print("msg", data)
 	emit('announcement', data, broadcast=True)
 
+# Inject ID into page using context processor
+@app.context_processor
+def inject_worship_id():
+    # This runs automatically before any template is rendered
+    coming_sunday = __get_sundays()["sunday"]
+    worship_id = Utils.get_worship_id(coming_sunday)[0]
+    return dict(worship_id=worship_id)
+
 # Rendering interfaces
 
+# --------- Home and Profile Page ---------
 @app.route("/")
 def index():
+	return render_template('home.html')
+
+@app.route("/profile")
+def profile():
+	team = Utils.list_team()
+	return render_template('profile.html', team=team)
+
+# -------- Worship Pages ---------
+@app.route("/worship")
+def worship_home():
 	id = request.args.get('id', None)
 	if id:
 		songs = Utils.get_worship_songs(id)
@@ -91,13 +110,7 @@ def index():
 	sundays = Tools.allsundays()
 	worship = Utils.worship_list()
 	worship = [{'date': x, 'worship': next((y for y in worship if y['date'] == x), -1)} for x in sundays[1]]
-	return render_template('worship.html', worship=worship, sundays=sundays)
-
-@app.route("/info")
-def info():
-	coming_sunday = __get_sundays()["sunday"]
-	id = Utils.get_worship_id(coming_sunday)[0]
-	return render_template('info.html', id=id)
+	return render_template('worship/worship.html', worship=worship, sundays=sundays)
 
 @app.route("/worship/<id>")
 @app.route("/worship/<id>/<tab>")
@@ -115,81 +128,31 @@ def worship(id, tab=''):
 		w = w[0]
 	return render_template('worship/notes.html', songs=songs, id=id, w=w, tab=tab)
 
-@app.route("/slides/admin1")
-def sildes_admin1():
-	_init_slide()
-	global client
-	client = {'admin': [], 'lead': [], 'musician': [], 'view': []}
-	return slides_data
-
-@app.route("/slides")
-@app.route("/slides/<mode>")
-def slides_viewer(mode=None):
-	__update_client_mode(mode)
-	if not mode:
-		return render_template('slides/slides.html', presentation=slides_data, mode='')
-	if not slides_data['data']:
-		__get_slide_json()
-	if mode == 'admin':
-		if len(client['admin']) > 0:
-			__update_client_mode('')
-			return "<script>alert('Only one Admin mode can be connected, please use different mode.');window.location.replace('../slides');</script>"
+@app.route("/worship/schedule")
+def schedule():
+	now = datetime.now()
+	year = str(now.year)
+	sundays = __get_sundays()
+	allsundays = sundays['all']
+	assigned = []
+	booked = Utils.list_team(year)
+	for sun in allsundays:
+		if any(x for x in booked if x['date'] == sun):
+			assigned.append([sun, [x for x in booked if x['date'] == sun]])
 		else:
-			return render_template('slides/slides_admin.html', presentation=slides_data, mode=mode)
-	elif mode == 'lead':
-		if len(client['lead']) > 0:
-			__update_client_mode('')
-			return "<script>alert('Only one Lead mode can be connected, please use different mode.');window.location.replace('../slides');</script>"
-		return render_template('slides/slides_lead.html', presentation=slides_data, mode=mode)
-	elif mode == 'view':
-		__update_client_mode('')
-		return render_template('slides/slides_view.html', presentation=slides_data, mode=mode)
-	return render_template('slides/slides.html', presentation=slides_data, mode=mode)
-
-@app.route("/notes")
-def get_notes():
-	'''
-	:param id (rowid) from song_set
-	:return: pre-filled or empty notes.html template
-	'''
-
-	id = request.args.get('id', None)
-	content = []
-	if id:
-		content = Utils.get_info_by_id(id)
-	return render_template("notes.html", content=content)
+			assigned.append([sun, []])
+	team = Utils.list_team()
+	marked = Utils.get_marked_user()
+	return render_template('worship/schedule.html', booked=assigned, team=team, marked=marked, sunday=sundays['sunday'])
 
 @app.route("/song/list")
-def get_songs():
+def song_list():
 	'''
 	:param: none
 	:return: all song
 	'''
 	songs = Utils.get_songs()
-	return render_template('song_list.html', songs=songs)
-
-@app.route("/sheet/<id>")
-def get_song_sheet(id):
-	'''
-	:param id: song_id
-	:param keys: comma number
-	:return: sheet object with ABC content, sheet link, and transpose numbers
-	'''
-	keys = ['C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B']
-	keys_1 = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B']
-	keyof = request.args.get('keyof', '0,1,2,3,4,5,6,7,8,9,10,11') # when no key is present, return all keys
-	keyof = keyof.split(',')
-
-	sheet, key = Utils.get_song_sheet(id)
-	if key:
-		k_init = keys.index(key) if key in keys else keys_1.index(key)
-		keyof_ = [k_init+int(x) for x in keyof]
-		for i in range(0, len(keyof_)): # adjust index when value is 12 or over
-			keyof_[i] = keyof_[i]-12 if keyof_[i] > 11 else keyof_[i]
-		sheet['keyof_name'] = [keys[x] for x in keyof_]
-		keyof = [keys[int(x)] for x in keyof] # Translate int to key name
-		sheet['keyof'] = keyof
-	return render_template('sheet.html', sheets=sheet)
+	return render_template('song/song_list.html', songs=songs)
 
 @app.route("/chords/<ids>")
 def get_song_chords(ids):
@@ -268,7 +231,7 @@ def edit_song(id): # Renamed for clarity
 
     # Handle creating a new song
     if id == '-1':
-        return render_template('song_editor.html', content={'id': -1})
+        return render_template('song/song_editor.html', content={'id': -1})
     
     db = request.args.get('db', 'worship.db')
     lang = request.args.get('lang', None)
@@ -284,15 +247,8 @@ def edit_song(id): # Renamed for clarity
         # add key lyrics to be used by song_editor
         content["lyrics"] = content["lyrics_raw"] 
         
-    return render_template('song_editor.html', content=content)
+    return render_template('song/song_editor.html', content=content)
 
-
-@app.route("/calendar")
-def calendar():
-	now = datetime.now()
-	year = str(now.year)
-	column, calendar = Utils.get_calendar(year)
-	return render_template('admin/calendar.html', column=column, calendar=calendar)
 
 @app.route("/assets")
 def assets():
@@ -303,36 +259,63 @@ def assets():
 
 	return render_template('slides_assets.html', setting=setting, assets=assets, promote=promote)
 
-@app.route("/schedule")
-def schedule():
-	now = datetime.now()
-	year = str(now.year)
-	sundays = __get_sundays()
-	allsundays = sundays['all']
-	assigned = []
-	booked = Utils.list_team(year)
-	for sun in allsundays:
-		if any(x for x in booked if x['date'] == sun):
-			assigned.append([sun, [x for x in booked if x['date'] == sun]])
+# @app.route("/people")
+# def people():
+# 	people = Utils.get_teams()
+# 	return render_template('people.html', people=people)
+
+# -------- Slides Pages ---------
+
+# I think this one is specifically to reset a locked admin or lead page. We could make it slides/reset in the future.
+@app.route("/slides/admin1")
+def sildes_admin1():
+	_init_slide()
+	global client
+	client = {'admin': [], 'lead': [], 'musician': [], 'view': []}
+	return slides_data
+
+@app.route("/slides")
+def slides():
+	return render_template('slides/slides.html')
+
+@app.route("/slides/<mode>")
+def slides_viewer(mode=None):
+	__update_client_mode(mode)
+	if not mode:
+		return render_template('slides/slides.html', presentation=slides_data, mode='')
+	if not slides_data['data']:
+		__get_slide_json()
+	if mode == 'admin':
+		if len(client['admin']) > 0:
+			__update_client_mode('')
+			return "<script>alert('Only one Admin mode can be connected, please use different mode.');window.location.replace('../slides');</script>"
 		else:
-			assigned.append([sun, []])
-	team = Utils.list_team()
-	marked = Utils.get_marked_user()
-	return render_template('schedule.html', booked=assigned, team=team, marked=marked, sunday=sundays['sunday'])
+			return render_template('slides/slides_admin.html', presentation=slides_data, mode=mode)
+	elif mode == 'lead':
+		if len(client['lead']) > 0:
+			__update_client_mode('')
+			return "<script>alert('Only one Lead mode can be connected, please use different mode.');window.location.replace('../slides');</script>"
+		return render_template('slides/slides_lead.html', presentation=slides_data, mode=mode)
+	elif mode == 'view':
+		__update_client_mode('')
+		return render_template('slides/slides_view.html', presentation=slides_data, mode=mode)
+	return render_template('slides/slides.html', presentation=slides_data, mode=mode)
 
+# --------- Admin Pages ---------
+@app.route("/admin")
+def admin_home():
+	coming_sunday = __get_sundays()["sunday"]
+	id = Utils.get_worship_id(coming_sunday)[0]
+	return render_template('admin/home.html', id=id)
 
-@app.route("/profile")
-def profile():
-	team = Utils.list_team()
-	return render_template('profile.html', team=team)
+@app.route("/admin/info")
+def admin_info():
+	coming_sunday = __get_sundays()["sunday"]
+	id = Utils.get_worship_id(coming_sunday)[0]
+	return render_template('admin/info.html', id=id)
 
-@app.route("/people")
-def people():
-	people = Utils.get_teams()
-	return render_template('people.html', people=people)
-
-@app.route("/rollcall")
-def roll_call():
+@app.route("/admin/people")
+def admin_people():
 	id = request.args.get('id', None)
 	groups = Utils.get_groups()
 	sundays = __get_sundays()
@@ -340,13 +323,22 @@ def roll_call():
 		people = Utils.get_team_present(sundays['worship_id'])
 	else:
 		people = Utils.get_team_present(id)
-	return render_template('admin/rollcall.html', people=people, groups=[x[1] for x in groups], sundays=sundays)
+	return render_template('admin/people.html', people=people, groups=[x[1] for x in groups], sundays=sundays)
 
-@app.route("/report/<id>")
-def report(id):
+@app.route("/admin/calendar")
+def admin_calendar():
+	now = datetime.now()
+	year = str(now.year)
+	column, calendar = Utils.get_calendar(year)
+	return render_template('admin/calendar.html', column=column, calendar=calendar)
+
+@app.route("/admin/report/<id>")
+def admin_report(id):
 	report, saved = Tools.get_report(id)
-	return render_template('report_pdf.html', saved=saved, report=report, id=id)
+	return render_template('admin/report_pdf.html', saved=saved, report=report, id=id)
 
+
+# --------- Other Pages ---------
 @app.route("/files")
 def file_list():
 	'''

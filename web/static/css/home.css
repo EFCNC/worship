@@ -1,0 +1,44 @@
+.menu-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 20px;
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 20px 20px;
+}
+
+.menu-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #ffffff;
+    color: #333333;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 25px 15px;
+    text-decoration: none;
+    font-size: 1.1rem;
+    font-weight: 600;
+    transition: all 0.2s ease-in-out;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.menu-card:hover {
+    background-color: #3182ce;
+    color: #ffffff;
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(49, 130, 206, 0.3);
+    border-color: #3182ce;
+}
+
+.menu-card i {
+    font-size: 2.5rem;
+    margin-bottom: 12px;
+    color: #4a5568;
+    transition: color 0.2s ease-in-out;
+}
+
+.menu-card:hover i {
+    color: #ffffff;
+}

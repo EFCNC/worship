@@ -4,6 +4,9 @@
 
 {% block extra_css %}
 <style>
+    /* =========================================
+        Dialog and Popup
+    ========================================= */
     /* Hide header and navigation when in popup/dialog mode */
     body.popup-mode #main-content,
     body.popup-mode main {
@@ -21,6 +24,9 @@
         display: none !important;
     }
     
+    /* =========================================
+        Main Thingys
+    ========================================= */
     .editor-container { 
         max-width: 95%; 
         margin: 20px auto; 
@@ -29,25 +35,55 @@
         border-radius: 8px; 
         box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
     }
-    .form-row { display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; }
-    .form-group { display: flex; flex-direction: column; flex-grow: 1; }
-    .form-group label { font-weight: bold; font-size: 0.85rem; margin-bottom: 5px; color: #555; }
-    input[type="text"], textarea { padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem; }
-    
-    .tag-container { background: #f9f9f9; padding: 10px; border-radius: 4px; margin-bottom: 10px; border: 1px solid #eee; }
-    .sequence, .chord {
-        display: inline-block;
-        padding: 4px 10px;
-        border: 2px solid #333;
-        border-radius: 4px;
-        margin: 3px;
-        cursor: pointer;
-        font-weight: bold;
-        transition: all 0.2s;
-        background: white;
+
+    .editor-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
     }
-    .sequence:hover, .chord:hover { background: #333; color: #fff; }
+
+    /* Remove default margin from h2 so it centers perfectly in the flex container */
+    .editor-header h2 {
+        margin: 0; 
+    }
+
+    /* =========================================
+        Form Crap
+    ========================================= */
+    .form-row { display: flex; 
+        gap: 15px; 
+        margin-bottom: 15px; 
+        flex-wrap: wrap; 
+    }
+
+    .form-group { 
+        display: flex; 
+        flex-direction: column; 
+        flex-grow: 1; 
+        min-width: 0;
+    }
+
+    .form-group label { font-weight: bold;
+        font-size: 0.85rem;
+        margin-bottom: 5px;
+        color: #555;
+    }
+
+    input[type="text"], textarea, select { 
+        box-sizing: border-box;
+        width: 100%;            
+        max-width: 100%;        
+        padding: 8px; 
+        border: 1px solid #ccc; 
+        border-radius: 4px; 
+        font-size: 1rem; 
+        background-color: #fff;
+    }
     
+    /* =========================================
+        Lyrics Crap
+    ========================================= */
     .lyrics-split-container {
         display: flex;
         gap: 20px;
@@ -79,13 +115,58 @@
         outline: none;
     }
 
-    /* Dynamic Inputs for Videos/Scores */
-    .dynamic-input-group { display: flex; gap: 5px; margin-bottom: 8px; }
-    .dynamic-input-group input { flex-grow: 1; }
-    .btn-remove { background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; padding: 0 12px; font-weight: bold; }
-    .btn-add { background: #e2e8f0; color: #333; border: 1px dashed #cbd5e1; border-radius: 4px; padding: 6px; cursor: pointer; font-size: 0.85rem; margin-top: 5px; transition: 0.2s; }
-    .btn-add:hover { background: #cbd5e1; }
+    /* =========================================
+        Chords/Tags and Sequence
+    ========================================= */
+    .tag-container { background: #f9f9f9;
+        padding: 10px;
+        border-radius: 4px;
+        margin-bottom: 10px;
+        border: 1px solid #eee;
+    }
+
+    .sequence, .chord {
+        display: inline-block;
+        padding: 4px 10px;
+        border: 2px solid #333;
+        border-radius: 4px;
+        margin: 3px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: all 0.2s;
+        background: white;
+    }
+
+    .sequence:hover, .chord:hover {
+        background: #333;
+        color: #fff;
+    }
     
+    /* =========================================
+        Dynamic Video/Score/Sheet Inputs
+   ========================================= */
+    .dynamic-input-group { 
+        display: flex; 
+        gap: 5px; 
+        margin-bottom: 8px; 
+    }
+
+    .dynamic-input-group input[type="text"], 
+    .dynamic-input-group textarea { 
+        flex: 1;
+        width: 0;
+        min-width: 0;
+    }
+
+    /* =========================================
+        Buttons
+   ========================================= */
+    /* Shared Button Styles */
+    .btn, .btn-remove, .btn-add, .btn-delete {
+        border-radius: 4px; 
+        cursor: pointer; 
+    }
+
     .actions { 
         margin-top: 20px; 
         padding-top: 20px; 
@@ -94,26 +175,74 @@
         justify-content: flex-end; 
         gap: 10px; 
     }
-    .btn { padding: 10px 25px; border-radius: 4px; cursor: pointer; border: none; font-weight: bold; }
+
+    .btn { 
+        padding: 10px 25px;
+        border: none;
+        font-weight: bold;
+    }
+
+    /* For Dynamic X Input */
+    .btn-remove {
+        background: #dc3545;
+        color: white;
+        border: none;
+        padding: 0 12px;
+        font-weight: bold;
+    }
+
+    .btn-add {
+        background: #e2e8f0;
+        color: #333;
+        border: 1px dashed #cbd5e1;
+        padding: 6px;
+        font-size: 0.85rem;
+        margin-top: 5px;
+        transition: 0.2s;
+    }
+
+    .btn-add:hover { background: #cbd5e1; }
+       
     .btn-save { background-color: #28a745; color: white; }
     .btn-cancel { background-color: #dc3545; color: white; text-decoration: none; display: inline-block; text-align: center; }
+
+    /* For Delete Song button */
+    .btn-delete {
+        background: none;
+        border: none;
+        color: #dc3545;
+        padding: 0.5rem;
+        transition: background-color 0.2s ease;
+    }
+
+    .btn-delete:hover {
+        background-color: #ffe6e6;
+    }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="editor-container">
-    <h2>Song Editor</h2>
+    <div class="editor-header">
+        <h2>Song Editor</h2>
+
+        <button type="button" class="btn-delete" aria-label="Delete Song" onclick="deleteSong()">
+            Delete Song <i class="fa-solid fa-trash"></i> 
+        </button>
+
+    </div>
+    
     <form id="song_form">
         <input type="hidden" name="id" value="{{ content.id }}">
         
         <div class="form-row">
-            <div class="form-group" style="flex: 3;">
+            <div class="form-group" style="flex-grow: 3;">
                 <label>Title</label>
                 <input name="title" type="text" value="{{ content.title }}"/>
             </div>
-            <div class="form-group">
+            <div class="form-group" style="flex: 0 1 80px;">
                 <label>Key</label>
-                <input name="song_key" type="text" value="{{ content.key }}" placeholder="C"/>
+                <input name="song_key" type="text" value="{{ content.song_key }}" placeholder="C"/>
             </div>
             <div class="form-group">
                 <label>Book</label>
@@ -122,9 +251,30 @@
         </div>
 
         <div class="form-row">
-            <div class="form-group"><label>Lang 1</label><input name="lang" type="text" value="{{ content.lang }}"/></div>
-            <div class="form-group"><label>Lang 2</label><input name="lang_2" type="text" value="{{ content.lang_2 }}"/></div>
-            <div class="form-group"><label>Author</label><input name="author" type="text" value="{{ content.author }}"/></div>
+            <div class="form-group" style="flex: 0 1 120px;">
+                <label>Lang 1</label>
+                <select name="lang">
+                    <option value="" {% if not content.lang %}selected{% endif %}></option>
+                    <option value="en" {% if content.lang == 'en' %}selected{% endif %}>en</option>
+                    <option value="zh" {% if content.lang == 'zh' %}selected{% endif %}>zh</option>
+                    <option value="zh-TW" {% if content.lang == 'zh-TW' %}selected{% endif %}>tw</option>
+                    <option value="pinyin" {% if content.lang == 'pinyin' %}selected{% endif %}>pinyin</option>
+                </select>
+            </div>
+            <div class="form-group" style="flex: 0 1 120px;">
+                <label>Lang 2</label>
+                <select name="lang_2">
+                    <option value="" {% if not content.lang_2 %}selected{% endif %}></option>
+                    <option value="en" {% if content.lang_2 == 'en' %}selected{% endif %}>en</option>
+                    <option value="zh" {% if content.lang_2 == 'zh' %}selected{% endif %}>zh</option>
+                    <option value="zh-TW" {% if content.lang_2 == 'zh-TW' %}selected{% endif %}>zh-TW</option>
+                    <option value="pinyin" {% if content.lang_2 == 'pinyin' %}selected{% endif %}>pinyin</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Author</label>
+                <input name="author" type="text" value="{{ content.author }}"/>
+            </div>
         </div>
 
         <div class="tag-container">
@@ -221,6 +371,11 @@
     }
     
     console.log("Normalized Original Data:", originalData);
+
+    // --- Delete Song Logic ---
+    function deleteSong(){
+        console.log ("No clue what to do :)")
+    }
 
     // --- Dynamic Inputs Logic ---
     function addDynamicInput(wrapperId, inputName, placeholder, value = "") {
@@ -406,10 +561,10 @@
         return {
             id: Number(songId),
             title: $('input[name="title"]').val(),
-            key: $('input[name="song_key"]').val(),
+            song_key: $('input[name="song_key"]').val(),
             book: $('input[name="book"]').val(),
-            lang: $('input[name="lang"]').val(),
-            lang_2: $('input[name="lang_2"]').val(),
+            lang: $('select[name="lang"]').val(),
+            lang_2: $('select[name="lang_2"]').val(),
             author: $('input[name="author"]').val(),
             sequence: $('input[name="sequence"]').val(),
             copyright: $('input[name="copyright"]').val(),
@@ -550,7 +705,7 @@
         console.groupEnd();
 
         // Submit to API
-        const url = '/API/song/' + songId + '/edit';
+        const url = '/API/song/' + songId;
         
         submit_song(url, JSON.stringify(changedFields))
             .done(function(response) {
@@ -565,6 +720,25 @@
                     alert("Error saving song: " + (jqXHR.responseText || "Unknown error"));
                 }
             });
+    }
+
+    function deleteSong() {
+        if(confirm("Are you sure you want to delete this song?")) {
+            id =$('input[name="id"').val();
+            url = API_URL + 'song/' + id;
+            $.ajax({
+                url: url,
+                type: 'DELETE',
+                success: function(result) {
+                    if(window.location.href.endsWith("edit")) {
+                        window.location.href = '/song/list';
+                    }
+                    else {
+                        location.reload();
+                    }
+                }
+            });
+        }
     }
 </script>
 {% endblock %}

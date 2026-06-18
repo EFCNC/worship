@@ -1,0 +1,77 @@
+<!-- Consolidated Header Fragment - included in base.html -->
+<header id="header">
+    <div id="profile">
+        <a href="{{ url_for('profile') }}" id="profile-container" class="profile_bubble" style="display: none;">
+            <!-- Image loads immediately, initials shown only if image fails -->
+            <span id="profile-initials" style="font-weight: bold; display: none;"></span>
+            <img id="profile-img" src="" alt="Profile" style="width: 100%; height: 100%; object-fit: cover;">
+        </a>
+    </div>
+
+    <a href="{{ url_for('index') }}" class="home-icon" aria-label="Home">
+        <i class="fas fa-home"></i>
+    </a>
+
+    <button id="menu-toggle" class="hamburger" aria-label="Toggle navigation">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <nav class="navigation" id="main-nav">
+        <a href="{{ url_for('worship_home') }}">Worship</a>
+        <a href="{{ url_for('song_list') }}">Songs</a>
+        <a href="{{ url_for('schedule') }}">Schedule</a>
+    </nav>
+</header>
+
+<!-- Inline script to start image loading ASAP (before DOMContentLoaded) -->
+<script>
+    (function() {
+        const userCookie = $.cookie("user_name");
+        const profileImg = document.getElementById('profile-img');
+        const profileInitials = document.getElementById('profile-initials');
+        const profileContainer = document.getElementById('profile-container');
+        
+        if (userCookie) {
+            const full_english_name = userCookie.split('(')[0].trim();
+            const initials = full_english_name.split(' ')
+                .map(word => word[0].toUpperCase())
+                .join('');
+            const imgPath = `/static/img/${full_english_name}.jpg`;
+            
+            // Preload image to detect if it exists
+            const preload = new Image();
+            preload.onload = function() {
+                // Image exists and loaded, set the real src and show
+                profileImg.src = imgPath;
+                profileContainer.style.display = 'flex';
+            };
+            preload.onerror = function() {
+                // Image doesn't exist, show initials
+                profileInitials.textContent = initials;
+                profileInitials.style.display = 'inline';
+                profileImg.style.display = 'none';
+                profileContainer.classList.add('use-initials');
+                profileContainer.style.display = 'flex';
+            };
+            preload.src = imgPath;  // Start download immediately
+        } else {
+            // No user logged in, show login image
+            profileImg.src = '/static/img/login.jpg';
+            profileContainer.style.display = 'flex';
+        }
+    })();
+
+    document.getElementById('menu-toggle').addEventListener('click', function() {
+            document.getElementById('main-nav').classList.toggle('show-menu');
+            
+            // Swap the icon from bars to an X when open
+            const icon = this.querySelector('i');
+            if (icon.classList.contains('fa-bars')) {
+                icon.classList.remove('fa-bars');
+                icon.classList.add('fa-times');
+            } else {
+                icon.classList.remove('fa-times');
+                icon.classList.add('fa-bars');
+            }
+    });
+</script>
