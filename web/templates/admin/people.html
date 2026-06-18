@@ -560,6 +560,7 @@
     }
 
     $(document).on('click', 'button.group_key', function() {
+        isTogglingGroups = true;
         toggle = true;
         keyword = this.name;
         div = $(this).parent();
@@ -574,11 +575,13 @@
             $(this).addClass('highlight');
             $('#total_label').text(keyword);
             table.column(4).search((d) => d.indexOf(keyword)>=0).draw();
+            setTimeout(() => { isTogglingGroups = false; }, 50);
         }
         else {
             console.log('reset')
             $('#total_label').text('總人數');
             table.column(4).search('').draw();
+            setTimeout(() => { isTogglingGroups = false; }, 50);
         }
     });
 
