@@ -9,26 +9,46 @@
 /* =========================================
     General Stuff
    ========================================= */
-#songs { text-align:left; list-style-type: none; margin: 0; padding: 0; width: 95%; }
+#songs { text-align:left; list-style-type: none; margin: 0; padding: 0;}
 .lyrics {
     text-align:center;
     list-style-type: none;
     margin: 0; padding: 0;
     width: 100%;
 }
+
+/* This might not be working */
 #songs, .lyrics li { margin: 0 3px 3px 3px; padding: 0.2em; font-size: 1em}
 
-#worship, #song_list {
+/* =========================================
+   Shared Card Styling (Replaces .sermon-card)
+   ========================================= */
+.app-card {
+    background: #fdfdfd;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+    margin: 15px 5px;
     box-sizing: border-box;
-    display: flex;
-    /* width: 100%; */
-    justify-content: center;
-    align-self: center;
-    border: 3px solid #0c0c0c;
-    padding: 5px;
-    margin: 5px;
 }
 
+/* Base layout for Worship and Song List containers */
+#worship {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-self: center;
+}
+
+#song_list {
+    display: flex;
+    /* flex-direction: column; */
+    justify-content: center;
+    align-self: center;
+}
+
+/* Things that go click */
 .lyrics li:hover, .infotitle:hover{cursor: pointer}
 
 .lyrics li span { position: absolute; margin-left: -1.3em;}
@@ -46,18 +66,12 @@
 /* =========================================
    Sermon Box
    ========================================= */
-#sermon_data {
+#sermon-data_card {
     margin: 15px 5px;
-    padding: 5px;
+    padding: 15px;
     /* width: 95%; */
 }
-.sermon-card {
-    background: #fdfdfd;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    padding: 15px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.04);
-}
+
 .sermon-header {
     display: flex;
     justify-content: space-between;
@@ -119,7 +133,6 @@
     box-sizing: border-box;
 }
 
-
 /* =========================================
     Lyrics Flexbox and Sequence Highlighting
    ========================================= */
@@ -143,6 +156,7 @@
 
 .lyrics_buttons { display: flex; gap: 8px; flex-shrink: 0; }
 
+.p { background-color: #f78787; color: #fff}
 .v, [class~="1"], [class~="2"], [class~="3"], [class~="4"], [class~="5"], [class~="6"], [class~="7"], [class~="8"] { 
     background-color: #D6B588; 
     color: #fff; 
@@ -184,9 +198,7 @@ li {
    ========================================= */
 .action_btns { display: flex; align-items: center; flex-wrap: wrap;}
 
-.action_btns button {
-    margin: 5px;
-}
+.action_btns button { margin: 5px; }
 
 .save_btn { background-color: #28a745; color: white; border-color: #28a745; }
 .save_btn:hover { background-color: #218838; }
@@ -240,6 +252,7 @@ li {
     background-color: var(--lang-color);
 }
 
+
 .custom-loader {
   width:100px;
   height:100px;
@@ -270,7 +283,7 @@ li {
 <div class="custom-loader" style="display:none"></div>
 <h3><span class="arrow left" name="-1">&lt;</span> {{ w.date }} <span class="arrow right" name="1">&gt;</span></h3>
 <!-- Container of worship songs -->
-<div id="sermon_data"></div>
+<div id="sermon-data_card" class="app-card"></div>
 
 <div class="action_btns">
     <div class="search_container">
@@ -286,7 +299,7 @@ li {
     </div>
     
  <!-- sortable songs -->
-<div id="worship"></div>
+<div id="worship" class="app-card"></div>
 
 <div class="action_btns">
     <button class="save_btn" style="display: none;">Save</button>
@@ -294,7 +307,7 @@ li {
     <button class="reset_btn" style="display: none;">Reset</button>
 </div>
 
-<div id="song_list" >
+<div id="song_list" class="app-card">
     <div id="left_content"></div>
     <div id="middle_content"></div>
     <div id="right_content"></div>
@@ -453,16 +466,14 @@ li {
         }
 
         var cardHtml = `
-            <div class="sermon-card">
                 <div class="sermon-header">
                     <h4 class="sermon-title"><strong>Title:</strong> ${worship_data.title}</h4>
                     <span class="sermon-speaker">By: ${worship_data.speaker}</span>
                 </div>
                 <div class="sermon-bible"><strong>Scripture Reference:</strong> ${b}</div>
                 <div class="sermon-outline"><strong>Sermon Outline:</strong><br/>${worship_data.outline}</div>
-            </div>
         `;
-        $('#sermon_data').html(cardHtml);
+        $('#sermon-data_card').html(cardHtml);
     }
 
     // Presentation mode (not used currently, used by future preview)
@@ -680,6 +691,7 @@ li {
         $.when( add_song_to_worship(worship)).then(function() {
             init();
         });
+        
         if($.cookie("pinned")) {
             var my_pinned_songs = '<div style="font-size:16px;font-weight:600;width:100%;padding:5px">My pinned songs&nbsp;&nbsp;<a href="song/list" title="more">...</a></div>';
             get_songs($.cookie("pinned")).done(function(data) {
@@ -749,7 +761,7 @@ li {
 
     // Not sure what this is, looks old???
 
-    
+
     // $(document).on('click', '.infotitle', function() {
     //     id = $(this).attr('name');
     //     url = API_URL + 'notes/id=?' + id;
