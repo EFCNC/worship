@@ -496,7 +496,7 @@ def edit_song(id, content):
     media_columns = ['video', 'score', 'abc']
 
     # remove empty fields
-    content = [x for x in content if x['value']]
+    #content = [x for x in content if x['value']]
     songs_columns = [x for x in content if x['name'] not in song_set_columns + media_columns]
     media_columns = [x for x in content if x['name'] in media_columns]
     song_set_columns = [x for x in content if x['name'] in song_set_columns]
