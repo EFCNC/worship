@@ -47,8 +47,8 @@ var API_URL = '/API/';
 
                 // Row 2: Key, Media Links
                 html += '<div class="song-details-row">';
-                html += '<span>Current Key: <select class="key" name="' + data.transpose + '" init="' + data.key + '"><option>' + data.key + '</option></select></span>';
-                html += '<span>&nbsp;Original Key: ' + data.key + '</span>';
+                html += '<span>Current Key: <select class="key" name="' + data.transpose + '" init="' + data.song_key + '"><option>' + data.song_key + '</option></select></span>';
+                html += '<span>&nbsp;Original Key: ' + data.song_key + '</span>';
                 
                 if (data.score) {
                     html += '<a href="' + data.score + '" target="new"><i style="font-size:24px" class="fa" title="Sheet Music">&#xf0f6;</i></a>';
