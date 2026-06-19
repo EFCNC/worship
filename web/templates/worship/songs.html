@@ -429,15 +429,12 @@ li {
         });
     });
 
-     
-
     // When Notes are changed
     $(document).on('change', 'textarea[name="song_notes"]', function() {
         index = $(this).attr('index');
         songs_temp[index].notes = $(this).val();
         checkActionButtons();
     });
-
     
     // ======================
     // Functions
@@ -859,7 +856,7 @@ li {
             id = $(this).parent().attr('songid');
             get_song(id).done(function(data) {
                 if(songs_temp.find(o => o.title === data.title)) {
-                    alert('"' + data.title + '" already in the set!!');
+                    alert('"' + data.title + '"is already in the set!');
                     return false;
                 }
                 data['date'] = worship_data.date;
