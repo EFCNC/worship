@@ -315,7 +315,7 @@
         <div class="form-row" style="margin-top:15px;">
             <div class="form-group"><label>Copyright</label><input name="copyright" type="text" value="{{ content.copyright }}"/></div>
             <div class="form-group"><label>CCLI</label><input name="ccli" type="text" value="{{ content.ccli }}"/></div>
-            <div class="form-group"><label>Bible Verse</label><input name="bible_verse" type="text" value="{{ content.bible }}"/></div>
+            <div class="form-group"><label>Bible Verse</label><input name="bible_verse" type="text" value="{{ content.bible_verse }}"/></div>
         </div>
 
         <div class="form-row">
@@ -569,7 +569,7 @@
             sequence: $('input[name="sequence"]').val(),
             copyright: $('input[name="copyright"]').val(),
             ccli: $('input[name="ccli"]').val(),
-            bible: $('input[name="bible_verse"]').val(),
+            bible_verse: $('input[name="bible_verse"]').val(),
             
             // Gather dynamic inputs and filter out empty strings
             video: $('input[name="video[]"]').map(function(){ return this.value.trim(); }).get().filter(v => v !== ""),
