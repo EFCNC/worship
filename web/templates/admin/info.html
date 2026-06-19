@@ -5,54 +5,24 @@
 {% block extra_css %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <style>
-.worship_container {
-  display: flex;
-  flex-wrap: wrap;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
+
+/* Navigation Flexbox Top Row */
+.dates_navigation {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    width: 66%;
+    margin: 0 auto 20px auto;
 }
 
-.worship_container > div {
-  min-width: 220px;
-  margin: 10px;
-  text-align: center;
-  font-size: 14px;
-}
 
-#content > div {
-    position: relative;
-    display: inline-block;
-    border-radius: 5px;
-    margin: 5px;
-    padding: 5px 25px 5px 5px;
-}
-
-.announcement {
-    background-color: #556b2f;
-    color: #fff;
-}
-
-.caring {
-    background-color: #6b552f;
-    color: #fff;
-}
-
-#content > div:hover {
-    cursor: pointer;
-}
-
-.fa-trash-o .show {
-  visibility: visible;
-  -webkit-animation: fadeIn 1s;
-  animation: fadeIn 1s;
-}
-
-@media (max-width: 600px) {
-  .worship_container {
-    flex-direction: column;
-    flex: 100%;
-  }
+.dates_navigation_btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: center;
 }
 
 #current {
@@ -60,25 +30,143 @@
     font-weight: 600;
 }
 
-.nav {
-    font-size: 15px;
+/* Content Flexbox (contains info-list elements) */
+#content {
+    display:flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 66%;
+    margin: 0 auto;
+}
+
+.info_list {
+    display: flex;
+    align-items: center;
+    border-radius: 5px;
+    padding: 10px 15px;
+    gap: 15px;
+}
+
+.info_list:hover {
+    cursor: pointer;
+    filter: brightness(1.1);
 }
 
 .info_content {
-    padding: 2px 2px 2px 2px;
+    flex-grow: 1;
+    outline: none;
+    padding: 5px;
+    word-break: break-word;
+}
+
+/* Inline Delete Icon */
+.delete-inline {
+    cursor: pointer;
+    font-size: 18px;
+    padding: 5px;
+    color: #fff;
+    opacity: 0.6;
+    transition: opacity 0.2s, color 0.2s;
+}
+
+.delete-inline:hover {
+    opacity: 1;
+    color: #ffcccc; /* Light red tint on hover */
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 30px 20px;
+    color: #666;
+    font-style: italic;
+    background-color: #f5f5f5;
+    border-radius: 5px;
+    border: 1px dashed #ccc;
+}
+
+/* Action Buttons Container */
+.action_btns {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    width: 66%;
+    margin: 20px auto 0 auto; /* Fixed centering here */
+}
+
+.action_btns button {
+    flex: 1 1 auto; 
+    min-width: 100px;
+    text-align: center;
+}
+
+/* Color Coding */
+.announcement {
+    background-color: #556b2f;
+    color: #fff;
+}
+.caring {
+    background-color: #6b552f;
+    color: #fff;
+}
+
+/* --- Desktop Specific Tweaks --- */
+@media (min-width: 601px) {
+    .dates_navigation {
+        width: 66%;
+        margin: 0 auto 20px auto;
+    }
+    #content {
+        width: 66%;
+    }
+    .action_btns {
+        width: 66%;
+    }
+}
+/* --- Mobile Specific Tweaks --- */
+@media (max-width: 600px) {
+    /* Revert main content wrappers to full width on small screens */
+    .dates_navigation, 
+    #content, 
+    .action_btns {
+        width: 100%;
+    }
+
+    /* Target smaller text for date ranges */
+    .nav-date {
+        font-size: 10px;
+    }
+    
+    /* Make buttons slightly taller for easier touch targets */
+    .dates_navigation_btn {
+        padding: 8px 15px;
+    }
+    
+    #current {
+        font-size: 16px;
+    }
 }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="worship_container">
-    <div class="worship-card">
-        <button id="pre" class="nav" title="Last Week"></button>&nbsp;&nbsp;<span id="current"></span>&nbsp;&nbsp;<button id="next" class="nav" title="Next Week"></button>
-        <div id="content" style="padding:10px;text-align:left;">
-        </div>
-        <button id="add_1" title="Add Announcement">Add Announcement</button>&nbsp;&nbsp;<button id="add_2" title="Add Prayer Request">Add Prayer Request</button>&nbsp;&nbsp;<button id="copyall"  itle="Copy from Last Week">Copy from last week</button>&nbsp;&nbsp;<button id="delete" title="Delete selected Item"><i class="fa fa-trash-o"></i></button>&nbsp;&nbsp;<button id="copy" title="Copy all information to Clipboard"><i class="fa fa-copy"></i></button>
-    </div>
+<div class="dates_navigation">
+    <button id="previous" class="dates_navigation_btn" title="Last Week"></button>
+    <span id="current"></span>
+    <button id="next" class="dates_navigation_btn" title="Next Week"></button>
 </div>
+
+    <div id="content" class="content"></div>
+
+    <div class="action_btns">
+        <button id="add_1" title="Add Announcement">Add Announcement</button>
+        <button id="add_2" title="Add Prayer Request">Add Prayer Request</button>
+        <button id="copyall"  itle="Copy from Last Week">Copy from Last Week</button>
+        <button id="copy" title="Copy all information to Clipboard"><i class="fa fa-copy"></i></button>
+    </div>
+
 <div id="clipboard" style="display:none"></div>
 {% endblock %}
 
@@ -91,13 +179,38 @@
     const sundays = [];
     getSundays(new Date().getFullYear());
 
+
     $(document).ready(function () {
             d.setDate(d.getDate() - d.getDay() + 7); // coming Sunday
             index = sundays.indexOf(d.toLocaleDateString('en-CA'));
             current_week =  sundays[index];
         $('#current').html(current_week);
         get_info(id);
-        show_nav(index);
+        showDatesNavigation(index);
+    });
+
+    // Inline Delete Handler
+    $(document).on('click', '.delete-inline', function() {
+        let index = $(this).closest('.info_list').attr('name');
+        let item = content[index];
+        
+        // If the item hasn't been saved to the DB yet (ID is -1)
+        if (item.id === -1) {
+            $(this).closest('.info_list').remove();
+            checkEmptyState();
+            return;
+        }
+
+        if(confirm("Are you sure you want to delete this item?")) {
+            url = API_URL + 'info/delete/' + item.id;
+            $('#loading').show();
+            $.when( $.ajax( url ) ).then(function( response, textStatus, jqXHR ) {
+                if(response) {
+                    get_info(id);
+                    $('#loading').hide();
+                }
+            });
+        }
     });
 
     $('#copyall').on('click', function() {
@@ -113,44 +226,29 @@
         });
     });
 
-    $('#delete').on('click', function() {
-        content_index = $('input[name="info_box"]:checked').val();
-        if (content_index) {
-            if(confirm("Are you sure?")) {
-                url = API_URL + 'info/delete/'+content[content_index].id;
-                $('#loading').show();
-                $.when( $.ajax( url ) ).then(function( response, textStatus, jqXHR ) {
-                    if(response) {
-                        get_info(id);
-                        $('#loading').hide();
-                    }
-                });
-            }
-        }
-        else {
-            alert("Please select an item first!");
-        }
-    });
-
     $("#copy").click(function() {
-        t = content.map(obj=>obj.info);
-        var $temp = $("<div>");
-        $("body").append($temp);
-        $temp.attr("contenteditable", true)
-            .html(t.join('<br/>')).select()
-            .on("focus", function() { document.execCommand('selectAll',false,null); })
-            .focus();
-            document.execCommand("copy");
-            $temp.remove();
+        // Map the content and join lines with a newline break
+        let textToCopy = content.map(obj => obj.info).join('\n');
+        
+        navigator.clipboard.writeText(textToCopy).then(function() {
+            // Optional: Provide visual feedback here (like changing the icon to a checkmark)
+            console.log('Copying to clipboard was successful!');
+        }).catch(function(err) {
+            console.error('Could not copy text: ', err);
         });
+    });
 
     $(document).on('blur', '.info_content', function() {
         tt = $(this).text();
         if (tt == '') {
-            $('#content').last().find('div').remove();
-            //return false;
+            $(this).closest('.info_list').remove();
+            checkEmptyState();
+            return false;
         }
-        cc = content[$(this).prev('input').val()];
+        
+        let itemIndex = $(this).closest('.info_list').attr('name');
+        cc = content[itemIndex];
+
         if(tt!= cc.info) {  // content changed
             cc.info = tt;
             url = API_URL + 'info/edit';
@@ -172,23 +270,27 @@
         }
     });
 
-    $('.nav').on('click', function() {
+    $('.dates_navigation_btn').on('click', function() {
         index = sundays.indexOf($(this).val());
         current_week = sundays[index];
         get_info(index);
-        show_nav(index);
+        showDatesNavigation(index);
         $('#current').html(current_week);
     });
 
     $('#add_1').click(function() {
-        $("#content").append('<div class="info_list announcement"><input type="radio" value="' + content.length + '" name="info_box"/><span class="info_content" contenteditable="true"></span></div><br/>');
-        $("#content").last().find('span').focus();
+        $('.empty-state').remove(); // Clear empty state if present
+        let newIndex = content.length;
+        $("#content").append('<div name="' + newIndex + '" class="info_list announcement"><span class="info_content" contenteditable="true" spellcheck="true" autocorrect="on" autocapitalize="sentences"></span><i class="fa fa-trash-o delete-inline" title="Delete"></i></div>');
+        $("#content .info_list").last().find('span').focus();
         content.push({'id': -1, 'info': 'New Announcement', 'type': 'announcement', 'date': current_week});
     });
 
     $('#add_2').click(function() {
-        $("#content").append('<div class="info_list caring"><input type="radio" value="' + content.length + '" name="info_box"/><span class="info_content" contenteditable="true"></span></div><br/>');
-        $("#content").last().find('span').focus();
+        $('.empty-state').remove(); // Clear empty state if present
+        let newIndex = content.length;
+        $("#content").append('<div name="' + newIndex + '" class="info_list caring"><span class="info_content" contenteditable="true" spellcheck="true" autocorrect="on" autocapitalize="sentences"></span><i class="fa fa-trash-o delete-inline" title="Delete"></i></div>');
+        $("#content .info_list").last().find('span').focus();
         content.push({'id': -1, 'info': 'New Prayer Request', 'type': 'caring', 'date': current_week});
     });
 
@@ -205,19 +307,20 @@
         }
     }
 
-    function show_nav(i) {
+    function showDatesNavigation(i) {
         if (i > 0) {
-            $('#pre').text('< ' + sundays[i-1]);
-            $('#pre').val(sundays[i-1]);
+            $('#previous').html('<i class="fa fa-chevron-left"></i> <span class="nav-date">' + sundays[i-1] + '</span>');
+            $('#previous').val(sundays[i-1]);
         }
+        
         if (i < sundays.length-1) {
-            $('#next').text(sundays[i+1] + ' >')
-            $('#next').val(sundays[i+1])
+            $('#next').html('<span class="nav-date">' + sundays[i+1] + '</span> <i class="fa fa-chevron-right"></i>');
+            $('#next').val(sundays[i+1]);
         }
     }
 
     function get_info(id) {
-        $('loading').show();
+        $('#loading').show();
         url = API_URL + 'info/'+id;
         $.when( $.ajax( url ) ).then(function( response, textStatus, jqXHR ) {
             if(response) {
@@ -226,15 +329,26 @@
                 i = 0;
                 $.each(content, function() {
                     if (this.info) {
-                        html += '<div name="' + i + '" class="info_list ' + this.type + '"  title="' + this.type + '"><input type="radio" value="' + i + '" name="info_box"/><span class="info_content" contenteditable="true">' + this.info + '</span></div><br/>';
+                        html += '<div name="' + i + '" class="info_list ' + this.type + '"  title="' + this.type + '"><span class="info_content" contenteditable="true" spellcheck="true" autocorrect="on" autocapitalize="sentences">' + this.info + '</span><i class="fa fa-trash-o delete-inline" title="Delete"></i></div>';
                         i++;
                     }
                 });
             }
+            // Empty State Check
+            if (html === '') {
+                html = '<div class="empty-state">No announcements or prayer requests for this week.</div>';
+            }
+
             $('#content').html(html);
-            $('loading').hide();
+            $('#loading').hide();
         });
     }
-</script>
 
+    // Helper to add the empty state back if the user manually deletes everything
+    function checkEmptyState() {
+        if ($('#content').children('.info_list').length === 0) {
+            $('#content').html('<div class="empty-state">No announcements or prayer requests for this week.</div>');
+        }
+    }
+</script>
 {% endblock %}
