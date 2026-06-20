@@ -7,21 +7,53 @@
 <style>
   iframe {
     height: 800px;
-    width: 600px;
+    width: 100%;
     resize: both;
     overflow: auto;
+  }
+
+#container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  max-width: 900px;
+  margin: 0 auto;
 }
+
+#control_panel_container{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+#sheet_btns_container{
+  display: flex;
+  gap: 2px;
+}
+
 </style>
 {% endblock %}
 
 {% block content %}
-<div id="my_score">
-    <div id="top"><span id="sheet_title"></span>&nbsp;<span id="sheet_btn"></span></div>
-    Tempo: <input id="tempo" size="5"/>&nbsp;&nbsp;<div id="tools"></div>
-    <div id="abc">
+<div id="container">
+  <div id="sheet_title" style="margin-bottom: 10px;"></div>
+
+  <div id="control_panel_container">
+    <div id="sheet_btns_container"></div>
+    <div id="tempo_container" style="display:none;">
+      Tempo: <input id="tempo_input" size="5"/>
     </div>
-    <textarea id="abc_data" rows="10" cols="100"></textarea>
-    <div style="text-align:center" id="sheet"></div>
+    <div id="transpose_select_container"></div>
+  </div>
+
+  <div id="abc"></div>
+  <div id="sheet"></div>
+
+  <textarea id="abc_data" rows="10" cols="100" style="display: none;"></textarea>
 </div>
 {% endblock %}
 
@@ -32,78 +64,12 @@
   let key_index = 0;
   let root = '';
   let abc_data;
+  let data;
+  let keys;
   const keys_1 = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
   const keys_2 = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
-  var spinner = $( "#tempo" ).spinner();
-
-  $(document).on('click', 'button', function() {
-    // Reload abc sheet with key_index changed
-    key_index = keys.indexOf($(this).attr('name')) - keys.indexOf(root);
-    ABCJS.renderAbc("abc", data.abc, {visualTranspose: key_index});
-  });
-
-  function load_sheet(type, k_index) {
-    data = sheets[index];
-    $('#abc_data').val(data.abc);
-
-    if (type == 'abc') {
-      $("#sheet").hide();
-
-      // Load abc data
-      $.when(ABCJS.renderAbc("abc", data.abc)).then(function(abc) {
-        abc_data = abc[0];
-        $("#abc").show();
-        root = abc_data.getKeySignature().root;
-        tempo = abc_data.getBpm();
-        keys = keys_1;
-        if(['Db', 'Eb', 'F', 'Ab', 'Bb'].indexOf(root) >= 0) {
-            keys = keys_2;
-        }
-
-        html = '';
-        for(var i=0;i<keys.length;i++) {
-            if (keys[i] == root) {
-              html += '<button title="Original Key" name="' + root + '"><b>' + root + '</b></button>';
-            }
-            else {
-              html += '<button name="' + keys[i] + '">' + keys[i] + '</button>';
-            }
-        }
-        $('#tempo').val(tempo);
-        $('#tools').html(html);
-      });
-    }
-    else if (type == 'sheet') {
-      if(['bmp', 'jpg', 'png', 'gif'].some(char => data.sheet.endsWith(char))) {
-        temp = '<img src="' + data.sheet + '" style="max-width: 100%;max-height: 100vh;margin: auto;"/>';
-      }
-      else {
-        temp = '<iframe id="sheet_link" src="' + data.sheet + '"></iframe>';
-      }
-        $("#abc").hide();
-        $('#sheet').empty();
-        $('#sheet').append(temp);
-        $('#sheet').show();
-    }
-  }
-
-  function load_sheet_btn(n) {
-    data = sheets[n];
-    html = '';
-    if(data.abc) {
-      html += '<button class="type_btn" name="abc" onclick="load_sheet(this.name)">Interact Sheet</button>';
-    }
-    if(data.sheet) {
-      html += '<button class="type_btn" name="sheet" onclick="load_sheet(this.name)">Normal Sheet</button>';
-    }
-    $('#sheet_btn').html(html);
-    if(data.abc) {
-      load_sheet('abc', key_index);
-    }
-    else {
-      load_sheet('sheet');
-    }
-  }
+  
+  var spinner = $( "#tempo_input" ).spinner();
 
   $(document).ready(function() {
     // Form select box with song title
@@ -124,5 +90,91 @@
     });
   });
 
+  $(document).on('change', '#transpose_select', function() {
+    // Reload abc sheet with key_index changed
+    let selected_key = $(this).val();
+    key_index = keys.indexOf(selected_key) - keys.indexOf(root);
+
+    // Save the key preference to the specific song's memory
+    sheets[index].saved_key_name = selected_key;
+    sheets[index].saved_key_index = key_index;
+
+    ABCJS.renderAbc("abc", data.abc, {visualTranspose: key_index, responsive: "resize"});
+  });
+
+  function load_sheet(type, k_index) {
+    data = sheets[index];
+
+    data.saved_type = type;
+
+    $('#abc_data').val(data.abc);
+
+    if (type == 'abc') {
+      $("#sheet").hide();
+
+      let current_key_index = data.saved_key_index || 0;
+
+      // Load abc data
+      $.when(ABCJS.renderAbc("abc", data.abc, {visualTranspose: current_key_index, responsive: "resize"})).then(function(abc) {
+        abc_data = abc[0];
+        $("#abc").show();
+        $("#tempo_container").show();
+        $('#transpose_select_container').show();
+
+        root = abc_data.getKeySignature().root;
+        let tempo = abc_data.getBpm();
+        keys = keys_1;
+        if(['Db', 'Eb', 'F', 'Ab', 'Bb'].indexOf(root) >= 0) {
+            keys = keys_2;
+        }
+
+        let active_key_name = data.saved_key_name || root;
+
+        let html = '&nbsp; Key: <select id="transpose_select">';
+        for(var i=0; i<keys.length; i++) {
+            let is_selected = (keys[i] === active_key_name) ? 'selected' : '';
+            let label = (keys[i] === root) ? keys[i] + ' (Original)' : keys[i];
+            
+            html += '<option value="' + keys[i] + '" ' + is_selected + '>' + label + '</option>';
+        }
+        html += '</select>';
+
+        $('#tempo_input').val(tempo);
+        $('#transpose_select_container').html(html);
+        
+      });
+    }
+    else if (type == 'sheet') {
+      let temp = "";
+      if(['bmp', 'jpg', 'png', 'gif'].some(char => data.sheet.endsWith(char))) {
+        temp = '<img src="' + data.sheet + '" style="max-width: 100%;max-height: 100vh;margin: auto;"/>';
+      }
+      else {
+        temp = '<iframe id="sheet_link" src="' + data.sheet + '"></iframe>';
+      }
+        $("#abc").hide();
+        $("#tempo_container").hide();
+        $('#transpose_select_container').hide();
+        $('#sheet').html(temp);
+        $('#sheet').show();
+    }
+  }
+
+  function load_sheet_btn(n) {
+    data = sheets[n];
+    let html = '';
+    
+    if(data.abc) {
+      html += '<button class="type_btn" name="abc" onclick="load_sheet(this.name)">Interact Sheet</button>';
+    }
+    if(data.sheet) {
+      html += '<button class="type_btn" name="sheet" onclick="load_sheet(this.name)">Normal Sheet</button>';
+    }
+    $('#sheet_btns_container').html(html);
+    
+    let type_to_load = data.saved_type || (data.abc ? 'abc' : 'sheet');
+    
+    load_sheet(type_to_load);
+  }
 </script>
 {% endblock %}
