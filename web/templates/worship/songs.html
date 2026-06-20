@@ -29,11 +29,11 @@
     border-radius: 8px;
     padding: 15px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.04);
-    margin: 15px auto 5px auto;
+    margin: 15px auto;
     box-sizing: border-box;
 }
 
-/* Base layout for Worship and Song List containers */
+/* Worship and Song List containers */
 #worship {
     display: flex;
     flex-direction: column;
@@ -187,9 +187,12 @@ li {
 /* =========================================
    Buttons
    ========================================= */
-.action_btns { display: flex; align-items: center; flex-wrap: wrap; padding: 0px 15px }
-
-.action_btns button { margin: 5px; }
+.action_btn_container {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
 
 .save_btn { background-color: #28a745; color: white; border-color: #28a745; }
 .save_btn:hover { background-color: #218838; }
@@ -304,7 +307,7 @@ li {
 <!-- Container of worship songs -->
 <div id="sermon-data_card" class="app-card"></div>
 
-<div class="action_btns">
+<div class="action_btn_container">
     <div class="search_container">
         <input id="keyword" type="text" placeholder="Search songs..."">
         <button id="search_btn">Search</button>
@@ -317,7 +320,7 @@ li {
  <!-- sortable songs -->
 <div id="worship" class="app-card"></div>
 
-<div class="action_btns">
+<div class="action_btn_container">
     <button class="save_btn" style="display: none;">Save</button>
     <!--<button class="export_btn" onclick="javascript:export_file({{ id }})">Export</button>-->
     <button class="reset_btn" style="display: none;">Reset</button>
@@ -790,6 +793,13 @@ li {
     /* =========================================================
        Search, Import, Song Database Stuff
        ========================================================= */
+    $(document).on('keydown', '#keyword', function(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault(); 
+            $('#search_btn').click();
+        }
+    });
+
     $(document).on('click', '#search_btn', function() {
         var keyword = $("#keyword").val();
         if (keyword == '') {
