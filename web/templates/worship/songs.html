@@ -29,10 +29,9 @@
     border-radius: 8px;
     padding: 15px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.04);
-    margin: 15px 5px;
+    margin: 15px auto 5px auto;
     box-sizing: border-box;
 }
-
 
 /* Base layout for Worship and Song List containers */
 #worship {
@@ -61,11 +60,6 @@
 /* =========================================
    Sermon Box
    ========================================= */
-#sermon-data_card {
-    margin: 15px 5px;
-    padding: 15px;
-}
-
 .sermon-header {
     display: flex;
     justify-content: space-between;
@@ -347,6 +341,7 @@ li {
     // Store worship set into object
     let songs = {{ songs|safe }};
     let songs_temp = JSON.parse(JSON.stringify(songs));
+    console.log(songs_temp);
     let lyrics_raw = '';
     let worship_data = {{ w|safe }};
     let worship_id = {{ id|safe }};
