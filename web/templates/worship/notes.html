@@ -6,6 +6,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" charset="utf-8">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <style>
+.summary_container{
+    display: flex;
+    flex-direction: column;
+    background: #fdfdfd;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 0px 15px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+    margin: 15px auto;
+    box-sizing: border-box;
+}
+
 span.chunk {
     position:relative;
 }
@@ -119,31 +131,45 @@ span.chunk:before {
 {% endblock %}
 
 {% block content %}
-    <h3> {{ w.date }} 敬拜筆記 (Worship Notes):</h3>
-    <p>
-        <b>Title: {{ w.sermon_title }}<br/>
-        Speaker: {{ w.speaker }}<br/>
-        Bible: <span id="bible_verse"></span><br/>
-        Outline: {{ w.outline }}</b>
-    </p>
-    <p>
-        {% for team in w.content %}
-            {{ team.role }}: {{ team.user_name }}<br/>
-        {% endfor %}
-    </p>
-    <p>
-        <b>Worship Leader's Notes:</b>
-        {{ w.notes }}
-    </p>
 
+    <div id="summary_container" class="summary_container">
+        <h3>{{ w.date }} 敬拜筆記 (Worship Notes)</h3>
+
+        <div class="card-row">
+            <p>
+                <b>Title:</b> {{ w.sermon_title }}<br/>
+                <b>Speaker:</b> {{ w.speaker }}<br/>
+                <b>Bible:</b> <span id="bible_verse"></span><br/>
+                <b>Outline:</b> {{ w.outline }}
+            </p>
+        </div>
+
+        <div class="card-row">
+            <p>
+                {% for team in w.content %}
+                    {{ team.role }}: {{ team.user_name }}<br/>
+                {% endfor %}
+            </p>
+        </div>
+
+        <div class="card-row">
+            <p>
+                <b>Worship Leader's Notes:</b><br/>
+                {{ w.notes }}
+            </p>
+        </div>
+
+
+    </div>
+    
     <!-- Container of worship songs -->
     <div class="worship_controls_button_container">
         <button class="toggle-btn view" onclick="loadTab('view')">View</button>
         <button class="toggle-btn chord" onclick="loadTab('chord')">Chord</button>
         <button class="toggle-btn bi" onclick="loadTab('bi')">Bilingual</button>
         <button class="toggle-btn video" onclick="loadTab('video')">Youtube</button>
-        <button class="toggle-btn" onclick="load_chords()">All Chords</button>
-        <button class="toggle-btn" onclick="load_sheets()">All Sheets</button>
+        <button class="toggle-btn view" onclick="load_chords()">All Chords</button>
+        <button class="toggle-btn view" onclick="load_sheets()">All Sheets</button>
     </div>
 
     <div id="worship">
@@ -294,11 +320,11 @@ span.chunk:before {
     }
 
     function load_chords() {
-        window.open('/chords/' + song_id.toString(), '_blank').focus();
+        window.location.href = '/worship/chords/' + song_id.toString();
     }
 
     function load_sheets() {
-        window.open('/sheets/' + song_id.toString(), '_blank').focus();
+        window.location.href = '/worship/sheets/' + song_id.toString();
     }
 
     // console.log(tab)
