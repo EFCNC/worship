@@ -271,7 +271,7 @@ span.chunk:before {
                 finalHtml += `<div class="video-container"><iframe src="${videoUrl}"></iframe></div><br/>`;
             }else {
                 //Build the Header
-                let currentKey = transposeChord(item.key, parseInt(item.transpose));
+                let currentKey = transposeChord(item.song_key, parseInt(item.transpose));
                 let header = `
                     <div class="songs">
                         <div class="reference">
