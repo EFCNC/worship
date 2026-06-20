@@ -341,7 +341,6 @@ li {
     // Store worship set into object
     let songs = {{ songs|safe }};
     let songs_temp = JSON.parse(JSON.stringify(songs));
-    console.log(songs_temp);
     let lyrics_raw = '';
     let worship_data = {{ w|safe }};
     let worship_id = {{ id|safe }};
