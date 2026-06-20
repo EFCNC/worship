@@ -122,10 +122,15 @@ header#header {
 }
 
 /* Main Content Area */
-/* Unsure if needed */
+@media (min-width: 768px) {
+    main#main-content {
+        padding: 0px var(--spacing-md);
+    }
+}
+
 main#main-content {
     /* min-height: calc(100vh - var(--header-height)); */
-    padding: 0px var(--spacing-md);
+    /* padding: 0px var(--spacing-md); */
 }
 
 /* Home Icon */
