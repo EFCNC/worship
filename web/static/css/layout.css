@@ -10,13 +10,13 @@
 
 /* Some padding */
 .page-standard {
-    padding: var(--spacing-xl);
+    padding: var(--spacing-sm) var(--spacing-xl);
 }
 
 /* Main Content Area */
 @media (max-width: 768px) {
     .page-standard {
-        padding: var(--spacing-md);
+        padding: 0 var(--spacing-md);
     }
 }
 
