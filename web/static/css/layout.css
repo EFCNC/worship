@@ -13,17 +13,19 @@
     padding: var(--spacing-xl);
 }
 
-/* Edge-to-edge layout */
-.page-full {
-    padding: 0;
-    width: 100%;
-}
-
 /* Main Content Area */
 @media (max-width: 768px) {
     .page-standard {
-        padding: 0;
+        padding: var(--spacing-md);
     }
+}
+
+/* Edge-to-edge layout */
+.page-full {
+    margin: 0;
+    padding: 10px 0 0 0;
+    /* width: 100%;
+    box-sizing: border-box; */
 }
 
 /* Header Styles */
