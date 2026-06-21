@@ -43,7 +43,7 @@
     {% endif %}
 
     <!-- Main Content Area -->
-    <main id="main-content">
+    <main id="main-content" class="{% block main_class %}page-standard{% endblock %}">
         {% block content %}{% endblock %}
     </main>
 

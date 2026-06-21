@@ -2,6 +2,8 @@
 
 {% block page_title %}Worship Sheets{% endblock %}
 
+{% block main_class %}page-full{% endblock %}
+
 {% block extra_css %}
 <script src="/static/abcjs-basic-min.js"></script>
 <style>
@@ -21,6 +23,10 @@
   margin: 0 auto;
 }
 
+#sheet, #abc {
+  width: 100%;
+}
+
 #control_panel_container{
   display: flex;
   align-items: center;
@@ -34,7 +40,6 @@
   display: flex;
   gap: 2px;
 }
-
 </style>
 {% endblock %}
 

@@ -154,15 +154,15 @@ def song_list():
 	songs = Utils.get_songs()
 	return render_template('song/song_list.html', songs=songs)
 
-@app.route("/chords/<ids>")
+@app.route("/worship/chords/<ids>")
 def get_song_chords(ids):
 	ids = ids.split(',')
 	chords = Utils.get_song_chords(ids)
 	return render_template('/worship/chords.html', chords=chords)
 
-@app.route("/sheets")
-@app.route("/sheets/<ids>")
-def get_song_sheet1(ids=None):
+@app.route("/worship/sheets")
+@app.route("/worship/sheets/<ids>")
+def get_song_sheet(ids=None):
 	'''
 	:param ids: song_ids
 	:return: sheet object with ABC content, sheet link, and transpose numbers
