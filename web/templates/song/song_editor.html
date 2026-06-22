@@ -477,7 +477,7 @@
     }
 
     // --- Editor Interaction ---
-    function insertAtCursor(tag, isPaired) {
+    function insertAtCursor(tag, isStructure) {
         const txtarea = lastFocusedTextarea || document.getElementById('lyrics_lang1');
         txtarea.focus();
 
@@ -485,8 +485,10 @@
         const finish = txtarea.selectionEnd;
         const sel = txtarea.value.substring(start, finish);
 
-        let textToInsert = isPaired 
-            ? `<${tag}>\n${sel}\n</${tag}>` 
+        // If it's a structure helper (Verse, Chorus), just prepend the [Tag] header.
+        // Otherwise (for chords), wrap/insert it inline like normal.
+        let textToInsert = isStructure 
+            ? `[${tag}]\n${sel}` 
             : `[${tag}] `;
 
         if (!document.execCommand('insertText', false, textToInsert)) {
@@ -503,6 +505,7 @@
         let lang1Result = "";
         let lang2Result = "";
 
+        // Regex searches for standard XML pairs: <tag>content</tag>
         const sectionRegex = /<([^>]+)>([\s\S]*?)<\/\1>/g;
         let match;
 
@@ -517,13 +520,19 @@
                 const parts = innerContent.split('[region 2]');
                 p1 = parts[0].trim();
                 p2 = parts[1].trim();
+            } else {
+                p1 = innerContent.trim();
             }
 
-            lang1Result += `<${tagName}>\n${p1}\n</${tagName}>\n\n`;
-            lang2Result += `<${tagName}>\n${p2}\n</${tagName}>\n\n`;
+            // Output to the textareas using the new Bracket format
+            lang1Result += `[${tagName}]\n${p1}\n\n`;
+            if (p2) {
+                lang2Result += `[${tagName}]\n${p2}\n\n`;
+            }
         }
 
         if (lang1Result === "") {
+            // Fallback for raw text with no tags
             $('#lyrics_lang1').val(rawContent);
         } else {
             $('#lyrics_lang1').val(lang1Result.trim());
@@ -536,22 +545,33 @@
         const lang1Raw = $('#lyrics_lang1').val();
         const lang2Raw = $('#lyrics_lang2').val();
 
-        const sectionRegex = /<([^>]+)>([\s\S]*?)<\/\1>/g;
+        // Matches [Tag] at the start of a line, then grabs everything until the next [Tag]
+        const sectionRegex = /(?:^|\n)\[([^\]]+)\][ \t]*\r?\n([\s\S]*?)(?=(?:\n\[[^\]]+\])|$)/g;
         
         let combinedResult = "";
         let match;
 
+        // Reset regex index to ensure a clean run
+        sectionRegex.lastIndex = 0;
+
         while ((match = sectionRegex.exec(lang1Raw)) !== null) {
-            const tagName = match[1];
+            const tagName = match[1].trim();
             const content1 = match[2].trim();
 
+            // Find the corresponding [Tag] in lang2 (using 'gi' to make it case-insensitive for better UX)
             const escapedTagName = tagName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            const secondRegex = new RegExp(`<${escapedTagName}>([\\s\\S]*?)<\\/${escapedTagName}>`, 'g');
+            const secondRegex = new RegExp(`(?:^|\\n)\\[${escapedTagName}\\][ \\t]*\\r?\\n([\\s\\S]*?)(?=(?:\\n\\[[^\\]]+\\])|$)`, 'gi');
             const match2 = secondRegex.exec(lang2Raw);
             
             const content2 = match2 ? match2[1].trim() : "";
 
+            // Reconstruct the original XML format for the database
             combinedResult += `<${tagName}>\n${content1}\n[region 2]\n${content2}\n</${tagName}>\n\n`;
+        }
+
+        // Fallback: If no bracket tags were used by the user, return the text as-is to avoid a blank save
+        if (combinedResult === "" && lang1Raw.trim() !== "") {
+            return lang1Raw.trim();
         }
 
         return combinedResult.trim();
