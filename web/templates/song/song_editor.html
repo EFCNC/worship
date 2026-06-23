@@ -554,7 +554,8 @@
         text = text.replace(/\[(bridge)\]/gi, '<span class="hl-bridge">[$1]</span>');
         text = text.replace(/\[(pre-chorus)\]/gi, '<span class="hl-prechorus">[$1]</span>');
         text = text.replace(/\[(prechorus)\]/gi, '<span class="hl-prechorus">[$1]</span>');
-
+        text = text.replace(/^[ \t]*\[([^\]]+)\][ \t]*$/gm, '<span class="hl-verse" style="color: #805ad5;">[$1]</span>');
+        
         // Fix textarea trailing newline scrolling tracking offset bug
         if (text.endsWith('\n')) {
             text += ' ';
@@ -573,7 +574,7 @@
         const sel = txtarea.value.substring(start, finish);
 
         let textToInsert = isPaired 
-            ? `<${tag}>\n${sel}\n</${tag}>` 
+            ? `[${tag}]\n${sel}\n` 
             : `[${tag}] `;
 
         if (!document.execCommand('insertText', false, textToInsert)) {
@@ -594,6 +595,7 @@
         let lang1Result = "";
         let lang2Result = "";
 
+        // Matches XML tags: <tagName>content</tagName>
         const sectionRegex = /<([^>]+)>([\s\S]*?)<\/\1>/g;
         let match;
 
@@ -608,10 +610,17 @@
                 const parts = innerContent.split('[region 2]');
                 p1 = parts[0].trim();
                 p2 = parts[1].trim();
+            } else {
+                p1 = p1.trim();
             }
 
-            lang1Result += `<${tagName}>\n${p1}\n</${tagName}>\n\n`;
-            lang2Result += `<${tagName}>\n${p2}\n</${tagName}>\n\n`;
+            // Output as [tag] instead of <tag>
+            lang1Result += `[${tagName}]\n${p1}\n\n`;
+            
+            // Only append to lang2 if there's translation content
+            if (p2) {
+                lang2Result += `[${tagName}]\n${p2}\n\n`;
+            }
         }
 
         if (lang1Result === "") {
@@ -627,22 +636,54 @@
         const lang1Raw = $('#lyrics_lang1').val();
         const lang2Raw = $('#lyrics_lang2').val();
 
-        const sectionRegex = /<([^>]+)>([\s\S]*?)<\/\1>/g;
-        
+        // Helper function to reliably parse text blocks line-by-line
+        function getBlocks(text) {
+            const lines = text.split(/\r?\n/);
+            let blocks = [];
+            let currentBlock = null;
+
+            lines.forEach(line => {
+                // Matches exactly "[tag]" on its own line (ignoring surrounding spaces)
+                // Inline chords like "[C]Worship His name" will safely bypass this
+                const tagMatch = line.match(/^\s*\[([^\]]+)\]\s*$/);
+                
+                if (tagMatch) {
+                    if (currentBlock) blocks.push(currentBlock);
+                    currentBlock = { tag: tagMatch[1].trim(), lines: [] };
+                } else if (currentBlock) {
+                    currentBlock.lines.push(line);
+                }
+            });
+            if (currentBlock) blocks.push(currentBlock);
+            return blocks;
+        }
+
+        const blocks1 = getBlocks(lang1Raw);
+        const blocks2 = getBlocks(lang2Raw);
+
         let combinedResult = "";
-        let match;
 
-        while ((match = sectionRegex.exec(lang1Raw)) !== null) {
-            const tagName = match[1];
-            const content1 = match[2].trim();
+        // Map translations by tag for easy lookup
+        const map2 = {};
+        blocks2.forEach(b => {
+            map2[b.tag] = b.lines.join('\n').trim();
+        });
 
-            const escapedTagName = tagName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            const secondRegex = new RegExp(`<${escapedTagName}>([\\s\\S]*?)<\\/${escapedTagName}>`, 'g');
-            const match2 = secondRegex.exec(lang2Raw);
-            
-            const content2 = match2 ? match2[1].trim() : "";
+        // Reconstruct the XML-style format
+        blocks1.forEach(b1 => {
+            const content1 = b1.lines.join('\n').trim();
+            const content2 = map2[b1.tag] || "";
 
-            combinedResult += `<${tagName}>\n${content1}\n[region 2]\n${content2}\n</${tagName}>\n\n`;
+            combinedResult += `<${b1.tag}>\n${content1}\n`;
+            if (content2) {
+                combinedResult += `[region 2]\n${content2}\n`;
+            }
+            combinedResult += `</${b1.tag}>\n\n`;
+        });
+
+        // Fallback if no tags were parsed (just raw text entered)
+        if (combinedResult === "") {
+            return lang1Raw.trim();
         }
 
         return combinedResult.trim();
@@ -724,6 +765,41 @@
         });
     }
 
+    // --- Sync Textarea Resizing ---
+    function syncResizing() {
+        const el1 = document.getElementById('lyrics_lang1');
+        const el2 = document.getElementById('lyrics_lang2');
+
+        if (!el1 || !el2) return;
+
+        let isSyncing = false;
+
+        const observer = new ResizeObserver(entries => {
+            // Prevent an infinite loop of them triggering each other
+            if (isSyncing) return;
+
+            for (let entry of entries) {
+                const target = entry.target;
+                const newHeight = target.offsetHeight + 'px'; 
+                const other = target === el1 ? el2 : el1;
+
+                // Only update if they are actually out of sync
+                if (other.style.height !== newHeight) {
+                    isSyncing = true;
+                    other.style.height = newHeight;
+                    
+                    // Release the lock after the browser paints the new height
+                    requestAnimationFrame(() => {
+                        isSyncing = false;
+                    });
+                }
+            }
+        });
+
+        observer.observe(el1);
+        observer.observe(el2);
+    }
+
     var lastFocusedTextarea = null;
     
     // --- Detect Popup Mode ---
@@ -777,6 +853,7 @@
         $('input[name="song_key"]').on('input', updateSmartChordLabels);
 
         syncScrollbars();
+        syncResizing();
 
         $('.chord').click(function() {
             const note = getNoteFromKey(parseInt($(this).data('num')));
