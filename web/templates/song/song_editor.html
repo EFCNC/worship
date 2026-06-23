@@ -94,18 +94,59 @@
         min-width: 0; /* Prevents flex items from overflowing */
     }
 
+    /* Keeps both layers perfectly bound and clips any stray text bleed */
+    .editor-wrapper {
+        position: relative;
+        width: 100%;
+        overflow: hidden; 
+        border-radius: 4px;
+        background-color: #fff;
+    }
+
+    /* Background mirror layer holding colored highlights */ 
+    .backdrop {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none; /* Let mouse clicks pass straight through to textarea */
+        box-sizing: border-box;
+        overflow: hidden; /* Handled exclusively via JS scroll events */
+        margin: 0;
+        color: #333;
+        background: #fff;
+    }
+
+    /* Top interactive user interface layer */
     .lyrics-area {
+        position: relative;
+        z-index: 2;
         min-height: 500px;
         resize: vertical;
-
-        /* Strict line alignment */
-        line-height: 1.8;       /* Forces equal vertical spacing */
-        font-size: 14px;
-
-        /* Horizontal Scrollbar and preventing overflowrapping */
-        white-space: pre;
-        overflow-wrap: normal;
+        display: block;
+        box-sizing: border-box;
+        margin: 0;
+        
+        /* Make user text invisible to reveal highlighted layer perfectly directly underneath */
+        background: transparent !important;
+        color: transparent !important;
+        caret-color: #000 !important; /* Keep your blinking typing cursor visible */
+        
         overflow-x: auto;
+        overflow-y: auto;
+    }
+
+      .lyrics-area, .backdrop {
+        /* CRITICAL: Must exactly match backdrop structural parameters */
+        padding: 8px !important;
+        border: 1px solid #ccc !important;
+        font-family: Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace !important;
+        font-size: 14px !important;
+        line-height: 1.8 !important;
+        white-space: pre !important;
+        letter-spacing: normal !important;
+        word-spacing: normal !important;
     }
 
     /* Highlight the active textarea slightly */
@@ -114,6 +155,12 @@
         box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
         outline: none;
     }
+
+     /* Highlight Color Styles */
+    span.hl-chorus { color: #38a169; font-weight: bold; }
+    span.hl-verse { color: #3182ce; font-weight: bold; }
+    span.hl-bridge { color: #e53e3e; font-weight: bold; }
+    span.hl-prechorus { color: #d69e2e; font-weight: bold; }
 
     /* =========================================
         Chords/Tags and Sequence
@@ -302,13 +349,19 @@
                 <label style="color: #3182ce; display: flex; align-items: center; gap: 5px;">
                     <span>🔵</span> Primary Language
                 </label>
-                <textarea id="lyrics_lang1" class="lyrics-area" spellcheck="false"></textarea>
+                <div class="editor-wrapper">
+                    <div id="highlights_lang1" class="backdrop"></div>
+                    <textarea id="lyrics_lang1" class="lyrics-area" spellcheck="false"></textarea>
+                </div>
             </div>
             <div class="form-group">
                 <label style="color: #805ad5; display: flex; align-items: center; gap: 5px;">
                     <span>🟣</span> Translation
                 </label>
-                <textarea id="lyrics_lang2" class="lyrics-area" spellcheck="false"></textarea>
+                <div class="editor-wrapper">
+                    <div id="highlights_lang2" class="backdrop"></div>
+                    <textarea id="lyrics_lang2" class="lyrics-area" spellcheck="false"></textarea>
+                </div>
             </div>
         </div>
 
@@ -476,6 +529,40 @@
         });
     }
 
+    /* =========================================
+        Visual Syntax Highlighting Processor
+    ========================================= */
+    function updateHighlights(textareaId, backdropId) {
+        let text = $('#' + textareaId).val();
+        
+        // Escape native HTML elements to protect the wrapper framework layout
+        text = text
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+
+        // Highlight actual storage markup tags (<chorus>, </chorus>, etc.)
+        text = text.replace(/&lt;(\/?)chorus&gt;/gi, '<span class="hl-chorus">&lt;$1chorus&gt;</span>');
+        text = text.replace(/&lt;(\/?)verse&gt;/gi, '<span class="hl-verse">&lt;$1verse&gt;</span>');
+        text = text.replace(/&lt;(\/?)bridge&gt;/gi, '<span class="hl-bridge">&lt;$1bridge&gt;</span>');
+        text = text.replace(/&lt;(\/?)pre-chorus&gt;/gi, '<span class="hl-prechorus">&lt;$1pre-chorus&gt;</span>');
+        text = text.replace(/&lt;(\/?)prechorus&gt;/gi, '<span class="hl-prechorus">&lt;$1prechorus&gt;</span>');
+
+        // Also catch traditional fallback structural square brackets if typed manually: [chorus]
+        text = text.replace(/\[(chorus)\]/gi, '<span class="hl-chorus">[$1]</span>');
+        text = text.replace(/\[(verse)\]/gi, '<span class="hl-verse">[$1]</span>');
+        text = text.replace(/\[(bridge)\]/gi, '<span class="hl-bridge">[$1]</span>');
+        text = text.replace(/\[(pre-chorus)\]/gi, '<span class="hl-prechorus">[$1]</span>');
+        text = text.replace(/\[(prechorus)\]/gi, '<span class="hl-prechorus">[$1]</span>');
+
+        // Fix textarea trailing newline scrolling tracking offset bug
+        if (text.endsWith('\n')) {
+            text += ' ';
+        }
+
+        $('#' + backdropId).html(text);
+    }
+
     // --- Editor Interaction ---
     function insertAtCursor(tag, isPaired) {
         const txtarea = lastFocusedTextarea || document.getElementById('lyrics_lang1');
@@ -493,6 +580,10 @@
             const value = txtarea.value;
             txtarea.value = value.substring(0, start) + textToInsert + value.substring(finish);
         }
+
+        // Trigger visual markup render recalculation immediately after insertion
+        const targetBackdropId = txtarea.id === 'lyrics_lang1' ? 'highlights_lang1' : 'highlights_lang2';
+        updateHighlights(txtarea.id, targetBackdropId);
     }
     
     // --- Pulling and Loading Lyrics from Database ---
@@ -600,22 +691,34 @@
     function syncScrollbars(){
         const $left = $('#lyrics_lang1');
         const $right = $('#lyrics_lang2');
+        const $leftBackdrop = $('#highlights_lang1');
+        const $rightBackdrop = $('#highlights_lang2');
 
         let isSyncingLeft = false;
         let isSyncingRight = false;
 
         $left.on('scroll', function() {
+            // Keep its own backdrop styling layer perfectly tracked with real viewport movements
+            $leftBackdrop.scrollTop(this.scrollTop);
+            $leftBackdrop.scrollLeft(this.scrollLeft);
+
             if (!isSyncingLeft) {
                 isSyncingRight = true;
                 $right.scrollTop(this.scrollTop);
+                $rightBackdrop.scrollTop(this.scrollTop);
             }
             isSyncingLeft = false;
         });
 
         $right.on('scroll', function() {
+            // Keep its own backdrop styling layer perfectly tracked with real viewport movements
+            $rightBackdrop.scrollTop(this.scrollTop);
+            $rightBackdrop.scrollLeft(this.scrollLeft);
+
             if (!isSyncingRight) {
                 isSyncingLeft = true;
                 $left.scrollTop(this.scrollTop);
+                $leftBackdrop.scrollTop(this.scrollTop);
             }
             isSyncingRight = false;
         });
@@ -653,6 +756,14 @@
         // Populate the dynamic fields (video and score) and textareas (lyrics)
         populateDynamicFields();
         loadAndSplitLyrics();
+
+        // Initialize and fire up structural helper highlights on primary load
+        updateHighlights('lyrics_lang1', 'highlights_lang1');
+        updateHighlights('lyrics_lang2', 'highlights_lang2');
+
+        // Watch formatting inputs to update text styling dynamically on modification
+        $('#lyrics_lang1').on('input', function() { updateHighlights('lyrics_lang1', 'highlights_lang1'); });
+        $('#lyrics_lang2').on('input', function() { updateHighlights('lyrics_lang2', 'highlights_lang2'); });
 
         // TEST: Capture the generated 'content' layout right now so the baseline matches perfectly
         originalData.content = combineLyrics();
