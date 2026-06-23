@@ -464,9 +464,45 @@
     // --- Event Listeners ---
     // ============================================
 
+    let isTogglingGroups = false;
+
     // --- Toggle Hamburger Menu ---
     $(document).on('click', '#hamburger-btn', function() {
-        $('#groups-container').slideToggle('fast');
+        isTogglingGroups = true;
+        $('#groups-container').slideToggle('fast', function() {
+            // This callback runs exactly when the animation finishes.
+            // A tiny 50ms timeout ensures any trailing browser scroll events are ignored.
+            setTimeout(() => { isTogglingGroups = false; }, 50);
+        });
+    });
+
+    // --- Close Groups Container on Outside Click ---
+    $(document).on('click', function(e) {
+        let $container = $('#groups-container');
+        let $hamburger = $('#hamburger-btn');
+
+        // Check if the container is open
+        if ($container.is(':visible')) {
+            // Check if the click target is NOT the container, NOT inside the container, 
+            // and NOT the hamburger button
+            if (!$container.is(e.target) && 
+                $container.has(e.target).length === 0 && 
+                !$hamburger.is(e.target) && 
+                $hamburger.has(e.target).length === 0) {
+                
+                $container.slideUp('fast');
+            }
+        }
+    });
+
+    // --- Close Groups Container on Scroll ---
+    $(window).on('scroll', function() {
+        if (isTogglingGroups) return;
+
+        let $container = $('#groups-container');
+        if ($container.is(':visible')) {
+            $container.slideUp('fast');
+        }
     });
 
     // --- Open Modal on Name Click ---
@@ -524,6 +560,7 @@
     }
 
     $(document).on('click', 'button.group_key', function() {
+        isTogglingGroups = true;
         toggle = true;
         keyword = this.name;
         div = $(this).parent();
@@ -538,11 +575,13 @@
             $(this).addClass('highlight');
             $('#total_label').text(keyword);
             table.column(4).search((d) => d.indexOf(keyword)>=0).draw();
+            setTimeout(() => { isTogglingGroups = false; }, 50);
         }
         else {
             console.log('reset')
             $('#total_label').text('總人數');
             table.column(4).search('').draw();
+            setTimeout(() => { isTogglingGroups = false; }, 50);
         }
     });
 

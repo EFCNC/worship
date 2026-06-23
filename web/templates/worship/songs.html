@@ -5,62 +5,165 @@
 {% block extra_css %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <style>
-#songs { text-align:left; list-style-type: none; margin: 0; padding: 0; width: 95%; }
-.lyrics { text-align:center; list-style-type: none; margin: 0; padding: 0; width: 75%; }
+
+/* =========================================
+    General Stuff
+   ========================================= */
+#songs { text-align:left; list-style-type: none; margin: 0; padding: 0;}
+.lyrics {
+    text-align:center;
+    list-style-type: none;
+    margin: 0; padding: 0;
+    width: 100%;
+}
+
+/* This might not be working */
 #songs, .lyrics li { margin: 0 3px 3px 3px; padding: 0.2em; font-size: 1em}
-#songs .title:hover{cursor: pointer}
-.infotitle:hover{cursor: pointer}
-.lyrics li span { position: absolute; margin-left: -1.3em;}
-.lyrics li:hover {cursor: pointer}
-.1, .2, .3, .4, .5, .6, .7, .8 { background-color: #da2c43; color: #fff}
-.chorus, .Chorus, .c { background-color: #556b2f; color: #fff}
-.bridge, .b, .b2, .b3, .b4 { background-color: #003153; color: #fff}
 
-.lyrics_buttons {
-    text-align: right;
-    position: absolute;
-    margin-top: -10px;
+/* =========================================
+   Shared Card Styling
+   ========================================= */
+.app-card {
+    background: #fdfdfd;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+    margin: 15px auto;
+    box-sizing: border-box;
 }
 
-.action_btns {
+/* Worship and Song List containers */
+#worship {
     display: flex;
-    align-items: stretch;
-}
-
-.action_btns button {
-    margin: 5px;
-}
-
-#worship, #song_list {
-    display: flex;
-    width: 95%;
+    flex-direction: column;
     justify-content: center;
     align-self: center;
-    border: 3px solid #0c0c0c;
-    padding: 5px;
-    margin: 5px;
 }
 
-.edit_btn img {
-    position: relative;
-    background-color: transparent;
-    width: 15px;
-    height: 15px;
+#song_list {
+    display: flex;
+    justify-content: center;
+    align-self: center;
 }
 
-.edit_btn:hover, .sequence:hover {
+.arrow {
+    padding: 2px;
+    margin: 2px;
+}
+
+.arrow:hover {
     cursor: pointer;
+    border: 1px solid #d0d0d0;
 }
 
-.title {
+/* =========================================
+   Sermon Box
+   ========================================= */
+.sermon-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 8px;
+    margin-bottom: 12px;
+}
+.sermon-title { margin: 0; font-size: 1.3em; color: #2c3e50; }
+.sermon-speaker { font-weight: 600; color: #7f8c8d; background: #eaeded; padding: 4px 8px; border-radius: 4px; font-size: 0.9em;}
+.sermon-bible { font-size: 1.05em; margin-bottom: 12px; }
+.sermon-outline { color: #34495e; line-height: 1.6; background: #f9f9f9; padding: 10px; border-radius: 4px; border-left: 3px solid #bdc3c7; }
+
+/* Bible Link */
+.bible-link { color: #009698; text-decoration: none; font-weight: bold; margin-right: 6px; padding: 2px 6px; border: 1px solid #009698; border-radius: 4px; background: #f0fbfc; }
+.bible-link:hover { background: #009698; color: #fff; }
+
+/* =========================================
+   Worship Song Card Flexbox (3 Rows)
+   ========================================= */
+/* Stacks the three rows vertically */
+.song-content-wrapper {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    padding: 5px;
+}
+
+/* Flexbox for the top row */
+.song-header-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.song-title {
     margin: 3px 3px 3px 3px;
     border: 1px solid transparent;
 }
 
-.lyrics_section:hover {
+/* Flexbox for the middle row (keys and icons) */
+.song-details-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+/*  The p of song-notes for some reason has a bottom margin being applied.
+    Adding this to just get rid of it. */
+.song-notes-row p { margin: 0; }
+
+.song-notes-row textarea {
+    width: 100%; /* Makes the text area span the full width of the card */
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+/* =========================================
+    Lyrics Flexbox and Sequence Highlighting
+   ========================================= */
+.lyric-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 10px;
+    margin: 10px 0px;
+    /* background-color: #fcfcfc; */
+    border: 1px solid #eee;
+    border-radius: 4px;
+}
+.lyric-content {
+    flex-grow: 0.5;
+    text-align: center;
+    padding: 5px;
+    margin: 5px;
+    border-radius: 4px;
+}
+
+.lyrics_buttons { display: flex; gap: 8px; flex-shrink: 0; }
+
+.p { background-color: #f78787; color: #fff}
+.v, [class~="1"], [class~="2"], [class~="3"], [class~="4"], [class~="5"], [class~="6"], [class~="7"], [class~="8"] { 
+    background-color: #D6B588; 
+    color: #fff; 
+}
+.chorus, .Chorus, .c { background-color: #556b2f; color: #fff}
+.bridge, .b, .b2, .b3, .b4 { background-color: #003153; color: #fff}
+
+.sequence-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.song_sequence_toggle {
+    display: flex;
+    align-items: center;
     cursor: pointer;
-    background: #e1e1e1;
-    border: 1px solid #d0d0d0;
+    gap: 8px;
 }
 
 #song_list > div {
@@ -76,82 +179,117 @@ li {
   padding: 5px;
 }
 
-.song_title {
-    cursor: pointer;
-}
-
 .highlighted {
-    font-weight: 400px;
+    font-weight: 400;
     color: red;
 }
 
-.keynote {
+/* =========================================
+   Buttons
+   ========================================= */
+.action_btn_container {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.save_btn { background-color: #28a745; color: white; border-color: #28a745; }
+.save_btn:hover { background-color: #218838; }
+
+.reset_btn { background-color: #dc3545; color: white; border-color: #dc3545; }
+.reset_btn:hover { background-color: #c82333; }
+
+.remove_btn {
+    background: none;
+    border: none;
+    color: #dc3545;
+    padding: 0.5rem;
+    transition: background-color 0.2s ease;
+    margin-left: auto;
+}
+
+.remove_btn:hover {
+    background-color: #ee8686;
+}
+
+/* This resets global button styles for specific icon buttons */
+.icon-button {
+    background: none !important;
+    padding: 0 !important;
+    border: none !important;
+    color: inherit !important;
+    transform: none !important;
+}
+
+/* =========================================
+   Badge Tag Things
+   ========================================= */
+/* Key Tag */
+   .keynote {
   border: 4px solid #000;
   background-color: #000;
   color: #fff;
   border-radius: 5px;
 }
 
-.lang_en {
-  border: 4px solid #009698;
-  background-color: #009698;
-  color: #fff;
-  border-radius: 50px 20px;
+/* Language tags */
+.lang_en    { --lang-color: #009698; }
+.lang_zh    { --lang-color: #8b0000; }
+.lang_zhTW  { --lang-color: #556b2f; }
+.lang_zhpingyin { --lang-color: #856088; }
+
+.lang_en, .lang_zh, .lang_zhTW, .lang_zhpingyin {
+    border-radius: 50px 20px;
+    color: #fff;
+    border: 4px solid var(--lang-color);
+    background-color: var(--lang-color);
 }
 
-.lang_zh {
-  border: 4px solid #8b0000;
-  background-color: #8b0000;
-  color: #fff;
-  border-radius: 50px 20px;
-}
-
-.lang_zhTW {
-  border: 4px solid #556b2f;
-  background-color: #556b2f;
-  color: #fff;
-  border-radius: 50px 20px;
-}
-
-.lang_zhpingyin {
-  border: 4px solid #856088;
-  background-color: #856088;
-  color: #fff;
-  border-radius: 50px 20px;
-}
-
-.custom-loader {
-  width:100px;
-  height:100px;
-  border-radius:50%;
-  background:conic-gradient(#0000 10%,#766DF4);
-  -webkit-mask:radial-gradient(farthest-side,#0000 calc(100% - 16px),#000 0);
-  animation:s3 1s infinite linear;
-}
-@keyframes s3 {to{transform: rotate(1turn)}}
-
-.arrow {
-    padding: 2px;
-    margin: 2px;
-}
-
-.arrow:hover {
-    cursor: pointer;
-    border: 1px solid #d0d0d0;
-}
-
-#sermon_data {
+/* =========================================
+   Sidebar / Search List Items
+   ========================================= */
+.sidebar-section-title {
+    font-size: 16px;
+    font-weight: 600;
     padding: 5px;
-    margin: 5px;
-    width: 95%;
+    margin-top: 15px;
+    border-bottom: 2px solid #eee;
+}
+
+.sidebar-song-item {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap; /* Allows items to wrap on tiny screens */
+    gap: 8px; /* Spacing between the button, title, and tags */
+    padding: 6px 8px;
+    margin: 4px 0;
+    border-radius: 6px;
+    background-color: #fff;
+    border: 1px solid #f0f0f0;
+    transition: background-color 0.2s ease;
+}
+
+.sidebar-song-item:hover {
+    background-color: #f9f9f9;
+}
+
+/* Specific styling for the new visible Insert (+) Button */
+.insert_btn {
+    color: #28a745 !important;
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: transform 0.1s ease;
+}
+
+.insert_btn:hover {
+    transform: scale(1.2) !important;
 }
 
 /* Default rules for mobile devices */
 .ui-dialog {
     width: 95% !important; /* Almost full screen on mobile */
     box-sizing: border-box;
-    left: 50% !important;
-    transform: translateX(-50%);
 }
 
 /* Rules for desktop screens (screens wider than 768px) */
@@ -167,26 +305,28 @@ li {
 <div class="custom-loader" style="display:none"></div>
 <h3><span class="arrow left" name="-1">&lt;</span> {{ w.date }} <span class="arrow right" name="1">&gt;</span></h3>
 <!-- Container of worship songs -->
-<div id="sermon_data"></div>
-<div class="action_btns">
-    <input id="keyword" style="display:none">
-    <button id="search_btn">Search</button>
-    <button id="add_song_btn">Add Song</button>
-    <!--<button id="add_note_btn">Add Notes</button>-->
-    <button class="save_btn" onclick="javascript:save({{ id }})">Save</button>
-        <!--<button class="export_btn" onclick="javascript:export_file({{ id }})">Export</button>-->
-        <button class="reset_btn" onclick="javascript:reset()">Reset</button>
-        <!--<button id="preview_btn">Present</button>-->
+<div id="sermon-data_card" class="app-card"></div>
+
+<div class="action_btn_container">
+    <div class="search_container">
+        <input id="keyword" type="text" placeholder="Search songs..."">
+        <button id="search_btn">Search</button>
     </div>
-<div id="worship">
-    <!-- sortable songs -->
+    <button id="add_new_song_btn">Add New Song</button>
+    <button class="save_btn" style="display: none;">Save</button>
+    <button class="reset_btn" style="display: none;">Reset</button>
+    </div>
+    
+ <!-- sortable songs -->
+<div id="worship" class="app-card"></div>
+
+<div class="action_btn_container">
+    <button class="save_btn" style="display: none;">Save</button>
+    <!--<button class="export_btn" onclick="javascript:export_file({{ id }})">Export</button>-->
+    <button class="reset_btn" style="display: none;">Reset</button>
 </div>
-    <div class="action_btns">
-<button class="save_btn" onclick="javascript:save({{ id }})">Save</button>
-<!--<button class="export_btn" onclick="javascript:export_file({{ id }})">Export</button>-->
-&nbsp;&nbsp;<button class="reset_btn" onclick="javascript:reset()">Reset</button>
-    </div>
-<div id="song_list" >
+
+<div id="song_list" class="app-card">
     <div id="left_content"></div>
     <div id="middle_content"></div>
     <div id="right_content"></div>
@@ -197,8 +337,12 @@ li {
 {% block extra_js %}
 <script src="/static/bible.js"></script>
 <script>
+
+    /* =================================
+        Global Variables
+    ================================== */
     // Store worship set into object
-    const songs = {{ songs|safe }};
+    let songs = {{ songs|safe }};
     let songs_temp = JSON.parse(JSON.stringify(songs));
     let lyrics_raw = '';
     let worship_data = {{ w|safe }};
@@ -210,180 +354,161 @@ li {
     let flat = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"];
     let keys;
 
-    // Events listener
+    // Used to calculate scrolling
+    const headerOffset = $('#header').outerHeight();
 
-    // When lyrics sequence is clicked, open up movable lyrics sections
-    $(document).on({
-        mouseover: function () {
-            if(device=='mobile') {
-                id = $(this).attr('name');
-                $("#sequence_"+id).toggle('slow');
-            }
-        },
-        click: function () {
-            if (device=='desktop') {
-                id = $(this).attr('name');
-                $("#sequence_"+id).toggle('slow');
-            }
-        }
-    }, ".lyrics_section");
-
-    // When lyrics sequence is added
-    $(document).on('click', '.add_btn', function () {
-        $(this).parent().parent().clone().appendTo($(this).parent().parent().parent());
-        $(".lyrics").sortable( "destroy" );
-        init();
-    });
-
-    // When lyrics sequence is removed
-    $(document).on('click', '.remove_sequence_btn', function () {
-        $(this).parent().parent().remove();
-        $(".lyrics").sortable( "destroy" );
-        init();
-    });
-
-    // When key changed
-    $(document).on('change', '.key', function () {
-        transpose = keys.indexOf(this.value)-keys.indexOf($(this).attr('init'));
-        id = $(this).parent().attr('name');
-        for(song of songs_temp) {
-            if (song.id == id) {
-                song.transpose = transpose;
-                break;
-            }
-        }
-    });
-
-    // When notes are changed
-    $(document).on('change', 'textarea[name="song_notes"]', function() {
-        index = $(this).attr('index');
-        songs_temp[index].notes = $(this).val();
-    });
-
-    // Functions
-
-    function get_sermon() {
-        var html = [];
-        var bible = worship_data.bible.replace(/(、|;)/g, '，'); // Replace possible symbols to Chinese comma
-        bible = bible.split('，');
-        var b = '';
-        for (var i=0;i<bible.length;i++) {
-            b += ' <a href="javascript:get_bible(show_verse, \'' + bible[i] + '\')">' + bible[i] + '</a>';
-        }
-        html.push('Title: ' + worship_data.title + b);
-        html.push('Speaker: ' + worship_data.speaker);
-        html.push(worship_data.outline);
-        $('#sermon_data').html(html.join('<br/>'));
-    }
-
-    // Presentation mode
-    function presentation() {
-        url = API_URL + 'worship/' + worship_id + '/preview';
-        $.when( $.ajax( url ) ).then(function( data, textStatus, jqXHR ) {
-            presentation = data;
-            console.log(presentation)
-            $("#preview").show();
-            $.when(load($("#preview"))).then(function() {
-                go_full_screen();
-            });
-        });
-    }
-
-    // Save current arrangement, if no changes won't do anything
-    function save(id) {
-        temp = is_changed($('#songs').sortable('toArray', {attribute: 'name'}), $('#lyrics').sortable('toArray', {attribute: 'name'}))
-        if (temp) {
-            changed = temp.map((item, i)=> ({'song_order': i+1, 'type': item.type, 'song_id': item.id, 'sequence': item.alt_sequence, 'notes': item.notes, 'transpose': [item.transpose.toString()], 'scheduled_date': item.date}));
-
-            url = API_URL + 'worship/' + id + '/edit';
-            data = JSON.stringify(changed);
-
-            $.ajax({
-                type: "post",
-                url: url,
-			    data: data,
-                complete: function(response) {
-            	    if(response.status==200) {
-            	        alert("Worship Arrangement Saved!!");
-    	            }
-        	        else {
-        	            alert(response);
-				    }
-                },
-                contentType: "application/json",
-                dataType: 'json'
-            });
-        }
-        else {
-            alert("Nothing was changed!!");
-        }
-    }
-
-    // update alt sequence which will be saved unto song_set table
-    function update_alt(alt) {
-        ids = []
-        $.each(alt, function() {
-            temp = this.split('_');
-            base = temp[0];
-            ids.push(temp[1])
-        });
-        id = base.split('-')[1]
-        ids = ids.join(',')
-        $('#'+base+'_alt').html(ids);
-        for (song of songs_temp) {
-            if (song.id == id) {
-               song.alt_sequence = ids;
-                break;
-            }
-        }
-    }
-
-    // Reset all the changes (songs order, lyrics order)
-    function reset() {
-        songs_temp = JSON.parse(JSON.stringify(songs));
+    /*  ==================================
+        Initialization Stuff
+        ================================== */
+    
+    // Song Database Setup Stuff
+    $(document).ready(function () {
+        get_sermon();
         $.when( add_song_to_worship(worship)).then(function() {
             init();
         });
-    }
-
-    // TODO, can be removed or rework the logic
-    function enable_btn(enable) {
-        if(enable) {
-            $(".save_btn").removeAttr('disabled');
-            $(".reset_btn").removeAttr('disabled');
+        
+        if($.cookie("pinned")) {
+            let my_pinned_songs = '<div class="sidebar-section-title">My Pinned Songs&nbsp;&nbsp;<a href="song/list" title="more">...</a></div>';
+            get_songs($.cookie("pinned")).done(function(data) {
+                for (let s of data) {
+                    my_pinned_songs += `
+                        <div songid="${s.id}" class="sidebar-song-item">
+                            <button type="button" class="icon-button insert_btn" title="Add Song"><i class="fa-solid fa-plus"></i></button>
+                            <span class="song_title"><b>${s.title}</b></span>
+                            <span class="keynote">${s.key}</span>
+                            ${lang_tag(s.lang)} ${lang_tag(s.lang_2)} ${get_links(s.video, s.score, s.abc)}
+                        </div>`;
+                }
+            $('#left_content').append(my_pinned_songs);
+            });
         }
-        else {
-            $(".save_btn").attr('disabled', 'disabled');
-            $(".reset_btn").attr('disabled', 'disabled');
-        }
-    }
-
-    // init sortable, triggered after the worship div is loaded
-    function init() {
-        $("#songs").sortable({
-            /*create: function( event, ui ) {
-                is_changed($(this).sortable('toArray', {attribute: 'name'}));
-            },
-            update: function () {
-                is_changed($(this).sortable('toArray', {attribute: 'name'}));
-            }*/
+        get_songs_by_days(30).done(function(data) {
+            let my_song_list = '<div class="sidebar-section-title">Songs used recently&nbsp;&nbsp;<a href="song/list" title="more">...</a></div>';
+            for (let key in data) {
+                let ss = data[key];
+                if (ss) {
+                    for (let s1 of ss) {
+                        my_song_list += `
+                            <div title="${key}" songid="${s1.id}" class="sidebar-song-item">
+                                <button type="button" class="icon-button insert_btn" title="Add Song"><i class="fa-solid fa-plus"></i></button>
+                                <span class="song_title"><b>${s1.title}</b></span>
+                                <span class="keynote">${s1.key}</span>
+                                ${lang_tag(s1.lang)} ${lang_tag(s1.lang_2)}
+                            </div>`;
+                    }
+                }
+            }
+            $('#left_content').append(my_song_list);
         });
-        $("#songs").disableSelection();
-        $(".lyrics").sortable({
-            create: function( event, ui ) {
-                //is_changed($(this).sortable('toArray', {attribute: 'name'}));
-                update_alt($(this).sortable('toArray'));
-            },
-            update: function(event, ui) {
-                //is_changed($(this).sortable('toArray', {attribute: 'name'}));
-                update_alt($(this).sortable('toArray'));
+
+        get_songs().done(function(data) {
+            let my_new_songs = '<div class="sidebar-section-title">Newly added songs&nbsp;&nbsp;<a href="song/list" title="more">...</a></div>';
+            for (let s of data) {
+                my_new_songs += `
+                    <div songid="${s.id}" class="sidebar-song-item">
+                        <button type="button" class="icon-button insert_btn" title="Add Song"><i class="fa-solid fa-plus"></i></button>
+                        <span class="song_title"><b>${s.title}</b></span>
+                        <span class="keynote">${s.key}</span>
+                        ${lang_tag(s.lang)} ${lang_tag(s.lang_2)} ${get_links(s.video, s.score, s.abc)}
+                    </div>`;
+            }
+            $('#left_content').append(my_new_songs);
+        });
+
+        $('.arrow').click(function() {
+            increment = Number($(this).attr('name'));
+            id = worship_id;
+            id = id + increment;
+            if (id >= 0) {
+                window.location.href = '?id='+id;
             }
         });
-        $(".lyrics").disableSelection();
-        get_transpose();
+    });
+
+    // When Notes are changed
+    $(document).on('change', 'textarea[name="song_notes"]', function() {
+        index = $(this).attr('index');
+        songs_temp[index].notes = $(this).val();
+        checkActionButtons();
+    });
+    
+    // ======================
+    // Functions
+    // ======================
+
+    // Sermon Card Functions:
+    function get_sermon() {
+        var bible = worship_data.bible.replace(/(、|;)/g, '，').split('，');; // Replace possible symbols to Chinese comma, then split by commas
+        var b = '';
+        for (var i=0; i<bible.length; i++) {
+            if(bible[i].trim() !== "") {
+                b += ' <a class="bible-link" href="javascript:get_bible(show_verse, \'' + bible[i] + '\')">' + bible[i] + '</a>';
+            }
+        }
+
+        var cardHtml = `
+                <div class="sermon-header">
+                    <h4 class="sermon-title"><strong>Title:</strong> ${worship_data.title}</h4>
+                    <span class="sermon-speaker">By: ${worship_data.speaker}</span>
+                </div>
+                <div class="sermon-bible"><strong>Scripture Reference:</strong> ${b}</div>
+                <div class="sermon-outline"><strong>Sermon Outline:</strong><br/>${worship_data.outline}</div>
+        `;
+        $('#sermon-data_card').html(cardHtml);
     }
 
-    // Helper functions
+
+    // ========================
+    // Action Buttons Stuff
+    // ========================
+    $(document).on('click', '.save_btn', function() {
+        save(worship_id);
+    });
+
+    $(document).on('click', '.reset_btn', function() {
+        reset();
+    });
+
+    // Reactive State Management (Show/Hide Save & Reset Buttons)
+    function checkActionButtons() {
+        let orderChanged = false;
+        if ($('#songs').data('ui-sortable')) {
+            let currentOrder = $('#songs').sortable('toArray', {attribute: 'name'});
+            let originalOrder = songs.map(item => String(item.id));
+            orderChanged = JSON.stringify(currentOrder) !== JSON.stringify(originalOrder);
+        }
+        
+        let contentChanged = false;
+        
+        // Check if songs were added or removed
+        if (songs.length !== songs_temp.length) {
+            contentChanged = true;
+        } else {
+            // Compare the specific fields that matter to avoid false positives
+            for (let song of songs) {
+                let tempSong = songs_temp.find(s => s.id === song.id);
+                
+                // Force both transposes to be integers so "0", ["0"], and 0 all match perfectly
+                let origTranspose = parseInt(song.transpose) || 0;
+                let tempTranspose = parseInt(tempSong.transpose) || 0;
+
+                if (!tempSong || 
+                    origTranspose !== tempTranspose || 
+                    song.notes != tempSong.notes || 
+                    song.alt_sequence != tempSong.alt_sequence) {
+                    contentChanged = true;
+                    break;
+                }
+            }
+        }
+
+        if (orderChanged || contentChanged) {
+            $('.save_btn, .reset_btn').show();
+        } else {
+            $('.save_btn, .reset_btn').hide();
+        }
+    }
 
     // This function will detect if arrangement has been changed compare to the origin one
     function is_changed(order) {
@@ -411,6 +536,116 @@ li {
         console.log(content)
         return temp;
     }
+
+    /*  
+        Save current arrangement, checkActionsButton() function will determine if Save button appears
+        Leaving the if else just in case
+    */
+    function save(id) {
+        let temp = is_changed($('#songs').sortable('toArray', {attribute: 'name'}), $('#lyrics').sortable('toArray', {attribute: 'name'}))
+        if (temp) {
+            let changed = temp.map((item, i)=> ({
+                'song_order': i+1,
+                'type': item.type,
+                'song_id': item.id,
+                'sequence': item.alt_sequence,
+                'notes': item.notes,
+                'transpose': [item.transpose.toString()],
+                'scheduled_date': item.date
+            }));
+
+            let url = API_URL + 'worship/' + id + '/edit';
+            let data = JSON.stringify(changed);
+
+            $.ajax({
+                type: "post",
+                url: url,
+			    data: data,
+                complete: function(response) {
+            	    if(response.status==200) {
+            	        alert("Worship Arrangement Saved!");
+
+                        // Rebuild the 'songs' baseline to match the newly saved state!
+                        let newOrder = $('#songs').sortable('toArray', {attribute: 'name'});
+                        let newBaseline = [];
+                        
+                        for (let currentId of newOrder) {
+                            let songData = songs_temp.find(s => s.id == currentId);
+                            if (songData) {
+                                newBaseline.push(songData);
+                            }
+                        }
+                        
+                        // Overwrite the original songs array with this new baseline
+                        songs = JSON.parse(JSON.stringify(newBaseline));
+                        
+                        // Re-run the checker to hide the Save/Reset buttons
+                        checkActionButtons();
+    	            }
+        	        else {
+        	            alert(response);
+				    }
+                },
+                contentType: "application/json",
+                dataType: 'json'
+            });
+        }
+        else {
+            alert("Nothing was changed!!");
+        }
+    }
+
+    // Reset all the changes (songs order, lyrics order)
+    function reset() {
+        songs_temp = JSON.parse(JSON.stringify(songs));
+        $.when( add_song_to_worship(worship)).then(function() {
+            init();
+            checkActionButtons();
+        });
+    }
+
+    // init sortable, triggered after the worship div is loaded
+    function init() {
+        $("#songs").sortable({
+            update: function () {
+                checkActionButtons();
+            }
+        });
+        $("#songs").disableSelection();
+        $(".lyrics").sortable({
+            create: function( event, ui ) {
+                //is_changed($(this).sortable('toArray', {attribute: 'name'}));
+                update_alt($(this).sortable('toArray'));
+            },
+            update: function(event, ui) {
+                //is_changed($(this).sortable('toArray', {attribute: 'name'}));
+                update_alt($(this).sortable('toArray'));
+                checkActionButtons();
+            }
+        });
+        $(".lyrics").disableSelection();
+        get_transpose();
+    }
+
+    // ======================
+    // Transpose and Key Stuff
+    // ======================
+
+    // When the Key is changed
+    $(document).on('change', '.key', function () {
+        let transposeVal = keys.indexOf(this.value) - keys.indexOf($(this).attr('init'));
+        let id = $(this).closest('li').attr('name');
+        
+        $(this).attr('name', transposeVal); 
+        
+        for (let song of songs_temp) {
+            if (song.id == id) {
+                song.transpose = transposeVal;
+                break;
+            }
+        }
+        checkActionButtons();
+    });
 
     // parse chord to different key by transpose number
     function parse_chord(chord, diff) {
@@ -449,211 +684,120 @@ li {
 
     // Create drop down list based on original key, flat based or sharp based
     function get_transpose() {
-	    var key = $('.key');
-	    $.each(key, function(index, element) {
-	        var original_key = $(this).attr('init');
+        var key = $('.key');
+        $.each(key, function(index, element) {
+            var original_key = $(this).attr('init');
+            
+            // 1. Determine if we are using sharps or flats FIRST
             keys = flat;
-            transposed_key = parse_chord(original_key, this.name)[0];
-            if (sharp.indexOf(original_key)>=0) {
-    	        keys = sharp;
+            if (sharp.indexOf(original_key) >= 0) {
+                keys = sharp;
             }
+            
+            // 2. Parse the chord without the [0] at the end!
+            var transposed_key = parse_chord(original_key, this.name);
+            
             $(this).empty();
-            for(var i=0;i<keys.length;i++) {
-    	        o = document.createElement('option');
+            for(var i = 0; i < keys.length; i++) {
+                var o = document.createElement('option');
                 o.text = keys[i];
-    	        if(keys[i] == transposed_key) {
-        	        o.selected = true;
+                if(keys[i] === transposed_key) {
+                    o.selected = true;
                 }
                 $(this).append(o);
             }
-	    })
+        });
     }
 
-    $(document).ready(function () {
-        get_sermon();
-        $.when( add_song_to_worship(worship)).then(function() {
-            init();
-        });
-        if($.cookie("pinned")) {
-            var my_pinned_songs = '<div style="font-size:16px;font-weight:600;width:100%;padding:5px">My pinned songs&nbsp;&nbsp;<a href="song/list" title="more">...</a></div>';
-            get_songs($.cookie("pinned")).done(function(data) {
-                for (s of data) {
-                    my_pinned_songs += "<span songid='" + s.id + "' class='song_title'>" + s.title + "&nbsp;<span class='keynote'>" + s.key + "</span>&nbsp;" + lang_tag(s.lang) + "&nbsp;" + lang_tag(s.lang_2) + "&nbsp;" + get_links(s.video, s.score, s.abc) + " <button style='display:none' class='insert_btn'> + </button></span><br/>";
-                    //my_pinned_songs += "<span songid='" + s.id + "' class='song_title'>" + s.title + "&nbsp;<span class='keynote'>" + s.key + "</span>&nbsp;" + lang_tag(s.lang) + "&nbsp;" + lang_tag(s.lang_2) + "&nbsp;<button style='display:none' class='insert_btn'> + </button></span><br/>";
-                }
-            my_pinned_songs += "</div>";
-            $('#left_content').append(my_pinned_songs);
-            });
-        }
-            get_songs_by_days(30).done(function(data1) {
-            var my_song_list = '<div style="font-size:16px;font-weight:600;width:100%;padding:5px">Songs used recently&nbsp;&nbsp;<a href="song/list" title="more">...</a></div>';
-                for (key in data1) {
-                    ss = data1[key];
-                    if (ss) {
-                        for (s1 of ss) {
-                            my_song_list += "<span title ='" + key + "' songid='" + s1.id + "' class='song_title'>" + s1.title + "&nbsp;<span class='keynote'>" + s1.key + "</span>&nbsp;" + lang_tag(s1.lang) + "&nbsp;" + lang_tag(s1.lang_2) + "&nbsp;" + " <button style='display:none' class='insert_btn'> + </button></span><br/>";
-                        }
-                    }
-                }
-                my_song_list += "</div>";
-                $('#left_content').append(my_song_list);
-            });
-            get_songs().done(function(data) {
-                var my_new_songs = '<div style="font-size:16px;font-weight:600;width:100%;padding:5px">Newly added songs&nbsp;&nbsp;<a href="song/list" title="more">...</a></div>';
-                for (s of data) {
-                    my_new_songs += "<span songid='" + s.id + "' class='song_title'>" + s.title + "&nbsp;<span class='keynote'>" + s.key + "</span>&nbsp;" + lang_tag(s.lang) + "&nbsp;" + lang_tag(s.lang_2) + "&nbsp;" + get_links(s.video, s.score, s.abc) + " <button style='display:none' class='insert_btn'> + </button></span><br/>";
-                }
-                $('#left_content').append(my_new_songs);
-            });
-
-            $('#left_content').append('</div>');
-
-        $('.arrow').click(function() {
-            increment = Number($(this).attr('name'));
-            id = worship_id;
-            id = id + increment;
-            if (id >= 0) {
-                window.location.href = '?id='+id;
-            }
-        });
-    });
-
-    $(document).on({
-        mouseover: function () {
-            $(".remove_btn", this).show();
-        },
-        mouseout: function () {
-            $(".remove_btn", this).hide();
-        },
-        click: function (event) {
-            if($(event.target).attr('class') == 'remove_btn') {
-                return false;
-            }
-            lang = $(this).attr('lang');
-            id = $(this).attr('name');
-            $.when(render_song(id, 'worship.db', lang), function() {
-                console.log('saved');
-            });
-        }
-    }, ".title");
-
-    $(document).on({
-        mouseover: function () {
-            $(".remove_btn", this).show();
-        },
-        mouseout: function () {
-            $(".remove_btn", this).hide();
-        }
-    }, ".infotitle");
-
-    $(document).on('click', '.infotitle', function() {
+    /* ======================
+        Song Sequence and Lyrics
+    */
+    // When lyrics sequence is clicked, open up movable lyrics sections
+    $(document).on('click', '.song_sequence_toggle', function(){
         id = $(this).attr('name');
-        url = API_URL + 'notes/id=?' + id;
-        console.log($(this).attr('bible'));
-        $.when( $.ajax( url ) ).then(function( data, textStatus, jqXHR ) {
-            $("#dialog").html(data);
-            $("#dialog").dialog({
-                title: "Edit Note",
-                width: 'auto',
-                buttons: [
-	                {
-    	                id: "button-add",
-                        text : "Save",
-                        click: function() {
-                            notes = $("#mynotes").val();
-                            //data = {'id': -1, 'transpose': 0, 'date': worship_data.date, 'alt_sequence': '', 'sequence': '', 'notes': notes, 'type': 'i'};
-                            url = API_URL + 'notes';
-                            $( this ).dialog( "close" );
-                            data = $("#content").serialize();
-                            console.log(data);
-                            /*$.ajax({
-                                type: "post",
-                                url: url,
-	                            data: data,
-                                complete: function(response) {
-          	                        if(response.status==200) {
-           	                            //location.reload();
-                                        $( this ).dialog( "close" );
-    	                            }
-                                    else {
-                                        alert(response);
-		                            }
-                                }
-                            });*/
-                        }
-                    },
-	                {
-	                    id: "button-cancel",
-                        text : "Cancel",
-                        click: function() {
-                            $( this ).dialog( "close" );
-                        }
-                    }
-                ]
-            });
-        });
+        $(this).find('.toggle-icon').toggleClass('fa-caret-down fa-caret-right');
+        $("#sequence_"+id).toggle('slow');
     });
 
-    $('#search_btn').hover(function() {
-        $("#keyword").show('slow', function() {
-        });
+    // When add_sequence_btn for lyrics sequence is clicked
+    $(document).on('click', '.add_sequence_btn', function () {
+        let listElement = $(this).closest('li');
+
+        // Clone the element and insert it directly after the clicked element
+        listElement.clone().insertAfter(listElement);
+        $(".lyrics").sortable("destroy");
+
+        init();
+        checkActionButtons();
     });
 
-    $(document).on('click', '#add_song_btn', function() {
+    // When remove_sequence_btn is clicked
+    $(document).on('click', '.remove_sequence_btn', function () {
+        $(this).closest('li').remove();
+
+        $(".lyrics").sortable( "destroy" );
+        init();
+        checkActionButtons();
+    });
+   
+    // update alt sequence which will be saved onto song_set table
+    function update_alt(alt) {
+        ids = []
+        $.each(alt, function() {
+            temp = this.split('_');
+            base = temp[0];
+            ids.push(temp[1])
+        });
+        id = base.split('-')[1]
+        ids = ids.join(',')
+        $('#'+base+'_alt').html(ids);
+        for (song of songs_temp) {
+            if (song.id == id) {
+               song.alt_sequence = ids;
+                break;
+            }
+        }
+    }
+
+    /* =========================================================
+       Song Editor Stuff (Add/Remove/Edit)
+       ========================================================= */
+    $(document).on('click', '#add_new_song_btn', function() {
         render_song(-1, '', '', 1);
     });
 
-    $(document).on('click', '#add_note_btn', function() {
-        url = 'notes';
-        $.when( $.ajax( url ) ).then(function( data, textStatus, jqXHR ) {
-            $("#dialog").html(data);
-            $("#dialog").dialog({
-                title: "Add Info to Song",
-                width: 'auto',
-                buttons: [
-	                {
-    	                id: "button-add",
-                        text : "Add",
-                        click: function() {
-                            notes = $("#mynotes").val();
-                            data = {'id': -1, 'transpose': 0, 'date': worship_data.date, 'alt_sequence': '', 'sequence': '', 'notes': notes, 'type': 'info'};
-                            songs_temp.push(data);
-                            console.log(songs_temp);
-                            $( this ).dialog( "close" );
-                            $.when( add_song_to_worship(worship)).then(function() {
-                                init();
-                            });
+    $(document).on('click', '.edit_btn', function(event) {
 
-                            url = API_URL + 'info';
-                            data = JSON.stringify($("#info").serialize());
-                            $.ajax({
-                                type: "post",
-                                url: url,
-	                            data: data,
-                                complete: function(response) {
-          	                        if(response.status==200) {
-           	                            //location.reload();
-                                        $( this ).dialog( "close" );
-    	                            }
-                                    else {
-                                        alert(response);
-		                            }
-                                },
-                                contentType: "application/json",
-                                dataType: 'json'
-                            });
-                        }
-                    },
-	                {
-	                    id: "button-cancel",
-                        text : "Cancel",
-                        click: function() {
-                            $( this ).dialog( "close" );
-                        }
-                    }
-                ]
-            });
-        });
+        let parentContainer = $(this).closest('.song-title');
+        let lang = parentContainer.attr('lang');
+        let id = parentContainer.attr('name');
+
+        render_song(id, 'worship.db', lang);
+    });
+    
+    // Remove song from song set, when click save song_set table will be updated
+    $(document).on('click', '.remove_btn', function() {
+        let id = $(this).closest('li').attr('name');
+        for (i in songs_temp) {
+            if (songs_temp[i].id == id) {
+                songs_temp.splice(i,1);
+                break;
+            }
+        }
+         $.when( add_song_to_worship(worship)).then(function() {
+            init();
+            checkActionButtons();
+         });
+    });
+
+    /* =========================================================
+       Search, Import, Song Database Stuff
+       ========================================================= */
+    $(document).on('keydown', '#keyword', function(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault(); 
+            $('#search_btn').click();
+        }
     });
 
     $(document).on('click', '#search_btn', function() {
@@ -665,33 +809,36 @@ li {
         var url = API_URL + 'search/song?keywords=' + keyword;
         $.when( $.ajax( url ) ).then(function( data, textStatus, jqXHR ) {
 
-            // This returns dict with id, title and file
-            var left = '<span id="left_header"><h3>Songs which can be imported from another Database</h3></span><br/>'
-            for(var i=0;i<data['left'].length;i++) {
-                left += "<span class='song_title'>" + highlight_keyword(keyword, data['left'][i]['title']) + lang_tag(data['left'][i]['lang']) + " <button lang='" + data['left'][i]['lang'] + "' db='" + data['left'][i]['db'] + "' songid='" + data['left'][i]['id'] + "' style='display:none' class='insert_btn'> + </button></span><br/>";
+            // Left Panel (Database Import)
+            let left = '<div class="sidebar-section-title"><h3>Import from another Database</h3></div>';
+            for(let i=0; i<data['left'].length; i++) {
+                left += `
+                    <div class="sidebar-song-item">
+                        <button type="button" lang="${data['left'][i]['lang']}" db="${data['left'][i]['db']}" songid="${data['left'][i]['id']}" class="icon-button insert_btn" title="Import Song"><i class="fa-solid fa-cloud-arrow-down"></i></button>
+                        <span class="song_title"><b>${highlight_keyword(keyword, data['left'][i]['title'])}</b></span> 
+                        ${lang_tag(data['left'][i]['lang'])}
+                    </div>`;
             }
-            var right = '<span id="right_header"><h3>Available Songs</h3></sapn><br/>';
-            for(var i=0;i<data['right'].length;i++) {
-                right += "<span songid='" + data['right'][i]['id'] + "' class='song_title'>" + highlight_keyword(keyword, data['right'][i]['title']) + "&nbsp;<span class='keynote'>" + data['right'][i]['key'] + "</span>&nbsp;" + lang_tag(data['right'][i]['lang']) + "&nbsp;" + lang_tag(data['right'][i]['lang_2']) + get_links(data['right'][i]['video'], data['right'][i]['score'], data['right'][i]['abc']) + " <button style='display:none' class='insert_btn'> + </button></span><br/>";
+
+            // Right Panel (Available Songs)
+            let right = '<div class="sidebar-section-title"><h3>Available Songs</h3></div>';
+            for(let i=0; i<data['right'].length; i++) {
+                right += `
+                    <div songid="${data['right'][i]['id']}" class="sidebar-song-item">
+                        <button type="button" class="icon-button insert_btn" title="Add Song"><i class="fa-solid fa-plus"></i></button>
+                        <span class="song_title"><b>${highlight_keyword(keyword, data['right'][i]['title'])}</b></span> 
+                        <span class="keynote">${data['right'][i]['key']}</span> 
+                        ${lang_tag(data['right'][i]['lang'])} ${lang_tag(data['right'][i]['lang_2'])} 
+                        ${get_links(data['right'][i]['video'], data['right'][i]['score'], data['right'][i]['abc'])}
+                    </div>`;
             }
 
             $("#right_content").html(left);
             $("#middle_content").html(right);
             $("#song_list").show();
-            var aTag = $("#song_list");
-            $('html,body').animate({scrollTop: aTag.offset().top},'slow');
+            $('html,body').animate({scrollTop: $("#song_list").offset().top - headerOffset}, 'slow');
         });
     });
-
-    // Event handlers for inset_btn
-    $(document).on({
-        mouseover: function () {
-            $(".insert_btn", this).show();
-        },
-        mouseout: function () {
-            $(".insert_btn", this).hide();
-        }
-    }, ".song_title");
 
     // event handler "+" button is click from the searched songs
     $(document).on('click', '.insert_btn', function() {
@@ -700,58 +847,53 @@ li {
             id = $(this).attr('songid');
             db = $(this).attr('db');
             lang = $(this).attr('lang');
-            render_song(id, db, lang, 1);
+            // Scroll back up before opening editor
+            $('html,body').animate({scrollTop: $("#worship").offset().top - headerOffset}, 'slow')
+                .promise()
+                .done(function() {
+                    // This will run ONLY after the scroll animation has completely finished
+                    render_song(id, db, lang, 1);
+                });
         }
         // When songs in current dB is clicked, add it to panel
         else {
             id = $(this).parent().attr('songid');
             get_song(id).done(function(data) {
                 if(songs_temp.find(o => o.title === data.title)) {
-                    alert('"' + data.title + '" already in the set!!');
+                    alert('"' + data.title + '"is already in the set!');
                     return false;
                 }
                 data['date'] = worship_data.date;
                 songs_temp.push(data);
+                
                 $.when( add_song_to_worship(worship)).then(function() {
+                    $('html,body').animate({scrollTop: $("#worship").offset().top - headerOffset}, 'slow');
                     init();
+                    checkActionButtons();
                 });
             });
         }
     });
 
-    // Remove song from song set, when click save song_set table will be updated
-    $(document).on('click', '.remove_btn', function() {
-        id = $(this).parent().parent().attr('name');
-        for (i in songs_temp) {
-            if (songs_temp[i].id == id) {
-                songs_temp.splice(i,1);
-                break;
-            }
-        }
-         $.when( add_song_to_worship(worship)).then(function() {
-            init();
-         });
-    });
-
-/*    $(document).on('click', '.edit_btn img', function() {
-        id = this.name;
-        $('.lyrics_raw').each(function(){
-            if (this.id != 'lyrics_raw_' + id) {
-                $(this).hide('slow');
-            }
-            else {
-                $("#lyrics_raw_" + id).toggle('slow');
-            }
+    /* =========================================================
+       Extras
+       ========================================================= */
+    // Presentation mode (not used currently, used by future preview)
+    function presentation() {
+        url = API_URL + 'worship/' + worship_id + '/preview';
+        $.when( $.ajax( url ) ).then(function( data, textStatus, jqXHR ) {
+            presentation = data;
+            console.log(presentation)
+            $("#preview").show();
+            $.when(load($("#preview"))).then(function() {
+                go_full_screen();
+            });
         });
-    });*/
+    }
 
     $("#preview_btn").click(function() {
         window.location.href = 'slides/admin?id={{ id }}';
         //presentation();
-    });
-
-    $("#home").click(function() {
-        window.location.href = '/';
     });
 
 </script>

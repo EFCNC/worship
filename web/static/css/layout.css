@@ -4,9 +4,11 @@
  */
 
 /* Exclude header, loading, and dialog from default margin */
-body > :not(#loading):not(#dialog):not(header) {
+body > :not(#loading):not(#dialog):not(.ui-dialog):not(header) {
     margin: var(--spacing-md);
 }
+
+
 
 /* Header Styles */
 header#header {
@@ -120,10 +122,15 @@ header#header {
 }
 
 /* Main Content Area */
-/* Unsure if needed */
+@media (min-width: 768px) {
+    main#main-content {
+        padding: 0px var(--spacing-md);
+    }
+}
+
 main#main-content {
-    min-height: calc(100vh - var(--header-height));
-    padding: var(--spacing-md);
+    /* min-height: calc(100vh - var(--header-height)); */
+    /* padding: 0px var(--spacing-md); */
 }
 
 /* Home Icon */
