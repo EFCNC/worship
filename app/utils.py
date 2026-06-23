@@ -322,10 +322,6 @@ def get_song_by_id_(id, db_name):
     lang = db[0]["lang"]
     x = dB.run_para(sql, id, db_name)[0]
     content = Parser.parse_lyrics_for_import(x[4]) # index 4: lyrics
-    #if lang == "zh-CN":
-        #converter = opencc.OpenCC('s2t.json')
-        # convert title, bookname, lyrics, copyright to traditional chinese
-        #song = {'id': x[0], 'book': converter.convert(x[2]) if x[2] else '', 'title': converter.convert(x[1]), 'lyrics': converter.convert(content[0]), 'sequence': content[1], 'copyright': converter.convert(x[5]) if x[4] else '', 'ccli': x[6] if x[6] else '', 'song_number': x[7], 'file': x[8] if x[8] else ''}
     if lang == 'en':
         song = {'id': x[0], 'book': x[2] if x[2] else '', 'title': x[1], 'lyrics': content[0], 'sequence': content[1], 'copyright': x[5] if x[5] else '', 'ccli': x[6] if x[6] else '', 'song_number': x[7], 'file': x[8] if x[8] else ''}
     else:  # stream_of_song
@@ -640,14 +636,13 @@ def get_worship_id(date):
     return r
 
 def get_worship_songs(id):
-    #sql = "select s.title, s.author, s.lang, s.lang_2, s.song_key, s.sequence, s.bible_verse, s.lyricist, s.book, s.copyright, s.ccli, s.content, (select link from media m where m.song_id=s.song_id and m_type=0) as video, (select link from media m where m.song_id=s.song_id and m_type=1) as score, w.scheduled_date as date, se.song_id as id, se.transpose as transpose, se.sequence alt_sequence, se.notes as notese from song_set se left join songs s on s.song_id = se.song_id  inner join worship w on w.scheduled_date = se.scheduled_date where se.worship_id = ? group by s.song_id order by se.song_order"
     sql = "select s.title, s.author, s.lang, s.lang_2, s.song_key, s.sequence, s.bible_verse, s.lyricist, s.book, s.copyright, s.ccli, s.content, (select link from media m where m.song_id=s.song_id and m_type='video') as video, (select link from media m where m.song_id=s.song_id and m_type='score') as score, w.scheduled_date as date, se.song_id as id, se.transpose as transpose, se.sequence alt_sequence, se.notes as notes, se.bible, se.version, se.rowid, se.type, (select abc from media m where m.song_id=s.song_id and m_type='abc') as abc from presentation se left join songs s on s.song_id = se.song_id  inner join worship w on w.scheduled_date = se.scheduled_date where se.worship_id = ? order by se.song_order"
     result = dB.run_para(sql, id)
     songs = []
 
     for r in result:
         if r[22] == 'info':
-            songs.append({'type': r[22], 'title': r[19] if r[19] else r[18][0:10], 'author': '', 'lang': '', 'lang_2': '', 'key': '', 'sequence': '', 'bible': '', 'lyricist': '', 'book': '', 'copyright': '', 'ccli': '', 'lyrics_raw': '', 'content': '', 'video': '', 'score': '', 'date': r[14], 'id': r[21], 'transpose': r[16].split(','), 'alt_sequence': '', 'notes': r[18] if r[18] else '', 'version': r[20] if r[20] else ''})
+            songs.append({'type': r[22], 'title': r[19] if r[19] else r[18][0:10], 'author': '', 'lang': '', 'lang_2': '', 'song_key': '', 'sequence': '', 'bible_verse': '', 'lyricist': '', 'book': '', 'copyright': '', 'ccli': '', 'lyrics_raw': '', 'content': '', 'video': '', 'score': '', 'date': r[14], 'id': r[21], 'transpose': r[16].split(','), 'alt_sequence': '', 'notes': r[18] if r[18] else '', 'version': r[20] if r[20] else ''})
         elif r[22] == 'song':
             songs.append({'type': r[22], 'title': r[0], 'author': r[1] if r[1] else '', 'lang': r[2] if r[2] else '', 'lang_2': r[3] if r[3] else '', 'song_key': r[4] if r[4] else '', 'sequence': r[5] if r[5] else '', 'bible_verse': r[6] if r[6] else '', 'lyricist': r[7] if r[7] else '', 'book': r[8] if r[8] else '', 'copyright': r[9] if r[9] else '', 'ccli': r[10] if r[10] else '', 'lyrics_raw': r[11], 'content': Parser.parse_lyrics(r[11], r[17]), 'video': r[12] if r[12] else '', 'score': r[13] if r[13] else '', 'date': r[14], 'id': r[15], 'transpose': r[16].split(',') if r[16] else [0], 'alt_sequence': r[17] if r[17] else '', 'notes': r[18] if r[18] else '', 'abc': r[23] if r[23] else ''})
     return songs
