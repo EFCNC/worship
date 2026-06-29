@@ -286,8 +286,19 @@ var API_URL = '/API/';
 
                 buttons: [
 	                {
+	                    id: "button-cancel",
+                        type: "button",
+                        text : dialog_title[num]['cancel'],
+                        class: "btn btn-red",
+                        click: function() {
+                            $( this ).dialog( "close" );
+                        }
+                    },
+                    {
     	                id: "button-add",
+                        type: "button",
                         text : dialog_title[num]['text'],
+                        class: "btn btn-green",
                         click: function() {
                             const currentState = window.getCurrentState();
                             if (!window.validate_form(currentState)) return;
@@ -338,8 +349,7 @@ var API_URL = '/API/';
                                     songs_temp.push(data);
                                     
                                     $.when( add_song_to_worship(worship) ).then(function() {
-                                        init(); // Refresh the UI
-                                        checkActionButtons(); // Kinda bad, but the function is in songs.html
+                                        $(document).trigger('worshipUIUpdated');
                                     });
                                 }).fail(function(err) {
                                     alert("Song was saved, but failed to fetch data for UI update.");
@@ -352,13 +362,6 @@ var API_URL = '/API/';
                                 alert("Error: " + error);
                             });
        
-                        }
-                    },
-	                {
-	                    id: "button-cancel",
-                        text : dialog_title[num]['cancel'],
-                        click: function() {
-                            $( this ).dialog( "close" );
                         }
                     }
                 ]

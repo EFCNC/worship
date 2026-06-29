@@ -297,6 +297,27 @@ li {
     transform: scale(1.2) !important;
 }
 
+/* =========================================
+   Modal Button Overrides
+========================================= */
+
+.ui-dialog-buttonset .btn {
+    padding: 10px 25px !important;
+    font-size: 1.05rem !important;
+    font-weight: bold !important;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.ui-dialog-buttonset .btn:hover, 
+.ui-dialog-buttonset .btn.ui-state-hover,
+.ui-dialog-buttonset .btn:focus {
+    transform: none !important; /* Kills the zoom/shift */
+    scale: 1 !important;
+    border: none !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important; /* Safe hover effect */
+    font-weight: bold !important; /* Stops jQuery from un-bolding the text */
+}
+
 /* Default rules for mobile devices */
 .ui-dialog {
     width: 95% !important; /* Almost full screen on mobile */
@@ -943,6 +964,12 @@ li {
                 });
             });
         }
+    });
+
+    // Listen for the custom event triggered by worship.js
+    $(document).on('worshipUIUpdated', function() {
+        if (typeof init === 'function') init();
+        if (typeof checkActionButtons === 'function') checkActionButtons();
     });
 
     /* =========================================================
