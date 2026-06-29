@@ -53,7 +53,7 @@ var API_URL = '/API/';
                 if (data.score) {
                     html += '<a href="' + data.score + '" target="new"><i style="font-size:24px" class="fa" title="Sheet Music">&#xf0f6;</i></a>';
                 }
-                if (data.abc) {
+                if (data.abc.length > 0) {
                     html += '<a href="sheets/' + data.id + '" target="new"><i class="fa" style="font-size:24px" title="Interacted Sheet Music">&#xf1c7;</i></a>';
                 }
                 if (data.video) {
@@ -261,7 +261,7 @@ var API_URL = '/API/';
         let dialog_title = [{'title': 'Save Worship Song', 'text': 'Save', 'cancel': 'Cancel', 'action': 'edit'},
                             {'title': 'Add Worship Song', 'text': 'Add', 'cancel': 'Cancel', 'action': 'add'}];
         
-        $.when( $.ajax( url ) ).then(function( response, textStatus, jqXHR ) {
+        return $.ajax(url).then(function( response, textStatus, jqXHR ) {
             $("#dialog").html(response);
             $("#dialog").dialog({
                 title: dialog_title[num]['title'],
@@ -289,15 +289,12 @@ var API_URL = '/API/';
     	                id: "button-add",
                         text : dialog_title[num]['text'],
                         click: function() {
-
                             const currentState = window.getCurrentState();
-
                             if (!window.validate_form(currentState)) return;
 
                             var tempSubmit = [];
                             for (let key in currentState) {
                                 if (key === 'id') continue;
-
                                 tempSubmit.push({
                                     name: key,
                                     value: currentState[key]
@@ -305,7 +302,7 @@ var API_URL = '/API/';
                             }
 
                             console.log('tempSubmit', tempSubmit);
-                            if (num==0) {   // When popup is for edit
+                            if (num == 0) {   // When popup is for edit
                                 var click_url = API_URL + 'song/' + id;
                                 submit_song(click_url, JSON.stringify(tempSubmit)).done(function(response) {
                                     console.log(response);
@@ -342,6 +339,7 @@ var API_URL = '/API/';
                                     
                                     $.when( add_song_to_worship(worship) ).then(function() {
                                         init(); // Refresh the UI
+                                        checkActionButtons(); // Kinda bad, but the function is in songs.html
                                     });
                                 }).fail(function(err) {
                                     alert("Song was saved, but failed to fetch data for UI update.");
