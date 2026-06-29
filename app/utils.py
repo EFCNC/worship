@@ -592,9 +592,10 @@ def edit_songset(id, content):
     :param id: worship_id,
     :param content: dict of column name, value
     """
+    dB.run_para('DELETE FROM presentation where worship_id = ?', id)
+
     if content:
-        dB.run_para('delete from presentation where worship_id = ?', id)
-        sql = "insert into presentation(song_id, worship_id, transpose, scheduled_date, sequence, song_order, notes, type) values"
+        sql = "INSERT INTO presentation(song_id, worship_id, transpose, scheduled_date, sequence, song_order, notes, type) VALUES"
         for song in content:
             if song['type'] == 'info':
                 sql += '({}, {}, {}, "{}", "{}", {}, "{}", "{}"),'.format(-1, id, ','.join(song['transpose']), song['scheduled_date'], song['sequence'], song['song_order'], song['notes'], song['type'])
@@ -602,6 +603,8 @@ def edit_songset(id, content):
                 sql += '({}, {}, {}, "{}", "{}", {}, "{}", "{}"),'.format(song['song_id'], id, ','.join(song['transpose']), song['scheduled_date'], song['sequence'], song['song_order'], song['notes'], song['type'])
         sql = sql[:-1]
         return dB.run(sql)
+    
+    return True
 
 def update_sermon(data):
     w_date = data["date"]
