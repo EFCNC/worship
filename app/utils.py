@@ -663,12 +663,12 @@ def worship_list(id=None):
         sql = "select s.title, s.speaker, case when t.name then t.name else t.name_2 end, (select i.name from instrument i where i.id = it.instrument_id), w.title, w.scheduled_date, w.worship_id, s.bible_verse, s.outline, w.notes from worship w inner join sermon s on w.scheduled_date = s.date left join instrument_team it on w.worship_id = it.worship_id left join team t on it.user_id = t.user_id where w.worship_id=? and it.instrument_id <> -1 order by w.scheduled_date, it.instrument_id"
         result = dB.run_para(sql, id)
     else:
-        sql = "select s.title, s.speaker, case when t.name then t.name else t.name_2 end, (select i.name from instrument i where i.id = it.instrument_id), w.title, w.scheduled_date, w.worship_id, s.bible_verse, s.outline, w.notes from worship w inner join sermon s on w.scheduled_date = s.date left join instrument_team it on w.worship_id = it.worship_id left join team t on it.user_id = t.user_id where it.instrument_id <> -1 order by w.scheduled_date, it.instrument_id"
+        sql = "select s.title, s.speaker, case when t.name then t.name else t.name_2 end, (select i.name from instrument i where i.id = it.instrument_id), w.title, w.scheduled_date, w.worship_id, s.bible_verse, s.outline, w.notes from worship w inner join sermon s on w.scheduled_date = s.date left join instrument_team it on w.worship_id = it.worship_id left join team t on it.user_id = t.user_id order by w.scheduled_date, it.instrument_id"
         result = dB.run(sql)
     worship = []
     for r in result:
         a = next((x for x in worship if x['date'] == r[5]), None)
-        if a:
+        if a and r[3]:
             a['content'].append({'user_name': r[2], 'role': r[3]})
         else:
             worship.append({'worship_id': r[6], 'date': r[5] if r[5] else '', 'worship_title': r[4] if r[4] else '', 'sermon_title': r[0] if r[0] else '', 'speaker': r[1] if r[1] else '', 'bible': r[7] if r[7] else '', 'outline': r[8] if r[8] else '', 'notes': r[9] if r[9] else '', 'content': [{'user_name': r[2] if r[2] else '', 'role': r[3] if r[3] else ''}]})
