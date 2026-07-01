@@ -27,8 +27,6 @@
         display: none !important;
     }
 
-    
-    
     /* =========================================
         Main Thingys
     ========================================= */
@@ -168,12 +166,6 @@
     /* =========================================
         Buttons
    ========================================= */
-    /* Shared Button Styles */
-    .btn, .btn-remove, .btn-add, .btn-delete {
-        border-radius: 4px; 
-        cursor: pointer; 
-    }
-
     .actions { 
         margin-top: 20px; 
         padding-top: 20px; 
@@ -182,49 +174,33 @@
         justify-content: flex-end; 
         gap: 10px; 
     }
+    /* Make the Save and Cancel buttons larger */
+    .actions .btn {
+        padding: 10px 25px;
+    }
 
     .btn { 
-        padding: 10px 25px;
-        border: none;
+        padding: 8px 16px;
+        border-radius: 4px; 
+        cursor: pointer;
         font-weight: bold;
-    }
-
-    /* For Dynamic X Input */
-    .btn-remove {
-        background: #dc3545;
-        color: white;
         border: none;
-        padding: 0 12px;
-        font-weight: bold;
+        text-align: center;
+        transition: 0.2s ease;
     }
+    
+    /* Colors */
+    .btn-green { background-color: #28a745 !important; color: white !important; }
+    .btn-green:hover { background-color: #218838 !important; }
 
-    .btn-add {
-        background: #e2e8f0;
-        color: #333;
-        border: 1px dashed #cbd5e1;
-        padding: 6px;
-        font-size: 0.85rem;
-        margin-top: 5px;
-        transition: 0.2s;
-    }
+    .btn-red { background-color: #dc3545 !important; color: white !important; }
+    .btn-red:hover { background-color: #c82333 !important; }
 
-    .btn-add:hover { background: #cbd5e1; }
-       
-    .btn-save { background-color: #28a745; color: white; }
-    .btn-cancel { background-color: #dc3545; color: white; text-decoration: none; display: inline-block; text-align: center; }
+    .btn-outline { background: #e2e8f0; color: #333; border: 1px dashed #cbd5e1; }
+    .btn-outline:hover { background: #cbd5e1; }
 
-    /* For Delete Song button */
-    .btn-delete {
-        background: none;
-        border: none;
-        color: #dc3545;
-        padding: 0.5rem;
-        transition: background-color 0.2s ease;
-    }
-
-    .btn-delete:hover {
-        background-color: #ffe6e6;
-    }
+    .btn-icon-danger { background: none; border: none; color: #dc3545; padding: 0.5rem; cursor: pointer; transition: 0.2s ease; }
+    .btn-icon-danger:hover { background-color: #ffe6e6; border-radius: 4px; }
 </style>
 {% endblock %}
 
@@ -233,7 +209,7 @@
     <div class="editor-header">
         <h2>Song Editor</h2>
 
-        <button type="button" class="btn-delete" aria-label="Delete Song" onclick="deleteSong()">
+        <button type="button" class="btn-icon-danger" aria-label="Delete Song" onclick="deleteSong()">
             Delete Song <i class="fa-solid fa-trash"></i> 
         </button>
 
@@ -329,12 +305,12 @@
             <div class="form-group" id="video_container">
                 <label>Youtube URLs</label>
                 <div id="video_inputs_wrapper"></div>
-                <button type="button" class="btn-add" onclick="addDynamicInput('video_inputs_wrapper', 'video[]', 'Enter YouTube URL')">+ Add Video</button>
+                <button type="button" class="btn btn-outline" onclick="addDynamicInput('video_inputs_wrapper', 'video[]', 'Enter YouTube URL')">+ Add Video</button>
             </div>
             <div class="form-group" id="score_container">
                 <label>Score PDF URLs</label>
                 <div id="score_inputs_wrapper"></div>
-                <button type="button" class="btn-add" onclick="addDynamicInput('score_inputs_wrapper', 'score[]', 'Enter Score PDF URL')">+ Add Score</button>
+                <button type="button" class="btn btn-outline" onclick="addDynamicInput('score_inputs_wrapper', 'score[]', 'Enter Score PDF URL')">+ Add Score</button>
             </div>
         </div>
 
@@ -342,13 +318,13 @@
             <div class="form-group" id="abc_container" style="flex: 100%;">
                 <label>ABC Notation (Sheets)</label>
                 <div id="abc_inputs_wrapper"></div>
-                <button type="button" class="btn-add" onclick="addDynamicTextarea('abc_inputs_wrapper', 'abc[]', 'Enter ABC notation here...')">+ Add ABC Sheet</button>
+                <button type="button" class="btn btn-outline" onclick="addDynamicTextarea('abc_inputs_wrapper', 'abc[]', 'Enter ABC notation here...')">+ Add ABC Sheet</button>
             </div>
         </div>
 
         <div class="actions">
-            <a href="/song/list" class="btn btn-cancel">Cancel</a>
-            <button type="button" id="btn_save" class="btn btn-save">Save Song</button>
+            <button type="button" id="btn_cancel" class="btn btn-red">Cancel</button>
+            <button type="button" id="btn_save" class="btn btn-green">Save Song</button>
         </div>
     </form>
 </div>
@@ -398,7 +374,7 @@
         
         const removeBtn = document.createElement('button');
         removeBtn.type = 'button';
-        removeBtn.className = 'btn-remove';
+        removeBtn.className = 'btn btn-red';
         removeBtn.innerHTML = '✕';
         removeBtn.onclick = function() { wrapper.removeChild(group); };
         
@@ -424,7 +400,7 @@
         
         const removeBtn = document.createElement('button');
         removeBtn.type = 'button';
-        removeBtn.className = 'btn-remove';
+        removeBtn.className = 'btn btn-red';
         removeBtn.innerHTML = '✕';
         removeBtn.onclick = function() { wrapper.removeChild(group); };
         
@@ -682,6 +658,11 @@
 
         $('.sequence').click(function() {
             insertAtCursor($(this).data('tag'), true);
+        });
+
+        // Cancel
+        $('#btn_cancel').click(function(e) {
+            window.location.href = "/song/list";
         });
 
         // Form button handler - works when used as standalone page

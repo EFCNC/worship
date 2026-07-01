@@ -102,11 +102,6 @@ def profile():
 # -------- Worship Pages ---------
 @app.route("/worship")
 def worship_home():
-	id = request.args.get('id', None)
-	if id:
-		songs = Utils.get_worship_songs(id)
-		w = Utils.get_worship(id)
-		return render_template('worship/songs.html', songs=songs, id=id, w=w)
 	sundays = Tools.allsundays()
 	worship = Utils.worship_list()
 	worship = [{'date': x, 'worship': next((y for y in worship if y['date'] == x), -1)} for x in sundays[1]]
@@ -114,7 +109,7 @@ def worship_home():
 
 @app.route("/worship/<id>")
 @app.route("/worship/<id>/<tab>")
-def worship(id, tab=''):
+def worship_notes(id, tab=''):
 	json_file = request.args.get('json', None)
 	if json_file:
 		json_file = Tools.get_worship_json(id)
@@ -127,6 +122,12 @@ def worship(id, tab=''):
 	if w:
 		w = w[0]
 	return render_template('worship/notes.html', songs=songs, id=id, w=w, tab=tab)
+
+@app.route("/worship/<id>/edit")
+def worship_songs_editor(id):
+	songs = Utils.get_worship_songs(id)
+	w = Utils.get_worship(id)
+	return render_template('worship/songs.html', songs=songs, id=id, w=w)
 
 @app.route("/worship/schedule")
 def schedule():
@@ -403,4 +404,4 @@ def __get_slide_json():
 	return True
 
 if __name__ == '__main__':
-	app.run(host="0.0.0.0", port=80, debug=True)
+	app.run(host="0.0.0.0", port=5000, debug=True)

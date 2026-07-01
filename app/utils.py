@@ -592,9 +592,10 @@ def edit_songset(id, content):
     :param id: worship_id,
     :param content: dict of column name, value
     """
+    dB.run_para('DELETE FROM presentation where worship_id = ?', id)
+
     if content:
-        dB.run_para('delete from presentation where worship_id = ?', id)
-        sql = "insert into presentation(song_id, worship_id, transpose, scheduled_date, sequence, song_order, notes, type) values"
+        sql = "INSERT INTO presentation(song_id, worship_id, transpose, scheduled_date, sequence, song_order, notes, type) VALUES"
         for song in content:
             if song['type'] == 'info':
                 sql += '({}, {}, {}, "{}", "{}", {}, "{}", "{}"),'.format(-1, id, ','.join(song['transpose']), song['scheduled_date'], song['sequence'], song['song_order'], song['notes'], song['type'])
@@ -602,6 +603,8 @@ def edit_songset(id, content):
                 sql += '({}, {}, {}, "{}", "{}", {}, "{}", "{}"),'.format(song['song_id'], id, ','.join(song['transpose']), song['scheduled_date'], song['sequence'], song['song_order'], song['notes'], song['type'])
         sql = sql[:-1]
         return dB.run(sql)
+    
+    return True
 
 def update_sermon(data):
     w_date = data["date"]
@@ -665,7 +668,7 @@ def worship_list(id=None):
     worship = []
     for r in result:
         a = next((x for x in worship if x['date'] == r[5]), None)
-        if a:
+        if a and r[3]:
             a['content'].append({'user_name': r[2], 'role': r[3]})
         else:
             worship.append({'worship_id': r[6], 'date': r[5] if r[5] else '', 'worship_title': r[4] if r[4] else '', 'sermon_title': r[0] if r[0] else '', 'speaker': r[1] if r[1] else '', 'bible': r[7] if r[7] else '', 'outline': r[8] if r[8] else '', 'notes': r[9] if r[9] else '', 'content': [{'user_name': r[2] if r[2] else '', 'role': r[3] if r[3] else ''}]})

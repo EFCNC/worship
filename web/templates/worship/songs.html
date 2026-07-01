@@ -80,6 +80,17 @@
 /* =========================================
    Worship Song Card Flexbox (3 Rows)
    ========================================= */
+.empty-state {
+    text-align: center;
+    padding: 30px 20px;
+    color: #666;
+    font-style: italic;
+    background-color: #f5f5f5;
+    border-radius: 5px;
+    border: 1px dashed #ccc;
+    margin: 10px;
+}
+
 /* Stacks the three rows vertically */
 .song-content-wrapper {
     box-sizing: border-box;
@@ -284,6 +295,27 @@ li {
 
 .insert_btn:hover {
     transform: scale(1.2) !important;
+}
+
+/* =========================================
+   Modal Button Overrides
+========================================= */
+
+.ui-dialog-buttonset .btn {
+    padding: 10px 25px !important;
+    font-size: 1.05rem !important;
+    font-weight: bold !important;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.ui-dialog-buttonset .btn:hover, 
+.ui-dialog-buttonset .btn.ui-state-hover,
+.ui-dialog-buttonset .btn:focus {
+    transform: none !important; /* Kills the zoom/shift */
+    scale: 1 !important;
+    border: none !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important; /* Safe hover effect */
+    font-weight: bold !important; /* Stops jQuery from un-bolding the text */
 }
 
 /* Default rules for mobile devices */
@@ -555,6 +587,7 @@ li {
             }));
 
             let url = API_URL + 'worship/' + id + '/edit';
+            console.log(url);
             let data = JSON.stringify(changed);
 
             $.ajax({
@@ -625,6 +658,26 @@ li {
         });
         $(".lyrics").disableSelection();
         get_transpose();
+
+        checkWorshipEmptyState();
+    }
+
+    function checkWorshipEmptyState() {
+        let $songsList = $('#songs');
+        let $worshipCard = $('#worship');
+        
+        // Check if there are any song items inside the list
+        if ($songsList.children('li').length === 0) {
+            $songsList.hide(); // Kill the 6.38px layout ghost space
+            
+            // Inject the empty state block if it isn't already there
+            if ($worshipCard.children('.empty-state').length === 0) {
+                $worshipCard.append('<div class="empty-state">No songs added yet! Search or select a song to add.</div>');
+            }
+        } else {
+            $songsList.show(); // Bring the list container back online
+            $worshipCard.children('.empty-state').remove(); // Clear out the notice
+        }
     }
 
     // ======================
@@ -840,24 +893,60 @@ li {
         });
     });
 
+    // Add this helper function outside your click handler
+    function scrollToTarget(id) {
+        let $target = $('#worship li[name="' + id + '"]');
+        if ($target.length === 0) $target = $('#worship li').last();
+        let $scrollTarget = $target.length > 0 ? $target : $('#worship');
+        
+        let targetTop = $scrollTarget.offset().top - headerOffset;
+
+        // Only scroll if we need to go up
+        if ($(window).scrollTop() > targetTop) {
+            return $('html,body').animate({scrollTop: targetTop}, 'slow').promise();
+        }
+        // Return an instantly resolved promise if no scroll is needed
+        return $.Deferred().resolve().promise(); 
+    }
+
     // event handler "+" button is click from the searched songs
     $(document).on('click', '.insert_btn', function() {
+        // Fix scroll jump
+        event.preventDefault();
+        $(this).blur();
+
+        let id, db, lang;
+
+        // id check for import vs already in db
+        let isImport = $(this).parent().parent().attr('id') == 'right_content';
+        id = isImport ? $(this).attr('songid') : $(this).parent().attr('songid');
+
+        //Loading and scroll logic
+        const startLoading = () => {
+            $('#main-content').css({ 'opacity': '0.5', 'pointer-events': 'none' });
+            $('body').css('cursor', 'wait');
+        };
+
+        const stopLoading = () => {
+            $('#main-content').css({ 'opacity': '1', 'pointer-events': 'auto' });
+            $('body').css('cursor', 'default');
+        };
+
+        startLoading();
+
         // When songs from imported dB is clicked, prepare for import
-        if ($(this).parent().parent().attr('id') == 'right_content') {
-            id = $(this).attr('songid');
+        if (isImport) {
             db = $(this).attr('db');
             lang = $(this).attr('lang');
-            // Scroll back up before opening editor
-            $('html,body').animate({scrollTop: $("#worship").offset().top - headerOffset}, 'slow')
-                .promise()
-                .done(function() {
-                    // This will run ONLY after the scroll animation has completely finished
-                    render_song(id, db, lang, 1);
-                });
+
+            // Scroll first, then execute render
+            scrollToTarget(id).done(() => {
+                render_song(id, db, lang, 1).always(stopLoading);
+            });
+
         }
         // When songs in current dB is clicked, add it to panel
         else {
-            id = $(this).parent().attr('songid');
             get_song(id).done(function(data) {
                 if(songs_temp.find(o => o.title === data.title)) {
                     alert('"' + data.title + '"is already in the set!');
@@ -866,13 +955,22 @@ li {
                 data['date'] = worship_data.date;
                 songs_temp.push(data);
                 
-                $.when( add_song_to_worship(worship)).then(function() {
-                    $('html,body').animate({scrollTop: $("#worship").offset().top - headerOffset}, 'slow');
-                    init();
-                    checkActionButtons();
+                $.when(add_song_to_worship(worship)).then(function() {
+                    // DOM is updated, now scroll to the new item
+                    scrollToTarget(id).done(() => {
+                        init();
+                        checkActionButtons();
+                        stopLoading();
+                    });
                 });
             });
         }
+    });
+
+    // Listen for the custom event triggered by worship.js
+    $(document).on('worshipUIUpdated', function() {
+        if (typeof init === 'function') init();
+        if (typeof checkActionButtons === 'function') checkActionButtons();
     });
 
     /* =========================================================
