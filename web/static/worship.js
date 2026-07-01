@@ -54,7 +54,7 @@ var API_URL = '/API/';
                     html += '<a href="' + data.score + '" target="new"><i style="font-size:24px" class="fa" title="Sheet Music">&#xf0f6;</i></a>';
                 }
                 if (data.abc.length > 0) {
-                    html += '<a href="sheets/' + data.id + '" target="new"><i class="fa" style="font-size:24px" title="Interacted Sheet Music">&#xf1c7;</i></a>';
+                    html += '<a href="/sheets/' + data.id + '" target="new"><i class="fa" style="font-size:24px" title="Interacted Sheet Music">&#xf1c7;</i></a>';
                 }
                 if (data.video) {
                     html += '<a href="' + data.video + '" target="new"><i class="fa fa-play-circle" style="font-size:24px" title="Youtube Video"></i></a>';
@@ -251,7 +251,7 @@ var API_URL = '/API/';
     }
 
     function render_song(id, db, lang, num) {
-        let url = 'song/' + id + '/edit';
+        let url = '/song/' + id + '/edit';
         if (db && lang) {
             url += '?db=' + db + '&lang=' + lang;
         }
