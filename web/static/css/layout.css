@@ -4,11 +4,29 @@
  */
 
 /* Exclude header, loading, and dialog from default margin */
-body > :not(#loading):not(#dialog):not(.ui-dialog):not(header) {
+/* body > :not(#loading):not(#dialog):not(.ui-dialog):not(header) {
     margin: var(--spacing-md);
+} */
+
+/* Some padding */
+.page-standard {
+    padding: var(--spacing-sm) var(--spacing-xl);
 }
 
+/* Main Content Area */
+@media (max-width: 768px) {
+    .page-standard {
+        padding: 0 var(--spacing-md);
+    }
+}
 
+/* Edge-to-edge layout */
+.page-full {
+    margin: 0;
+    padding: 10px 0 0 0;
+    /* width: 100%;
+    box-sizing: border-box; */
+}
 
 /* Header Styles */
 header#header {
@@ -119,18 +137,6 @@ header#header {
 /* Dialog Container */
 #dialog {
     z-index: 1000;
-}
-
-/* Main Content Area */
-@media (min-width: 768px) {
-    main#main-content {
-        padding: 0px var(--spacing-md);
-    }
-}
-
-main#main-content {
-    /* min-height: calc(100vh - var(--header-height)); */
-    /* padding: 0px var(--spacing-md); */
 }
 
 /* Home Icon */
