@@ -1,8 +1,6 @@
 {% extends 'base.html' %}
 
-{% block page_title %}Worship Sheets{% endblock %}
-
-{% block main_class %}page-full{% endblock %}
+{% block page_title %}Sheets for {{ w.date }}{% endblock %}
 
 {% block extra_css %}
 <script src="/static/abcjs-basic-min.js"></script>
@@ -63,7 +61,13 @@
 
 {% block extra_js %}
 <script>
-  let sheets = {{ sheets|safe }};
+  // let sheets = {{ sheets|safe }};
+  let w = {{ w|safe }};
+  let songs = {{ songs|safe }};
+  const song_id = songs.map(o=> o.id);
+  console.log(song_id);
+
+  
   let index = 0;
   let key_index = 0;
   let root = '';
@@ -116,10 +120,7 @@
     if (type == 'abc') {
       $("#sheet").hide();
 
-      let current_key_index = data.saved_key_index !== undefined ? data.saved_key_index : (data.transpose_amount || 0);
-
-      let parsed_abc = ABCJS.parseOnly(data.abc);
-      root = parsed_abc[0].getKeySignature().root;
+      let current_key_index = data.saved_key_index || 0;
 
       // Load abc data
       $.when(ABCJS.renderAbc("abc", data.abc, {visualTranspose: current_key_index, responsive: "resize"})).then(function(abc) {
@@ -128,24 +129,14 @@
         $("#tempo_container").show();
         $('#transpose_select_container').show();
 
+        root = abc_data.getKeySignature().root;
         let tempo = abc_data.getBpm();
         keys = keys_1;
         if(['Db', 'Eb', 'F', 'Ab', 'Bb'].indexOf(root) >= 0) {
             keys = keys_2;
         }
 
-        let active_key_name = data.saved_key_name;
-        if (!active_key_name) {
-            if (current_key_index !== 0) {
-                // If transposed initially via transpose_amount, calculate new key
-                let root_idx = keys.indexOf(root);
-                let new_idx = (root_idx + current_key_index) % 12;
-                if (new_idx < 0) new_idx += 12; // Handle negative transpositions
-                active_key_name = keys[new_idx];
-            } else {
-                active_key_name = root;
-            }
-        }
+        let active_key_name = data.saved_key_name || root;
 
         let html = '&nbsp; Key: <select id="transpose_select">';
         for(var i=0; i<keys.length; i++) {

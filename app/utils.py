@@ -375,14 +375,15 @@ def get_songs(ids=None):
 
 def get_song_sheet(ids=None):
     if ids:
-        sql = "select (select abc from media m where m.song_id=s.song_id and m_type='abc') as abc, (select link from media m where m.song_id=s.song_id and m_type='score') as sheet, s.title from songs s where (abc is not null or sheet is not null) and s.song_id in ({ids})".format(ids=','.join(['?']*len(ids)))
+        sql = "select (select abc from media m where m.song_id=s.song_id and m_type='abc') as abc, (select link from media m where m.song_id=s.song_id and m_type='score') as sheet, s.title, s.song_id from songs s where (abc is not null or sheet is not null) and s.song_id in ({ids})".format(ids=','.join(['?']*len(ids)))
         result = dB.run_para(sql, ids)
     else:
-        sql = "select (select abc from media m where m.song_id=s.song_id and m_type='abc') as abc, (select link from media m where m.song_id=s.song_id and m_type='score') as sheet, s.title from songs s where (abc is not null or sheet is not null)"
+        sql = "select (select abc from media m where m.song_id=s.song_id and m_type='abc') as abc, (select link from media m where m.song_id=s.song_id and m_type='score') as sheet, s.title, s.song_id from songs s where (abc is not null or sheet is not null)"
         result = dB.run(sql)
+        
     sheets = []
     for r in result:
-        sheet = {'abc': '', 'sheet': '', 'title': '', 'key': ''}
+        sheet = {'id': r[3], 'abc': '', 'sheet': '', 'title': '', 'key': ''}
         sheet['abc'] = r[0] if r[0] else ''
         if sheet['abc'] != '':
             abc = sheet['abc'].split('\r\n')
@@ -394,6 +395,11 @@ def get_song_sheet(ids=None):
         sheet['sheet'] = r[1] if r[1] else ''
         sheet['title'] = r[2]
         sheets.append(sheet)
+
+        if ids:
+        # Sort the results based on the index of the ID in the original 'ids' list
+            string_ids = [str(i) for i in ids]
+            sheets.sort(key=lambda x: string_ids.index(str(x['id'])))
     return sheets
 
 def get_song_chords(ids):

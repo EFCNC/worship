@@ -180,6 +180,8 @@ def get_song_sheet(ids=None):
 	ids = ids.split(',')
 	sheets = Utils.get_song_sheet(ids)
 	for sheet in sheets:
+		sheet['transpose_amount'] = 0
+
 		if sheet['key']:
 			keys = []
 			if sheet['key'] in keys_1:
@@ -197,6 +199,45 @@ def get_song_sheet(ids=None):
 			sheet['keyof'] = keyof_name
 	return render_template('worship/sheets.html', sheets=sheets)
 
+@app.route("/worship/sheets/weekly/<id>")
+def get_weekly_sheets(id):
+    songs = Utils.get_worship_songs(id)
+    
+    ids = [str(song['id']) for song in songs]
+    # print(ids)
+    sheets = Utils.get_song_sheet(ids)
+    # print(sheets)
+    keys_1 = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
+    keys_2 = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B']
+
+    for sheet in sheets:
+        sheet_id = sheet.get("id")
+        print(sheet_id)
+        weekly_data = next((song for song in songs if str(song.get("id")) == str(sheet_id)), None)
+
+        if weekly_data and 'transpose' in weekly_data:
+            t_val = weekly_data['transpose']
+            print(int(t_val[0]))
+            sheet['transpose_amount'] = int(t_val[0])
+        else:
+            sheet['transpose_amount'] = 0
+
+        song_key = sheet.get('song_key')
+        if song_key:
+            keyof = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+            if song_key in keys_1:
+                k_init = keys_1.index(song_key)
+                keys = keys_1
+            else:
+                k_init = keys_2.index(song_key)
+                keys = keys_2
+            
+            keyof = [(x - k_init) % 12 for x in keyof]
+
+            sheet['keyof_name'] = keys
+            sheet['keyof'] = [keys[x] for x in keyof]
+
+    return render_template('worship/sheets.html', songs=songs, sheets=sheets)
 # @app.route("/song/<id>")
 # def get_song_by_id(id):
 # 	'''
@@ -299,6 +340,19 @@ def slides_viewer(mode=None):
 	elif mode == 'view':
 		__update_client_mode('')
 		return render_template('slides/slides_view.html', presentation=slides_data, mode=mode)
+	elif mode == 'score':
+		
+		__update_client_mode('')
+		coming_sunday = __get_sundays()["sunday"]
+		id = Utils.get_worship_id(coming_sunday)[0]	
+		w = Utils.worship_list(id)
+		if w:
+			w = w[0]
+
+		songs = Utils.get_worship_songs(id)
+		
+		return render_template('slides/slides_score.html', presentation=slides_data, mode=mode, id=id, w=w, songs=songs)
+	
 	return render_template('slides/slides.html', presentation=slides_data, mode=mode)
 
 # --------- Admin Pages ---------
@@ -403,4 +457,4 @@ def __get_slide_json():
 	return True
 
 if __name__ == '__main__':
-	app.run(host="0.0.0.0", port=80, debug=True)
+	app.run(host="0.0.0.0", port=5000, debug=True)
