@@ -12,7 +12,7 @@ project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, project_root)
 
 
-from flask import Flask, render_template, request
+from flask import Flask, redirect, render_template, request, url_for
 from flask_socketio import SocketIO, emit
 from app import utils as Utils
 from app import tools as Tools
@@ -206,7 +206,7 @@ def get_weekly_sheets(id):
     ids = [str(song['id']) for song in songs]
     # print(ids)
     sheets = Utils.get_song_sheet(ids)
-    # print(sheets)
+    # print(sheets)    
     keys_1 = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
     keys_2 = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B']
 
@@ -237,7 +237,8 @@ def get_weekly_sheets(id):
             sheet['keyof_name'] = keys
             sheet['keyof'] = [keys[x] for x in keyof]
 
-    return render_template('worship/sheets.html', songs=songs, sheets=sheets)
+    return render_template('worship/sheets.html', sheets=sheets)
+
 # @app.route("/song/<id>")
 # def get_song_by_id(id):
 # 	'''
@@ -340,18 +341,12 @@ def slides_viewer(mode=None):
 	elif mode == 'view':
 		__update_client_mode('')
 		return render_template('slides/slides_view.html', presentation=slides_data, mode=mode)
-	elif mode == 'score':
-		
+	elif mode == 'sheets':
 		__update_client_mode('')
 		coming_sunday = __get_sundays()["sunday"]
-		id = Utils.get_worship_id(coming_sunday)[0]	
-		w = Utils.worship_list(id)
-		if w:
-			w = w[0]
+		id = Utils.get_worship_id(coming_sunday)[0]
 
-		songs = Utils.get_worship_songs(id)
-		
-		return render_template('slides/slides_score.html', presentation=slides_data, mode=mode, id=id, w=w, songs=songs)
+		return redirect(url_for('get_weekly_sheets', id=id))
 	
 	return render_template('slides/slides.html', presentation=slides_data, mode=mode)
 
