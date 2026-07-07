@@ -22,7 +22,7 @@
     width: 100%;
   }
 
-  /* New Flexbox Layout Styles */
+  /* Flexbox Layout Styles */
   #container {
     display: flex;
     flex-direction: column;
@@ -35,9 +35,15 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 15px;
+    gap: 10px;
     margin-bottom: 20px;
     flex-wrap: wrap;
+  }
+
+  /* Center the dropdown text */
+  #transpose_select {
+    text-align-last:center;
+    min-width: 80px; 
   }
 </style>
 {% endblock %}
@@ -47,7 +53,7 @@
   <div id="song_title" style="margin-bottom: 10px;"></div>
   
   <div id="control_panel_container">
-    <div id="transpose_select_container"></div>
+    <div id="transpose_select_container" style="display: flex; align-items: center; gap: 5px;"></div>
   </div>
   
   <div style="text-align:center" id="sheet"></div>
@@ -115,15 +121,19 @@
             }
         }
         
-        // Render key select dropdown
-        let html = '&nbsp; Key: <select id="transpose_select">';
+        // Render key select dropdown with + / - buttons
+        let html = '<button id="btn_transpose_down">-1</button>';
+        html += '<select id="transpose_select">';
         for (let i = 0; i < activeKeys.length; i++) {
             let is_selected = (activeKeys[i] === currentKey) ? 'selected' : '';
-            let label = (activeKeys[i] === data.key) ? activeKeys[i] + ' (Original)' : activeKeys[i];
+            // Shortened to (Orig) to help with width, change to (Original) if preferred
+            let label = (activeKeys[i] === data.key) ? activeKeys[i] + ' (Orig)' : activeKeys[i];
             
             html += '<option value="' + activeKeys[i] + '" ' + is_selected + '>' + label + '</option>';
         }
         html += '</select>';
+        html += '<button id="btn_transpose_up">+1</button>';
+        
         $('#transpose_select_container').html(html);
 
         // Calculate transposition difference based on the resolved currentKey
@@ -152,6 +162,17 @@
         $('#sheet').empty().html(sheetHtml).show();
     }
 
+    // Helper to safely change the song index from swipe/arrows
+    function changeSong(direction) {
+        let newIndex = parseInt(index) + direction;
+        // Check array bounds
+        if (newIndex >= 0 && newIndex < chords.length) {
+            index = newIndex;
+            $('#song_list').val(index); // Keep the dropdown UI synced
+            load_sheet(index);
+        }
+    }
+
     // --- EVENT LISTENERS ---
     $(document).ready(function() {
         // Form select box with song title
@@ -163,24 +184,88 @@
             songsHtml += '</select>';
             
             $("#song_title").html(songsHtml);
-            // Don't pass a target key initially so it evaluates transpose/memory logic
             load_sheet(0);
         }
 
         $('#song_list').change(function() {
             index = this.value;
-            // Omit target key parameter on song switch to trigger logic hierarchy
             load_sheet(index);
         });
     });
 
     $(document).on('change', '#transpose_select', function() {
         let selected_key = $(this).val();
-        
-        // Save the key preference to the specific song's memory for the session
         chords[index].saved_key_name = selected_key;
-        
         load_sheet(index, selected_key);
     });
+
+    // -1 Transpose Button
+    $(document).on('click', '#btn_transpose_down', function() {
+        let select = $('#transpose_select')[0];
+        let newIndex = select.selectedIndex - 1;
+        if (newIndex < 0) newIndex = select.options.length - 1; // Wrap to end
+        
+        let selected_key = select.options[newIndex].value;
+        chords[index].saved_key_name = selected_key;
+        load_sheet(index, selected_key);
+    });
+
+    // +1 Transpose Button
+    $(document).on('click', '#btn_transpose_up', function() {
+        let select = $('#transpose_select')[0];
+        let newIndex = select.selectedIndex + 1;
+        if (newIndex >= select.options.length) newIndex = 0; // Wrap to start
+        
+        let selected_key = select.options[newIndex].value;
+        chords[index].saved_key_name = selected_key;
+        load_sheet(index, selected_key);
+    });
+
+    // --- KEYBOARD & SWIPE NAVIGATION ---
+
+    // Arrow keys
+    $(document).keydown(function(e) {
+        // Prevent arrows from changing songs if the user is interacting with a dropdown
+        if (e.target.tagName.toLowerCase() === 'select') return;
+
+        if (e.key === 'ArrowLeft') {
+            changeSong(-1);
+        } else if (e.key === 'ArrowRight') {
+            changeSong(1);
+        }
+    });
+
+    // Touch Swiping
+    let touchStartX = 0;
+    let touchEndX = 0;
+    let touchStartY = 0;
+    let touchEndY = 0;
+
+    $(document).on('touchstart', function(e) {
+        touchStartX = e.changedTouches[0].screenX;
+        touchStartY = e.changedTouches[0].screenY;
+    });
+
+    $(document).on('touchend', function(e) {
+        touchEndX = e.changedTouches[0].screenX;
+        touchEndY = e.changedTouches[0].screenY;
+        handleSwipe();
+    });
+
+    function handleSwipe() {
+        let swipeThresholdX = 50; 
+        let swipeThresholdY = 50; 
+
+        // If the user scrolls vertically more than they swipe horizontally, ignore it
+        if (Math.abs(touchEndY - touchStartY) > swipeThresholdY) return;
+
+        if (touchEndX < touchStartX - swipeThresholdX) {
+            // Swiped Left -> Move forward to next song
+            changeSong(1);
+        } else if (touchEndX > touchStartX + swipeThresholdX) {
+            // Swiped Right -> Move backward to previous song
+            changeSong(-1);
+        }
+    }
 </script>
 {% endblock %}
