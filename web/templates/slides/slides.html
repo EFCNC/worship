@@ -8,42 +8,37 @@
 
 {% block content %}
     <div class="menu-container">
-        <a name="admin" class="menu-card">
+        <a href="/slides/admin" class="menu-card">
             <i class="fa-solid fa-circle-info"></i>
             <span>Admin</span>
         </a>
 
-        <a name="lead" class="menu-card">
+        <a href="/slides/lead" class="menu-card">
             <i class="fa-solid fa-users"></i>
             <span>Lead</span>
         </a>
 
-        <a name="view" class="menu-card">
+        <a href="/slides/view" class="menu-card">
             <i class="fa-solid fa-eye"></i>
             <span>View</span>
         </a>
 
-        <a name="musician" class="menu-card">
+        <a href="/slides/musician" class="menu-card">
             <i class="fa-solid fa-music"></i>
             <span>Musician</span>
         </a>
 
-        <a name="sheets" class="menu-card">
+        <a href="/slides/sheets" class="menu-card">
             <i class="fa-solid fa-file-alt"></i>
             <span>Sheets</span>
+        </a>
+
+        <a href="/slides/chords" class="menu-card">
+            <i class="fa-solid fa-guitar"></i>
+            <span>Chords</span>
         </a>
     </div>
 {% endblock %}
 
 {% block extra_js %}
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-        $(document).ready(function() {
-            $('.menu-card').click(function() {
-                // Added 'const' to properly declare the variable
-                const name = $(this).attr('name');
-                window.location.href = '/slides/' + name;
-            });
-        });
-    </script>
 {% endblock %}

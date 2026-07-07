@@ -355,6 +355,12 @@ def slides_viewer(mode=None):
 		id = Utils.get_worship_id(coming_sunday)[0]
 
 		return redirect(url_for('get_weekly_sheets', id=id))
+	elif mode == 'chords':
+		__update_client_mode('')
+		coming_sunday = __get_sundays()["sunday"]
+		id = Utils.get_worship_id(coming_sunday)[0]
+
+		return redirect(url_for('get_weekly_chords', id=id))
 	
 	return render_template('slides/slides.html', presentation=slides_data, mode=mode)
 
