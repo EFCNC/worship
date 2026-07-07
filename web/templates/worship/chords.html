@@ -5,33 +5,52 @@
 {% block extra_css %}
 <link href="../static/presentation.css" rel="stylesheet">
 <style>
-span.chunk {
+  span.chunk {
     position: relative;
-}
+  }
 
-span.chunk:before {
+  span.chunk:before {
     font-size: 0.65em;
     content: attr(data-chord);
     position: absolute;
     top: -2em;
-}
+  }
 
-#sheet {
+  #sheet {
     font-size: 1.25em;
     line-height: 200%;
-}
+    width: 100%;
+  }
+
+  /* New Flexbox Layout Styles */
+  #container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  #control_panel_container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
 </style>
 {% endblock %}
 
 {% block content %}
-<div id="my_score">
-    <div id="top">
-        <span id="sheet_title"></span>&nbsp;<span id="sheet_btn"></span>
-    </div>
-    <div id="abc">
-        <div id="keys"></div>
-    </div>
-    <div style="text-align:center" id="sheet"></div>
+<div id="container">
+  <div id="song_title" style="margin-bottom: 10px;"></div>
+  
+  <div id="control_panel_container">
+    <div id="transpose_select_container"></div>
+  </div>
+  
+  <div style="text-align:center" id="sheet"></div>
 </div>
 {% endblock %}
 
@@ -45,10 +64,6 @@ span.chunk:before {
     let index = 0;
 
     // --- FUNCTIONS ---
-    /**
-     * Transposes a single chord string by a specific number of steps (diff).
-     * Imported from worship notes file to replace the older parse_chord logic.
-     */
     function transposeChord(chord, diff) {
         if (diff === 0) return chord;
         
@@ -81,21 +96,37 @@ span.chunk:before {
         
         // Determine if we should use sharps or flats based on the original key
         const activeKeys = sharp.indexOf(data.key) >= 0 ? sharp : flat;
-        
-        // Render key toggle buttons
-        let keyHtml = '';
-        const currentKey = targetKey || data.key;
-        
-        for (let i = 0; i < activeKeys.length; i++) {
-            if (currentKey === activeKeys[i]) {
-                keyHtml += `<button title="Original Key" name="${activeKeys[i]}"><b>${activeKeys[i]}</b></button>`;
+        let currentKey = targetKey;
+
+        // Determine the target key based on session memory, weekly transpose, or original key
+        if (!currentKey) {
+            if (data.saved_key_name) {
+                // 1. Load user's session preference if it exists
+                currentKey = data.saved_key_name;
+            } else if (data.transpose_amount !== undefined && data.transpose_amount !== 0) {
+                // 2. Apply weekly transpose amount
+                let rootIdx = activeKeys.indexOf(data.key);
+                let newIdx = (rootIdx + data.transpose_amount) % 12;
+                if (newIdx < 0) newIdx += 12; // Handle negative transpositions
+                currentKey = activeKeys[newIdx];
             } else {
-                keyHtml += `<button name="${activeKeys[i]}">${activeKeys[i]}</button>`;
+                // 3. Fallback to original key
+                currentKey = data.key;
             }
         }
-        $('#keys').html(keyHtml);
+        
+        // Render key select dropdown
+        let html = '&nbsp; Key: <select id="transpose_select">';
+        for (let i = 0; i < activeKeys.length; i++) {
+            let is_selected = (activeKeys[i] === currentKey) ? 'selected' : '';
+            let label = (activeKeys[i] === data.key) ? activeKeys[i] + ' (Original)' : activeKeys[i];
+            
+            html += '<option value="' + activeKeys[i] + '" ' + is_selected + '>' + label + '</option>';
+        }
+        html += '</select>';
+        $('#transpose_select_container').html(html);
 
-        // Calculate transposition difference
+        // Calculate transposition difference based on the resolved currentKey
         let transpose = 0;
         if (currentKey) {
             transpose = activeKeys.indexOf(currentKey) - activeKeys.indexOf(data.key);
@@ -121,27 +152,35 @@ span.chunk:before {
         $('#sheet').empty().html(sheetHtml).show();
     }
 
+    // --- EVENT LISTENERS ---
     $(document).ready(function() {
         // Form select box with song title
         if (chords.length >= 1) {
             let songsHtml = '<select name="songs" id="song_list">';
             for (let s = 0; s < chords.length; s++) {
-                songsHtml += `<option value="${s}">${chords[s].title} (${chords[s].key})</option>`;
+                songsHtml += `<option value="${s}">${chords[s].title}</option>`;
             }
             songsHtml += '</select>';
             
-            $("#sheet_title").html(songsHtml);
-            load_sheet(0, chords[0].key);
+            $("#song_title").html(songsHtml);
+            // Don't pass a target key initially so it evaluates transpose/memory logic
+            load_sheet(0);
         }
 
         $('#song_list').change(function() {
             index = this.value;
-            load_sheet(index, chords[index].key);
+            // Omit target key parameter on song switch to trigger logic hierarchy
+            load_sheet(index);
         });
     });
 
-    $(document).on('click', 'button', function() {
-        load_sheet(index, this.name);
+    $(document).on('change', '#transpose_select', function() {
+        let selected_key = $(this).val();
+        
+        // Save the key preference to the specific song's memory for the session
+        chords[index].saved_key_name = selected_key;
+        
+        load_sheet(index, selected_key);
     });
 </script>
 {% endblock %}

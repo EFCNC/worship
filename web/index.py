@@ -163,10 +163,19 @@ def get_song_chords(ids):
 @app.route("/worship/chords/weekly/<id>")
 def get_weekly_chords(id):
 	songs = Utils.get_worship_songs(id)
-    
 	ids = [str(song['id']) for song in songs]
-
 	chords = Utils.get_song_chords(ids)
+
+	for chord_data in chords:
+		chord_id = chord_data.get("id")
+    	# Find the matching weekly data for this specific song
+		weekly_data = next((song for song in songs if str(song.get("id")) == str(chord_id)), None)
+
+		if weekly_data and 'transpose' in weekly_data:
+			t_val = weekly_data['transpose']
+			chord_data['transpose_amount'] = int(t_val[0])
+		else:
+			chord_data['transpose_amount'] = 0
 
 	return render_template('/worship/chords.html', chords=chords)
 
