@@ -160,6 +160,16 @@ def get_song_chords(ids):
 	chords = Utils.get_song_chords(ids)
 	return render_template('/worship/chords.html', chords=chords)
 
+@app.route("/worship/chords/weekly/<id>")
+def get_weekly_chords(id):
+	songs = Utils.get_worship_songs(id)
+    
+	ids = [str(song['id']) for song in songs]
+
+	chords = Utils.get_song_chords(ids)
+
+	return render_template('/worship/chords.html', chords=chords)
+
 @app.route("/worship/sheets")
 @app.route("/worship/sheets/<ids>")
 def get_song_sheet(ids=None):
@@ -204,9 +214,7 @@ def get_weekly_sheets(id):
     songs = Utils.get_worship_songs(id)
     
     ids = [str(song['id']) for song in songs]
-    # print(ids)
     sheets = Utils.get_song_sheet(ids)
-    # print(sheets)    
     keys_1 = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
     keys_2 = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B']
 

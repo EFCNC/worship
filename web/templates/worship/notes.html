@@ -168,8 +168,14 @@ span.chunk:before {
         <button class="toggle-btn chord" onclick="loadTab('chord')">Chord</button>
         <button class="toggle-btn bi" onclick="loadTab('bi')">Bilingual</button>
         <button class="toggle-btn video" onclick="loadTab('video')">Youtube</button>
-        <button class="toggle-btn view" onclick="load_chords()">All Chords</button>
-        <button class="toggle-btn view" onclick="load_sheets()">All Sheets</button>
+        <a href="{{ url_for('get_weekly_chords', id=id) }}">
+            <button class="toggle-btn view">All Chords</button>
+        </a>
+        <a href="{{ url_for('get_weekly_sheets', id=id) }}">
+            <button class="toggle-btn view">All Sheets</button>
+        </a>
+
+        
     </div>
 
     <div id="worship">
@@ -317,15 +323,6 @@ span.chunk:before {
             }
         }
         document.getElementById('worship').innerHTML = finalHtml;
-    }
-
-    function load_chords() {
-        window.location.href = '/worship/chords/' + song_id.toString();
-    }
-
-    function load_sheets() {
-        // This id=id is the id from the python script... 
-        window.location.href = "{{ url_for('get_weekly_sheets', id=id) }}";
     }
 
     // console.log(tab)

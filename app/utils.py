@@ -408,6 +408,11 @@ def get_song_chords(ids):
     chords = []
     for r in result:
         chords.append({'id': r[0], 'title': r[1], 'content': Parser.parse_lyrics(r[2], r[3]), 'key': r[4]})
+    if ids:
+        # Sort the results based on the index of the ID in the original 'ids' list
+            string_ids = [str(i) for i in ids]
+            chords.sort(key=lambda x: string_ids.index(str(x['id'])))
+    
     return chords
 
 def get_song_by_id(id):
