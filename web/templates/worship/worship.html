@@ -82,19 +82,34 @@
         flex-wrap: wrap;
     }
 
-    .edit_btn {
-        border: none;
-        display: inline-block;
-        padding: 8px 16px;
-        vertical-align: middle;
-        overflow: hidden;
-        text-decoration: none;
-        color: inherit;
-        background-color: inherit;
-        text-align: center;
+    /* Target both buttons and the links inside your overlay */
+    button, 
+    .overlay_btns a {
         cursor: pointer;
+        font-family: inherit;
+        font-size: inherit;
+        font-weight: var(--font-weight-bold);
+        padding: var(--spacing-sm) var(--spacing-md);
+        border: none;
+        border-radius: var(--border-radius);
+        background-color: #1abc9c;
+        color: var(--text-light);
+        transition: background-color var(--transition-default), transform var(--transition-default);
+        
+        /* Crucial additions for the <a> tags to act like buttons */
+        display: inline-block;
+        text-decoration: none;
+        text-align: center;
         white-space: nowrap;
-        border-radius: 50px;
+    }
+
+    @media(hover: hover) and (pointer: fine) {
+        button:hover, 
+        .overlay_btns a:hover {
+            background-color: #3e8e41;
+            color: #fff;
+            transform: translateY(-2px);
+        }
     }
 
     .ui-dialog-titlebar {
@@ -131,15 +146,15 @@
                             {% endfor %}
                         </div>
                         <div class="overlay_btns">
-                            <button id="info_btn" name="{{ w.worship.date }}">Info</button>
+                            <a href="{{ url_for('admin_info') }}">Info</a>
                             <button id="sermon_btn" name="{{ w.worship.worship_id }}">Edit</button>
-                            <button id="song_btn" name="{{ w.worship.worship_id }}">Songs</button>
-                            <button id="notes_btn" name="{{ w.worship.worship_id }}">Notes</button>
+                            <a href="{{ url_for('worship_songs_editor', id=w.worship.worship_id) }}">Songs</a>
+                            <a href="{{ url_for('worship_notes', id=w.worship.worship_id) }}">Notes</a>
                             <button id="team_btn" name="{{ w.worship.worship_id }}">Teams</button>
                         </div>
                     {% else %}
                         <div class="overlay_btns">
-                            <button id="song_btn" name="{{ w.worship.worship_id }}">Songs</button>
+                            <a href="{{ url_for('worship_songs_editor', id=w.worship.worship_id) }}">Songs</a>
                             <button id="team_btn" name="{{ w.worship.worship_id }}">Teams</button>
                         </div>
                     {% endif %}
@@ -384,25 +399,18 @@ $(document).ready(function () {
     $(".overlay_btns button").on('click', function () {
         id = $(this).attr('name');
         date = $(this).parent().parent().parent().attr('date')
+
         if(!id) {
             $("#popup").html();
         }
+        
         else {
             worship_id = Number(id);
-            if (this.id == 'song_btn') {
-                window.location.href = '?id='+id;
-            }
-            else if (this.id == 'team_btn') {
+            if (this.id == 'team_btn') {
                 popup(id, date);
             }
             else if (this.id == 'sermon_btn') {
                 get_sermon(worship_id);
-            }
-            else if (this.id == 'info_btn') {
-                location.href = '/admin/info';
-            }
-            else if (this.id == 'notes_btn') {
-                location.href = '/worship/'+id;
             }
         }
     });

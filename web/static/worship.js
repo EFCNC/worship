@@ -53,8 +53,8 @@ var API_URL = '/API/';
                 if (data.score) {
                     html += '<a href="' + data.score + '" target="new"><i style="font-size:24px" class="fa" title="Sheet Music">&#xf0f6;</i></a>';
                 }
-                if (data.abc) {
-                    html += '<a href="sheets/' + data.id + '" target="new"><i class="fa" style="font-size:24px" title="Interacted Sheet Music">&#xf1c7;</i></a>';
+                if (data.abc.length > 0) {
+                    html += '<a href="/sheets/' + data.id + '" target="new"><i class="fa" style="font-size:24px" title="Interacted Sheet Music">&#xf1c7;</i></a>';
                 }
                 if (data.video) {
                     html += '<a href="' + data.video + '" target="new"><i class="fa fa-play-circle" style="font-size:24px" title="Youtube Video"></i></a>';
@@ -251,7 +251,7 @@ var API_URL = '/API/';
     }
 
     function render_song(id, db, lang, num) {
-        let url = 'song/' + id + '/edit';
+        let url = '/song/' + id + '/edit';
         if (db && lang) {
             url += '?db=' + db + '&lang=' + lang;
         }
@@ -261,7 +261,7 @@ var API_URL = '/API/';
         let dialog_title = [{'title': 'Save Worship Song', 'text': 'Save', 'cancel': 'Cancel', 'action': 'edit'},
                             {'title': 'Add Worship Song', 'text': 'Add', 'cancel': 'Cancel', 'action': 'add'}];
         
-        $.when( $.ajax( url ) ).then(function( response, textStatus, jqXHR ) {
+        return $.ajax(url).then(function( response, textStatus, jqXHR ) {
             $("#dialog").html(response);
             $("#dialog").dialog({
                 title: dialog_title[num]['title'],
@@ -286,18 +286,26 @@ var API_URL = '/API/';
 
                 buttons: [
 	                {
-    	                id: "button-add",
-                        text : dialog_title[num]['text'],
+	                    id: "button-cancel",
+                        type: "button",
+                        text : dialog_title[num]['cancel'],
+                        class: "btn btn-red",
                         click: function() {
-
+                            $( this ).dialog( "close" );
+                        }
+                    },
+                    {
+    	                id: "button-add",
+                        type: "button",
+                        text : dialog_title[num]['text'],
+                        class: "btn btn-green",
+                        click: function() {
                             const currentState = window.getCurrentState();
-
                             if (!window.validate_form(currentState)) return;
 
                             var tempSubmit = [];
                             for (let key in currentState) {
                                 if (key === 'id') continue;
-
                                 tempSubmit.push({
                                     name: key,
                                     value: currentState[key]
@@ -305,7 +313,7 @@ var API_URL = '/API/';
                             }
 
                             console.log('tempSubmit', tempSubmit);
-                            if (num==0) {   // When popup is for edit
+                            if (num == 0) {   // When popup is for edit
                                 var click_url = API_URL + 'song/' + id;
                                 submit_song(click_url, JSON.stringify(tempSubmit)).done(function(response) {
                                     console.log(response);
@@ -341,7 +349,7 @@ var API_URL = '/API/';
                                     songs_temp.push(data);
                                     
                                     $.when( add_song_to_worship(worship) ).then(function() {
-                                        init(); // Refresh the UI
+                                        $(document).trigger('worshipUIUpdated');
                                     });
                                 }).fail(function(err) {
                                     alert("Song was saved, but failed to fetch data for UI update.");
@@ -354,13 +362,6 @@ var API_URL = '/API/';
                                 alert("Error: " + error);
                             });
        
-                        }
-                    },
-	                {
-	                    id: "button-cancel",
-                        text : dialog_title[num]['cancel'],
-                        click: function() {
-                            $( this ).dialog( "close" );
                         }
                     }
                 ]
@@ -385,7 +386,7 @@ var API_URL = '/API/';
         var links = '';
         links += video ? "<a href='" + video + "' target='new'><i class='fa fa-play-circle' style='font-size:24px' title='Youtube Video'></i></a>" : "";
         links += score ? "<a href='" + score + "' target='new'><i style='font-size:24px' class='fa' title='Sheet Music'>&#xf0f6;</i></a>" : "";
-        links += id? "<a href='sheets/" + id + "' target='new'><i style='font-size:24px' class='fa' title='Interacted Sheet Music'>&#xf1c7;</i></a>" : "";
+        links += id? "<a href='/sheets/" + id + "' target='new'><i style='font-size:24px' class='fa' title='Interacted Sheet Music'>&#xf1c7;</i></a>" : "";
         return links;
     }
 
