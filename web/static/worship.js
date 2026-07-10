@@ -54,7 +54,7 @@ var API_URL = '/API/';
                     html += '<a href="' + data.score + '" target="new"><i style="font-size:24px" class="fa" title="Sheet Music">&#xf0f6;</i></a>';
                 }
                 if (data.abc.length > 0) {
-                    html += '<a href="/sheets/' + data.id + '" target="new"><i class="fa" style="font-size:24px" title="Interacted Sheet Music">&#xf1c7;</i></a>';
+                    html += '<a href="/worship/sheets/' + data.id + '" target="new"><i class="fa" style="font-size:24px" title="Interacted Sheet Music">&#xf1c7;</i></a>';
                 }
                 if (data.video) {
                     html += '<a href="' + data.video + '" target="new"><i class="fa fa-play-circle" style="font-size:24px" title="Youtube Video"></i></a>';
@@ -386,7 +386,7 @@ var API_URL = '/API/';
         var links = '';
         links += video ? "<a href='" + video + "' target='new'><i class='fa fa-play-circle' style='font-size:24px' title='Youtube Video'></i></a>" : "";
         links += score ? "<a href='" + score + "' target='new'><i style='font-size:24px' class='fa' title='Sheet Music'>&#xf0f6;</i></a>" : "";
-        links += id? "<a href='/sheets/" + id + "' target='new'><i style='font-size:24px' class='fa' title='Interacted Sheet Music'>&#xf1c7;</i></a>" : "";
+        links += id? "<a href='/worship/sheets/" + id + "' target='new'><i style='font-size:24px' class='fa' title='Interacted Sheet Music'>&#xf1c7;</i></a>" : "";
         return links;
     }
 
