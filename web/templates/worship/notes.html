@@ -137,9 +137,15 @@ span.chunk:before {
 
         <div class="card-row">
             <p>
-                <b>Title:</b> {{ w.sermon_title }}<br/>
-                <b>Speaker:</b> {{ w.speaker }}<br/>
-                <b>Bible:</b> <span id="bible_verse"></span><br/>
+                <b>English</b><br/>
+                <b>Title:</b> {{ w.title_en or w.sermon_title }}<br/>
+                <b>Speaker:</b> {{ w.speaker_en or w.speaker }}<br/>
+                <b>Bible:</b> {{ w.bible_en or w.bible }}<br/>
+                <br/>
+                <b>Chinese</b><br/>
+                <b>Title:</b> {{ w.title_zh or w.sermon_title }}<br/>
+                <b>Speaker:</b> {{ w.speaker_zh or w.speaker }}<br/>
+                <b>Bible:</b> {{ w.bible_zh or w.bible }}<br/>
                 <b>Outline:</b> {{ w.outline }}
             </p>
         </div>

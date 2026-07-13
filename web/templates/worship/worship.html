@@ -116,6 +116,34 @@
         background-color: #008CBA;
         color: #fff;
     }
+
+    .sermon-preview-container {
+        padding: 10px;
+        text-align: left;
+        font-size: 13px;
+        line-height: 1.35;
+    }
+
+    .sermon-preview-block {
+        background: rgba(255,255,255,0.28);
+        border-radius: 6px;
+        padding: 6px 8px;
+        margin-bottom: 6px;
+    }
+
+    .joint-badge {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background: #ffef99;
+        color: #6b4f00;
+        border-radius: 999px;
+        padding: 2px 7px;
+        font-size: 10px;
+        font-weight: bold;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+    }
 </style>
 {% endblock %}
 
@@ -127,11 +155,19 @@
                 <div class="card-front">
                     <h3>{{ w.date }}</h3>
                     {% if w.worship %}
-                        <div style="padding:10px;text-align:left;">
-                            <b>{{ w.worship.sermon_title }}</b><br/>
-                            Speaker: {{ w.worship.speaker }}<br/>
-                            Bible: {{ w.worship.bible }}<br/>
-                            Notes: {{ w.worship.notes|truncate(100) }}
+                        <div class="sermon-preview-container">
+                            {% if w.worship.is_joint %}
+                                <div class="joint-badge">Joint</div>
+                            {% endif %}
+                            <div class="sermon-preview-block">
+                                <b>EN</b>: {{ w.worship.title_en or '' }}<br/>
+                                <small>{{ w.worship.speaker_en or '' }}</small>
+                            </div>
+                            <div class="sermon-preview-block">
+                                <b>中</b>: {{ w.worship.title_zh or '' }}<br/>
+                                <small>{{ w.worship.speaker_zh or '' }}</small>
+                            </div>
+                            <div>Notes: {{ (w.worship.notes or '')|string|truncate(100) }}</div>
                         </div>
                     {% endif %}
                 </div>
@@ -280,13 +316,48 @@ let sundays = {{ sundays|safe }};
         });
     }
 
+    function escapeHtml(value) {
+        return String(value || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
     function get_sermon(id) {
         url = API_URL + 'sermon/' + id;
         $.when($.ajax(url)).then(function(response, textStatus, jqXHR) {
             if (response) {
-                var sermon_data = {};
+                var sermon_data = {
+                    date: date,
+                    notes: response.notes || '',
+                    is_joint: !!response.is_joint
+                };
                 $("#popup").empty();
-                html = 'Title: <input type="text" id="title" value="' + response.title + '"></input><br/>Speaker: <input type="text" id="speaker" value="' + response.speaker + '"></input><br/>&nbsp;Bible: <input type="text" id="bible_verse" value="' + response.bible + '"></input><br/>Outline<br/><textarea rows="3" cols="2" style="width:95%" id="outline">' + response.outline + '</textarea><br/>Notes<br/><textarea rows="3" cols="2" style="width:95%" id="notes">' + response.notes + '</textarea>';
+                html = '<div style="min-width:560px;">';
+                html += '<div style="margin-bottom:8px;">';
+                html += '<label><input type="checkbox" id="is_joint" ' + (response.is_joint ? 'checked' : '') + '> Joint sermon</label>';
+                html += '</div>';
+                html += '<div style="display:flex;gap:12px;flex-wrap:wrap;">';
+                html += '<div style="flex:1 1 220px;min-width:220px;border:1px solid #ddd;padding:10px;border-radius:6px;">';
+                html += '<div><b>English</b></div>';
+                html += 'Title: <input type="text" id="title_en" value="' + escapeHtml(response.title_en || '') + '"><br/>';
+                html += 'Speaker: <input type="text" id="speaker_en" value="' + escapeHtml(response.speaker_en || '') + '"><br/>';
+                html += 'Bible: <input type="text" id="verse_en" value="' + escapeHtml(response.bible_en || '') + '"><br/>';
+                html += '</div>';
+                html += '<div style="flex:1 1 220px;min-width:220px;border:1px solid #ddd;padding:10px;border-radius:6px;">';
+                html += '<div><b>Chinese</b></div>';
+                html += 'Title: <input type="text" id="title_zh" value="' + escapeHtml(response.title_zh || '') + '"><br/>';
+                html += 'Speaker: <input type="text" id="speaker_zh" value="' + escapeHtml(response.speaker_zh || '') + '"><br/>';
+                html += 'Bible: <input type="text" id="verse_zh" value="' + escapeHtml(response.bible_zh || '') + '"><br/>';
+                html += '</div>';
+                html += '</div>';
+                html += '<div style="margin-top:10px;">';
+                html += 'Outline<br/><textarea rows="3" cols="2" style="width:95%" id="outline">' + escapeHtml(response.outline || '') + '</textarea><br/>';
+                html += 'Notes<br/><textarea rows="3" cols="2" style="width:95%" id="notes">' + escapeHtml(response.notes || '') + '</textarea>';
+                html += '</div>';
+                html += '</div>';
                 $("#popup").append(html);
                 $("#popup").dialog({
                     title: "Sermon Information (" + date + ")",
@@ -296,7 +367,6 @@ let sundays = {{ sundays|safe }};
                         text: "OK",
                         click: function() {
                             if (!jQuery.isEmptyObject(sermon_data)) {
-                                sermon_data["date"] = date;
                                 $.ajax({
                                     type: "post",
                                     url: url,
@@ -316,11 +386,14 @@ let sundays = {{ sundays|safe }};
                         }
                     }]
                 });
-                $('#popup input').change(function() {
-                    sermon_data[this.id] = $(this).val();
-                });
-                $('#popup textarea').change(function() {
-                    sermon_data[this.id] = $(this).val();
+                $('#popup').on('input change', 'input, textarea', function() {
+                    if (this.id === 'notes' || this.id === 'outline') {
+                        sermon_data[this.id] = $(this).val();
+                    } else if (this.id === 'is_joint') {
+                        sermon_data.is_joint = $(this).is(':checked') ? 1 : 0;
+                    } else {
+                        sermon_data[this.id] = $(this).val();
+                    }
                 });
             }
         });

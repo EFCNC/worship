@@ -1,0 +1,91 @@
+import sqlite3
+from pathlib import Path
+
+
+def migrate_sermon_schema(db_path: str | None = None) -> None:
+    db_file = Path(db_path or 'db/worship.db')
+    if not db_file.exists():
+        raise FileNotFoundError(f"Database not found: {db_file}")
+
+    conn = sqlite3.connect(db_file)
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+
+    print(f"Migrating {db_file}")
+
+    cols = [row[1] for row in cur.execute('PRAGMA table_info(sermon)')]
+    needed = {
+        'title_en': 'TEXT',
+        'title_zh': 'TEXT',
+        'speaker_en': 'TEXT',
+        'speaker_zh': 'TEXT',
+        'verse_en': 'TEXT',
+        'verse_zh': 'TEXT',
+        'is_joint': 'INTEGER DEFAULT 0',
+    }
+
+    for name, definition in needed.items():
+        if name not in cols:
+            cur.execute(f'ALTER TABLE sermon ADD COLUMN {name} {definition}')
+
+    cur.execute('''
+        UPDATE sermon
+        SET title_en = COALESCE(title_en, title),
+            title_zh = COALESCE(title_zh, title),
+            speaker_en = COALESCE(speaker_en, speaker),
+            speaker_zh = COALESCE(speaker_zh, speaker),
+            verse_en = COALESCE(verse_en, bible_verse),
+            verse_zh = COALESCE(verse_zh, bible_verse)
+        WHERE (title_en IS NULL OR title_en = '')
+           OR (title_zh IS NULL OR title_zh = '')
+           OR (speaker_en IS NULL OR speaker_en = '')
+           OR (speaker_zh IS NULL OR speaker_zh = '')
+           OR (verse_en IS NULL OR verse_en = '')
+           OR (verse_zh IS NULL OR verse_zh = '')
+    ''')
+
+    cur.execute('''
+        SELECT sermon_id, title, speaker, bible_verse, keyword, outline, lang, updated, date,
+               title_en, title_zh, speaker_en, speaker_zh, verse_en, verse_zh, is_joint
+        FROM sermon
+    ''')
+    rows = cur.fetchall()
+
+    cur.execute('DROP TABLE sermon')
+    cur.execute('''
+        CREATE TABLE sermon (
+            sermon_id INTEGER PRIMARY KEY,
+            title_en TEXT,
+            title_zh TEXT,
+            speaker_en TEXT,
+            speaker_zh TEXT,
+            verse_en TEXT,
+            verse_zh TEXT,
+            is_joint INTEGER DEFAULT 0,
+            title TEXT,
+            speaker TEXT,
+            bible_verse TEXT,
+            keyword TEXT,
+            outline TEXT,
+            lang TEXT,
+            updated TEXT DEFAULT CURRENT_TIMESTAMP,
+            date TEXT
+        )
+    ''')
+
+    for row in rows:
+        cur.execute('''
+            INSERT INTO sermon (
+                sermon_id, title, speaker, bible_verse, keyword, outline, lang, updated, date,
+                title_en, title_zh, speaker_en, speaker_zh, verse_en, verse_zh, is_joint
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', tuple(row))
+
+    cur.execute("UPDATE sermon SET title = '', speaker = '', bible_verse = ''")
+    conn.commit()
+    print('Migration complete')
+    conn.close()
+
+
+if __name__ == '__main__':
+    migrate_sermon_schema()

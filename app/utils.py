@@ -620,24 +620,64 @@ def edit_songset(id, content):
 def update_sermon(data):
     w_date = data["date"]
     w_notes = data["notes"] if "notes" in data else None
-    values = []
-    sql = "update sermon set "
+
+    fields = {}
     for key, val in data.items():
-        if key != 'notes' and key != 'date':
-            sql += key + "= ?,"
-            values.append(val)
-    if len(values) > 0:
-        values.append(w_date)
-        sql = sql[:-1] + " where date = ?"
-        dB.run_para(sql, values)
-    if w_notes:
-        sql = "update worship set notes=? where scheduled_date=?"
-        dB.run_para(sql, [w_notes, w_date])
+        if key in ['notes', 'date']:
+            continue
+        if key in ['title_en', 'title_zh', 'speaker_en', 'speaker_zh', 'verse_en', 'verse_zh', 'is_joint']:
+            fields[key] = val
+        elif key in ['title', 'speaker', 'bible_verse', 'outline']:
+            if key == 'title':
+                fields['title_en'] = val
+                fields['title_zh'] = val
+            elif key == 'speaker':
+                fields['speaker_en'] = val
+                fields['speaker_zh'] = val
+            elif key == 'bible_verse':
+                fields['verse_en'] = val
+                fields['verse_zh'] = val
+
+    if fields:
+        assignments = ', '.join([f"{k} = ?" for k in fields.keys()])
+        values = list(fields.values()) + [w_date]
+        dB.run_para(f"update sermon set {assignments} where date = ?", values)
+
+    if w_notes is not None:
+        dB.run_para("update worship set notes=? where scheduled_date=?", [w_notes, w_date])
+
+
+def _get_sermon_display_fields(title_en, title_zh, speaker_en, speaker_zh, verse_en, verse_zh, outline, is_joint):
+    return {
+        'title': title_en or title_zh or '',
+        'title_en': title_en or '',
+        'title_zh': title_zh or '',
+        'speaker': speaker_en or speaker_zh or '',
+        'speaker_en': speaker_en or '',
+        'speaker_zh': speaker_zh or '',
+        'bible': verse_en or verse_zh or '',
+        'bible_en': verse_en or '',
+        'bible_zh': verse_zh or '',
+        'outline': outline or '',
+        'is_joint': bool(is_joint) if is_joint is not None else False
+    }
+
 
 def get_worship(id):
-    sql = "select notes, scheduled_date, s.title, s.speaker, s.bible_verse, s.outline from worship w inner join sermon s on w.scheduled_date = s.date where worship_id = ?"
+    sql = """
+        select notes, scheduled_date, s.title_en, s.title_zh, s.speaker_en, s.speaker_zh,
+               s.verse_en, s.verse_zh, s.outline, s.is_joint
+        from worship w
+        inner join sermon s on w.scheduled_date = s.date
+        where worship_id = ?
+    """
     r = dB.run_para(sql, id)[0]
-    return {'date': r[1], 'title': r[2] if r[2] else '', 'notes': r[0] if r[0] else '', 'speaker': r[3] if r[3] else '', 'bible': r[4] if r[4] else '', 'outline': r[5] if r[5] else ''}
+    sermon_fields = _get_sermon_display_fields(r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9])
+    return {
+        'date': r[1],
+        'notes': r[0] if r[0] else '',
+        **sermon_fields
+    }
 
 def get_worship_date(id):
     sql = "select scheduled_date from worship where worship_id = ?"
@@ -671,18 +711,57 @@ def get_availablity():
 
 def worship_list(id=None):
     if id:
-        sql = "select s.title, s.speaker, case when t.name then t.name else t.name_2 end, (select i.name from instrument i where i.id = it.instrument_id), w.title, w.scheduled_date, w.worship_id, s.bible_verse, s.outline, w.notes from worship w inner join sermon s on w.scheduled_date = s.date left join instrument_team it on w.worship_id = it.worship_id left join team t on it.user_id = t.user_id where w.worship_id=? and it.instrument_id <> -1 order by w.scheduled_date, it.instrument_id"
+        sql = """
+            select s.title_en, s.title_zh, s.speaker_en, s.speaker_zh, s.verse_en, s.verse_zh,
+                   case when t.name then t.name else t.name_2 end,
+                   (select i.name from instrument i where i.id = it.instrument_id),
+                   w.title, w.scheduled_date, w.worship_id, s.outline, w.notes, s.is_joint
+            from worship w
+            inner join sermon s on w.scheduled_date = s.date
+            left join instrument_team it on w.worship_id = it.worship_id
+            left join team t on it.user_id = t.user_id
+            where w.worship_id=? and it.instrument_id <> -1
+            order by w.scheduled_date, it.instrument_id
+        """
         result = dB.run_para(sql, id)
     else:
-        sql = "select s.title, s.speaker, case when t.name then t.name else t.name_2 end, (select i.name from instrument i where i.id = it.instrument_id), w.title, w.scheduled_date, w.worship_id, s.bible_verse, s.outline, w.notes from worship w inner join sermon s on w.scheduled_date = s.date left join instrument_team it on w.worship_id = it.worship_id left join team t on it.user_id = t.user_id order by w.scheduled_date, it.instrument_id"
+        sql = """
+            select s.title_en, s.title_zh, s.speaker_en, s.speaker_zh, s.verse_en, s.verse_zh,
+                   case when t.name then t.name else t.name_2 end,
+                   (select i.name from instrument i where i.id = it.instrument_id),
+                   w.title, w.scheduled_date, w.worship_id, s.outline, w.notes, s.is_joint
+            from worship w
+            inner join sermon s on w.scheduled_date = s.date
+            left join instrument_team it on w.worship_id = it.worship_id
+            left join team t on it.user_id = t.user_id
+            order by w.scheduled_date, it.instrument_id
+        """
         result = dB.run(sql)
     worship = []
     for r in result:
-        a = next((x for x in worship if x['date'] == r[5]), None)
-        if a and r[3]:
-            a['content'].append({'user_name': r[2], 'role': r[3]})
+        a = next((x for x in worship if x['date'] == r[9]), None)
+        if a and (r[6] or r[7]):
+            a['content'].append({'user_name': r[6] if r[6] else '', 'role': r[7] if r[7] else ''})
         else:
-            worship.append({'worship_id': r[6], 'date': r[5] if r[5] else '', 'worship_title': r[4] if r[4] else '', 'sermon_title': r[0] if r[0] else '', 'speaker': r[1] if r[1] else '', 'bible': r[7] if r[7] else '', 'outline': r[8] if r[8] else '', 'notes': r[9] if r[9] else '', 'content': [{'user_name': r[2] if r[2] else '', 'role': r[3] if r[3] else ''}]})
+            sermon_fields = _get_sermon_display_fields(r[0], r[1], r[2], r[3], r[4], r[5], r[11], r[13])
+            worship.append({
+                'worship_id': r[10],
+                'date': r[9] if r[9] else '',
+                'worship_title': r[8] if r[8] else '',
+                'sermon_title': sermon_fields['title'],
+                'title_en': sermon_fields['title_en'],
+                'title_zh': sermon_fields['title_zh'],
+                'speaker': sermon_fields['speaker'],
+                'speaker_en': sermon_fields['speaker_en'],
+                'speaker_zh': sermon_fields['speaker_zh'],
+                'bible': sermon_fields['bible'],
+                'bible_en': sermon_fields['bible_en'],
+                'bible_zh': sermon_fields['bible_zh'],
+                'outline': sermon_fields['outline'],
+                'notes': r[12] if r[12] else '',
+                'is_joint': sermon_fields['is_joint'],
+                'content': [{'user_name': r[6] if r[6] else '', 'role': r[7] if r[7] else ''}]
+            })
     return worship
 
 def get_api_key(name):
