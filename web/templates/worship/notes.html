@@ -138,15 +138,16 @@ span.chunk:before {
         <div class="card-row">
             <p>
                 <b>English</b><br/>
-                <b>Title:</b> {{ w.title_en or w.sermon_title }}<br/>
-                <b>Speaker:</b> {{ w.speaker_en or w.speaker }}<br/>
-                <b>Bible:</b> {{ w.bible_en or w.bible }}<br/>
+                <b>Title:</b> {{ w.title_en or '' }}<br/>
+                <b>Speaker:</b> {{ w.speaker_en or '' }}<br/>
+                <b>Bible:</b> <span id="bible_verse_en">{{ w.bible_en or '' }}</span><br/>
+                <b>Outline:</b> {{ w.outline_en or '' }}<br/>
                 <br/>
                 <b>Chinese</b><br/>
-                <b>Title:</b> {{ w.title_zh or w.sermon_title }}<br/>
-                <b>Speaker:</b> {{ w.speaker_zh or w.speaker }}<br/>
-                <b>Bible:</b> {{ w.bible_zh or w.bible }}<br/>
-                <b>Outline:</b> {{ w.outline }}
+                <b>Title:</b> {{ w.title_zh or '' }}<br/>
+                <b>Speaker:</b> {{ w.speaker_zh or '' }}<br/>
+                <b>Bible:</b> <span id="bible_verse_zh">{{ w.bible_zh or '' }}</span><br/>
+                <b>Outline:</b> {{ w.outline_zh or '' }}
             </p>
         </div>
 
@@ -196,8 +197,8 @@ span.chunk:before {
     const sharp = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
     const flat = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"];
 
-    const worshipData = {{ songs|safe }};
-    const worshipInfo = {{ w|safe }};
+    const worshipData = {{ songs|tojson }};
+    const worshipInfo = {{ w|tojson }};
     const initialTab = '{{ tab|safe }}' || 'view';
     const song_id = worshipData.map(o=> o.id);
 
@@ -347,12 +348,29 @@ span.chunk:before {
             document.title = `${worshipInfo.date} Worship Notes - Worship Manager`;
 
             // Bible Link generation logic
-            const bibleContainer = document.getElementById('bible_verse');
-            const bibleVerses = worshipInfo.bible.replace(/(、|;)/g, '，').split('，');
-        
-            bibleContainer.innerHTML = bibleVerses.map(v =>
-                ` <a href="javascript:void(0)" onclick="get_bible(show_verse, '${v.trim()}')">${v.trim()}</a>`
-            ).join('');
+            ['bible_verse_en', 'bible_verse_zh'].forEach((id) => {
+                const bibleContainer = document.getElementById(id);
+                if (!bibleContainer) {
+                    return;
+                }
+                const bibleText = (bibleContainer.textContent || '').trim();
+                if (!bibleText) {
+                    return;
+                }
+                const bibleVerses = bibleText.replace(/(、|;)/g, '，').split('，').map(v => v.trim()).filter(Boolean);
+                bibleContainer.innerHTML = '';
+
+                bibleVerses.forEach((verse, index) => {
+                    if (index > 0) {
+                        bibleContainer.appendChild(document.createTextNode(' '));
+                    }
+                    const link = document.createElement('a');
+                    link.href = 'javascript:void(0)';
+                    link.textContent = verse;
+                    link.onclick = () => get_bible(show_verse, verse);
+                    bibleContainer.appendChild(link);
+                });
+            });
         }
         // Load initial view
         loadTab(initialTab);

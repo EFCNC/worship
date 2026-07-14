@@ -160,12 +160,12 @@
                                 <div class="joint-badge">Joint</div>
                             {% endif %}
                             <div class="sermon-preview-block">
-                                <b>EN</b>: {{ w.worship.title_en or '' }}<br/>
-                                <small>{{ w.worship.speaker_en or '' }}</small>
-                            </div>
-                            <div class="sermon-preview-block">
                                 <b>中</b>: {{ w.worship.title_zh or '' }}<br/>
                                 <small>{{ w.worship.speaker_zh or '' }}</small>
+                            </div>
+                            <div class="sermon-preview-block">
+                                <b>EN</b>: {{ w.worship.title_en or '' }}<br/>
+                                <small>{{ w.worship.speaker_en or '' }}</small>
                             </div>
                             <div>Notes: {{ (w.worship.notes or '')|string|truncate(100) }}</div>
                         </div>
@@ -209,6 +209,7 @@ let roster;
 let inst;
 let marked;
 let worship_id = -1;
+let activeCard = null;
 let sundays = {{ sundays|safe }};
 
     function pop_role(name) {
@@ -286,7 +287,25 @@ let sundays = {{ sundays|safe }};
         return roster_html;
     }
 
-    function popup(id, date) {
+    function update_card_team_info(card) {
+        if (!card || !roster || !team) {
+            return;
+        }
+        var teamInfo = $(card).find('.card-back .team-info');
+        if (!teamInfo.length) {
+            return;
+        }
+        var html = '<u><b>Worship Team</b></u><br/>';
+        for (var i = 0; i < roster.length; i++) {
+            var entry = roster[i];
+            if (entry.user_name && entry.inst_name) {
+                html += '<b>' + escapeHtml(entry.inst_name) + ':</b>&nbsp;' + escapeHtml(entry.user_name) + '<br/>';
+            }
+        }
+        teamInfo.html(html);
+    }
+
+    function popup(id, date, card) {
         $("#popup").dialog({
             title: "Worship Team (" + date + ")",
             width: 'auto',
@@ -294,8 +313,9 @@ let sundays = {{ sundays|safe }};
                 id: "button-add",
                 text: "OK",
                 click: function() {
-                    $(this).dialog("close");
-                    location.reload();
+                    var dialogElement = $(this);
+                    update_card_team_info(card);
+                    dialogElement.dialog("close");
                 }
             }]
         });
@@ -325,12 +345,20 @@ let sundays = {{ sundays|safe }};
             .replace(/'/g, '&#39;');
     }
 
-    function get_sermon(id) {
+    function get_sermon(id, card) {
         url = API_URL + 'sermon/' + id;
         $.when($.ajax(url)).then(function(response, textStatus, jqXHR) {
             if (response) {
                 var sermon_data = {
                     date: date,
+                    title_en: response.title_en || '',
+                    title_zh: response.title_zh || '',
+                    speaker_en: response.speaker_en || '',
+                    speaker_zh: response.speaker_zh || '',
+                    verse_en: response.bible_en || '',
+                    verse_zh: response.bible_zh || '',
+                    outline_en: response.outline_en || response.outline || '',
+                    outline_zh: response.outline_zh || response.outline || '',
                     notes: response.notes || '',
                     is_joint: !!response.is_joint
                 };
@@ -341,20 +369,29 @@ let sundays = {{ sundays|safe }};
                 html += '</div>';
                 html += '<div style="display:flex;gap:12px;flex-wrap:wrap;">';
                 html += '<div style="flex:1 1 220px;min-width:220px;border:1px solid #ddd;padding:10px;border-radius:6px;">';
-                html += '<div><b>English</b></div>';
-                html += 'Title: <input type="text" id="title_en" value="' + escapeHtml(response.title_en || '') + '"><br/>';
-                html += 'Speaker: <input type="text" id="speaker_en" value="' + escapeHtml(response.speaker_en || '') + '"><br/>';
-                html += 'Bible: <input type="text" id="verse_en" value="' + escapeHtml(response.bible_en || '') + '"><br/>';
-                html += '</div>';
-                html += '<div style="flex:1 1 220px;min-width:220px;border:1px solid #ddd;padding:10px;border-radius:6px;">';
                 html += '<div><b>Chinese</b></div>';
                 html += 'Title: <input type="text" id="title_zh" value="' + escapeHtml(response.title_zh || '') + '"><br/>';
                 html += 'Speaker: <input type="text" id="speaker_zh" value="' + escapeHtml(response.speaker_zh || '') + '"><br/>';
                 html += 'Bible: <input type="text" id="verse_zh" value="' + escapeHtml(response.bible_zh || '') + '"><br/>';
                 html += '</div>';
+                html += '<div style="flex:1 1 220px;min-width:220px;border:1px solid #ddd;padding:10px;border-radius:6px;">';
+                html += '<div><b>English</b></div>';
+                html += 'Title: <input type="text" id="title_en" value="' + escapeHtml(response.title_en || '') + '"><br/>';
+                html += 'Speaker: <input type="text" id="speaker_en" value="' + escapeHtml(response.speaker_en || '') + '"><br/>';
+                html += 'Bible: <input type="text" id="verse_en" value="' + escapeHtml(response.bible_en || '') + '"><br/>';
+                html += '</div>';
                 html += '</div>';
                 html += '<div style="margin-top:10px;">';
-                html += 'Outline<br/><textarea rows="3" cols="2" style="width:95%" id="outline">' + escapeHtml(response.outline || '') + '</textarea><br/>';
+                html += '<div style="display:flex;gap:12px;flex-wrap:wrap;">';
+                html += '<div style="flex:1 1 220px;">';
+                html += '<div><b>Chinese Outline</b></div>';
+                html += '<textarea rows="4" style="width:95%" id="outline_zh">' + escapeHtml(response.outline_zh || response.outline || '') + '</textarea>';
+                html += '</div>';
+                html += '<div style="flex:1 1 220px;">';
+                html += '<div><b>English Outline</b></div>';
+                html += '<textarea rows="4" style="width:95%" id="outline_en">' + escapeHtml(response.outline_en || response.outline || '') + '</textarea>';
+                html += '</div>';
+                html += '</div>';
                 html += 'Notes<br/><textarea rows="3" cols="2" style="width:95%" id="notes">' + escapeHtml(response.notes || '') + '</textarea>';
                 html += '</div>';
                 html += '</div>';
@@ -366,6 +403,7 @@ let sundays = {{ sundays|safe }};
                         id: "button-add",
                         text: "OK",
                         click: function() {
+                            var dialogElement = $(this);
                             if (!jQuery.isEmptyObject(sermon_data)) {
                                 $.ajax({
                                     type: "post",
@@ -375,19 +413,31 @@ let sundays = {{ sundays|safe }};
                                     dataType: 'json',
                                     complete: function(response) {
                                         if (response.status == 200) {
-                                            location.reload();
+                                            if (card) {
+                                                var preview = $(card).find('.card-front .sermon-preview-container');
+                                                if (preview.length) {
+                                                    preview.html(
+                                                        (sermon_data.is_joint ? '<div class="joint-badge">Joint</div>' : '') +
+                                                        '<div class="sermon-preview-block"><b>中</b>: ' + escapeHtml(sermon_data.title_zh || '') + '<br/><small>' + escapeHtml(sermon_data.speaker_zh || '') + '</small></div>' +
+                                                        '<div class="sermon-preview-block"><b>EN</b>: ' + escapeHtml(sermon_data.title_en || '') + '<br/><small>' + escapeHtml(sermon_data.speaker_en || '') + '</small></div>' +
+                                                        '<div>Notes: ' + escapeHtml(sermon_data.notes || '') + '</div>'
+                                                    );
+                                                }
+                                            }
+                                            dialogElement.dialog("close");
                                         } else {
                                             alert(response.responseText);
                                         }
                                     }
                                 });
+                            } else {
+                                dialogElement.dialog("close");
                             }
-                            $(this).dialog("close");
                         }
                     }]
                 });
                 $('#popup').on('input change', 'input, textarea', function() {
-                    if (this.id === 'notes' || this.id === 'outline') {
+                    if (this.id === 'notes' || this.id === 'outline_en' || this.id === 'outline_zh') {
                         sermon_data[this.id] = $(this).val();
                     } else if (this.id === 'is_joint') {
                         sermon_data.is_joint = $(this).is(':checked') ? 1 : 0;
@@ -480,10 +530,12 @@ $(document).ready(function () {
         else {
             worship_id = Number(id);
             if (this.id == 'team_btn') {
-                popup(id, date);
+                activeCard = $(this).closest('.worship-card');
+                popup(id, date, activeCard);
             }
             else if (this.id == 'sermon_btn') {
-                get_sermon(worship_id);
+                activeCard = $(this).closest('.worship-card');
+                get_sermon(worship_id, activeCard);
             }
         }
     });

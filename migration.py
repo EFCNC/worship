@@ -21,6 +21,8 @@ def migrate_sermon_schema(db_path: str | None = None) -> None:
         'speaker_zh': 'TEXT',
         'verse_en': 'TEXT',
         'verse_zh': 'TEXT',
+        'outline_en': 'TEXT',
+        'outline_zh': 'TEXT',
         'is_joint': 'INTEGER DEFAULT 0',
     }
 
@@ -35,23 +37,19 @@ def migrate_sermon_schema(db_path: str | None = None) -> None:
             speaker_en = COALESCE(speaker_en, speaker),
             speaker_zh = COALESCE(speaker_zh, speaker),
             verse_en = COALESCE(verse_en, bible_verse),
-            verse_zh = COALESCE(verse_zh, bible_verse)
+            verse_zh = COALESCE(verse_zh, bible_verse),
+            outline_zh = COALESCE(outline_zh, outline),
+            outline_en = COALESCE(outline_en, '')
         WHERE (title_en IS NULL OR title_en = '')
            OR (title_zh IS NULL OR title_zh = '')
            OR (speaker_en IS NULL OR speaker_en = '')
            OR (speaker_zh IS NULL OR speaker_zh = '')
            OR (verse_en IS NULL OR verse_en = '')
            OR (verse_zh IS NULL OR verse_zh = '')
+           OR (outline_zh IS NULL OR outline_zh = '')
     ''')
 
-    cur.execute('''
-        SELECT sermon_id, title, speaker, bible_verse, keyword, outline, lang, updated, date,
-               title_en, title_zh, speaker_en, speaker_zh, verse_en, verse_zh, is_joint
-        FROM sermon
-    ''')
-    rows = cur.fetchall()
-
-    cur.execute('DROP TABLE sermon')
+    cur.execute('ALTER TABLE sermon RENAME TO sermon_old')
     cur.execute('''
         CREATE TABLE sermon (
             sermon_id INTEGER PRIMARY KEY,
@@ -61,27 +59,40 @@ def migrate_sermon_schema(db_path: str | None = None) -> None:
             speaker_zh TEXT,
             verse_en TEXT,
             verse_zh TEXT,
+            outline_en TEXT,
+            outline_zh TEXT,
             is_joint INTEGER DEFAULT 0,
-            title TEXT,
-            speaker TEXT,
-            bible_verse TEXT,
             keyword TEXT,
-            outline TEXT,
             lang TEXT,
             updated TEXT DEFAULT CURRENT_TIMESTAMP,
             date TEXT
         )
     ''')
 
-    for row in rows:
-        cur.execute('''
-            INSERT INTO sermon (
-                sermon_id, title, speaker, bible_verse, keyword, outline, lang, updated, date,
-                title_en, title_zh, speaker_en, speaker_zh, verse_en, verse_zh, is_joint
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ''', tuple(row))
+    cur.execute('''
+        INSERT INTO sermon (
+            sermon_id, title_en, title_zh, speaker_en, speaker_zh, verse_en, verse_zh,
+            outline_en, outline_zh, is_joint, keyword, lang, updated, date
+        )
+        SELECT
+            sermon_id,
+            COALESCE(title_en, ''),
+            COALESCE(title_zh, ''),
+            COALESCE(speaker_en, ''),
+            COALESCE(speaker_zh, ''),
+            COALESCE(verse_en, ''),
+            COALESCE(verse_zh, ''),
+            COALESCE(outline_en, ''),
+            COALESCE(outline_zh, ''),
+            COALESCE(is_joint, 0),
+            keyword,
+            lang,
+            updated,
+            date
+        FROM sermon_old
+    ''')
 
-    cur.execute("UPDATE sermon SET title = '', speaker = '', bible_verse = ''")
+    cur.execute('DROP TABLE sermon_old')
     conn.commit()
     print('Migration complete')
     conn.close()

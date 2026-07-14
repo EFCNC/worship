@@ -471,21 +471,34 @@ li {
 
     // Sermon Card Functions:
     function get_sermon() {
-        var bible = worship_data.bible.replace(/(、|;)/g, '，').split('，');; // Replace possible symbols to Chinese comma, then split by commas
-        var b = '';
-        for (var i=0; i<bible.length; i++) {
-            if(bible[i].trim() !== "") {
-                b += ' <a class="bible-link" href="javascript:get_bible(show_verse, \'' + bible[i] + '\')">' + bible[i] + '</a>';
+        function buildBibleLinks(bibleText) {
+            var bible = (bibleText || '').replace(/(、|;)/g, '，').split('，');
+            var b = '';
+            for (var i=0; i<bible.length; i++) {
+                if (bible[i].trim() !== "") {
+                    b += ' <a class="bible-link" href="javascript:get_bible(show_verse, \'" + bible[i] + "\')">' + bible[i] + '</a>';
+                }
             }
+            return b;
         }
+
+        var bibleZh = buildBibleLinks(worship_data.bible_zh || worship_data.bible || '');
+        var bibleEn = buildBibleLinks(worship_data.bible_en || worship_data.bible || '');
 
         var cardHtml = `
                 <div class="sermon-header">
-                    <h4 class="sermon-title"><strong>Title:</strong> ${worship_data.title}</h4>
-                    <span class="sermon-speaker">By: ${worship_data.speaker}</span>
+                    <h4 class="sermon-title"><strong>中文:</strong> ${worship_data.title_zh}</h4>
+                    <span class="sermon-speaker">By: ${worship_data.speaker_zh}</span>
                 </div>
-                <div class="sermon-bible"><strong>Scripture Reference:</strong> ${b}</div>
-                <div class="sermon-outline"><strong>Sermon Outline:</strong><br/>${worship_data.outline}</div>
+                <div class="sermon-bible"><strong>Scripture Reference:</strong> ${bibleZh}</div>
+                <div class="sermon-outline"><strong>Sermon Outline:</strong><br/>${worship_data.outline_zh || worship_data.outline || ''}</div>
+
+                <div class="sermon-header">
+                    <h4 class="sermon-title"><strong>English:</strong> ${worship_data.title_en}</h4>
+                    <span class="sermon-speaker">By: ${worship_data.speaker_en}</span>
+                </div>
+                <div class="sermon-bible"><strong>Scripture Reference:</strong> ${bibleEn}</div>
+                <div class="sermon-outline"><strong>Sermon Outline:</strong><br/>${worship_data.outline_en || worship_data.outline || ''}</div>
         `;
         $('#sermon-data_card').html(cardHtml);
     }
