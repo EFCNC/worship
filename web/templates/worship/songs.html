@@ -374,10 +374,10 @@ li {
         Global Variables
     ================================== */
     // Store worship set into object
-    let songs = {{ songs|safe }};
+    let songs = {{ songs|tojson|safe }};
     let songs_temp = JSON.parse(JSON.stringify(songs));
     let lyrics_raw = '';
-    let worship_data = {{ w|tojson }};
+    let worship_data = {{ w|tojson|safe }};
     let worship_id = {{ id|safe }};
     let worship = $('#worship');
 
@@ -475,31 +475,37 @@ li {
             var bible = (bibleText || '').replace(/(、|;)/g, '，').split('，');
             var b = '';
             for (var i=0; i<bible.length; i++) {
-                if (bible[i].trim() !== "") {
-                    b += ' <a class="bible-link" href="javascript:get_bible(show_verse, \'" + bible[i] + "\')">' + bible[i] + '</a>';
+                var verse = bible[i].trim();
+                if (verse !== "") {
+                    var escapedVerse = verse.replace(/'/g, "\\'").replace(/"/g, '\\"');
+                    b += ' <a class="bible-link" href="javascript:void(0)" onclick="get_bible(show_verse, \'' + escapedVerse + '\'); return false;">' + verse + '</a>';
                 }
             }
             return b;
         }
 
-        var bibleZh = buildBibleLinks(worship_data.bible_zh || worship_data.bible || '');
-        var bibleEn = buildBibleLinks(worship_data.bible_en || worship_data.bible || '');
+        var sermonVariants = worship_data.sermons || {};
+        var sermonLangs = [
+            { key: 'zh', label: '中文', shortLabel: '中' },
+            { key: 'zh-TW', label: '台語', shortLabel: '台' },
+            { key: 'en', label: 'English', shortLabel: 'EN' }
+        ];
 
-        var cardHtml = `
+        var cardHtml = sermonLangs.filter(function(item) {
+            var sermon = sermonVariants[item.key] || {};
+            return sermon.title || sermon.speaker || sermon.bible || sermon.outline;
+        }).map(function(item) {
+            var sermon = sermonVariants[item.key] || {};
+            var bibleText = buildBibleLinks(sermon.bible || '');
+            return `
                 <div class="sermon-header">
-                    <h4 class="sermon-title"><strong>中文:</strong> ${worship_data.title_zh}</h4>
-                    <span class="sermon-speaker">By: ${worship_data.speaker_zh}</span>
+                    <h4 class="sermon-title"><strong>${item.label}:</strong> ${sermon.title || ''}</h4>
+                    <span class="sermon-speaker">By: ${sermon.speaker || ''}</span>
                 </div>
-                <div class="sermon-bible"><strong>Scripture Reference:</strong> ${bibleZh}</div>
-                <div class="sermon-outline"><strong>Sermon Outline:</strong><br/>${worship_data.outline_zh || worship_data.outline || ''}</div>
-
-                <div class="sermon-header">
-                    <h4 class="sermon-title"><strong>English:</strong> ${worship_data.title_en}</h4>
-                    <span class="sermon-speaker">By: ${worship_data.speaker_en}</span>
-                </div>
-                <div class="sermon-bible"><strong>Scripture Reference:</strong> ${bibleEn}</div>
-                <div class="sermon-outline"><strong>Sermon Outline:</strong><br/>${worship_data.outline_en || worship_data.outline || ''}</div>
-        `;
+                <div class="sermon-bible"><strong>Scripture Reference:</strong> ${bibleText}</div>
+                <div class="sermon-outline"><strong>Sermon Outline:</strong><br/>${sermon.outline || ''}</div>
+            `;
+        }).join('');
         $('#sermon-data_card').html(cardHtml);
     }
 

@@ -134,22 +134,21 @@ span.chunk:before {
 
     <div id="summary_container" class="summary_container">
         <h3>{{ w.date }} 敬拜筆記 (Worship Notes)</h3>
-
-        <div class="card-row">
-            <p>
-                <b>English</b><br/>
-                <b>Title:</b> {{ w.title_en or '' }}<br/>
-                <b>Speaker:</b> {{ w.speaker_en or '' }}<br/>
-                <b>Bible:</b> <span id="bible_verse_en">{{ w.bible_en or '' }}</span><br/>
-                <b>Outline:</b> {{ w.outline_en or '' }}<br/>
-                <br/>
-                <b>Chinese</b><br/>
-                <b>Title:</b> {{ w.title_zh or '' }}<br/>
-                <b>Speaker:</b> {{ w.speaker_zh or '' }}<br/>
-                <b>Bible:</b> <span id="bible_verse_zh">{{ w.bible_zh or '' }}</span><br/>
-                <b>Outline:</b> {{ w.outline_zh or '' }}
-            </p>
-        </div>
+        {% set sermon_langs = [('zh', '中'), ('zh-TW', '台'), ('en', 'EN')] %}
+        {% for lang_key, label in sermon_langs %}
+            {% set sermon = w.sermons[lang_key] if w.sermons and w.sermons[lang_key] else {} %}
+            {% if sermon.title or sermon.speaker or sermon.bible or sermon.outline %}
+                <div class="card-row">
+                    <p>
+                        <b>{{ label }}</b><br/>
+                        <b>Title:</b> {{ sermon.title or '' }}<br/>
+                        <b>Speaker:</b> {{ sermon.speaker or '' }}<br/>
+                        <b>Bible:</b> <span id="bible_verse_{{ lang_key }}">{{ sermon.bible or '' }}</span><br/>
+                        <b>Outline:</b> {{ sermon.outline or '' }}
+                    </p>
+                </div>
+            {% endif %}
+        {% endfor %}
 
         <div class="card-row">
             <p>
@@ -197,8 +196,8 @@ span.chunk:before {
     const sharp = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
     const flat = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"];
 
-    const worshipData = {{ songs|tojson }};
-    const worshipInfo = {{ w|tojson }};
+    const worshipData = {{ songs|tojson|safe }};
+    const worshipInfo = {{ w|tojson|safe }};
     const initialTab = '{{ tab|safe }}' || 'view';
     const song_id = worshipData.map(o=> o.id);
 

@@ -155,18 +155,21 @@
                 <div class="card-front">
                     <h3>{{ w.date }}</h3>
                     {% if w.worship %}
+                        {% set sermon_order = w.worship.display_order or ['zh', 'en'] %}
                         <div class="sermon-preview-container">
                             {% if w.worship.is_joint %}
                                 <div class="joint-badge">Joint</div>
                             {% endif %}
-                            <div class="sermon-preview-block">
-                                <b>中</b>: {{ w.worship.title_zh or '' }}<br/>
-                                <small>{{ w.worship.speaker_zh or '' }}</small>
-                            </div>
-                            <div class="sermon-preview-block">
-                                <b>EN</b>: {{ w.worship.title_en or '' }}<br/>
-                                <small>{{ w.worship.speaker_en or '' }}</small>
-                            </div>
+                            {% for lang_key in sermon_order %}
+                                {% set sermon_variant = w.worship.sermons[lang_key] if w.worship.sermons and w.worship.sermons[lang_key] else {} %}
+                                {% if sermon_variant.title or sermon_variant.speaker or sermon_variant.bible or sermon_variant.outline %}
+                                    {% set label = '中' if lang_key == 'zh' else '台' if lang_key == 'zh-TW' else 'EN' %}
+                                    <div class="sermon-preview-block">
+                                        <b>{{ label }}</b>: {{ sermon_variant.title or '' }}<br/>
+                                        <small>{{ sermon_variant.speaker or '' }}</small>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
                             <div>Notes: {{ (w.worship.notes or '')|string|truncate(100) }}</div>
                         </div>
                     {% endif %}
@@ -210,7 +213,7 @@ let inst;
 let marked;
 let worship_id = -1;
 let activeCard = null;
-let sundays = {{ sundays|safe }};
+let sundays = {{ sundays|tojson|safe }};
 
     function pop_role(name) {
         for (i in taken_role) {
@@ -345,55 +348,121 @@ let sundays = {{ sundays|safe }};
             .replace(/'/g, '&#39;');
     }
 
+    function getSermonVariant(sermons, langKey) {
+        return (sermons && sermons[langKey]) || {};
+    }
+
+    function getPreferredSermonKey(sermons, displayOrder) {
+        var order = displayOrder && displayOrder.length ? displayOrder : ['zh', 'en'];
+        for (var i = 0; i < order.length; i++) {
+            var langKey = order[i];
+            var variant = getSermonVariant(sermons, langKey);
+            if (variant && (variant.title || variant.speaker || variant.bible || variant.outline)) {
+                return langKey;
+            }
+        }
+        return 'zh';
+    }
+
+    function getLanguageLabel(langKey) {
+        if (langKey === 'zh-TW') return '台';
+        if (langKey === 'en') return 'EN';
+        return '中';
+    }
+
+    function buildSermonPreviewHtml(sermonData) {
+        var html = '';
+        if (sermonData.is_joint) {
+            html += '<div class="joint-badge">Joint</div>';
+        }
+        var displayOrder = sermonData.display_order && sermonData.display_order.length ? sermonData.display_order : ['zh', 'en'];
+        displayOrder.forEach(function(langKey) {
+            var langVariant = getSermonVariant(sermonData.sermons, langKey);
+            if (langVariant.title || langVariant.speaker || langVariant.bible || langVariant.outline) {
+                html += '<div class="sermon-preview-block"><b>' + getLanguageLabel(langKey) + '</b>: ' + escapeHtml(langVariant.title || '') + '<br/><small>' + escapeHtml(langVariant.speaker || '') + '</small></div>';
+            }
+        });
+        html += '<div>Notes: ' + escapeHtml(sermonData.notes || '') + '</div>';
+        return html;
+    }
+
+    function buildSermonEditorHtml(sermonData, selectedLang, sermonLangs) {
+        var html = '';
+        html += '<div style="display:flex;flex-wrap:wrap;gap:12px;">';
+        sermonData.display_order.forEach(function(langKey) {
+            var langVariant = getSermonVariant(sermonData.sermons, langKey);
+            html += '<div style="flex:1 1 240px;min-width:240px;border:1px solid #ddd;padding:10px;border-radius:6px;">';
+            html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">';
+            html += '<b>' + getLanguageLabel(langKey) + '</b>';
+            html += '<button type="button" class="sermon-remove-lang" data-lang-key="' + langKey + '" style="padding:4px 8px;">Remove</button>';
+            html += '</div>';
+            html += 'Title: <input type="text" data-lang-key="' + langKey + '" data-field="title" value="' + escapeHtml(langVariant.title || '') + '"><br/>';
+            html += 'Speaker: <input type="text" data-lang-key="' + langKey + '" data-field="speaker" value="' + escapeHtml(langVariant.speaker || '') + '"><br/>';
+            html += 'Bible: <input type="text" data-lang-key="' + langKey + '" data-field="bible" value="' + escapeHtml(langVariant.bible || '') + '"><br/>';
+            html += 'Outline:<br/><textarea rows="4" style="width:95%" data-lang-key="' + langKey + '" data-field="outline">' + escapeHtml(langVariant.outline || '') + '</textarea>';
+            html += '</div>';
+        });
+        html += '</div>';
+        html += '<div style="margin-top:10px;">';
+        html += '<label>Add language: <select id="sermon_add_language_select">';
+        sermonLangs.forEach(function(item) {
+            if (sermonData.display_order.indexOf(item.key) === -1) {
+                html += '<option value="' + item.key + '">' + item.display + '</option>';
+            }
+        });
+        html += '</select></label>';
+        html += ' <button type="button" id="sermon_add_language_btn">Add</button>';
+        html += '</div>';
+        return html;
+    }
+
     function get_sermon(id, card) {
         url = API_URL + 'sermon/' + id;
         $.when($.ajax(url)).then(function(response, textStatus, jqXHR) {
             if (response) {
                 var sermon_data = {
                     date: date,
-                    title_en: response.title_en || '',
-                    title_zh: response.title_zh || '',
-                    speaker_en: response.speaker_en || '',
-                    speaker_zh: response.speaker_zh || '',
-                    verse_en: response.bible_en || '',
-                    verse_zh: response.bible_zh || '',
-                    outline_en: response.outline_en || response.outline || '',
-                    outline_zh: response.outline_zh || response.outline || '',
                     notes: response.notes || '',
+                    sermons: {
+                        zh: {
+                            title: (response.sermons && response.sermons.zh && response.sermons.zh.title) || '',
+                            speaker: (response.sermons && response.sermons.zh && response.sermons.zh.speaker) || '',
+                            bible: (response.sermons && response.sermons.zh && response.sermons.zh.bible) || '',
+                            outline: (response.sermons && response.sermons.zh && response.sermons.zh.outline) || ''
+                        },
+                        'zh-TW': {
+                            title: (response.sermons && response.sermons['zh-TW'] && response.sermons['zh-TW'].title) || '',
+                            speaker: (response.sermons && response.sermons['zh-TW'] && response.sermons['zh-TW'].speaker) || '',
+                            bible: (response.sermons && response.sermons['zh-TW'] && response.sermons['zh-TW'].bible) || '',
+                            outline: (response.sermons && response.sermons['zh-TW'] && response.sermons['zh-TW'].outline) || ''
+                        },
+                        en: {
+                            title: (response.sermons && response.sermons.en && response.sermons.en.title) || '',
+                            speaker: (response.sermons && response.sermons.en && response.sermons.en.speaker) || '',
+                            bible: (response.sermons && response.sermons.en && response.sermons.en.bible) || '',
+                            outline: (response.sermons && response.sermons.en && response.sermons.en.outline) || ''
+                        }
+                    },
+                    display_order: (response.display_order && response.display_order.length ? response.display_order : ['zh', 'en']),
                     is_joint: !!response.is_joint
                 };
+                if (sermon_data.display_order.length === 0 || (sermon_data.display_order.length === 1 && sermon_data.display_order[0] === 'zh-TW')) {
+                    sermon_data.display_order = ['zh', 'en'];
+                }
+                var sermonLangs = [
+                    { key: 'zh', label: '中', display: 'Chinese' },
+                    { key: 'zh-TW', label: '台', display: 'Taiwanese' },
+                    { key: 'en', label: 'EN', display: 'English' }
+                ];
                 $("#popup").empty();
-                html = '<div style="min-width:560px;">';
+                html = '<div style="min-width:640px;">';
                 html += '<div style="margin-bottom:8px;">';
                 html += '<label><input type="checkbox" id="is_joint" ' + (response.is_joint ? 'checked' : '') + '> Joint sermon</label>';
                 html += '</div>';
-                html += '<div style="display:flex;gap:12px;flex-wrap:wrap;">';
-                html += '<div style="flex:1 1 220px;min-width:220px;border:1px solid #ddd;padding:10px;border-radius:6px;">';
-                html += '<div><b>Chinese</b></div>';
-                html += 'Title: <input type="text" id="title_zh" value="' + escapeHtml(response.title_zh || '') + '"><br/>';
-                html += 'Speaker: <input type="text" id="speaker_zh" value="' + escapeHtml(response.speaker_zh || '') + '"><br/>';
-                html += 'Bible: <input type="text" id="verse_zh" value="' + escapeHtml(response.bible_zh || '') + '"><br/>';
-                html += '</div>';
-                html += '<div style="flex:1 1 220px;min-width:220px;border:1px solid #ddd;padding:10px;border-radius:6px;">';
-                html += '<div><b>English</b></div>';
-                html += 'Title: <input type="text" id="title_en" value="' + escapeHtml(response.title_en || '') + '"><br/>';
-                html += 'Speaker: <input type="text" id="speaker_en" value="' + escapeHtml(response.speaker_en || '') + '"><br/>';
-                html += 'Bible: <input type="text" id="verse_en" value="' + escapeHtml(response.bible_en || '') + '"><br/>';
-                html += '</div>';
-                html += '</div>';
-                html += '<div style="margin-top:10px;">';
-                html += '<div style="display:flex;gap:12px;flex-wrap:wrap;">';
-                html += '<div style="flex:1 1 220px;">';
-                html += '<div><b>Chinese Outline</b></div>';
-                html += '<textarea rows="4" style="width:95%" id="outline_zh">' + escapeHtml(response.outline_zh || response.outline || '') + '</textarea>';
-                html += '</div>';
-                html += '<div style="flex:1 1 220px;">';
-                html += '<div><b>English Outline</b></div>';
-                html += '<textarea rows="4" style="width:95%" id="outline_en">' + escapeHtml(response.outline_en || response.outline || '') + '</textarea>';
-                html += '</div>';
+                html += '<div id="sermon_language_editor" style="border:1px solid #ddd;padding:10px;border-radius:6px;">';
+                html += buildSermonEditorHtml(sermon_data, null, sermonLangs);
                 html += '</div>';
                 html += 'Notes<br/><textarea rows="3" cols="2" style="width:95%" id="notes">' + escapeHtml(response.notes || '') + '</textarea>';
-                html += '</div>';
                 html += '</div>';
                 $("#popup").append(html);
                 $("#popup").dialog({
@@ -416,12 +485,7 @@ let sundays = {{ sundays|safe }};
                                             if (card) {
                                                 var preview = $(card).find('.card-front .sermon-preview-container');
                                                 if (preview.length) {
-                                                    preview.html(
-                                                        (sermon_data.is_joint ? '<div class="joint-badge">Joint</div>' : '') +
-                                                        '<div class="sermon-preview-block"><b>中</b>: ' + escapeHtml(sermon_data.title_zh || '') + '<br/><small>' + escapeHtml(sermon_data.speaker_zh || '') + '</small></div>' +
-                                                        '<div class="sermon-preview-block"><b>EN</b>: ' + escapeHtml(sermon_data.title_en || '') + '<br/><small>' + escapeHtml(sermon_data.speaker_en || '') + '</small></div>' +
-                                                        '<div>Notes: ' + escapeHtml(sermon_data.notes || '') + '</div>'
-                                                    );
+                                                    preview.html(buildSermonPreviewHtml(sermon_data));
                                                 }
                                             }
                                             dialogElement.dialog("close");
@@ -437,13 +501,41 @@ let sundays = {{ sundays|safe }};
                     }]
                 });
                 $('#popup').on('input change', 'input, textarea', function() {
-                    if (this.id === 'notes' || this.id === 'outline_en' || this.id === 'outline_zh') {
-                        sermon_data[this.id] = $(this).val();
+                    if (this.id === 'notes') {
+                        sermon_data.notes = $(this).val();
                     } else if (this.id === 'is_joint') {
                         sermon_data.is_joint = $(this).is(':checked') ? 1 : 0;
-                    } else {
-                        sermon_data[this.id] = $(this).val();
+                    } else if ($(this).data('lang-key')) {
+                        var langKey = $(this).data('lang-key');
+                        var field = $(this).data('field');
+                        if (!sermon_data.sermons[langKey]) {
+                            sermon_data.sermons[langKey] = {};
+                        }
+                        sermon_data.sermons[langKey][field] = $(this).val();
                     }
+                });
+
+                $('#popup').on('click', '#sermon_add_language_btn', function() {
+                    var langKey = $('#sermon_add_language_select').val();
+                    if (!langKey || sermon_data.display_order.indexOf(langKey) !== -1) {
+                        return;
+                    }
+                    if (!sermon_data.sermons[langKey]) {
+                        sermon_data.sermons[langKey] = {};
+                    }
+                    var insertIndex = sermon_data.display_order.indexOf('en');
+                    if (insertIndex === -1) {
+                        insertIndex = sermon_data.display_order.length;
+                    }
+                    sermon_data.display_order.splice(insertIndex, 0, langKey);
+                    $('#sermon_language_editor').html(buildSermonEditorHtml(sermon_data, null, sermonLangs));
+                });
+
+                $('#popup').on('click', '.sermon-remove-lang', function() {
+                    var langKey = $(this).data('lang-key');
+                    sermon_data.display_order = sermon_data.display_order.filter(function(item) { return item !== langKey; });
+                    delete sermon_data.sermons[langKey];
+                    $('#sermon_language_editor').html(buildSermonEditorHtml(sermon_data, null, sermonLangs));
                 });
             }
         });
