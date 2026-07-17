@@ -263,6 +263,7 @@
 			                o_fragment = origin_.splice(0, fragment).join('<br/>')
 			                r_fragment = region_.splice(0, fragment).join('<br/>')
 				            let sub_section = document.createElement('section');
+                            sub_section.classList.add('top-align');
 				            sub_section.append(create_view(data.type, o_fragment, r_fragment, s_name));
       			            sub_section.setAttribute('order', j);
       			            section.append(sub_section);
