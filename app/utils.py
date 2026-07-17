@@ -657,20 +657,9 @@ def _normalize_sermon_lang(lang):
 
 
 def _get_sermon_variants_for_date(date):
+    """Maintains backward compatibility for single-date lookups."""
     rows = dB.run_para('select lang, title, speaker, bible, outline, is_joint from sermon where date = ? order by lang', [date])
-    variants = {lang: SermonVariant(lang=lang) for lang in ['zh', 'zh-TW', 'en']}
-    for row in rows:
-        lang = _normalize_sermon_lang(row[0])
-        variants[lang] = SermonVariant(
-            lang=lang,
-            title=row[1] if row[1] is not None else '',
-            speaker=row[2] if row[2] is not None else '',
-            bible=row[3] if row[3] is not None else '',
-            outline=row[4] if row[4] is not None else '',
-            is_joint=bool(row[5]) if row[5] is not None else False,
-        )
-
-    return variants
+    return _build_sermon_variants_from_rows(rows)
 
 
 def _get_preferred_sermon_variant(variants):
@@ -707,6 +696,20 @@ def _build_sermon_payload(date, notes, variants):
     }
     return payload
 
+def _build_sermon_variants_from_rows(rows):
+    """Helper function to build a variants dictionary from raw database rows."""
+    variants = {lang: SermonVariant(lang=lang) for lang in ['zh', 'zh-TW', 'en']}
+    for row in rows:
+        lang = _normalize_sermon_lang(row[0])
+        variants[lang] = SermonVariant(
+            lang=lang,
+            title=row[1] if row[1] is not None else '',
+            speaker=row[2] if row[2] is not None else '',
+            bible=row[3] if row[3] is not None else '',
+            outline=row[4] if row[4] is not None else '',
+            is_joint=bool(row[5]) if row[5] is not None else False,
+        )
+    return variants
 
 def update_sermon(data):
     w_date = data["date"]
@@ -813,6 +816,36 @@ def worship_list(id=None):
             order by w.scheduled_date, it.instrument_id
         """
         result = dB.run(sql)
+
+    # --- N+1 FIX: Bulk fetch all sermons at once ---
+    unique_dates = list(set([r[1] for r in result if r[1]]))
+    bulk_sermons = {}
+    
+    if unique_dates:
+        sermon_rows = []
+        # Chunk into groups of 900 to avoid SQLite limits on max parameters
+        chunk_size = 900
+        for i in range(0, len(unique_dates), chunk_size):
+            chunk = unique_dates[i:i + chunk_size]
+            placeholders = ','.join(['?'] * len(chunk))
+            sermon_sql = f'select date, lang, title, speaker, bible, outline, is_joint from sermon where date in ({placeholders})'
+            sermon_rows.extend(dB.run_para(sermon_sql, chunk))
+
+        # Group raw rows by date in memory
+        grouped_rows = {}
+        for row in sermon_rows:
+            s_date = row[0]
+            if s_date not in grouped_rows:
+                grouped_rows[s_date] = []
+            # Slice the row so it matches what `_build_sermon_variants_from_rows` expects (ignoring the date column)
+            grouped_rows[s_date].append(row[1:])
+
+        # Build variants for all dates
+        for d in unique_dates:
+            bulk_sermons[d] = _build_sermon_variants_from_rows(grouped_rows.get(d, []))
+
+    # --- End N+1 Fix ---
+
     worship = []
     for r in result:
         date = r[1] if r[1] else ''
@@ -820,8 +853,10 @@ def worship_list(id=None):
         if a and (r[4] or r[5]):
             a['content'].append({'user_name': r[4] if r[4] else '', 'role': r[5] if r[5] else ''})
         else:
-            variants = _get_sermon_variants_for_date(date)
+            # Look up the sermons in memory instead of hitting the database
+            variants = bulk_sermons.get(date, _build_sermon_variants_from_rows([]))
             sermon_payload = _build_sermon_payload(date, r[3] if r[3] else '', variants)
+            
             worship.append({
                 'worship_id': r[2],
                 'date': date,
