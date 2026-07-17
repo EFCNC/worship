@@ -87,10 +87,14 @@
     }
 
     function move_top(para) {
-        scrollTo = $('div[class="inner present"]');
-        base = $('.preview').offset().top;
-        $('.preview').scrollTop(base);
-        $('.preview').scrollTop($(scrollTo).offset().top - base);
+        let scrollTo = $('div.inner.present'); 
+        let preview = $('.preview');
+
+        if (scrollTo.length > 0 && preview.length > 0) {
+            let base = preview.offset().top;
+            preview.scrollTop(base);
+            preview.scrollTop(scrollTo.offset().top - base);
+        }
     }
 
     function save_slides() {
