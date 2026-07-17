@@ -12,7 +12,7 @@
     background: #fdfdfd;
     border: 1px solid #e0e0e0;
     border-radius: 8px;
-    padding: 0px 15px;
+    padding: 15px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.04);
     margin: 15px auto;
     box-sizing: border-box;
@@ -127,13 +127,37 @@ span.chunk:before {
     width: 100%;
     height: 100%;
 }
+
+/* Sermon Box */
+#summary_container h3 {
+    margin-top: 0;
+}
+.sermon-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 8px;
+    margin-bottom: 12px;
+}
+.sermon-title { margin: 0; font-size: 1.3em; color: #2c3e50; }
+.sermon-speaker { font-weight: 600; color: #7f8c8d; background: #eaeded; padding: 4px 8px; border-radius: 4px; font-size: 0.9em;}
+.sermon-bible { font-size: 1.05em; margin-bottom: 12px; }
+.sermon-outline { color: #34495e; line-height: 1.6; background: #f9f9f9; padding: 10px; margin-bottom: 12px; border-radius: 4px; border-left: 3px solid #bdc3c7; }
+
+/* Bible Link */
+.bible-link { color: #009698; text-decoration: none; font-weight: bold; margin-right: 6px; padding: 2px 6px; border: 1px solid #009698; border-radius: 4px; background: #f0fbfc; }
+.bible-link:hover { background: #009698; color: #fff; }
+
+
+
 </style>
 {% endblock %}
 
 {% block content %}
 
     <div id="summary_container" class="summary_container">
-        <h3>{{ w.date }} 敬拜筆記 (Worship Notes)</h3>
+        <!-- <h3>{{ w.date }} 敬拜筆記 (Worship Notes)</h3>
         {% set sermon_langs = [('zh', '中'), ('zh-TW', '台'), ('en', 'EN')] %}
         {% for lang_key, label in sermon_langs %}
             {% set sermon = w.sermons[lang_key] if w.sermons and w.sermons[lang_key] else {} %}
@@ -163,7 +187,7 @@ span.chunk:before {
                 <b>Worship Leader's Notes:</b><br/>
                 {{ w.notes }}
             </p>
-        </div>
+        </div> -->
 
 
     </div>
@@ -200,6 +224,77 @@ span.chunk:before {
     const worshipInfo = {{ w|tojson|safe }};
     const initialTab = '{{ tab|safe }}' || 'view';
     const song_id = worshipData.map(o=> o.id);
+
+    // Sermon Card Functions:
+    function get_sermon() {
+        function buildBibleLinks(bibleText) {
+            var bible = (bibleText || '').replace(/(、|;)/g, '，').split('，');
+            var b = '';
+            for (var i=0; i<bible.length; i++) {
+                var verse = bible[i].trim();
+                if (verse !== "") {
+                    var escapedVerse = verse.replace(/'/g, "\\'").replace(/"/g, '\\"');
+                    b += ' <a class="bible-link" href="javascript:void(0)" onclick="get_bible(show_verse, \'' + escapedVerse + '\'); return false;">' + verse + '</a>';
+                }
+            }
+            return b;
+        }
+
+        var sermonVariants = worshipInfo.sermons || {};
+        var sermonLangs = [
+            { key: 'zh', label: '中文', shortLabel: '中' },
+            { key: 'zh-TW', label: '台語', shortLabel: '台' },
+            { key: 'en', label: 'English', shortLabel: 'EN' }
+        ];
+
+        var titleHtml = "<h3>{{ w.date }} 敬拜筆記 (Worship Notes)</h3>";
+
+        var cardHtml = sermonLangs.filter(function(item) {
+            var sermon = sermonVariants[item.key] || {};
+            return sermon.title || sermon.speaker || sermon.bible || sermon.outline;
+        }).map(function(item) {
+            var sermon = sermonVariants[item.key] || {};
+            var bibleText = buildBibleLinks(sermon.bible || '');
+            return `
+                <div class="sermon-header">
+                    <h4 class="sermon-title"><strong>${item.label}:</strong> ${sermon.title || ''}</h4>
+                    <span class="sermon-speaker">By: ${sermon.speaker || ''}</span>
+                </div>
+                <div class="sermon-bible"><strong>Scripture Reference:</strong> ${bibleText}</div>
+                <div class="sermon-outline"><strong>Sermon Outline:</strong><br/>${sermon.outline || ''}</div>
+            `;
+        }).join('');
+
+        var teamHtml = '';
+        if (worshipInfo.content && worshipInfo.content.length > 0) {
+            var teamRows = worshipInfo.content.map(function(team) {
+                return `<strong>${team.role}:</strong> ${team.user_name}`;
+            }).join('<br/>');
+
+            teamHtml = `
+                <div class="card-row" style="border-top: 1px solid #eee; padding-top: 12px;">
+                    <p>${teamRows}</p>
+                </div>
+            `;
+        }
+
+        var notesHtml = '';
+        if (worshipInfo.notes) {
+            notesHtml = `
+                <div class="card-row" style="border-top: 1px solid #eee; padding-top: 12px;">
+                    <p>
+                        <strong>Worship Leader's Notes:</strong><br/>
+                        ${worshipInfo.notes.replace(/\n/g, '<br/>')}
+                    </p>
+                </div>
+            `;
+        }
+
+        $('#summary_container').html(titleHtml + cardHtml + teamHtml + notesHtml);
+    }
+
+
+
 
     // --- FUNCTIONS ---
     /**
@@ -345,32 +440,10 @@ span.chunk:before {
     window.onload = () => {
         if (worshipInfo && worshipInfo.date) {
             document.title = `${worshipInfo.date} Worship Notes - Worship Manager`;
-
-            // Bible Link generation logic
-            ['bible_verse_en', 'bible_verse_zh'].forEach((id) => {
-                const bibleContainer = document.getElementById(id);
-                if (!bibleContainer) {
-                    return;
-                }
-                const bibleText = (bibleContainer.textContent || '').trim();
-                if (!bibleText) {
-                    return;
-                }
-                const bibleVerses = bibleText.replace(/(、|;)/g, '，').split('，').map(v => v.trim()).filter(Boolean);
-                bibleContainer.innerHTML = '';
-
-                bibleVerses.forEach((verse, index) => {
-                    if (index > 0) {
-                        bibleContainer.appendChild(document.createTextNode(' '));
-                    }
-                    const link = document.createElement('a');
-                    link.href = 'javascript:void(0)';
-                    link.textContent = verse;
-                    link.onclick = () => get_bible(show_verse, verse);
-                    bibleContainer.appendChild(link);
-                });
-            });
         }
+
+        get_sermon();
+
         // Load initial view
         loadTab(initialTab);
     };

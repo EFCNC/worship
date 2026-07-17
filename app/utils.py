@@ -817,7 +817,6 @@ def worship_list(id=None):
         """
         result = dB.run(sql)
 
-    # --- N+1 FIX: Bulk fetch all sermons at once ---
     unique_dates = list(set([r[1] for r in result if r[1]]))
     bulk_sermons = {}
     
@@ -843,8 +842,6 @@ def worship_list(id=None):
         # Build variants for all dates
         for d in unique_dates:
             bulk_sermons[d] = _build_sermon_variants_from_rows(grouped_rows.get(d, []))
-
-    # --- End N+1 Fix ---
 
     worship = []
     for r in result:
