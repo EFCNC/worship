@@ -55,7 +55,19 @@ def search_song_efcnc(keyword):
         "cols": db["search"]["columns"]
     }
     result = dB.search(para)
-    titles = [{'id': x[0], 'title': x[1], 'lang': x[2] if x[2] else '', 'lang_2': x[3] if x[3] else '', 'key': x[4] if x[4] else '', 'video': x[5] if x[5] else '', 'score': x[6] if x[6] else '', 'abc': x[0] if x[7] else ''} for x in result]
+    
+    # Split the media strings into arrays so the frontend get_links() function can iterate over them
+    titles = [{
+        'id': x[0], 
+        'title': x[1], 
+        'lang': x[2] if x[2] else '', 
+        'lang_2': x[3] if x[3] else '', 
+        'key': x[4] if x[4] else '', 
+        'video': x[5].split(';;;') if x[5] else [], 
+        'score': x[6].split(';;;') if x[6] else [], 
+        'abc': x[7].split(';;;') if x[7] else []
+    } for x in result]
+    
     return titles
 
 def bible_books(translation):
@@ -344,16 +356,31 @@ def get_songs_para(days, count=None):
             content.append({'count': r[0], 'title': r[1], 'id': r[2]})
         return content
     else:
-        sql = "select p.scheduled_date, s.title, s.song_id, s.lang, s.lang_2, s.song_key from presentation p inner join songs s on s.song_id = p.song_id where julianday('now') - julianday(p.scheduled_date) <= {} order by p.scheduled_date desc, s.title".format(days)
+        # Changed delimiter from '||' to ';;;' to avoid breaking ABC notation
+        sql = """select p.scheduled_date, s.title, s.song_id, s.lang, s.lang_2, s.song_key,
+                 (select group_concat(link, ';;;') from media m where m.song_id=s.song_id and m_type='video') as video,
+                 (select group_concat(link, ';;;') from media m where m.song_id=s.song_id and m_type='score') as score,
+                 (select group_concat(abc, ';;;') from media m where m.song_id=s.song_id and m_type='abc') as abc 
+                 from presentation p inner join songs s on s.song_id = p.song_id 
+                 where julianday('now') - julianday(p.scheduled_date) <= {} 
+                 order by p.scheduled_date desc, s.title""".format(days)
         result = dB.run(sql)
         content = {}
-        temp = []
         for r in result:
-            if r[0] in content.keys():
-                temp.append({'id': r[2], 'title': r[1], 'lang': r[3], 'lang_2': r[4] if r[4] else '', 'key': r[5]})
-            else:
-                content[r[0]] = temp
-                temp = []
+            song_data = {
+                'id': r[2], 
+                'title': r[1], 
+                'lang': r[3], 
+                'lang_2': r[4] if r[4] else '', 
+                'key': r[5],
+                'video': r[6].split(';;;') if r[6] else [],
+                'score': r[7].split(';;;') if r[7] else [],
+                'abc': r[8].split(';;;') if r[8] else []
+            }
+            if r[0] not in content:
+                content[r[0]] = []
+            content[r[0]].append(song_data)
+            
         return content
 
 def get_songs(ids=None):
@@ -365,18 +392,34 @@ def get_songs(ids=None):
     else:
         sql += ' order by s.song_id desc'
         result = dB.run(sql)
+    
     songs = []
     for r in result:
         temp = next((x for x in songs if x['title'] == r[0]), None)
         if temp:
-            if r[13] == 'video':
+            # Append subsequent media entries if the song object already exists
+            if r[13] == 'video' and r[12]:
                 temp['video'].append(r[12])
-            elif r[13] == 'score':
+            elif r[13] == 'score' and r[12]:
                 temp['score'].append(r[12])
-            elif r[13] == 'abc':
-                temp['abc'] = r[15]
+            elif r[13] == 'abc' and r[14]:
+                temp['abc'].append(r[14])
         else:
-            songs.append({'type': 'song', 'title': r[0], 'author': r[1] if r[1] else '', 'lang': r[2] if r[2] else '', 'lang_2': r[3] if r[3] else '', 'key': r[4] if r[4] else '', 'sequence': r[5] if r[5] else '', 'bible': r[6] if r[6] else '', 'lyricist': r[7] if r[7] else '', 'book': r[8] if r[8] else '', 'copyright': r[9] if r[9] else '', 'ccli': r[10] if r[10] else '', 'lyrics_raw': r[11], 'content': Parser.parse_lyrics(r[11], r[5]), 'video': [r[12]] if r[13] == 'video' else [], 'score': [r[12]] if r[13] == 'score' else [], 'abc': r[15] if r[13] == 'abc' and r[14] else '', 'id': r[15], 'notes': '', 'transpose': ['0'], 'alt_sequence': r[5] if r[5] else ''})
+            # Initialize arrays safely on creation
+            songs.append({
+                'type': 'song', 'title': r[0], 'author': r[1] if r[1] else '', 
+                'lang': r[2] if r[2] else '', 'lang_2': r[3] if r[3] else '', 
+                'key': r[4] if r[4] else '', 'sequence': r[5] if r[5] else '', 
+                'bible': r[6] if r[6] else '', 'lyricist': r[7] if r[7] else '', 
+                'book': r[8] if r[8] else '', 'copyright': r[9] if r[9] else '', 
+                'ccli': r[10] if r[10] else '', 'lyrics_raw': r[11], 
+                'content': Parser.parse_lyrics(r[11], r[5]), 
+                'video': [r[12]] if r[13] == 'video' and r[12] else [], 
+                'score': [r[12]] if r[13] == 'score' and r[12] else [], 
+                'abc': [r[14]] if r[13] == 'abc' and r[14] else [], 
+                'id': r[15], 'notes': '', 'transpose': ['0'], 
+                'alt_sequence': r[5] if r[5] else ''
+            })
     return songs
 
 def get_song_sheet(ids=None):

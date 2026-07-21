@@ -44,25 +44,9 @@ var API_URL = '/API/';
                 html += '<div class="song-details-row">';
                 html += '<span>Current Key: <select class="key" name="' + data.transpose + '" init="' + data.song_key + '"><option>' + data.song_key + '</option></select></span>';
                 html += '<span>&nbsp;Original Key: ' + data.song_key + '</span>';
-                
-                // This forEach stuff could be removed if we decided to make every sheet redirect 
-                // to the sheets page as opposed to the specific link of the sheet page.
-                if (data.score && data.score.length > 0) {
-                    data.score.forEach(function(link) {
-                        html += '<a href="' + link + '" target="new"><i style="font-size:24px" class="fa" title="Sheet Music">&#xf0f6;</i></a>';
-                    });
-                }
-                if (data.abc && data.abc.length > 0) {
-                    // For interacted sheets, we just need the route to the ID. One icon is sufficient.
-                    html += '<a href="/worship/sheets/' + data.id + '" target="new"><i class="fa" style="font-size:24px" title="Interacted Sheet Music">&#xf1c7;</i></a>';
-                }
-                if (data.video && data.video.length > 0) {
-                    data.video.forEach(function(link) {
-                        html += '<a href="' + link + '" target="new"><i class="fa fa-play-circle" style="font-size:24px" title="Youtube Video"></i></a>';
-                    });
-                }
+                html += get_links(data.video, data.score, data.abc, data.id);
                 html += '</div>';
-
+                
                 // Row 3: Notes
                 html += '<div class="song-notes-row">';
                 html += '<p>Notes: <textarea name="song_notes" index="' + index + '" rows="5" cols="60">' + data.notes + '</textarea></p>';
@@ -442,21 +426,37 @@ var API_URL = '/API/';
 
     // Return media links
     function get_links(video, score, abc, id) {
-        var links = '';
-        
-        if (Array.isArray(video) && video.length > 0) {
-            video.forEach(v => links += "<a href='" + v + "' target='new'><i class='fa fa-play-circle' style='font-size:24px' title='Youtube Video'></i></a>");
-        }
-        
+        let html = '';
+
         if (Array.isArray(score) && score.length > 0) {
-            score.forEach(s => links += "<a href='" + s + "' target='new'><i style='font-size:24px' class='fa' title='Sheet Music'>&#xf0f6;</i></a>");
+            if (score.length === 1) {
+                html += `<a href="${score[0]}" target="_blank"><i style="font-size:24px" class="fa" title="Sheet Music">&#xf0f6;</i></a>`;
+            } else {
+                html += `<div class="media-dropdown">
+                    <span class="media-dropbtn"><i class="fa" style="font-size:24px" title="Sheet Music">&#xf0f6;</i><span class="badge">${score.length}</span></span>
+                    <div class="media-dropdown-content">`;
+                score.forEach((link, idx) => { html += `<a href="${link}" target="_blank">Sheet Music ${idx + 1}</a>`; });
+                html += `</div></div>`;
+            }
         }
-        
+
         if (Array.isArray(abc) && abc.length > 0 && id) {
-            links += "<a href='/worship/sheets/" + id + "' target='new'><i style='font-size:24px' class='fa' title='Interacted Sheet Music'>&#xf1c7;</i></a>";
+            html += `<a href="/worship/sheets/${id}" target="_blank"><i style="font-size:24px" class="fa" title="Interactive Sheet Music">&#xf1c7;</i></a>`;
+        }
+
+        if (Array.isArray(video) && video.length > 0) {
+            if (video.length === 1) {
+                html += `<a href="${video[0]}" target="_blank"><i class="fa fa-play-circle" style="font-size:24px" title="Youtube Video"></i></a>`;
+            } else {
+                html += `<div class="media-dropdown">
+                    <span class="media-dropbtn"><i class="fa fa-play-circle" style="font-size:24px" title="Youtube Videos"></i><span class="badge">${video.length}</span></span>
+                    <div class="media-dropdown-content">`;
+                video.forEach((link, idx) => { html += `<a href="${link}" target="_blank">Video ${idx + 1}</a>`; });
+                html += `</div></div>`;
+            }
         }
         
-        return links;
+        return html ? `<span class="media-icons-wrapper">${html}</span>` : '';
     }
 
     // Highlighted search keyword in the song title

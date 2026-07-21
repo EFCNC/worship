@@ -234,6 +234,90 @@ li {
 }
 
 /* =========================================
+   Media Icons & Dropdowns
+   ========================================= */
+.media-icons-wrapper {
+    display: inline-flex;
+    align-items: center;
+    gap: 15px; 
+    /* margin-left: 10px; */
+    vertical-align: middle;
+}
+
+.media-icons-wrapper > a,
+.media-icons-wrapper > .media-dropdown {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    text-decoration: none;
+    line-height: 1;
+}
+
+.media-icons-wrapper i {
+    font-size: 22px !important;
+    line-height: 1 !important;
+}
+
+.media-dropbtn {
+    cursor: pointer;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    color: #333;
+    padding-right: 6px; 
+}
+
+.media-dropbtn .badge {
+    background-color: #dc3545;
+    color: white;
+    border-radius: 10px;
+    padding: 1px 5px;
+    font-size: 10px;
+    position: absolute;
+    top: -4px;        
+    right: -2px;      
+    font-weight: bold;
+    line-height: 1;
+    box-shadow: 0 0 0 2px #ffffff;
+    z-index: 2;
+}
+
+.media-dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #fff;
+    min-width: 110px;
+    box-shadow: 0px 4px 12px rgba(0,0,0,0.15);
+    z-index: 100;
+    border-radius: 5px;
+    border: 1px solid #eee;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 5px 0;
+}
+
+.media-dropdown-content a {
+    color: #333;
+    padding: 8px 15px;
+    text-decoration: none;
+    display: block;
+    font-size: 13px;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.media-dropdown-content a:hover {
+    background-color: #f5f5f5;
+    color: #009698;
+}
+
+.media-dropdown:hover .media-dropdown-content {
+    display: block;
+}
+
+/* =========================================
    Badge Tag Things
    ========================================= */
 /* Key Tag */
@@ -426,12 +510,13 @@ li {
                                 <button type="button" class="icon-button insert_btn" title="Add Song"><i class="fa-solid fa-plus"></i></button>
                                 <span class="song_title"><b>${s1.title}</b></span>
                                 <span class="keynote">${s1.key}</span>
-                                ${lang_tag(s1.lang)} ${lang_tag(s1.lang_2)}
+                                ${lang_tag(s1.lang)} ${lang_tag(s1.lang_2)} ${get_links(s1.video, s1.score, s1.abc, s1.id)}
                             </div>`;
                     }
                 }
             }
             $('#left_content').append(my_song_list);
+            console.log(data)
         });
 
         get_songs().done(function(data) {
