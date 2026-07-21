@@ -409,7 +409,7 @@ li {
                             <button type="button" class="icon-button insert_btn" title="Add Song"><i class="fa-solid fa-plus"></i></button>
                             <span class="song_title"><b>${s.title}</b></span>
                             <span class="keynote">${s.key}</span>
-                            ${lang_tag(s.lang)} ${lang_tag(s.lang_2)} ${get_links(s.video, s.score, s.abc)}
+                            ${lang_tag(s.lang)} ${lang_tag(s.lang_2)} ${get_links(s.video, s.score, s.abc, s.id)}
                         </div>`;
                 }
             $('#left_content').append(my_pinned_songs);
@@ -442,7 +442,7 @@ li {
                         <button type="button" class="icon-button insert_btn" title="Add Song"><i class="fa-solid fa-plus"></i></button>
                         <span class="song_title"><b>${s.title}</b></span>
                         <span class="keynote">${s.key}</span>
-                        ${lang_tag(s.lang)} ${lang_tag(s.lang_2)} ${get_links(s.video, s.score, s.abc)}
+                        ${lang_tag(s.lang)} ${lang_tag(s.lang_2)} ${get_links(s.video, s.score, s.abc, s.id)}
                     </div>`;
             }
             $('#left_content').append(my_new_songs);
@@ -900,8 +900,8 @@ li {
                         <button type="button" class="icon-button insert_btn" title="Add Song"><i class="fa-solid fa-plus"></i></button>
                         <span class="song_title"><b>${highlight_keyword(keyword, data['right'][i]['title'])}</b></span> 
                         <span class="keynote">${data['right'][i]['key']}</span> 
-                        ${lang_tag(data['right'][i]['lang'])} ${lang_tag(data['right'][i]['lang_2'])} 
-                        ${get_links(data['right'][i]['video'], data['right'][i]['score'], data['right'][i]['abc'])}
+                        ${lang_tag(data['right'][i]['lang'])} ${lang_tag(data['right'][i]['lang_2'])}
+                        ${get_links(data['right'][i]['video'], data['right'][i]['score'], data['right'][i]['abc'], data['right'][i]['id'])}
                     </div>`;
             }
 
@@ -969,6 +969,7 @@ li {
             get_song(id).done(function(data) {
                 if(songs_temp.find(o => o.title === data.title)) {
                     alert('"' + data.title + '"is already in the set!');
+                    stopLoading();
                     return false;
                 }
                 data['date'] = worship_data.date;

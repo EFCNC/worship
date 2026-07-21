@@ -186,8 +186,6 @@ def get_weekly_sheets(id):
 
     return render_template('worship/sheets.html', sheets=sheets)
 
-
-
 @app.route("/worship/schedule")
 def schedule():
 	now = datetime.now()
@@ -321,10 +319,6 @@ def assets():
 
 	return render_template('slides_assets.html', setting=setting, assets=assets, promote=promote)
 
-# @app.route("/people")
-# def people():
-# 	people = Utils.get_teams()
-# 	return render_template('people.html', people=people)
 
 # -------- Slides Pages ---------
 
@@ -411,7 +405,6 @@ def admin_calendar():
 def admin_report(id):
 	report, saved = Tools.get_report(id)
 	return render_template('admin/report_pdf.html', saved=saved, report=report, id=id)
-
 
 # --------- Other Pages ---------
 @app.route("/files")
