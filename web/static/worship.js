@@ -16,19 +16,14 @@ var API_URL = '/API/';
         }, 'slow');
     }
     
-    // UI for Adding song to song_set
-    function add_song_to_worship(worship_list) {
-        worship_list.empty();
-        var top_ul = document.createElement('ul');
-        top_ul.setAttribute('id', 'songs');
-        var i = 0;
-        for (data of songs_temp) {
-            var list = document.createElement('li');
-            list.setAttribute('class', 'ui-state-default');
-            list.setAttribute('name', data.id);
+    // New helper function to build a single song <li>
+    function generate_song_card(data, index) {
+        var list = document.createElement('li');
+        list.setAttribute('class', 'ui-state-default');
+        list.setAttribute('name', data.id);
 
-            if (data.type == 'song') {
-                var html = '<div class="song-content-wrapper">';
+        if (data.type == 'song') {
+            var html = '<div class="song-content-wrapper">';
 
                 // Row 1: Title, Metadata, Delete Button
                 html += '<div class="song-header-row">';
@@ -49,21 +44,12 @@ var API_URL = '/API/';
                 html += '<div class="song-details-row">';
                 html += '<span>Current Key: <select class="key" name="' + data.transpose + '" init="' + data.song_key + '"><option>' + data.song_key + '</option></select></span>';
                 html += '<span>&nbsp;Original Key: ' + data.song_key + '</span>';
-                
-                if (data.score) {
-                    html += '<a href="' + data.score + '" target="new"><i style="font-size:24px" class="fa" title="Sheet Music">&#xf0f6;</i></a>';
-                }
-                if (data.abc.length > 0) {
-                    html += '<a href="/worship/sheets/' + data.id + '" target="new"><i class="fa" style="font-size:24px" title="Interacted Sheet Music">&#xf1c7;</i></a>';
-                }
-                if (data.video) {
-                    html += '<a href="' + data.video + '" target="new"><i class="fa fa-play-circle" style="font-size:24px" title="Youtube Video"></i></a>';
-                }
+                html += get_links(data.video, data.score, data.abc, data.id);
                 html += '</div>';
-
+                
                 // Row 3: Notes
                 html += '<div class="song-notes-row">';
-                html += '<p>Notes: <textarea name="song_notes" index="' + i + '" rows="5" cols="60">' + data.notes + '</textarea></p>';
+                html += '<p>Notes: <textarea name="song_notes" index="' + index + '" rows="5" cols="60">' + data.notes + '</textarea></p>';
                 html += '</div>';
 
                 // Row 4: Sequence Container
@@ -110,11 +96,25 @@ var API_URL = '/API/';
                 
                 var sequenceContainer = list.querySelector('.sequence-container');
                 sequenceContainer.appendChild(ul);
-            }
-            else if (data.type == 'info') {
-                list.innerHTML = '<span class="infotitle" name="' + data.id + '" bible="' + data.bible + '">' + data.notes + '&nbsp;<button class="remove_btn" style="display:none"> - </button></span>';
-            }
-            top_ul.append(list)
+            
+            var sequenceContainer = list.querySelector('.sequence-container');
+            sequenceContainer.appendChild(ul);
+        }
+        else if (data.type == 'info') {
+            list.innerHTML = '<span class="infotitle" name="' + data.id + '" bible="' + data.bible + '">' + data.notes + '&nbsp;<button class="remove_btn" style="display:none"> - </button></span>';
+        }
+        
+        return list;
+    }
+
+    function add_song_to_worship(worship_list) {
+        worship_list.empty();
+        var top_ul = document.createElement('ul');
+        top_ul.setAttribute('id', 'songs');
+        var i = 0;
+        for (data of songs_temp) {
+            var list = generate_song_card(data, i);
+            top_ul.append(list);
             i++;
         }
         worship_list.append(top_ul);
@@ -315,11 +315,54 @@ var API_URL = '/API/';
                             console.log('tempSubmit', tempSubmit);
                             if (num == 0) {   // When popup is for edit
                                 var click_url = API_URL + 'song/' + id;
-                                submit_song(click_url, JSON.stringify(tempSubmit)).done(function(response) {
-                                    console.log(response);
-                                });
-                                $("#dialog").dialog("close");
-                                location.reload();
+                                
+                                // Helper function for the refresh logic
+                                function updateCardAfterSave() {
+                                    $("#dialog").dialog("close");
+
+                                    // Fetch the newly saved song data from database
+                                    get_song(id).done(function(updated_song_data) {
+                                        
+                                        let songIndex = songs_temp.findIndex(s => s.id == id);
+                                        
+                                        if (songIndex > -1) {
+                                            let old_song = songs_temp[songIndex];
+                                            
+                                            // Preserve the worship-specific data
+                                            updated_song_data.transpose = old_song.transpose;
+                                            updated_song_data.notes = old_song.notes;
+                                            updated_song_data.alt_sequence = old_song.alt_sequence;
+                                            updated_song_data.date = old_song.date;
+
+                                            // Update songs_temp
+                                            songs_temp[songIndex] = updated_song_data;
+
+                                            // Generate the HTML for JUST this specific card
+                                            let new_card_html = generate_song_card(updated_song_data, songIndex);
+                                            
+                                            $('#worship li[name="' + id + '"]').replaceWith(new_card_html);
+
+                                            init();
+                                        }
+                                    });
+                                }
+
+                                submit_song(click_url, JSON.stringify(tempSubmit))
+                                    .done(function(response) {
+                                        console.log("Saved successfully with JSON response:", response);
+                                        updateCardAfterSave();
+                                    })
+                                    .fail(function(jqXHR, textStatus, errorThrown) {
+                                        // Check if it actually succeeded but just failed the JSON parse
+                                        if (jqXHR.status === 200) {
+                                            console.log("Saved successfully (plain text response).");
+                                            updateCardAfterSave();
+                                        } else {
+                                            console.error("AJAX Error:", textStatus, errorThrown);
+                                            alert("Failed to save changes. Please try again.");
+                                        }
+                                    });
+                                    
                                 return false;
                             }
 
@@ -382,12 +425,38 @@ var API_URL = '/API/';
     }
 
     // Return media links
-    function get_links(video, score, id) {
-        var links = '';
-        links += video ? "<a href='" + video + "' target='new'><i class='fa fa-play-circle' style='font-size:24px' title='Youtube Video'></i></a>" : "";
-        links += score ? "<a href='" + score + "' target='new'><i style='font-size:24px' class='fa' title='Sheet Music'>&#xf0f6;</i></a>" : "";
-        links += id? "<a href='/worship/sheets/" + id + "' target='new'><i style='font-size:24px' class='fa' title='Interacted Sheet Music'>&#xf1c7;</i></a>" : "";
-        return links;
+    function get_links(video, score, abc, id) {
+        let html = '';
+
+        if (Array.isArray(score) && score.length > 0) {
+            if (score.length === 1) {
+                html += `<a href="${score[0]}" target="_blank"><i style="font-size:24px" class="fa" title="Sheet Music">&#xf0f6;</i></a>`;
+            } else {
+                html += `<div class="media-dropdown">
+                    <span class="media-dropbtn"><i class="fa" style="font-size:24px" title="Sheet Music">&#xf0f6;</i><span class="badge">${score.length}</span></span>
+                    <div class="media-dropdown-content">`;
+                score.forEach((link, idx) => { html += `<a href="${link}" target="_blank">Sheet Music ${idx + 1}</a>`; });
+                html += `</div></div>`;
+            }
+        }
+
+        if (Array.isArray(abc) && abc.length > 0 && id) {
+            html += `<a href="/worship/sheets/${id}" target="_blank"><i style="font-size:24px" class="fa" title="Interactive Sheet Music">&#xf1c7;</i></a>`;
+        }
+
+        if (Array.isArray(video) && video.length > 0) {
+            if (video.length === 1) {
+                html += `<a href="${video[0]}" target="_blank"><i class="fa fa-play-circle" style="font-size:24px" title="Youtube Video"></i></a>`;
+            } else {
+                html += `<div class="media-dropdown">
+                    <span class="media-dropbtn"><i class="fa fa-play-circle" style="font-size:24px" title="Youtube Videos"></i><span class="badge">${video.length}</span></span>
+                    <div class="media-dropdown-content">`;
+                video.forEach((link, idx) => { html += `<a href="${link}" target="_blank">Video ${idx + 1}</a>`; });
+                html += `</div></div>`;
+            }
+        }
+        
+        return html ? `<span class="media-icons-wrapper">${html}</span>` : '';
     }
 
     // Highlighted search keyword in the song title

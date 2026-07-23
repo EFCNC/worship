@@ -1,4 +1,5 @@
 import sqlite3
+from dataclasses import dataclass
 from datetime import date, datetime
 from time import strftime
 
@@ -7,6 +8,11 @@ import json
 import os
 import re
 #import opencc
+try:
+    import hanzidentifier
+except ImportError:  # pragma: no cover - optional dependency
+    hanzidentifier = None
+
 from app import db as dB
 from app import parser as Parser
 
@@ -49,7 +55,19 @@ def search_song_efcnc(keyword):
         "cols": db["search"]["columns"]
     }
     result = dB.search(para)
-    titles = [{'id': x[0], 'title': x[1], 'lang': x[2] if x[2] else '', 'lang_2': x[3] if x[3] else '', 'key': x[4] if x[4] else '', 'video': x[5] if x[5] else '', 'score': x[6] if x[6] else '', 'abc': x[0] if x[7] else ''} for x in result]
+    
+    # Split the media strings into arrays so the frontend get_links() function can iterate over them
+    titles = [{
+        'id': x[0], 
+        'title': x[1], 
+        'lang': x[2] if x[2] else '', 
+        'lang_2': x[3] if x[3] else '', 
+        'key': x[4] if x[4] else '', 
+        'video': x[5].split(';;;') if x[5] else [], 
+        'score': x[6].split(';;;') if x[6] else [], 
+        'abc': x[7].split(';;;') if x[7] else []
+    } for x in result]
+    
     return titles
 
 def bible_books(translation):
@@ -69,7 +87,7 @@ def bible_book():
     return content.json()
 
 def search_bible(keyword, offset, range=None):
-    if hanzidentifier.has_chinese(keyword):
+    if hanzidentifier is not None and hanzidentifier.has_chinese(keyword):
         version = conf["bibleAPI"]["version"]["zh"][0]["key"]
     else:
         version = conf["bibleAPI"]["version"]["en"][0]["key"]
@@ -338,16 +356,31 @@ def get_songs_para(days, count=None):
             content.append({'count': r[0], 'title': r[1], 'id': r[2]})
         return content
     else:
-        sql = "select p.scheduled_date, s.title, s.song_id, s.lang, s.lang_2, s.song_key from presentation p inner join songs s on s.song_id = p.song_id where julianday('now') - julianday(p.scheduled_date) <= {} order by p.scheduled_date desc, s.title".format(days)
+        # Changed delimiter from '||' to ';;;' to avoid breaking ABC notation
+        sql = """select p.scheduled_date, s.title, s.song_id, s.lang, s.lang_2, s.song_key,
+                 (select group_concat(link, ';;;') from media m where m.song_id=s.song_id and m_type='video') as video,
+                 (select group_concat(link, ';;;') from media m where m.song_id=s.song_id and m_type='score') as score,
+                 (select group_concat(abc, ';;;') from media m where m.song_id=s.song_id and m_type='abc') as abc 
+                 from presentation p inner join songs s on s.song_id = p.song_id 
+                 where julianday('now') - julianday(p.scheduled_date) <= {} 
+                 order by p.scheduled_date desc, s.title""".format(days)
         result = dB.run(sql)
         content = {}
-        temp = []
         for r in result:
-            if r[0] in content.keys():
-                temp.append({'id': r[2], 'title': r[1], 'lang': r[3], 'lang_2': r[4] if r[4] else '', 'key': r[5]})
-            else:
-                content[r[0]] = temp
-                temp = []
+            song_data = {
+                'id': r[2], 
+                'title': r[1], 
+                'lang': r[3], 
+                'lang_2': r[4] if r[4] else '', 
+                'key': r[5],
+                'video': r[6].split(';;;') if r[6] else [],
+                'score': r[7].split(';;;') if r[7] else [],
+                'abc': r[8].split(';;;') if r[8] else []
+            }
+            if r[0] not in content:
+                content[r[0]] = []
+            content[r[0]].append(song_data)
+            
         return content
 
 def get_songs(ids=None):
@@ -359,18 +392,34 @@ def get_songs(ids=None):
     else:
         sql += ' order by s.song_id desc'
         result = dB.run(sql)
+    
     songs = []
     for r in result:
         temp = next((x for x in songs if x['title'] == r[0]), None)
         if temp:
-            if r[13] == 'video':
+            # Append subsequent media entries if the song object already exists
+            if r[13] == 'video' and r[12]:
                 temp['video'].append(r[12])
-            elif r[13] == 'score':
+            elif r[13] == 'score' and r[12]:
                 temp['score'].append(r[12])
-            elif r[13] == 'abc':
-                temp['abc'] = r[15]
+            elif r[13] == 'abc' and r[14]:
+                temp['abc'].append(r[14])
         else:
-            songs.append({'type': 'song', 'title': r[0], 'author': r[1] if r[1] else '', 'lang': r[2] if r[2] else '', 'lang_2': r[3] if r[3] else '', 'key': r[4] if r[4] else '', 'sequence': r[5] if r[5] else '', 'bible': r[6] if r[6] else '', 'lyricist': r[7] if r[7] else '', 'book': r[8] if r[8] else '', 'copyright': r[9] if r[9] else '', 'ccli': r[10] if r[10] else '', 'lyrics_raw': r[11], 'content': Parser.parse_lyrics(r[11], r[5]), 'video': [r[12]] if r[13] == 'video' else [], 'score': [r[12]] if r[13] == 'score' else [], 'abc': r[15] if r[13] == 'abc' and r[14] else '', 'id': r[15], 'notes': '', 'transpose': ['0'], 'alt_sequence': r[5] if r[5] else ''})
+            # Initialize arrays safely on creation
+            songs.append({
+                'type': 'song', 'title': r[0], 'author': r[1] if r[1] else '', 
+                'lang': r[2] if r[2] else '', 'lang_2': r[3] if r[3] else '', 
+                'key': r[4] if r[4] else '', 'sequence': r[5] if r[5] else '', 
+                'bible': r[6] if r[6] else '', 'lyricist': r[7] if r[7] else '', 
+                'book': r[8] if r[8] else '', 'copyright': r[9] if r[9] else '', 
+                'ccli': r[10] if r[10] else '', 'lyrics_raw': r[11], 
+                'content': Parser.parse_lyrics(r[11], r[5]), 
+                'video': [r[12]] if r[13] == 'video' and r[12] else [], 
+                'score': [r[12]] if r[13] == 'score' and r[12] else [], 
+                'abc': [r[14]] if r[13] == 'abc' and r[14] else [], 
+                'id': r[15], 'notes': '', 'transpose': ['0'], 
+                'alt_sequence': r[5] if r[5] else ''
+            })
     return songs
 
 def get_song_sheet(ids=None):
@@ -617,27 +666,144 @@ def edit_songset(id, content):
     
     return True
 
+@dataclass
+class SermonVariant:
+    lang: str
+    title: str = ''
+    speaker: str = ''
+    bible: str = ''
+    outline: str = ''
+    is_joint: bool = False
+
+    def to_dict(self):
+        return {
+            'lang': self.lang,
+            'title': self.title,
+            'speaker': self.speaker,
+            'bible': self.bible,
+            'outline': self.outline,
+            'is_joint': self.is_joint,
+        }
+
+
+def _normalize_sermon_lang(lang):
+    if not lang:
+        return 'zh'
+    lang = str(lang).strip().lower()
+    if lang.startswith('zh-tw') or lang.startswith('zh_tw') or lang in {'tw', 'taiwan', 'taiwanese'}:
+        return 'zh-TW'
+    if lang.startswith('zh'):
+        return 'zh'
+    if lang.startswith('en'):
+        return 'en'
+    return 'zh'
+
+
+def _get_sermon_variants_for_date(date):
+    """Maintains backward compatibility for single-date lookups."""
+    rows = dB.run_para('select lang, title, speaker, bible, outline, is_joint from sermon where date = ? order by lang', [date])
+    return _build_sermon_variants_from_rows(rows)
+
+
+def _get_preferred_sermon_variant(variants):
+    for lang in ['zh', 'zh-TW', 'en']:
+        variant = variants.get(lang)
+        if variant and any((variant.title or '').strip() or (variant.speaker or '').strip() or (variant.bible or '').strip() or (variant.outline or '').strip() for _ in [0]):
+            return variant
+    return variants.get('zh') or variants.get('zh-TW') or variants.get('en') or SermonVariant(lang='zh')
+
+
+def _has_sermon_content(variant):
+    return bool((variant.title or '').strip() or (variant.speaker or '').strip() or (variant.bible or '').strip() or (variant.outline or '').strip())
+
+
+def _build_display_order(variants):
+    preferred_order = ['zh', 'zh-TW', 'en']
+    active_langs = [lang for lang in preferred_order if _has_sermon_content(variants.get(lang))]
+    if not active_langs:
+        return ['zh', 'en']
+    if 'zh' not in active_langs and 'en' in active_langs:
+        active_langs = ['zh'] + [lang for lang in active_langs if lang != 'zh']
+    return [lang for lang in active_langs if lang in preferred_order]
+
+
+def _build_sermon_payload(date, notes, variants):
+    preferred_variant = _get_preferred_sermon_variant(variants)
+    payload = {
+        'date': date,
+        'notes': notes or '',
+        'sermons': {lang: variant.to_dict() for lang, variant in variants.items()},
+        'is_joint': any(variant.is_joint for variant in variants.values()),
+        'display_lang': preferred_variant.lang,
+        'display_order': _build_display_order(variants),
+    }
+    return payload
+
+def _build_sermon_variants_from_rows(rows):
+    """Helper function to build a variants dictionary from raw database rows."""
+    variants = {lang: SermonVariant(lang=lang) for lang in ['zh', 'zh-TW', 'en']}
+    for row in rows:
+        lang = _normalize_sermon_lang(row[0])
+        variants[lang] = SermonVariant(
+            lang=lang,
+            title=row[1] if row[1] is not None else '',
+            speaker=row[2] if row[2] is not None else '',
+            bible=row[3] if row[3] is not None else '',
+            outline=row[4] if row[4] is not None else '',
+            is_joint=bool(row[5]) if row[5] is not None else False,
+        )
+    return variants
+
 def update_sermon(data):
     w_date = data["date"]
-    w_notes = data["notes"] if "notes" in data else None
-    values = []
-    sql = "update sermon set "
-    for key, val in data.items():
-        if key != 'notes' and key != 'date':
-            sql += key + "= ?,"
-            values.append(val)
-    if len(values) > 0:
-        values.append(w_date)
-        sql = sql[:-1] + " where date = ?"
-        dB.run_para(sql, values)
-    if w_notes:
-        sql = "update worship set notes=? where scheduled_date=?"
-        dB.run_para(sql, [w_notes, w_date])
+    w_notes = data.get("notes")
+    sermons_payload = data.get('sermons') or {}
+    is_joint = int(bool(data.get('is_joint', 0)))
+    display_order = data.get('display_order') or []
+
+    existing_rows = dB.run_para('select id, sermon_id, lang from sermon where date = ?', [w_date])
+    existing_by_lang = {_normalize_sermon_lang(r[2]): r[0] for r in existing_rows}
+    parent_ids = {_normalize_sermon_lang(r[2]): r[1] for r in existing_rows}
+
+    active_langs = []
+    for lang in display_order:
+        if lang in ['zh', 'zh-TW', 'en']:
+            active_langs.append(lang)
+    for lang in ['zh', 'zh-TW', 'en']:
+        if sermons_payload.get(lang):
+            active_langs.append(lang)
+    active_langs = list(dict.fromkeys(active_langs or ['zh', 'en']))
+
+    for lang in active_langs:
+        variant = sermons_payload.get(lang) or {}
+        title = variant.get('title', data.get(f'title_{lang.replace("-", "_")}', data.get('title', '')))
+        speaker = variant.get('speaker', data.get(f'speaker_{lang.replace("-", "_")}', data.get('speaker', '')))
+        bible = variant.get('bible', data.get(f'bible_{lang.replace("-", "_")}', data.get(f'verse_{lang.replace("-", "_")}', data.get('bible_verse', ''))))
+        outline = variant.get('outline', data.get(f'outline_{lang.replace("-", "_")}', data.get('outline', '')))
+
+        row_id = existing_by_lang.get(lang)
+        parent_id = parent_ids.get(lang) or parent_ids.get('en') or parent_ids.get('zh') or 0
+        if row_id:
+            dB.run_para('update sermon set title=?, speaker=?, bible=?, outline=?, is_joint=? where id=?', [title, speaker, bible, outline, is_joint, row_id])
+        else:
+            if parent_id == 0:
+                parent_id = 1 + dB.run('select coalesce(max(sermon_id), 0) from sermon')[0][0]
+            dB.run_para('insert into sermon(sermon_id, lang, title, speaker, bible, outline, is_joint, date) values(?, ?, ?, ?, ?, ?, ?, ?)', [parent_id, lang, title, speaker, bible, outline, is_joint, w_date])
+
+    remove_langs = [lang for lang in ['zh', 'zh-TW', 'en'] if lang not in active_langs]
+    if remove_langs:
+        placeholders = ','.join('?' for _ in remove_langs)
+        dB.run_para(f'delete from sermon where date = ? and lang in ({placeholders})', [w_date, *remove_langs])
+
+    if w_notes is not None:
+        dB.run_para('update worship set notes=? where scheduled_date=?', [w_notes, w_date])
+
 
 def get_worship(id):
-    sql = "select notes, scheduled_date, s.title, s.speaker, s.bible_verse, s.outline from worship w inner join sermon s on w.scheduled_date = s.date where worship_id = ?"
+    sql = 'select notes, scheduled_date from worship where worship_id = ?'
     r = dB.run_para(sql, id)[0]
-    return {'date': r[1], 'title': r[2] if r[2] else '', 'notes': r[0] if r[0] else '', 'speaker': r[3] if r[3] else '', 'bible': r[4] if r[4] else '', 'outline': r[5] if r[5] else ''}
+    variants = _get_sermon_variants_for_date(r[1])
+    return _build_sermon_payload(r[1], r[0] if r[0] else '', variants)
 
 def get_worship_date(id):
     sql = "select scheduled_date from worship where worship_id = ?"
@@ -650,7 +816,7 @@ def get_worship_id(date):
     return r
 
 def get_worship_songs(id):
-    sql = "select s.title, s.author, s.lang, s.lang_2, s.song_key, s.sequence, s.bible_verse, s.lyricist, s.book, s.copyright, s.ccli, s.content, (select link from media m where m.song_id=s.song_id and m_type='video') as video, (select link from media m where m.song_id=s.song_id and m_type='score') as score, w.scheduled_date as date, se.song_id as id, se.transpose as transpose, se.sequence alt_sequence, se.notes as notes, se.bible, se.version, se.rowid, se.type, (select abc from media m where m.song_id=s.song_id and m_type='abc') as abc from presentation se left join songs s on s.song_id = se.song_id  inner join worship w on w.scheduled_date = se.scheduled_date where se.worship_id = ? order by se.song_order"
+    sql = "select s.title, s.author, s.lang, s.lang_2, s.song_key, s.sequence, s.bible_verse, s.lyricist, s.book, s.copyright, s.ccli, s.content, (select group_concat(link, '||') from media m where m.song_id=s.song_id and m_type='video') as video, (select group_concat(link, '||') from media m where m.song_id=s.song_id and m_type='score') as score, w.scheduled_date as date, se.song_id as id, se.transpose as transpose, se.sequence alt_sequence, se.notes as notes, se.bible, se.version, se.rowid, se.type, (select group_concat(abc, '||') from media m where m.song_id=s.song_id and m_type='abc') as abc from presentation se left join songs s on s.song_id = se.song_id  inner join worship w on w.scheduled_date = se.scheduled_date where se.worship_id = ? order by se.song_order"
     result = dB.run_para(sql, id)
     songs = []
 
@@ -658,7 +824,11 @@ def get_worship_songs(id):
         if r[22] == 'info':
             songs.append({'type': r[22], 'title': r[19] if r[19] else r[18][0:10], 'author': '', 'lang': '', 'lang_2': '', 'song_key': '', 'sequence': '', 'bible_verse': '', 'lyricist': '', 'book': '', 'copyright': '', 'ccli': '', 'lyrics_raw': '', 'content': '', 'video': '', 'score': '', 'date': r[14], 'id': r[21], 'transpose': r[16].split(','), 'alt_sequence': '', 'notes': r[18] if r[18] else '', 'version': r[20] if r[20] else ''})
         elif r[22] == 'song':
-            songs.append({'type': r[22], 'title': r[0], 'author': r[1] if r[1] else '', 'lang': r[2] if r[2] else '', 'lang_2': r[3] if r[3] else '', 'song_key': r[4] if r[4] else '', 'sequence': r[5] if r[5] else '', 'bible_verse': r[6] if r[6] else '', 'lyricist': r[7] if r[7] else '', 'book': r[8] if r[8] else '', 'copyright': r[9] if r[9] else '', 'ccli': r[10] if r[10] else '', 'lyrics_raw': r[11], 'content': Parser.parse_lyrics(r[11], r[17]), 'video': r[12] if r[12] else '', 'score': r[13] if r[13] else '', 'date': r[14], 'id': r[15], 'transpose': r[16].split(',') if r[16] else [0], 'alt_sequence': r[17] if r[17] else '', 'notes': r[18] if r[18] else '', 'abc': r[23] if r[23] else ''})
+            songs.append({'type': r[22], 'title': r[0], 'author': r[1] if r[1] else '', 'lang': r[2] if r[2] else '', 'lang_2': r[3] if r[3] else '', 'song_key': r[4] if r[4] else '', 'sequence': r[5] if r[5] else '', 'bible_verse': r[6] if r[6] else '', 'lyricist': r[7] if r[7] else '', 'book': r[8] if r[8] else '', 'copyright': r[9] if r[9] else '', 'ccli': r[10] if r[10] else '', 'lyrics_raw': r[11], 'content': Parser.parse_lyrics(r[11], r[17]), 
+            'video': r[12].split('||') if r[12] else [], 
+            'score': r[13].split('||') if r[13] else [], 
+            'date': r[14], 'id': r[15], 'transpose': r[16].split(',') if r[16] else [0], 'alt_sequence': r[17] if r[17] else '', 'notes': r[18] if r[18] else '', 
+            'abc': r[23].split('||') if r[23] else []})
     return songs
 
 def get_availablity():
@@ -671,18 +841,77 @@ def get_availablity():
 
 def worship_list(id=None):
     if id:
-        sql = "select s.title, s.speaker, case when t.name then t.name else t.name_2 end, (select i.name from instrument i where i.id = it.instrument_id), w.title, w.scheduled_date, w.worship_id, s.bible_verse, s.outline, w.notes from worship w inner join sermon s on w.scheduled_date = s.date left join instrument_team it on w.worship_id = it.worship_id left join team t on it.user_id = t.user_id where w.worship_id=? and it.instrument_id <> -1 order by w.scheduled_date, it.instrument_id"
+        sql = """
+            select w.title, w.scheduled_date, w.worship_id, w.notes,
+                   case when t.name then t.name else t.name_2 end,
+                   (select i.name from instrument i where i.id = it.instrument_id)
+            from worship w
+            left join instrument_team it on w.worship_id = it.worship_id
+            left join team t on it.user_id = t.user_id
+            where w.worship_id=? and it.instrument_id <> -1
+            order by w.scheduled_date, it.instrument_id
+        """
         result = dB.run_para(sql, id)
     else:
-        sql = "select s.title, s.speaker, case when t.name then t.name else t.name_2 end, (select i.name from instrument i where i.id = it.instrument_id), w.title, w.scheduled_date, w.worship_id, s.bible_verse, s.outline, w.notes from worship w inner join sermon s on w.scheduled_date = s.date left join instrument_team it on w.worship_id = it.worship_id left join team t on it.user_id = t.user_id order by w.scheduled_date, it.instrument_id"
+        sql = """
+            select w.title, w.scheduled_date, w.worship_id, w.notes,
+                   case when t.name then t.name else t.name_2 end,
+                   (select i.name from instrument i where i.id = it.instrument_id)
+            from worship w
+            left join instrument_team it on w.worship_id = it.worship_id
+            left join team t on it.user_id = t.user_id
+            order by w.scheduled_date, it.instrument_id
+        """
         result = dB.run(sql)
+
+    unique_dates = list(set([r[1] for r in result if r[1]]))
+    bulk_sermons = {}
+    
+    if unique_dates:
+        sermon_rows = []
+        # Chunk into groups of 900 to avoid SQLite limits on max parameters
+        chunk_size = 900
+        for i in range(0, len(unique_dates), chunk_size):
+            chunk = unique_dates[i:i + chunk_size]
+            placeholders = ','.join(['?'] * len(chunk))
+            sermon_sql = f'select date, lang, title, speaker, bible, outline, is_joint from sermon where date in ({placeholders})'
+            sermon_rows.extend(dB.run_para(sermon_sql, chunk))
+
+        # Group raw rows by date in memory
+        grouped_rows = {}
+        for row in sermon_rows:
+            s_date = row[0]
+            if s_date not in grouped_rows:
+                grouped_rows[s_date] = []
+            # Slice the row so it matches what `_build_sermon_variants_from_rows` expects (ignoring the date column)
+            grouped_rows[s_date].append(row[1:])
+
+        # Build variants for all dates
+        for d in unique_dates:
+            bulk_sermons[d] = _build_sermon_variants_from_rows(grouped_rows.get(d, []))
+
     worship = []
     for r in result:
-        a = next((x for x in worship if x['date'] == r[5]), None)
-        if a and r[3]:
-            a['content'].append({'user_name': r[2], 'role': r[3]})
+        date = r[1] if r[1] else ''
+        a = next((x for x in worship if x['date'] == date), None)
+        if a and (r[4] or r[5]):
+            a['content'].append({'user_name': r[4] if r[4] else '', 'role': r[5] if r[5] else ''})
         else:
-            worship.append({'worship_id': r[6], 'date': r[5] if r[5] else '', 'worship_title': r[4] if r[4] else '', 'sermon_title': r[0] if r[0] else '', 'speaker': r[1] if r[1] else '', 'bible': r[7] if r[7] else '', 'outline': r[8] if r[8] else '', 'notes': r[9] if r[9] else '', 'content': [{'user_name': r[2] if r[2] else '', 'role': r[3] if r[3] else ''}]})
+            # Look up the sermons in memory instead of hitting the database
+            variants = bulk_sermons.get(date, _build_sermon_variants_from_rows([]))
+            sermon_payload = _build_sermon_payload(date, r[3] if r[3] else '', variants)
+            
+            worship.append({
+                'worship_id': r[2],
+                'date': date,
+                'worship_title': r[0] if r[0] else '',
+                'sermons': sermon_payload['sermons'],
+                'notes': sermon_payload['notes'],
+                'is_joint': sermon_payload['is_joint'],
+                'display_lang': sermon_payload['display_lang'],
+                'display_order': sermon_payload['display_order'],
+                'content': [{'user_name': r[4] if r[4] else '', 'role': r[5] if r[5] else ''}]
+            })
     return worship
 
 def get_api_key(name):

@@ -42,7 +42,7 @@
       "default": {
         "name": "worship.db",
         "search": {
-            "query": "select s.song_id, s.title, s.lang, s.lang_2, s.song_key, (select link from media m where m.song_id=s.song_id and m_type='video') as video, (select link from media m where m.song_id=s.song_id and m_type='score') as score, (select abc from media m where m.song_id=s.song_id and m_type='abc') as abc from songs s where {} group by s.song_id",
+            "query": "select s.song_id, s.title, s.lang, s.lang_2, s.song_key, (select group_concat(link, ';;;') from media m where m.song_id=s.song_id and m_type='video') as video, (select group_concat(link, ';;;') from media m where m.song_id=s.song_id and m_type='score') as score, (select group_concat(abc, ';;;') from media m where m.song_id=s.song_id and m_type='abc') as abc from songs s where {} group by s.song_id",
             "columns": [
               "s.title",
               "s.content"
