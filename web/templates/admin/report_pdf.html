@@ -399,11 +399,16 @@
         console.log("Loading sermon information...");
         url = '/API/sermon/' + id;
         $.when(load_content(url)).done(function(worship) {
-            ww = '主題：' + worship.title + '<br/>';
-            ww += '經文：' + worship.bible + '<br/>';
-            if (worship.outline) {
+            console.log(worship);
+
+            let lang = worship.display_lang;
+            let sermon = worship.sermons[lang];
+
+            ww = '主題：' + (sermon.title || '') + '<br/>';
+            ww += '經文：' + (sermon.bible || '') + '<br/>';
+            if (sermon.outline) {
                 ww += '大綱：';
-                temp = worship.outline.split('\n');
+                temp = sermon.outline.split('\n');
                 ww += '<ol>';
                 for(outline of temp) {
                     ww += '<li>' + outline + '</li>';
@@ -415,11 +420,14 @@
 
         url = '/API/sermon/' + (id-1);
         $.when(load_content(url)).done(function(previous) {
-            ww = '主題：' + previous.title + '<br/>';
-            ww += '經文：' + previous.bible + '<br/>';
-            if (previous.outline) {
+            let lang = previous.display_lang;
+            let sermon = previous.sermons[lang];
+
+            ww = '主題：' + sermon.title + '<br/>';
+            ww += '經文：' + sermon.bible + '<br/>';
+            if (sermon.outline) {
                 ww += '大綱：';
-                temp = previous.outline.split('\n');
+                temp = sermon.outline.split('\n');
                 ww += '<ol>';
                 for(outline of temp) {
                     ww += '<li>' + outline + '</li>';
