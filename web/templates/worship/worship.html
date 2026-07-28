@@ -43,7 +43,7 @@
         box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
     }
 
-    .worship-card:hover .card-inner {
+    .worship-card.is-flipped .card-inner {
         transform: rotateY(180deg);
     }
 
@@ -382,7 +382,12 @@ let sundays = {{ sundays|tojson|safe }};
                 html += '<div class="sermon-preview-block"><b>' + getLanguageLabel(langKey) + '</b>: ' + escapeHtml(langVariant.title || '') + '<br/><small>' + escapeHtml(langVariant.speaker || '') + '</small></div>';
             }
         });
-        html += '<div>Notes: ' + escapeHtml(sermonData.notes || '') + '</div>';
+        //Truncate Notes
+        const maxLen = 100;
+        const rawNotes = sermonData.notes || '';
+        const cutNotes = rawNotes.length > maxLen ? rawNotes.slice(0, maxLen) + '...' : rawNotes;
+
+        html += '<div>Notes: ' + escapeHtml(cutNotes) + '</div>';
         return html;
     }
 
@@ -500,6 +505,8 @@ let sundays = {{ sundays|tojson|safe }};
                         }
                     }]
                 });
+
+                $('#popup').off('input change', 'input, textarea');
                 $('#popup').on('input change', 'input, textarea', function() {
                     if (this.id === 'notes') {
                         sermon_data.notes = $(this).val();
@@ -515,6 +522,7 @@ let sundays = {{ sundays|tojson|safe }};
                     }
                 });
 
+                $('#popup').off('click', '#sermon_add_language_btn');
                 $('#popup').on('click', '#sermon_add_language_btn', function() {
                     var langKey = $('#sermon_add_language_select').val();
                     if (!langKey || sermon_data.display_order.indexOf(langKey) !== -1) {
@@ -531,6 +539,7 @@ let sundays = {{ sundays|tojson|safe }};
                     $('#sermon_language_editor').html(buildSermonEditorHtml(sermon_data, null, sermonLangs));
                 });
 
+                $('#popup').off('click', '.sermon-remove-lang');
                 $('#popup').on('click', '.sermon-remove-lang', function() {
                     var langKey = $(this).data('lang-key');
                     sermon_data.display_order = sermon_data.display_order.filter(function(item) { return item !== langKey; });
@@ -610,6 +619,23 @@ let sundays = {{ sundays|tojson|safe }};
 
 $(document).ready(function () {
     move_top('date="'+sundays[0] + '"');
+
+    $(".worship-card").on("click", function (e) {
+        // Prevent flipping if text is currently highlighted/selected
+        if (window.getSelection().toString().length > 0) {
+            return;
+        }
+
+        // Prevent flipping if the user clicks a button, link, or input inside the card
+        if ($(e.target).closest('button, a, input, select, textarea').length) {
+            return;
+        }
+
+        // Flip back all other cards
+        $('.worship-card').not(this).removeClass("is-flipped");
+
+        $(this).toggleClass("is-flipped");
+    });
 
     $(".overlay_btns button").on('click', function () {
         id = $(this).attr('name');
