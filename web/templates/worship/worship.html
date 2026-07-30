@@ -60,6 +60,9 @@
     .card-front {
         background-color: #8FBC8F;
         color: #556B2F;
+
+        display: flex;
+        flex-direction: column;
     }
 
     .card-back {
@@ -122,6 +125,11 @@
         text-align: left;
         font-size: 13px;
         line-height: 1.35;
+
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1; 
+        overflow: hidden; 
     }
 
     .sermon-preview-block {
@@ -129,6 +137,27 @@
         border-radius: 6px;
         padding: 6px 8px;
         margin-bottom: 6px;
+    }
+
+    .sermon-notes-preview {
+         white-space: pre-wrap;
+        margin-top: 5px;
+
+        flex-grow: 1;
+        overflow: hidden;
+        position: relative;
+    }
+
+    /* Fade-out effect at the bottom of the notes */
+    .sermon-notes-preview::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 25px; /* Height of the fade */
+        background: linear-gradient(to bottom, rgba(143, 188, 143, 0), #8FBC8F);
+        pointer-events: none;
     }
 
     .joint-badge {
@@ -143,6 +172,30 @@
         font-weight: bold;
         letter-spacing: 0.04em;
         text-transform: uppercase;
+    }
+
+    .team-info {
+        overflow-y: auto;
+        max-height: 220px;
+        /* Firefox */
+        scrollbar-width: thin;
+        scrollbar-color: rgba(255, 255, 255, 0.4) transparent;
+        padding-right: 5px;
+        padding-left: 9px;
+    }
+
+    /* Chrome, Edge, and Safari */
+    .team-info::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    .team-info::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .team-info::-webkit-scrollbar-thumb {
+        background-color: rgba(255, 255, 255, 0.4); /* Semi-transparent white */
+        border-radius: 10px;
     }
 </style>
 {% endblock %}
@@ -170,7 +223,7 @@
                                     </div>
                                 {% endif %}
                             {% endfor %}
-                            <div>Notes: {{ (w.worship.notes or '')|string|truncate(100) }}</div>
+                            <div class="sermon-notes-preview">Notes:<br>{{ w.worship.notes or '' }}</div>
                         </div>
                     {% endif %}
                 </div>
@@ -383,9 +436,7 @@ let sundays = {{ sundays|tojson|safe }};
             }
         });
         //Truncate Notes
-        const maxLen = 100;
-        const rawNotes = sermonData.notes || '';
-        const cutNotes = rawNotes.length > maxLen ? rawNotes.slice(0, maxLen) + '...' : rawNotes;
+        html += '<div class="sermon-notes-preview">Notes:<br>' + escapeHtml(sermonData.notes || '') + '</div>';
 
         html += '<div>Notes: ' + escapeHtml(cutNotes) + '</div>';
         return html;
