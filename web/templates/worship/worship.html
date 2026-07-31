@@ -197,6 +197,33 @@
         background-color: rgba(255, 255, 255, 0.4); /* Semi-transparent white */
         border-radius: 10px;
     }
+
+    /* Sermon Edit Popup UI */
+    .sermon-form-group {
+        display: flex;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+    
+    .sermon-form-group label {
+        width: 65px; /* Gives all labels the exact same width */
+        font-weight: normal;
+        margin: 0;
+    }
+    
+    .single-line-textarea {
+        flex: 1;
+        padding: 4px 6px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+        font-family: inherit;
+        font-size: 13px;
+        line-height: 1.4;
+        resize: vertical;
+    }
+
+
 </style>
 {% endblock %}
 
@@ -435,10 +462,9 @@ let sundays = {{ sundays|tojson|safe }};
                 html += '<div class="sermon-preview-block"><b>' + getLanguageLabel(langKey) + '</b>: ' + escapeHtml(langVariant.title || '') + '<br/><small>' + escapeHtml(langVariant.speaker || '') + '</small></div>';
             }
         });
-        //Truncate Notes
+
         html += '<div class="sermon-notes-preview">Notes:<br>' + escapeHtml(sermonData.notes || '') + '</div>';
 
-        html += '<div>Notes: ' + escapeHtml(cutNotes) + '</div>';
         return html;
     }
 
@@ -452,22 +478,61 @@ let sundays = {{ sundays|tojson|safe }};
             html += '<b>' + getLanguageLabel(langKey) + '</b>';
             html += '<button type="button" class="sermon-remove-lang" data-lang-key="' + langKey + '" style="padding:4px 8px;">Remove</button>';
             html += '</div>';
-            html += 'Title: <input type="text" data-lang-key="' + langKey + '" data-field="title" value="' + escapeHtml(langVariant.title || '') + '"><br/>';
-            html += 'Speaker: <input type="text" data-lang-key="' + langKey + '" data-field="speaker" value="' + escapeHtml(langVariant.speaker || '') + '"><br/>';
-            html += 'Bible: <input type="text" data-lang-key="' + langKey + '" data-field="bible" value="' + escapeHtml(langVariant.bible || '') + '"><br/>';
-            html += 'Outline:<br/><textarea rows="4" style="width:95%" data-lang-key="' + langKey + '" data-field="outline">' + escapeHtml(langVariant.outline || '') + '</textarea>';
+            html += '<div class="sermon-form-group"><label>Title:</label><textarea rows="1" class="single-line-textarea" data-lang-key="' + langKey + '" data-field="title">' + escapeHtml(langVariant.title || '') + '</textarea></div>';
+            html += '<div class="sermon-form-group"><label>Speaker:</label><textarea rows="1" class="single-line-textarea" data-lang-key="' + langKey + '" data-field="speaker">' + escapeHtml(langVariant.speaker || '') + '</textarea></div>';
+            
+            /* Bible Logic */
+            // Split existing data by semicolon, default to one empty row if blank
+            var bibleString = langVariant.bible || '';
+            var bibleArray = bibleString.split(';').map(function(s) { return s.trim(); }).filter(function(s) { return s.length > 0; });
+            if (bibleArray.length === 0) bibleArray = ['']; 
+
+            // Build the container (align-items flex-start keeps the "Bible" label at the top of the stack)
+            html += '<div class="sermon-form-group" style="align-items: flex-start;"><label style="margin-top: 6px;">Bible:</label>';
+            html += '<div class="bible-container" data-lang-key="' + langKey + '" style="flex: 1; display: flex; flex-direction: column; gap: 4px;">';
+            
+            // Loop through and create a row for each verse
+            bibleArray.forEach(function(verse) {
+                html += '<div class="bible-row" style="display: flex; gap: 4px;">';
+                html += '<textarea rows="1" class="single-line-textarea bible-input" data-lang-key="' + langKey + '" data-field="bible">' + escapeHtml(verse) + '</textarea>';
+                html += '<button type="button" class="remove-bible-btn" style="padding: 2px 8px; background-color: #e74c3c;">X</button>';
+                html += '</div>';
+            });
+
+            // Add verse button
+            html += '<button type="button" class="add-bible-btn" data-lang-key="' + langKey + '" style="align-self: flex-start; padding: 4px 8px; font-size: 11px; margin-top: 2px;">+ Add Verse</button>';
+            html += '</div></div>';
+            
+
+            html += '<div style="margin-top: 8px;">Outline:<br/><textarea rows="4" class="sermon-textarea" data-lang-key="' + langKey + '" data-field="outline">' + escapeHtml(langVariant.outline || '') + '</textarea></div>';
             html += '</div>';
         });
         html += '</div>';
         html += '<div style="margin-top:10px;">';
-        html += '<label>Add language: <select id="sermon_add_language_select">';
-        sermonLangs.forEach(function(item) {
-            if (sermonData.display_order.indexOf(item.key) === -1) {
-                html += '<option value="' + item.key + '">' + item.display + '</option>';
-            }
+        
+        /* Language Dropdown Logic */
+        // Calculate how many languages are actually left to add
+        var availableLangs = sermonLangs.filter(function(item) {
+            return sermonData.display_order.indexOf(item.key) === -1;
         });
+
+        // Lock the width, disable if empty
+        html += '<label>Add language: <select id="sermon_add_language_select" style="width: 120px;" ' + (availableLangs.length === 0 ? 'disabled' : '') + '>';
+        
+        if (availableLangs.length === 0) {
+            html += '<option> </option>';
+        } else {
+            availableLangs.forEach(function(item) {
+                html += '<option value="' + item.key + '">' + item.display + '</option>';
+            });
+        }
+        
         html += '</select></label>';
-        html += ' <button type="button" id="sermon_add_language_btn">Add</button>';
+        
+        // Disable the add button and fade it out if no languages are left
+        var btnDisabledState = availableLangs.length === 0 ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : '';
+        html += ' <button type="button" id="sermon_add_language_btn" ' + btnDisabledState + '>Add</button>';
+        
         html += '</div>';
         return html;
     }
@@ -518,12 +583,13 @@ let sundays = {{ sundays|tojson|safe }};
                 html += '<div id="sermon_language_editor" style="border:1px solid #ddd;padding:10px;border-radius:6px;">';
                 html += buildSermonEditorHtml(sermon_data, null, sermonLangs);
                 html += '</div>';
-                html += 'Notes<br/><textarea rows="3" cols="2" style="width:95%" id="notes">' + escapeHtml(response.notes || '') + '</textarea>';
+                html += 'Notes<br/><textarea rows="3" class="sermon-textarea" id="notes">' + escapeHtml(response.notes || '') + '</textarea>';
                 html += '</div>';
                 $("#popup").append(html);
                 $("#popup").dialog({
                     title: "Sermon Information (" + date + ")",
                     width: 'auto',
+                    position: { my: "center", at: "center", of: window },
                     buttons: [{
                         id: "button-add",
                         text: "OK",
@@ -566,11 +632,57 @@ let sundays = {{ sundays|tojson|safe }};
                     } else if ($(this).data('lang-key')) {
                         var langKey = $(this).data('lang-key');
                         var field = $(this).data('field');
+                        
                         if (!sermon_data.sermons[langKey]) {
                             sermon_data.sermons[langKey] = {};
                         }
-                        sermon_data.sermons[langKey][field] = $(this).val();
+                        
+                        // Consolidation logic for Bible fields
+                        if (field === 'bible') {
+                            var verses = [];
+                            $('.bible-input[data-lang-key="' + langKey + '"]').each(function() {
+                                var val = $(this).val().trim();
+                                val = val.replace(/;/g, ''); // Strip user-entered semicolons to protect formatting
+                                if (val) verses.push(val);
+                            });
+                            sermon_data.sermons[langKey].bible = verses.join('; ');
+                        } else {
+                            sermon_data.sermons[langKey][field] = $(this).val();
+                        }
                     }
+                });
+
+                // Handle Adding a Bible Row
+                $('#popup').off('click', '.add-bible-btn');
+                $('#popup').on('click', '.add-bible-btn', function() {
+                    var langKey = $(this).data('lang-key');
+                    var newRow = '<div class="bible-row" style="display: flex; gap: 4px;"><textarea rows="1" class="single-line-textarea bible-input" data-lang-key="' + langKey + '" data-field="bible"></textarea><button type="button" class="remove-bible-btn" style="padding: 2px 8px; background-color: #e74c3c;">X</button></div>';
+                    $(this).before(newRow);
+                    
+                    // Recenter popup
+                    $('#popup').dialog("option", "position", {my: "center", at: "center", of: window});
+                });
+
+                // Handle Removing a Bible Row
+                $('#popup').off('click', '.remove-bible-btn');
+                $('#popup').on('click', '.remove-bible-btn', function() {
+                    var container = $(this).closest('.bible-container');
+                    var rows = container.find('.bible-row');
+                    
+                    // If it is the last row, just empty it instead of deleting it
+                    if (rows.length === 1) {
+                        rows.find('.bible-input').val('').trigger('change');
+                        return;
+                    }
+
+                    // Otherwise, safely remove the row
+                    $(this).closest('.bible-row').remove();
+                    
+                    // Force a trigger to re-save the consolidated data without the deleted row
+                    container.find('.bible-input').first().trigger('change');
+                    
+                    // Recenter popup
+                    $('#popup').dialog("option", "position", {my: "center", at: "center", of: window});
                 });
 
                 $('#popup').off('click', '#sermon_add_language_btn');
@@ -588,6 +700,8 @@ let sundays = {{ sundays|tojson|safe }};
                     }
                     sermon_data.display_order.splice(insertIndex, 0, langKey);
                     $('#sermon_language_editor').html(buildSermonEditorHtml(sermon_data, null, sermonLangs));
+
+                    $('#popup').dialog("option", "position", {my: "center", at: "center", of: window});
                 });
 
                 $('#popup').off('click', '.sermon-remove-lang');
@@ -596,6 +710,25 @@ let sundays = {{ sundays|tojson|safe }};
                     sermon_data.display_order = sermon_data.display_order.filter(function(item) { return item !== langKey; });
                     delete sermon_data.sermons[langKey];
                     $('#sermon_language_editor').html(buildSermonEditorHtml(sermon_data, null, sermonLangs));
+
+                    $('#popup').dialog("option", "position", {my: "center", at: "center", of: window});
+                });
+
+                // Block the Enter key from creating a new line
+                $('#popup').off('keydown', '.single-line-textarea');
+                $('#popup').on('keydown', '.single-line-textarea', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                    }
+                });
+
+                // Strip line breaks if the user pastes text in
+                $('#popup').off('input.strip', '.single-line-textarea');
+                $('#popup').on('input.strip', '.single-line-textarea', function() {
+                    if (this.value.match(/[\r\n]/)) {
+                        this.value = this.value.replace(/[\r\n]+/g, ' '); // Replace line breaks with a space
+                        $(this).trigger('input'); // Re-trigger the save logic
+                    }
                 });
             }
         });
