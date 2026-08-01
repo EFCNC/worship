@@ -232,6 +232,29 @@
         width: 100%;
         margin-top: 4px;
     }
+
+    .remove-bible-btn {
+        background: transparent; 
+        border: none;
+        color: #999; 
+        cursor: pointer;
+        padding: 6px 8px;
+        font-size: 14px; 
+        display: flex;
+        align-items: center; 
+        justify-content: center;
+        border-radius: 4px;
+        transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+    }
+
+    /* Explicitly override the global button:hover */
+    @media(hover: hover) and (pointer: fine) {
+        button.remove-bible-btn:hover {
+            background-color: rgba(231, 76, 60, 0.1);
+            color: #e74c3c;
+            transform: translateY(-1px); 
+        }
+    }
 </style>
 {% endblock %}
 
@@ -501,9 +524,9 @@ let sundays = {{ sundays|tojson|safe }};
             
             // Loop through and create a row for each verse
             bibleArray.forEach(function(verse) {
-                html += '<div class="bible-row" style="display: flex; gap: 4px;">';
+                html += '<div class="bible-row" style="display: flex; gap: 4px; align-items: center;">';
                 html += '<textarea rows="1" class="single-line-textarea bible-input" data-lang-key="' + langKey + '" data-field="bible">' + escapeHtml(verse) + '</textarea>';
-                html += '<button type="button" class="remove-bible-btn" style="padding: 2px 8px; background-color: #e74c3c;">X</button>';
+                html += '<button type="button" class="remove-bible-btn" title="Remove verse"><i class="fas fa-trash"></i></button>';
                 html += '</div>';
             });
 
@@ -664,7 +687,7 @@ let sundays = {{ sundays|tojson|safe }};
                 $('#popup').off('click', '.add-bible-btn');
                 $('#popup').on('click', '.add-bible-btn', function() {
                     var langKey = $(this).data('lang-key');
-                    var newRow = '<div class="bible-row" style="display: flex; gap: 4px;"><textarea rows="1" class="single-line-textarea bible-input" data-lang-key="' + langKey + '" data-field="bible"></textarea><button type="button" class="remove-bible-btn" style="padding: 2px 8px; background-color: #e74c3c;">X</button></div>';
+                    var newRow = '<div class="bible-row" style="display: flex; gap: 4px; align-items: center;"><textarea rows="1" class="single-line-textarea bible-input" data-lang-key="' + langKey + '" data-field="bible"></textarea><button type="button" class="remove-bible-btn" title="Remove verse"><i class="fas fa-trash"></i></button></div>';
                     $(this).before(newRow);
                     
                     // Recenter popup
