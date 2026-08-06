@@ -235,14 +235,15 @@
         }
     }
 
-    .sermon-form-group {
+    .popup-form-group {
         display: flex;
         align-items: center;
         margin-bottom: 8px;
+        gap: 2px;
     }
     
-    .sermon-form-group label {
-        width: 65px; /* Gives all labels the exact same width */
+    .popup-form-group label {
+        width: 65px;
         font-weight: normal;
         margin: 0;
     }
@@ -269,7 +270,7 @@
         margin-top: 4px;
     }
 
-    .remove-bible-btn {
+    .remove-btn {
         background: transparent; 
         border: none;
         color: #999; 
@@ -285,7 +286,7 @@
 
     /* Explicitly override the global button:hover */
     @media(hover: hover) and (pointer: fine) {
-        button.remove-bible-btn:hover {
+        button.remove-btn:hover {
             background-color: rgba(231, 76, 60, 0.1);
             color: #e74c3c;
             transform: translateY(-1px); 
@@ -362,78 +363,94 @@ let worship_id = -1;
 let activeCard = null;
 let sundays = {{ sundays|tojson|safe }};
 
-    function pop_role(name) {
-        for (i in taken_role) {
-            if (taken_role[i].name == name) {
-                taken_role.splice(i, 1);
-                break;
-            }
-        }
+    /* Looks Useless */
+    // function pop_role(name) {
+    //     for (i in taken_role) {
+    //         if (taken_role[i].name == name) {
+    //             taken_role.splice(i, 1);
+    //             break;
+    //         }
+    //     }
+    // }
+
+function add_button() {
+        return '<button class="add_btn" title="Click to confirm" disabled style="opacity: 0.5; cursor: not-allowed; padding: 0 10px; margin-left: 4px; height: 28px; font-size: 13px; display: flex; align-items: center; justify-content: center;">Add</button>';
     }
 
-    function add_button() {
-        return '<button class="add_btn" title="Click to confirm" style="display:none">Add</button>';
-    }
-
-    function add_arrow() {
-        return '<button id="add_arrow" title="Click to Add a New Role"> &gt; </button>';
+    function add_role_button() {
+        return '<button id="add_role_button" title="Click to Add a New Role" style="padding: 4px 10px; margin-top: 10px; font-size: 12px;">+ Add Role</button>';
     }
 
     function inst_option() {
-        html = '<option>Select an Role</option>';
-        for (x in inst) {
-            html += '<option value="' + inst[x].id + '">' + inst[x].name + '</option>';
+        let html = '<option>Select a Role</option>';
+        for (let x in inst) {
+            html += '<option value="' + inst[x].id + '">' + escapeHtml(inst[x].name) + '</option>';
         }
-        var $select = $('<select class="inst"></select>');
+        var $select = $('<select class="inst single-line-textarea"></select>');
         $select.append(html);
         return $select[0].outerHTML;
     }
 
-    function team_option() {
-        html = '<option>Select a User</option>';
-        matched = marked.filter(obj => {
-            return obj.date == date
+    function team_option(date) {
+        let html = '<option>Select a User</option>';
+        const matched = marked.filter(obj => {
+            return obj.date == date;
         }).map(obj => obj.id);
-        for (x in team) {
+        
+        for (let x in team) {
             if (matched.indexOf(team[x].id) >= 0) {
-                html += '<option disabled title="Not Available" value="' + team[x].id + '">' + team[x].name + ' (' + team[x].name_2 + ')</option>';
+                html += '<option disabled title="Not Available" value="' + team[x].id + '">' + escapeHtml(team[x].name) + ' (' + escapeHtml(team[x].name_2) + ')</option>';
             } else {
-                html += '<option value="' + team[x].id + '">' + team[x].name + ' (' + team[x].name_2 + ')</option>';
+                html += '<option value="' + team[x].id + '">' + escapeHtml(team[x].name) + ' (' + escapeHtml(team[x].name_2) + ')</option>';
             }
         }
-        var $select = $('<select class="user"></select>');
+        var $select = $('<select class="user single-line-textarea"></select>');
         $select.append(html);
         return $select[0].outerHTML;
     }
 
     function pick_team(id, date) {
-        dd = new Date();
-        d1 = new Date(date.replace('-', '/'));
-        roster_html = '<div id="current_roster" name="' + id + '_' + date + '"></div>';
-        for (x in roster) {
-            html = '';
-            $div = $('<div>' + roster[x].inst_name + ': </div>');
+        const dd = new Date();
+        const d1 = new Date(date.replace('-', '/'));
+        let roster_html = '<div id="current_roster" name="' + id + '_' + date + '" style="padding-top: 10px;">';
+        
+        for (let x in roster) {
+            let html = '';
+            const $div = $('<div class="popup-form-group"><label style="width: 100px;">' + escapeHtml(roster[x].inst_name) + ':</label></div>');
+            
             inst = inst.filter((item, index) => item.id != roster[x].id);
-            for (t in team) {
-                if (team[t].id == roster[x].id) {
-                    html += '<option selected value="' + roster[x].id + '_' + roster[x].user_id + '">' + roster[x].user_name + ' (' + roster[x].user_name_2 + ')</option>';
+            for (let t in team) {
+                if (team[t].id == roster[x].user_id) {
+                    html += '<option selected value="' + roster[x].id + '_' + roster[x].user_id + '">' + escapeHtml(roster[x].user_name) + ' (' + escapeHtml(roster[x].user_name_2) + ')</option>';
                 } else {
-                    html += '<option value="' + roster[x].id + '_' + team[t].id + '">' + team[t].name + ' (' + team[t].name_2 + ')</option>';
+                    html += '<option value="' + roster[x].id + '_' + team[t].id + '">' + escapeHtml(team[t].name) + ' (' + escapeHtml(team[t].name_2) + ')</option>';
                 }
             }
+            
             if (dd > d1) {
-                var $select = $('<select class="roster" disabled title="' + roster[x].inst_name + '"></select>');
+                // Past dates (Read-only view)
+                var $select = $('<select class="roster single-line-textarea" disabled title="' + escapeHtml(roster[x].inst_name) + '"></select>');
+                $select.append(html);
+                $div.append($select);
             } else {
-                var $select = $('<select class="roster" title="' + roster[x].inst_name + '" data-initial-value=' + roster[x].user_id + '></select>');
+                // Future dates (Editable view)
+                var $select = $('<select class="roster single-line-textarea" title="' + escapeHtml(roster[x].inst_name) + '" data-initial-value=' + roster[x].user_id + '></select>');
+                $select.append(html);
+                $div.append($select);
+                
+                // Inject the Delete Button 
+                var deleteBtn = '<button type="button" class="remove-btn remove-roster-btn" title="Remove person" data-role-id="' + roster[x].id + '" data-user-id="' + roster[x].user_id + '" style="margin-left: 4px;"><i class="fas fa-trash"></i></button>';
+                $div.append(deleteBtn);
             }
-            $select.append(html);
-            $div.append($select);
+            
             roster_html += $div[0].outerHTML;
         }
+        
         roster_html += '<div id="roster_options"></div>';
         if (dd <= d1) {
-            roster_html += add_arrow();
+            roster_html += add_role_button();
         }
+        roster_html += '</div>';
         return roster_html;
     }
 
@@ -448,40 +465,53 @@ let sundays = {{ sundays|tojson|safe }};
         var html = '<u><b>Worship Team</b></u><br/>';
         for (var i = 0; i < roster.length; i++) {
             var entry = roster[i];
-            if (entry.user_name && entry.inst_name) {
-                html += '<b>' + escapeHtml(entry.inst_name) + ':</b>&nbsp;' + escapeHtml(entry.user_name) + '<br/>';
+            if (entry.user_name_2 && entry.inst_name) {
+                html += '<b>' + escapeHtml(entry.inst_name) + ':</b>&nbsp;' + escapeHtml(entry.user_name_2) + '<br/>';
+
+                // Another Option: Display both names like the dropdown -> "English (Chinese)"
+                // var displayName = entry.user_name + (entry.user_name_2 ? ' (' + entry.user_name_2 + ')' : '');
             }
         }
         teamInfo.html(html);
     }
 
-    function popup(id, date, card) {
-        $("#popup").dialog({
-            title: "Worship Team (" + date + ")",
-            width: 'auto',
-            buttons: [{
-                id: "button-add",
-                text: "OK",
-                click: function() {
-                    var dialogElement = $(this);
-                    update_card_team_info(card);
-                    dialogElement.dialog("close");
-                }
-            }]
-        });
-        get_roster(id, date);
-    }
-
-    function get_roster(id, date) {
-        $("#popup").empty();
-        url = API_URL + 'inst_team/' + id;
+    function get_roster(id, date, card) {
+        const url = API_URL + 'inst_team/' + id;
         $.when($.ajax(url)).then(function(response, textStatus, jqXHR) {
             if (response) {
                 inst = response['inst'];
                 team = response['team'];
-                roster = response['roster']
-                marked = response['marked']
-                $("#popup").html(pick_team(id, date));
+                roster = response['roster'];
+                marked = response['marked'];
+                
+                // Check if the popup dialog is already open on screen
+                var isDialogOpen = $("#popup").hasClass('ui-dialog-content') && $("#popup").dialog('isOpen');
+
+                if (isDialogOpen) {
+                    // Update content without re-initializing the dialog frame
+                    $("#popup").html(pick_team(id, date));
+                    $('#popup').dialog("option", "position", {my: "center", at: "center", of: window});
+                } else {
+                    // First time opening: inject HTML and initialize the dialog widget
+                    $("#popup").html(pick_team(id, date));
+                    $("#popup").dialog({
+                        title: "Worship Team (" + date + ")",
+                        width: 'auto',
+                        minWidth: 400,
+                        position: { my: "center", at: "center", of: window },
+                        buttons: [{
+                            id: "button-add",
+                            text: "OK",
+                            click: function() {
+                                var dialogElement = $(this);
+                                if (card) {
+                                    update_card_team_info(card);
+                                }
+                                dialogElement.dialog("close");
+                            }
+                        }]
+                    });
+                }
             }
         });
     }
@@ -518,7 +548,7 @@ let sundays = {{ sundays|tojson|safe }};
     }
 
     function buildSermonPreviewHtml(sermonData) {
-        var html = '';
+        let html = '';
         if (sermonData.is_joint) {
             html += '<div class="joint-badge">Joint</div>';
         }
@@ -536,7 +566,7 @@ let sundays = {{ sundays|tojson|safe }};
     }
 
     function buildSermonEditorHtml(sermonData, selectedLang, sermonLangs) {
-        var html = '';
+        let html = '';
         html += '<div class="sermon-lang-container">';
         sermonData.display_order.forEach(function(langKey) {
             var langVariant = getSermonVariant(sermonData.sermons, langKey);
@@ -545,8 +575,8 @@ let sundays = {{ sundays|tojson|safe }};
             html += '<b>' + getLanguageLabel(langKey) + '</b>';
             html += '<button type="button" class="sermon-remove-lang" data-lang-key="' + langKey + '" style="padding:4px 8px;">Remove</button>';
             html += '</div>';
-            html += '<div class="sermon-form-group"><label>Title:</label><textarea rows="1" class="single-line-textarea" data-lang-key="' + langKey + '" data-field="title">' + escapeHtml(langVariant.title || '') + '</textarea></div>';
-            html += '<div class="sermon-form-group"><label>Speaker:</label><textarea rows="1" class="single-line-textarea" data-lang-key="' + langKey + '" data-field="speaker">' + escapeHtml(langVariant.speaker || '') + '</textarea></div>';
+            html += '<div class="popup-form-group"><label>Title:</label><textarea rows="1" class="single-line-textarea" data-lang-key="' + langKey + '" data-field="title">' + escapeHtml(langVariant.title || '') + '</textarea></div>';
+            html += '<div class="popup-form-group"><label>Speaker:</label><textarea rows="1" class="single-line-textarea" data-lang-key="' + langKey + '" data-field="speaker">' + escapeHtml(langVariant.speaker || '') + '</textarea></div>';
             
             /* Bible Logic */
             // Split existing data by semicolon, default to one empty row if blank
@@ -555,14 +585,14 @@ let sundays = {{ sundays|tojson|safe }};
             if (bibleArray.length === 0) bibleArray = ['']; 
 
             // Build the container (align-items flex-start keeps the "Bible" label at the top of the stack)
-            html += '<div class="sermon-form-group" style="align-items: flex-start;"><label style="margin-top: 6px;">Bible:</label>';
+            html += '<div class="popup-form-group" style="align-items: flex-start;"><label style="margin-top: 6px;">Bible:</label>';
             html += '<div class="bible-container" data-lang-key="' + langKey + '" style="flex: 1; display: flex; flex-direction: column; gap: 4px;">';
             
             // Loop through and create a row for each verse
             bibleArray.forEach(function(verse) {
                 html += '<div class="bible-row" style="display: flex; gap: 4px; align-items: center;">';
                 html += '<textarea rows="1" class="single-line-textarea bible-input" data-lang-key="' + langKey + '" data-field="bible">' + escapeHtml(verse) + '</textarea>';
-                html += '<button type="button" class="remove-bible-btn" title="Remove verse"><i class="fas fa-trash"></i></button>';
+                html += '<button type="button" class="remove-btn" title="Remove verse"><i class="fas fa-trash"></i></button>';
                 html += '</div>';
             });
 
@@ -604,8 +634,8 @@ let sundays = {{ sundays|tojson|safe }};
         return html;
     }
 
-    function get_sermon(id, card) {
-        url = API_URL + 'sermon/' + id;
+    function get_sermon(id, card, date) {
+        const url = API_URL + 'sermon/' + id;
         $.when($.ajax(url)).then(function(response, textStatus, jqXHR) {
             if (response) {
                 var sermon_data = {
@@ -643,7 +673,7 @@ let sundays = {{ sundays|tojson|safe }};
                     { key: 'en', label: 'EN', display: 'English' }
                 ];
                 $("#popup").empty();
-                html = '<div class="sermon-editor-wrapper">';
+                let html = '<div class="sermon-editor-wrapper">';
                 html += '<div style="margin-bottom:8px;">';
                 html += '<label><input type="checkbox" id="is_joint" ' + (response.is_joint ? 'checked' : '') + '> Joint sermon</label>';
                 html += '</div>';
@@ -723,7 +753,7 @@ let sundays = {{ sundays|tojson|safe }};
                 $('#popup').off('click', '.add-bible-btn');
                 $('#popup').on('click', '.add-bible-btn', function() {
                     var langKey = $(this).data('lang-key');
-                    var newRow = '<div class="bible-row" style="display: flex; gap: 4px; align-items: center;"><textarea rows="1" class="single-line-textarea bible-input" data-lang-key="' + langKey + '" data-field="bible"></textarea><button type="button" class="remove-bible-btn" title="Remove verse"><i class="fas fa-trash"></i></button></div>';
+                    var newRow = '<div class="bible-row" style="display: flex; gap: 4px; align-items: center;"><textarea rows="1" class="single-line-textarea bible-input" data-lang-key="' + langKey + '" data-field="bible"></textarea><button type="button" class="remove-btn" title="Remove verse"><i class="fas fa-trash"></i></button></div>';
                     $(this).before(newRow);
                     
                     // Recenter popup
@@ -731,8 +761,8 @@ let sundays = {{ sundays|tojson|safe }};
                 });
 
                 // Handle Removing a Bible Row
-                $('#popup').off('click', '.remove-bible-btn');
-                $('#popup').on('click', '.remove-bible-btn', function() {
+                $('#popup').off('click', '.remove-btn');
+                $('#popup').on('click', '.remove-btn', function() {
                     var container = $(this).closest('.bible-container');
                     var rows = container.find('.bible-row');
                     
@@ -801,20 +831,25 @@ let sundays = {{ sundays|tojson|safe }};
         });
     }
 
-    $(document).on('click', '#add_arrow', function() {
-        $("#roster_options").append(inst_option() + team_option() + add_button());
-        $('#add_arrow').hide();
+    $(document).on('click', '#add_role_button', function() {
+        const rosterDate = $('#current_roster').attr('name').split('_')[1];
+        const newGroup = '<div class="popup-form-group" style="margin-top: 10px;">' + inst_option() + team_option(rosterDate) + add_button() + '</div>';
+        $("#roster_options").append(newGroup);
+        $('#add_role_button').hide();
+        
+        $('#popup').dialog("option", "position", {my: "center", at: "center", of: window});
     });
 
     $(document).on('change', ".roster", function() {
-        data = $(this).val().split('_');
-        pre = $(this).data('initial-value');
+        const rosterDate = $('#current_roster').attr('name').split('_')[1];
+        const selected = $(this).val().split('_');
+        const pre = $(this).data('initial-value');
         if (confirm('Are you sure?')) {
-            url = API_URL + 'roles/' + date;
-            data = {
+            const url = API_URL + 'roles/' + rosterDate;
+            const data = {
                 'pre_id': pre,
-                'user_id': data[1],
-                'role_id': data[0]
+                'user_id': selected[1],
+                'role_id': selected[0]
             };
             $('#loading').show();
             $.ajax({
@@ -825,7 +860,7 @@ let sundays = {{ sundays|tojson|safe }};
                 dataType: 'json',
                 complete: function(response) {
                     if (response.status == 200) {
-                        get_roster(worship_id, date);
+                        get_roster(worship_id, rosterDate, activeCard);
                     } else {
                         alert(response);
                     }
@@ -836,20 +871,26 @@ let sundays = {{ sundays|tojson|safe }};
     });
 
     $(document).on('change', ".inst, .user", function() {
-        if ($('.inst').val() != 'Select an Role' && $('.user').val() != 'Select a User') {
-            $('.add_btn').show();
+        if ($('.inst').val() != 'Select a Role' && $('.user').val() != 'Select a User') {
+            $('.add_btn').prop('disabled', false).css({
+                'opacity': '1',
+                'cursor': 'pointer'
+            });
         } else {
-            $('.add_btn').hide();
+            $('.add_btn').prop('disabled', true).css({
+                'opacity': '0.5',
+                'cursor': 'not-allowed'
+            });
         }
     });
 
     $(document).on('click', ".add_btn", function() {
-        id_date = $("#current_roster").attr('name').split('_');
-        url = API_URL + 'roles/' + id_date[1];
-        data = {
+        const idDate = $("#current_roster").attr('name').split('_');
+        const url = API_URL + 'roles/' + idDate[1];
+        const data = {
             'user_id': Number($('.user').val()),
             'role_id': Number($('.inst').val()),
-            'worship_id': id_date[0]
+            'worship_id': idDate[0]
         };
         $.ajax({
             type: "post",
@@ -859,10 +900,45 @@ let sundays = {{ sundays|tojson|safe }};
             dataType: 'json',
             complete: function(response) {
                 if (response.status == 200) {
-                    get_roster(id_date[0], id_date[1]);
+                    // Pass activeCard so the main card updates
+                    get_roster(idDate[0], idDate[1], activeCard);
                 } else {
                     alert(response);
                 }
+            }
+        });
+    });
+
+    $(document).on('click', '.remove-roster-btn', function(e) {
+        e.stopPropagation();
+
+        var idDate = $('#current_roster').attr('name').split('_');
+        var worshipId = Number(idDate[0]);
+        var rosterDate = idDate[1];
+        var roleId = Number($(this).data('role-id'));
+        var userId = Number($(this).data('user-id'));
+
+        if (!confirm('Are you sure you want to remove this person from the roster?')) {
+            return;
+        }
+
+        $('#loading').show();
+        $.ajax({
+            type: 'delete',
+            url: API_URL + 'roles/' + rosterDate,
+            data: JSON.stringify({
+                'user_id': userId,
+                'role_id': roleId
+            }),
+            contentType: 'application/json',
+            dataType: 'json',
+            complete: function(response) {
+                if (response.status == 200) {
+                    get_roster(worshipId, rosterDate, activeCard);
+                } else {
+                    alert(response.responseText || 'Unable to remove roster member.');
+                }
+                $('#loading').hide();
             }
         });
     });
@@ -889,8 +965,8 @@ $(document).ready(function () {
     });
 
     $(".overlay_btns button").on('click', function () {
-        id = $(this).attr('name');
-        date = $(this).parent().parent().parent().attr('date')
+        const id = $(this).attr('name');
+        const date = $(this).parent().parent().parent().attr('date');
 
         if(!id) {
             $("#popup").html();
@@ -900,11 +976,11 @@ $(document).ready(function () {
             worship_id = Number(id);
             if (this.id == 'team_btn') {
                 activeCard = $(this).closest('.worship-card');
-                popup(id, date, activeCard);
+                get_roster(id, date, activeCard);
             }
             else if (this.id == 'sermon_btn') {
                 activeCard = $(this).closest('.worship-card');
-                get_sermon(worship_id, activeCard);
+                get_sermon(worship_id, activeCard, date);
             }
         }
     });
