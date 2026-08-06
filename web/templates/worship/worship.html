@@ -373,7 +373,24 @@ let sundays = {{ sundays|tojson|safe }};
     //     }
     // }
 
-function add_button() {
+    function getDialogOptions(titleText) {
+        // Check if the screen is mobile-sized
+        const isMobile = $(window).width() < 600;
+        
+        return {
+            title: titleText,
+            width: isMobile ? '95%' : 'auto',
+            minWidth: 280, // Safe minimum for mobile devices
+            maxHeight: $(window).height() * 0.9, // Caps height at 90% of screen so the popup itself scrolls
+            position: { 
+                // Anchor to the top on mobile so it expands downward nicely
+                my: isMobile ? "top" : "center", 
+                at: isMobile ? "top+5%" : "center", 
+                of: window 
+            }
+        };
+    }
+    function add_button() {
         return '<button class="add_btn" title="Click to confirm" disabled style="opacity: 0.5; cursor: not-allowed; padding: 0 10px; margin-left: 4px; height: 28px; font-size: 13px; display: flex; align-items: center; justify-content: center;">Add</button>';
     }
 
@@ -490,15 +507,11 @@ function add_button() {
                 if (isDialogOpen) {
                     // Update content without re-initializing the dialog frame
                     $("#popup").html(pick_team(id, date));
-                    $('#popup').dialog("option", "position", {my: "center", at: "center", of: window});
+                    $('#popup').dialog("option", "position", getDialogOptions().position);
                 } else {
                     // First time opening: inject HTML and initialize the dialog widget
                     $("#popup").html(pick_team(id, date));
-                    $("#popup").dialog({
-                        title: "Worship Team (" + date + ")",
-                        width: 'auto',
-                        minWidth: 400,
-                        position: { my: "center", at: "center", of: window },
+                    $("#popup").dialog($.extend(getDialogOptions("Worship Team (" + date + ")"), {
                         buttons: [{
                             id: "button-add",
                             text: "OK",
@@ -510,7 +523,7 @@ function add_button() {
                                 dialogElement.dialog("close");
                             }
                         }]
-                    });
+                    }));
                 }
             }
         });
@@ -683,10 +696,7 @@ function add_button() {
                 html += 'Notes<br/><textarea rows="3" class="sermon-textarea" id="notes">' + escapeHtml(response.notes || '') + '</textarea>';
                 html += '</div>';
                 $("#popup").append(html);
-                $("#popup").dialog({
-                    title: "Sermon Information (" + date + ")",
-                    width: 'auto',
-                    position: { my: "center", at: "center", of: window },
+                $("#popup").dialog($.extend(getDialogOptions("Sermon Information (" + date + ")"), {
                     buttons: [{
                         id: "button-add",
                         text: "OK",
@@ -718,7 +728,7 @@ function add_button() {
                             }
                         }
                     }]
-                });
+                }));
 
                 $('#popup').off('input change', 'input, textarea');
                 $('#popup').on('input change', 'input, textarea', function() {
@@ -757,7 +767,7 @@ function add_button() {
                     $(this).before(newRow);
                     
                     // Recenter popup
-                    $('#popup').dialog("option", "position", {my: "center", at: "center", of: window});
+                    $('#popup').dialog("option", "position", getDialogOptions().position);
                 });
 
                 // Handle Removing a Bible Row
@@ -779,7 +789,7 @@ function add_button() {
                     container.find('.bible-input').first().trigger('change');
                     
                     // Recenter popup
-                    $('#popup').dialog("option", "position", {my: "center", at: "center", of: window});
+                    $('#popup').dialog("option", "position", getDialogOptions().position);
                 });
 
                 $('#popup').off('click', '#sermon_add_language_btn');
@@ -798,7 +808,7 @@ function add_button() {
                     sermon_data.display_order.splice(insertIndex, 0, langKey);
                     $('#sermon_language_editor').html(buildSermonEditorHtml(sermon_data, null, sermonLangs));
 
-                    $('#popup').dialog("option", "position", {my: "center", at: "center", of: window});
+                    $('#popup').dialog("option", "position", getDialogOptions().position);
                 });
 
                 $('#popup').off('click', '.sermon-remove-lang');
@@ -808,7 +818,7 @@ function add_button() {
                     delete sermon_data.sermons[langKey];
                     $('#sermon_language_editor').html(buildSermonEditorHtml(sermon_data, null, sermonLangs));
 
-                    $('#popup').dialog("option", "position", {my: "center", at: "center", of: window});
+                    $('#popup').dialog("option", "position", getDialogOptions().position);
                 });
 
                 // Block the Enter key from creating a new line
@@ -837,7 +847,7 @@ function add_button() {
         $("#roster_options").append(newGroup);
         $('#add_role_button').hide();
         
-        $('#popup').dialog("option", "position", {my: "center", at: "center", of: window});
+        $('#popup').dialog("option", "position", getDialogOptions().position);
     });
 
     $(document).on('change', ".roster", function() {
