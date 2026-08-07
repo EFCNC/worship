@@ -4,6 +4,9 @@
 
 {% block extra_css %}
 <style>
+    /*  ===========================
+        Main Layout & Containers
+        =========================== */
     .worship_container {
         display: flex;
         flex-wrap: wrap;
@@ -26,6 +29,9 @@
         }
     }
 
+    /*  ===========================
+        Worship Cards & Flip Animation
+        =========================== */
     .worship-card {
         background-color: transparent;
         width: 300px;
@@ -85,7 +91,7 @@
         flex-wrap: wrap;
     }
 
-    /* Target both buttons and the links inside your overlay */
+    /* Shared styling for buttons and links acting as buttons */
     button, 
     .overlay_btns a {
         cursor: pointer;
@@ -99,7 +105,6 @@
         color: var(--text-light);
         transition: background-color var(--transition-default), transform var(--transition-default);
         
-        /* Crucial additions for the <a> tags to act like buttons */
         display: inline-block;
         text-decoration: none;
         text-align: center;
@@ -113,11 +118,6 @@
             color: #fff;
             transform: translateY(-2px);
         }
-    }
-
-    .ui-dialog-titlebar {
-        background-color: #008CBA;
-        color: #fff;
     }
 
     .sermon-preview-container {
@@ -184,6 +184,9 @@
         padding-left: 9px;
     }
 
+    /*  ===========================
+        Scrollbars
+    =========================== */
     /* Chrome, Edge, and Safari */
     .team-info::-webkit-scrollbar {
         width: 4px;
@@ -198,7 +201,13 @@
         border-radius: 10px;
     }
 
-    /* Sermon Edit Popup UI */
+    /*  ===========================
+        Popup Stuff
+    =========================== */
+    .ui-dialog-titlebar {
+        background-color: #008CBA;
+        color: #fff;
+    }
 
     /* Mobile-first layout for the sermon popup */
     .sermon-editor-wrapper {
@@ -355,23 +364,13 @@
 
 {% block extra_js %}
 <script>
-let team;
-let roster;
-let inst;
-let marked;
-let worship_id = -1;
-let activeCard = null;
-let sundays = {{ sundays|tojson|safe }};
-
-    /* Looks Useless */
-    // function pop_role(name) {
-    //     for (i in taken_role) {
-    //         if (taken_role[i].name == name) {
-    //             taken_role.splice(i, 1);
-    //             break;
-    //         }
-    //     }
-    // }
+    let team;
+    let roster;
+    let inst;
+    let marked;
+    let worship_id = -1;
+    let activeCard = null;
+    let sundays = {{ sundays|tojson|safe }};
 
     function getDialogOptions(titleText) {
         // Check if the screen is mobile-sized
@@ -390,6 +389,7 @@ let sundays = {{ sundays|tojson|safe }};
             }
         };
     }
+
     function add_button() {
         return '<button class="add_btn" title="Click to confirm" disabled style="opacity: 0.5; cursor: not-allowed; padding: 0 10px; margin-left: 4px; height: 28px; font-size: 13px; display: flex; align-items: center; justify-content: center;">Add</button>';
     }
@@ -953,49 +953,48 @@ let sundays = {{ sundays|tojson|safe }};
         });
     });
 
+    $(document).ready(function () {
+        move_top('date="'+sundays[0] + '"');
 
-$(document).ready(function () {
-    move_top('date="'+sundays[0] + '"');
-
-    $(".worship-card").on("click", function (e) {
-        // Prevent flipping if text is currently highlighted/selected
-        if (window.getSelection().toString().length > 0) {
-            return;
-        }
-
-        // Prevent flipping if the user clicks a button, link, or input inside the card
-        if ($(e.target).closest('button, a, input, select, textarea').length) {
-            return;
-        }
-
-        // Flip back all other cards
-        $('.worship-card').not(this).removeClass("is-flipped");
-
-        $(this).toggleClass("is-flipped");
-    });
-
-    $(".overlay_btns button").on('click', function () {
-        const id = $(this).attr('name');
-        const date = $(this).parent().parent().parent().attr('date');
-
-        if(!id) {
-            $("#popup").html();
-        }
-        
-        else {
-            worship_id = Number(id);
-            if (this.id == 'team_btn') {
-                activeCard = $(this).closest('.worship-card');
-                get_roster(id, date, activeCard);
+        $(".worship-card").on("click", function (e) {
+            // Prevent flipping if text is currently highlighted/selected
+            if (window.getSelection().toString().length > 0) {
+                return;
             }
-            else if (this.id == 'sermon_btn') {
-                activeCard = $(this).closest('.worship-card');
-                get_sermon(worship_id, activeCard, date);
-            }
-        }
-    });
 
-});
+            // Prevent flipping if the user clicks a button, link, or input inside the card
+            if ($(e.target).closest('button, a, input, select, textarea').length) {
+                return;
+            }
+
+            // Flip back all other cards
+            $('.worship-card').not(this).removeClass("is-flipped");
+
+            $(this).toggleClass("is-flipped");
+        });
+
+        $(".overlay_btns button").on('click', function () {
+            const id = $(this).attr('name');
+            const date = $(this).parent().parent().parent().attr('date');
+
+            if(!id) {
+                $("#popup").html();
+            }
+            
+            else {
+                worship_id = Number(id);
+                if (this.id == 'team_btn') {
+                    activeCard = $(this).closest('.worship-card');
+                    get_roster(id, date, activeCard);
+                }
+                else if (this.id == 'sermon_btn') {
+                    activeCard = $(this).closest('.worship-card');
+                    get_sermon(worship_id, activeCard, date);
+                }
+            }
+        });
+
+    });
 
 </script>
 {% endblock %}
