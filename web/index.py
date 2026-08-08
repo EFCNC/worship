@@ -101,11 +101,13 @@ def profile():
 
 # -------- Worship Pages ---------
 @app.route("/worship")
+@app.route("/worship/edit")
 def worship_home():
 	sundays = Tools.allsundays()
 	worship = Utils.worship_list()
 	worship = [{'date': x, 'worship': next((y for y in worship if y['date'] == x), -1)} for x in sundays[1]]
-	return render_template('worship/worship.html', worship=worship, sundays=sundays)
+	is_edit_route = request.path.rstrip('/').endswith('/worship/edit')
+	return render_template('worship/worship.html', worship=worship, sundays=sundays, is_edit_route=is_edit_route)
 
 @app.route("/worship/<id>")
 @app.route("/worship/<id>/<tab>")
