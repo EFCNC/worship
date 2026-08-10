@@ -321,8 +321,7 @@ var API_URL = '/API/';
                                     $("#dialog").dialog("close");
 
                                     // Fetch the newly saved song data from database
-                                    get_song(id).done(function(updated_song_data) {
-                                        
+                                    return get_song(id).done(function(updated_song_data) {
                                         let songIndex = songs_temp.findIndex(s => s.id == id);
                                         
                                         if (songIndex > -1) {
@@ -350,13 +349,17 @@ var API_URL = '/API/';
                                 submit_song(click_url, JSON.stringify(tempSubmit))
                                     .done(function(response) {
                                         console.log("Saved successfully with JSON response:", response);
-                                        updateCardAfterSave();
+                                        updateCardAfterSave().done(function() {
+                                            $(document).trigger('worshipUIUpdated');
+                                        });
                                     })
                                     .fail(function(jqXHR, textStatus, errorThrown) {
                                         // Check if it actually succeeded but just failed the JSON parse
                                         if (jqXHR.status === 200) {
                                             console.log("Saved successfully (plain text response).");
-                                            updateCardAfterSave();
+                                            updateCardAfterSave().done(function() {
+                                                $(document).trigger('worshipUIUpdated');
+                                            });
                                         } else {
                                             console.error("AJAX Error:", textStatus, errorThrown);
                                             alert("Failed to save changes. Please try again.");
