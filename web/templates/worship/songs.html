@@ -260,6 +260,8 @@
     let worship_id = {{ id|safe }};
     let worship = $('#worship');
 
+    let hasUnsavedChanges = false;
+
     // init sharp and flat keys to be assigned to keys
     let sharp = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
     let flat = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"];
@@ -400,6 +402,14 @@
         reset();
     });
 
+    $(window).on('beforeunload.worshipUnsavedChanges', function (e) {
+        if (hasUnsavedChanges) {
+            e.preventDefault();
+            e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+            return e.returnValue;
+        }
+    });
+
     // Reactive State Management (Show/Hide Save & Reset Buttons)
     function checkActionButtons() {
         let orderChanged = false;
@@ -433,7 +443,9 @@
             }
         }
 
-        if (orderChanged || contentChanged) {
+        hasUnsavedChanges = orderChanged || contentChanged;
+
+        if (hasUnsavedChanges) {
             $('.save_btn, .reset_btn').show();
         } else {
             $('.save_btn, .reset_btn').hide();
