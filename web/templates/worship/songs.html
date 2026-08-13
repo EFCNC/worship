@@ -330,11 +330,14 @@
         });
 
         $('.arrow').click(function() {
-            increment = Number($(this).attr('name'));
-            id = worship_id;
-            id = id + increment;
-            if (id >= 0) {
-                window.location.href = '?id='+id;
+            let increment = Number($(this).attr('name'));
+            let nextId = worship_id;
+            nextId = nextId + increment;
+            if (nextId >= 0) {
+                let baseUrl = "{{ url_for('worship_songs_editor', id='PLACEHOLDER') }}";
+                
+                window.location.href = baseUrl.replace('PLACEHOLDER', nextId);
+                //window.location.href = `/worship/${nextId}/edit`
             }
         });
     });
