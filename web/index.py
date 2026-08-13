@@ -100,8 +100,8 @@ def profile():
 	return render_template('profile.html', team=team)
 
 # -------- Worship Pages ---------
-@app.route("/worship")
-@app.route("/worship/edit")
+@app.route("/worship", endpoint="worship_home_base")
+@app.route("/worship/edit", endpoint="worship_home_edit")
 def worship_home():
 	sundays = Tools.allsundays()
 	worship = Utils.worship_list()
