@@ -112,6 +112,17 @@ span.chunk:before {
 h3 {
     margin-top: 0;
 }
+
+@media (max-width: 768px) {
+    .song_container {
+        flex-direction: column;
+    }
+    
+    .song_block, .notes {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+}
 </style>
 {% endblock %}
 
