@@ -371,6 +371,7 @@
     let worship_id = -1;
     let activeCard = null;
     let sundays = {{ sundays|tojson|safe }};
+    let isEditRoute = {{ is_edit_route|tojson }};
 
     function getDialogOptions(titleText) {
         // Check if the screen is mobile-sized
@@ -444,7 +445,7 @@
                 }
             }
             
-            if (dd > d1) {
+            if (dd > d1 && isEditRoute != true) {
                 // Past dates (Read-only view)
                 var $select = $('<select class="roster single-line-textarea" disabled title="' + escapeHtml(roster[x].inst_name) + '"></select>');
                 $select.append(html);
@@ -464,7 +465,7 @@
         }
         
         roster_html += '<div id="roster_options"></div>';
-        if (dd <= d1) {
+        if (dd <= d1 || isEditRoute == true) {
             roster_html += add_role_button();
         }
         roster_html += '</div>';
