@@ -542,8 +542,9 @@
                 checkActionButtons();
             }
         });
-        $("#songs").disableSelection();
+
         $(".lyrics").sortable({
+            cancel: "input, textarea, button, select, option",
             create: function( event, ui ) {
                 //is_changed($(this).sortable('toArray', {attribute: 'name'}));
                 update_alt($(this).sortable('toArray'));
@@ -554,7 +555,7 @@
                 checkActionButtons();
             }
         });
-        $(".lyrics").disableSelection();
+
         get_transpose();
 
         checkWorshipEmptyState();
