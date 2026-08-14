@@ -235,37 +235,37 @@
         }
     });
 
-    // Touch Swiping
-    let touchStartX = 0;
-    let touchEndX = 0;
-    let touchStartY = 0;
-    let touchEndY = 0;
+    // // Touch Swiping
+    // let touchStartX = 0;
+    // let touchEndX = 0;
+    // let touchStartY = 0;
+    // let touchEndY = 0;
 
-    $(document).on('touchstart', function(e) {
-        touchStartX = e.changedTouches[0].screenX;
-        touchStartY = e.changedTouches[0].screenY;
-    });
+    // $(document).on('touchstart', function(e) {
+    //     touchStartX = e.changedTouches[0].screenX;
+    //     touchStartY = e.changedTouches[0].screenY;
+    // });
 
-    $(document).on('touchend', function(e) {
-        touchEndX = e.changedTouches[0].screenX;
-        touchEndY = e.changedTouches[0].screenY;
-        handleSwipe();
-    });
+    // $(document).on('touchend', function(e) {
+    //     touchEndX = e.changedTouches[0].screenX;
+    //     touchEndY = e.changedTouches[0].screenY;
+    //     handleSwipe();
+    // });
 
-    function handleSwipe() {
-        let swipeThresholdX = 50; 
-        let swipeThresholdY = 50; 
+    // function handleSwipe() {
+    //     let swipeThresholdX = 50; 
+    //     let swipeThresholdY = 50; 
 
-        // If the user scrolls vertically more than they swipe horizontally, ignore it
-        if (Math.abs(touchEndY - touchStartY) > swipeThresholdY) return;
+    //     // If the user scrolls vertically more than they swipe horizontally, ignore it
+    //     if (Math.abs(touchEndY - touchStartY) > swipeThresholdY) return;
 
-        if (touchEndX < touchStartX - swipeThresholdX) {
-            // Swiped Left -> Move forward to next song
-            changeSong(1);
-        } else if (touchEndX > touchStartX + swipeThresholdX) {
-            // Swiped Right -> Move backward to previous song
-            changeSong(-1);
-        }
-    }
+    //     if (touchEndX < touchStartX - swipeThresholdX) {
+    //         // Swiped Left -> Move forward to next song
+    //         changeSong(1);
+    //     } else if (touchEndX > touchStartX + swipeThresholdX) {
+    //         // Swiped Right -> Move backward to previous song
+    //         changeSong(-1);
+    //     }
+    // }
 </script>
 {% endblock %}

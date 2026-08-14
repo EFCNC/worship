@@ -260,6 +260,8 @@
     let worship_id = {{ id|safe }};
     let worship = $('#worship');
 
+    let hasUnsavedChanges = false;
+
     // init sharp and flat keys to be assigned to keys
     let sharp = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
     let flat = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"];
@@ -328,11 +330,14 @@
         });
 
         $('.arrow').click(function() {
-            increment = Number($(this).attr('name'));
-            id = worship_id;
-            id = id + increment;
-            if (id >= 0) {
-                window.location.href = '?id='+id;
+            let increment = Number($(this).attr('name'));
+            let nextId = worship_id;
+            nextId = nextId + increment;
+            if (nextId >= 0) {
+                let baseUrl = "{{ url_for('worship_songs_editor', id='PLACEHOLDER') }}";
+                
+                window.location.href = baseUrl.replace('PLACEHOLDER', nextId);
+                //window.location.href = `/worship/${nextId}/edit`
             }
         });
     });
@@ -400,6 +405,14 @@
         reset();
     });
 
+    $(window).on('beforeunload.worshipUnsavedChanges', function (e) {
+        if (hasUnsavedChanges) {
+            e.preventDefault();
+            e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+            return e.returnValue;
+        }
+    });
+
     // Reactive State Management (Show/Hide Save & Reset Buttons)
     function checkActionButtons() {
         let orderChanged = false;
@@ -433,7 +446,9 @@
             }
         }
 
-        if (orderChanged || contentChanged) {
+        hasUnsavedChanges = orderChanged || contentChanged;
+
+        if (hasUnsavedChanges) {
             $('.save_btn, .reset_btn').show();
         } else {
             $('.save_btn, .reset_btn').hide();
