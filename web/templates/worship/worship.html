@@ -139,6 +139,25 @@
         margin-bottom: 6px;
     }
 
+    a.bible-preview-badge {
+        display: inline-block;
+        font-size: 0.82em;
+        background: rgba(255, 255, 255, 0.25);
+        color: #333;
+        padding: 1px 3px;
+        border-radius: 4px;
+        margin-right: 4px; 
+        margin-top: 3px; 
+        border: 1px solid rgba(0, 0, 0, 0.15);
+        text-decoration: none;
+        transition: background-color 0.2s;
+    }
+
+    a.bible-preview-badge:hover {
+        background: rgba(255, 255, 255, 0.6);
+        color: #000;
+    }
+
     .sermon-notes-preview {
          white-space: pre-wrap;
         margin-top: 5px;
@@ -324,6 +343,17 @@
                                     <div class="sermon-preview-block">
                                         <b>{{ label }}</b>: {{ sermon_variant.title or '' }}<br/>
                                         <small>{{ sermon_variant.speaker or '' }}</small>
+                                        
+                                        {% if sermon_variant.bible %}
+                                            <br/>
+                                            {% set verses = sermon_variant.bible.replace('、', ';').replace('，', ';').split(';') %}
+                                            {% for verse in verses %}
+                                                {% set clean_verse = verse | trim %}
+                                                {% if clean_verse %}
+                                                    <a class="bible-preview-badge" href="javascript:void(0)" onclick="get_bible(show_verse, '{{ clean_verse | replace("'", "\\'") | replace('"', '\\"') }}'); return false;">{{ clean_verse }}</a>
+                                                {% endif %}
+                                            {% endfor %}
+                                        {% endif %}
                                     </div>
                                 {% endif %}
                             {% endfor %}
@@ -363,6 +393,7 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="/static/bible.js"></script>
 <script>
     let team;
     let roster;
@@ -561,6 +592,20 @@
         return '中';
     }
 
+    function buildInteractiveBibleBadges(bibleText) {
+        if (!bibleText) return '';
+        var bible = bibleText.replace(/(、|;)/g, '，').split('，');
+        var b = '<br/>';
+        for (var i=0; i<bible.length; i++) {
+            var verse = bible[i].trim();
+            if (verse !== "") {
+                var escapedVerse = verse.replace(/'/g, "\\'").replace(/"/g, '\\"');
+                b += '<a class="bible-preview-badge" href="javascript:void(0)" onclick="get_bible(show_verse, \'' + escapedVerse + '\'); return false;">' + escapeHtml(verse) + '</a>';
+            }
+        }
+        return b;
+    }
+
     function buildSermonPreviewHtml(sermonData) {
         let html = '';
         if (sermonData.is_joint) {
@@ -570,7 +615,10 @@
         displayOrder.forEach(function(langKey) {
             var langVariant = getSermonVariant(sermonData.sermons, langKey);
             if (langVariant.title || langVariant.speaker || langVariant.bible || langVariant.outline) {
-                html += '<div class="sermon-preview-block"><b>' + getLanguageLabel(langKey) + '</b>: ' + escapeHtml(langVariant.title || '') + '<br/><small>' + escapeHtml(langVariant.speaker || '') + '</small></div>';
+                
+                var bibleHtml = buildInteractiveBibleBadges(langVariant.bible);
+                
+                html += '<div class="sermon-preview-block"><b>' + getLanguageLabel(langKey) + '</b>: ' + escapeHtml(langVariant.title || '') + '<br/><small>' + escapeHtml(langVariant.speaker || '') + '</small>' + bibleHtml + '</div>';
             }
         });
 
