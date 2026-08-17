@@ -121,7 +121,7 @@
     }
 
     .sermon-preview-container {
-        padding: 10px;
+        padding: 0px 10px 5px 10px;
         text-align: left;
         font-size: 13px;
         line-height: 1.35;
@@ -135,8 +135,8 @@
     .sermon-preview-block {
         background: rgba(255,255,255,0.28);
         border-radius: 6px;
-        padding: 6px 8px;
-        margin-bottom: 6px;
+        padding: 5px 8px;
+        margin-bottom: 5px;
     }
 
     a.bible-preview-badge {
@@ -158,8 +158,7 @@
     }
 
     .sermon-notes-preview {
-         white-space: pre-wrap;
-        margin-top: 5px;
+        white-space: pre-wrap;
 
         flex-grow: 1;
         overflow: hidden;
@@ -190,6 +189,12 @@
         font-weight: bold;
         letter-spacing: 0.04em;
         text-transform: uppercase;
+    }
+
+    .no-speaker {
+        color: #d63031;
+        font-style: italic;
+        font-weight: bold;
     }
 
     .team-info {
@@ -341,7 +346,14 @@
                                     {% set label = '中' if lang_key == 'zh' else '台' if lang_key == 'zh-TW' else 'EN' %}
                                     <div class="sermon-preview-block">
                                         <b>{{ label }}</b>: {{ sermon_variant.title or '' }}<br/>
-                                        <small>{{ sermon_variant.speaker or '' }}</small>
+                                        
+                                        <small>
+                                            {% if sermon_variant.speaker %}
+                                                {{ sermon_variant.speaker }}
+                                            {% else %}
+                                                <span class="no-speaker">No speaker listed</span>
+                                            {% endif %}
+                                        </small>
                                         
                                         {% if sermon_variant.bible %}
                                             <br/>
@@ -618,7 +630,9 @@
                 
                 var bibleHtml = buildInteractiveBibleBadges(langVariant.bible);
                 
-                html += '<div class="sermon-preview-block"><b>' + getLanguageLabel(langKey) + '</b>: ' + escapeHtml(langVariant.title || '') + '<br/><small>' + escapeHtml(langVariant.speaker || '') + '</small>' + bibleHtml + '</div>';
+                var speakerHtml = langVariant.speaker ? escapeHtml(langVariant.speaker) : '<span class="no-speaker">No speaker listed</span>';
+                
+                html += '<div class="sermon-preview-block"><b>' + getLanguageLabel(langKey) + '</b>: ' + escapeHtml(langVariant.title || '') + '<br/><small>' + speakerHtml + '</small>' + bibleHtml + '</div>';
             }
         });
 
