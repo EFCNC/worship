@@ -1,14 +1,4 @@
-<!-- Improved compatibility of back to top link: See: https://github.com/othneildrew/Best-README-Template/pull/73 -->
 <a id="readme-top"></a>
-<!--
-*** Thanks for checking out the Best-README-Template. If you have a suggestion
-*** that would make this better, please fork the repo and create a pull request
-*** or simply open an issue with the tag "enhancement".
-*** Don't forget to give the project a star!
-*** Thanks again! Now go create something AMAZING! :D
--->
-
-
 
 <!-- PROJECT SHIELDS -->
 <!--
@@ -34,14 +24,14 @@
 
   <p align="center">
     Worship Application for Songs and Presentation...?
-    A python flask based web application aims to help churches in worship preparation and presentation.
+    A python flask based web application aimed to help churches in worship preparation and presentation.
     <br />
     <a href="https://github.com/EFCNC/worship"><strong>Explore the docs »</strong></a>
     <br />
     <br />
-    <a href="https://github.com/EFCNC/worship/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
+    <a href="https://github.com/EFCNC/worship/issues/new??template=bug_report.yml">Report Bug</a>
     &middot;
-    <a href="https://github.com/EFCNC/worship/issues/new?labels=enhancement&template=feature-request---.md">Request Feature</a>
+    <a href="https://github.com/EFCNC/worship/issues/new?template=feature_request.yml">Request Feature</a>
   </p>
 </div>
 
@@ -74,21 +64,42 @@
 ## About The Project
 
 <!-- [![Product Name Screen Shot][product-screenshot]](https://example.com) -->
-WIP
+WASP is a Flask-based church worship planning and presentation app for managing weekly worship services, song arrangements, worship teams, and slide presentations.
+
+WASP helps churches plan each Sunday service with:
+- song selection and arrangement
+- chord and sheet music views
+- team scheduling and availability
+- admin info and reporting
+- live presentation support for slides and lyrics
+
+This project is designed to support worship teams before, during, and after a Sunday service. It combines planning tools with presentation views so a church can manage service content from a single app.
+
+### Built With
+[![JQuery][JQuery.com]][JQuery-url] [![Jinja][Jinja.com]][Jinja-url]
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-### Built With
-* [![JQuery][JQuery.com]][JQuery-url]
-* [![Jinja][Jinja.com]][Jinja-url]
+## Features
 
+- Weekly worship planning and scheduling
+- Song library and editing tools
+- Chord and sheet music display for selected songs
+- Team roster and availability tracking
+- Admin tools for church info, calendars, and reports
+- Slide-based presentation modes for admin/lead/view use
+- JSON and export support for presentation data
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <!-- GETTING STARTED -->
 ## Getting Started
 
 ### Prerequisites
 
-- Have Python installed
+- Python 3.x
+- pip
+- A local environment or virtual environment
 
 ### Installation
 
@@ -102,15 +113,46 @@ WIP
    ```
 3. *(Optional)* Add ESV API
     1. Get a free ESV API Key at [https://api.esv.org/](https://api.esv.org/)
-    2. Enter your API in `web/static/config.js`
+    2. Enter your API in `web/static/config.example.js`
    ```js
    const ESV_API_KEY = "YOUR_ESV_API_KEY_HERE";
    ```
+    3. Rename `web/static/config.example.js` to `web/static/config.js`
+4. Rename `db/worship.example.db` to `db/worship.db`
 5. Start the web server:
    ```js
    python web/index.py
    ```
    Website is viewable at [http://localhost:5000/](http://localhost:5000/)
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+## Page Map
+
+The app is organized around a few main sections. The route map below matches the main pages in the Flask app:
+
+| Route | Template | Purpose |
+|---|---|---|
+| `/` | `home.html` | Main landing page |
+| `/profile` | `profile.html` | Selecting your user profile |
+| `/worship` | `worship/worship.html` | Worship dashboard and weekly overview |
+| `/worship/<id>` | `worship/notes.html` | Weekly worship notes and service details |
+| `/worship/<id>/edit` | `worship/songs.html` | Edit song order and weekly service arrangement |
+| `/worship/<id>/chords` | `worship/chords.html` | View chord charts for the week |
+| `/worship/<id>/sheets` | `worship/sheets.html` | View sheet music for the week |
+| `/worship/schedule` | `worship/schedule.html` | Team scheduling and availability |
+| `/song/list` | `song/song_list.html` | Browse the song library |
+| `/song/<id>/edit` | `song/song_editor.html` | Edit an individual song |
+| `/slides` | `slides/slides.html` | Presentation landing page |
+| `/slides/admin` | `slides/slides_admin.html` | Admin presentation mode |
+| `/slides/lead` | `slides/slides_lead.html` | Lead presentation mode |
+| `/slides/view` | `slides/slides_view.html` | View-only presentation mode |
+| `/admin` | `admin/home.html` | Admin dashboard |
+| `/admin/info` | `admin/info.html` | Weekly announcements and service info |
+| `/admin/people` | `admin/people.html` | Team management and assignments |
+| `/admin/calendar` | `admin/calendar.html` | Calendar and scheduling overview |
+| `/admin/report/<id>` | `admin/report_pdf.html` | Weekly report generation |
+| `/files` | `files.html` | Exported JSON and slide files |
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -157,12 +199,20 @@ Export and save your arrangements as JSON or easyslides format (zip) compatible 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+## Supported Song Databases
+- **en.sqlite** - Large collection of English hymns
+- **zh.sqlite** - Primarily from 迦南詩選
+- **stream_of_praise.db** - 讚美之泉 (lyrics in Chinese/Taiwanese)
+- **Coming soon** - 台語聖詩
 
 <!-- ROADMAP -->
 ## Roadmap
 
 - [x] Working build
-- [x] Use revealjs for presentations
+- [x] Migrate to revealjs for slides presentation
+  - [ ] Rebuild slide pages for better UI
+- [x] Bilingual support for sermon data
+  - [ ] Bilingual support in reports and auto-generated slides
 - [ ] Migrate songs to a new database format
 
 See the [open issues](https://github.com/EFCNC/worship/issues) for a full list of proposed features (and known issues).
@@ -175,30 +225,8 @@ See the [open issues](https://github.com/EFCNC/worship/issues) for a full list o
   <img src="https://contrib.rocks/image?repo=EFCNC/worship" alt="contrib.rocks image" />
 </a>
 
-
-<!-- LICENSE -->
-## License
-
-Distributed under the project_license. See `LICENSE.txt` for more information.
-
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-
-<!-- ACKNOWLEDGMENTS -->
-## Acknowledgments
-
-* []()
-* []()
-* []()
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
-### Supported Song Databases
-- **en.sqlite** - Large collection of English hymns
-- **zh.sqlite** - Primarily from 迦南詩選
-- **stream_of_praise.db** - 讚美之泉 (lyrics in Chinese/Taiwanese)
-- **Coming soon** - 台語聖詩
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
