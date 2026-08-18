@@ -22,10 +22,6 @@
 [![Forks][forks-shield]][forks-url]
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
-[![project_license][license-shield]][license-url]
-[![LinkedIn][linkedin-shield]][linkedin-url]
-
-
 
 <!-- PROJECT LOGO -->
 <br />
@@ -37,7 +33,7 @@
 <h3 align="center">Project... WASP?</h3>
 
   <p align="center">
-    Worship Application for Song and Presentation...?
+    Worship Application for Songs and Presentation...?
     A python flask based web application aims to help churches in worship preparation and presentation.
     <br />
     <a href="https://github.com/EFCNC/worship"><strong>Explore the docs »</strong></a>
@@ -89,8 +85,6 @@ WIP
 
 <!-- GETTING STARTED -->
 ## Getting Started
-
-To get a local copy up and running follow these  steps.
 
 ### Prerequisites
 
