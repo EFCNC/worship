@@ -161,11 +161,18 @@
         outline: none;
     }
 
-     /* Highlight Color Styles */
+    /* Highlight Color Styles */
     span.hl-chorus { color: #38a169; font-weight: bold; }
     span.hl-verse { color: #3182ce; font-weight: bold; }
     span.hl-bridge { color: #e53e3e; font-weight: bold; }
     span.hl-prechorus { color: #d69e2e; font-weight: bold; }
+    
+    span.hl-postchorus { color: #805ad5; font-weight: bold; }
+    span.hl-tag { color: #ed64a6; font-weight: bold; }
+    span.hl-vamp { color: #dd6b20; font-weight: bold; }
+    span.hl-intro { color: #718096; font-weight: bold; }
+    span.hl-outro { color: #4a5568; font-weight: bold; }
+    span.hl-interlude { color: #319795; font-weight: bold; }
 
     /* =========================================
         Chords/Tags and Sequence
@@ -306,14 +313,26 @@
                 <input name="author" type="text" value="{{ content.author }}"/>
             </div>
         </div>
+        <div class="form-row">
+            <div class="form-group" style="flex: 100%;">
+                <label>Arrangement Sequence</label>
+                <input name="sequence" type="text" value="{{ content.sequence }}" placeholder="e.g. Intro, V1, PC, C, V2, C, B, Tag, Outro" style="font-family: monospace; letter-spacing: 0.5px;"/>
+            </div>
+        </div>
 
         <div class="tag-container">
             <label>Structure Helpers (Click to insert):</label><br/>
-            <span class="sequence" data-tag="verse">Verse</span>
+            <span class="sequence" data-tag="intro" style="pointer-events: none; opacity: 0.4;">Intro</span>
+            <span class="sequence" data-tag="verse" style="pointer-events: none; opacity: 0.4;">Verse</span>
+            <span class="sequence" data-tag="pre-chorus">Pre-Chorus</span>
             <span class="sequence" data-tag="chorus">Chorus</span>
-            <span class="sequence" data-tag="prechorus">Pre-Chorus</span>
+            <span class="sequence" data-tag="post-chorus" style="pointer-events: none; opacity: 0.4;">Post-Chorus</span>
             <span class="sequence" data-tag="bridge">Bridge</span>
-            <input name="sequence" type="text" value="{{ content.sequence }}" placeholder="Sequence (V, C, V, C...)" style="width: 200px; margin-left: 10px;"/>
+            <span class="sequence" data-tag="interlude" style="pointer-events: none; opacity: 0.4;">Interlude</span>
+            <span class="sequence" data-tag="instrumental" style="pointer-events: none; opacity: 0.4;">Instrumental</span>
+            <span class="sequence" data-tag="vamp" style="pointer-events: none; opacity: 0.4;">Vamp</span>
+            <span class="sequence" data-tag="tag" style="pointer-events: none; opacity: 0.4;">Tag</span>
+            <span class="sequence" data-tag="outro" style="pointer-events: none; opacity: 0.4;">Outro</span>
         </div>
 
         <div class="tag-container" id="chord_tags">
@@ -524,19 +543,35 @@
             .replace(/</g, '&lt;')
             .replace(/>/g, '&gt;');
 
-        // Highlight actual storage markup tags (<chorus>, </chorus>, etc.)
-        text = text.replace(/&lt;(\/?)chorus&gt;/gi, '<span class="hl-chorus">&lt;$1chorus&gt;</span>');
-        text = text.replace(/&lt;(\/?)verse&gt;/gi, '<span class="hl-verse">&lt;$1verse&gt;</span>');
-        text = text.replace(/&lt;(\/?)bridge&gt;/gi, '<span class="hl-bridge">&lt;$1bridge&gt;</span>');
-        text = text.replace(/&lt;(\/?)pre-chorus&gt;/gi, '<span class="hl-prechorus">&lt;$1pre-chorus&gt;</span>');
-        text = text.replace(/&lt;(\/?)prechorus&gt;/gi, '<span class="hl-prechorus">&lt;$1prechorus&gt;</span>');
+        // Define all valid song structures
+        const structures = [
+            { tag: 'verse', cls: 'hl-verse' },
+            { tag: 'chorus', cls: 'hl-chorus' },
+            { tag: 'bridge', cls: 'hl-bridge' },
+            { tag: 'pre-chorus', cls: 'hl-prechorus' },
+            { tag: 'prechorus', cls: 'hl-prechorus' },
+            { tag: 'post-chorus', cls: 'hl-postchorus' },
+            { tag: 'postchorus', cls: 'hl-postchorus' },
+            { tag: 'tag', cls: 'hl-tag' },
+            { tag: 'vamp', cls: 'hl-vamp' },
+            { tag: 'intro', cls: 'hl-intro' },
+            { tag: 'outro', cls: 'hl-outro' },
+            { tag: 'interlude', cls: 'hl-interlude' },
+            { tag: 'instrumental', cls: 'hl-interlude' } 
+        ];
 
-        // Also catch traditional fallback structural square brackets if typed manually: [chorus]
-        text = text.replace(/\[(chorus)\]/gi, '<span class="hl-chorus">[$1]</span>');
-        text = text.replace(/\[(verse)\]/gi, '<span class="hl-verse">[$1]</span>');
-        text = text.replace(/\[(bridge)\]/gi, '<span class="hl-bridge">[$1]</span>');
-        text = text.replace(/\[(pre-chorus)\]/gi, '<span class="hl-prechorus">[$1]</span>');
-        text = text.replace(/\[(prechorus)\]/gi, '<span class="hl-prechorus">[$1]</span>');
+        // Loop through and dynamically generate regex replacements
+        structures.forEach(struct => {
+            // Highlight actual storage markup tags (<tag>, </tag>)
+            const xmlRegex = new RegExp(`&lt;(\/?)${struct.tag}&gt;`, 'gi');
+            text = text.replace(xmlRegex, `<span class="${struct.cls}">&lt;$1${struct.tag}&gt;</span>`);
+            
+            // Catch traditional fallback structural square brackets: [tag]
+            const bracketRegex = new RegExp(`\\[(${struct.tag})\\]`, 'gi');
+            text = text.replace(bracketRegex, `<span class="${struct.cls}">[$1]</span>`);
+        });
+
+        // Catch-all fallback for undefined custom bracket structures (e.g., [Guitar Solo])
         text = text.replace(/^[ \t]*\[([^\]]+)\][ \t]*$/gm, '<span class="hl-verse" style="color: #805ad5;">[$1]</span>');
         
         // Fix textarea trailing newline scrolling tracking offset bug
@@ -557,7 +592,7 @@
         const sel = txtarea.value.substring(start, finish);
 
         let textToInsert = isPaired 
-            ? `[${tag}]\n${sel}\n` 
+            ? `[${tag}]\n${sel}` 
             : `[${tag}] `;
 
         if (!document.execCommand('insertText', false, textToInsert)) {
