@@ -87,10 +87,14 @@
     }
 
     function move_top(para) {
-        scrollTo = $('div[class="inner present"]');
-        base = $('.preview').offset().top;
-        $('.preview').scrollTop(base);
-        $('.preview').scrollTop($(scrollTo).offset().top - base);
+        let scrollTo = $('div.inner.present'); 
+        let preview = $('.preview');
+
+        if (scrollTo.length > 0 && preview.length > 0) {
+            let base = preview.offset().top;
+            preview.scrollTop(base);
+            preview.scrollTop(scrollTo.offset().top - base);
+        }
     }
 
     function save_slides() {
@@ -263,6 +267,7 @@
 			                o_fragment = origin_.splice(0, fragment).join('<br/>')
 			                r_fragment = region_.splice(0, fragment).join('<br/>')
 				            let sub_section = document.createElement('section');
+                            sub_section.classList.add('top-align');
 				            sub_section.append(create_view(data.type, o_fragment, r_fragment, s_name));
       			            sub_section.setAttribute('order', j);
       			            section.append(sub_section);

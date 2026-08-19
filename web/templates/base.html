@@ -23,7 +23,8 @@
 
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    
     <!-- Page-Specific Styles -->
     {% block extra_css %}{% endblock %}
 </head>
@@ -43,7 +44,7 @@
     {% endif %}
 
     <!-- Main Content Area -->
-    <main id="main-content">
+    <main id="main-content" class="{% block main_class %}page-standard{% endblock %}">
         {% block content %}{% endblock %}
     </main>
 

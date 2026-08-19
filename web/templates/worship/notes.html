@@ -4,8 +4,16 @@
 
 {% block extra_css %}
 <meta name="viewport" content="width=device-width, initial-scale=1" charset="utf-8">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/static/css/worship-shared.css">
 <style>
+.reference {
+    padding: 0.5em;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
 span.chunk {
     position:relative;
 }
@@ -17,9 +25,6 @@ span.chunk:before {
     top:-2em;
 }
 
-.reference {
-    padding: 0.5em;
-}
 .song_chord {
     line-height: 200%;
 }
@@ -38,15 +43,19 @@ span.chunk:before {
     color: #000;
 }
 
-.notes {
-    text-align: center;
-    flex: 1; /* Takes up the remaining 50% width */
-}
-
 .song_block > span {
     position: absolute;
     top: 5px;
     left: 5px;
+}
+
+.notes {
+    text-align: center;
+    flex: 1;
+
+    min-width: 0; 
+    overflow-wrap: break-word;
+    word-break: break-word;
 }
 
 .info {
@@ -60,23 +69,6 @@ span.chunk:before {
     color: #000;
     border-radius: 5px;
     padding: 0px 10px 10px 10px;
-}
-
-.notes {
-    text-align: center;
-}
-
-/* Language tags */
-.lang_en    { --lang-color: #009698; }
-.lang_zh    { --lang-color: #8b0000; }
-.lang_zhTW  { --lang-color: #556b2f; }
-.lang_zhpingyin { --lang-color: #856088; }
-
-.lang_en, .lang_zh, .lang_zhTW, .lang_zhpingyin {
-    border-radius: 50px 20px;
-    color: #fff;
-    border: 4px solid var(--lang-color);
-    background-color: var(--lang-color);
 }
 
 /* Toggle buttons */
@@ -97,17 +89,18 @@ span.chunk:before {
     color: white;
 }
 
-.worship_controls_button_container {
+/* Video Grid */
+.video-grid {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 1rem;
+    gap: 20px;
+    justify-content: center;
+    margin-bottom: 30px;
 }
 
-/* Cotainer for Video (helps scale) */
 .video-container {
-    width: 100%;
-    max-width: 640px;
+    flex: 1 1 400px; 
+    max-width: 640px; 
     aspect-ratio: 16 / 9;
 }
 
@@ -115,35 +108,44 @@ span.chunk:before {
     width: 100%;
     height: 100%;
 }
+
+h3 {
+    margin-top: 0;
+}
+
+@media (max-width: 768px) {
+    .song_container {
+        flex-direction: column;
+    }
+    
+    .song_block, .notes {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+}
 </style>
 {% endblock %}
 
 {% block content %}
-    <h3> {{ w.date }} 敬拜筆記 (Worship Notes):</h3>
-    <p>
-        <b>Title: {{ w.sermon_title }}<br/>
-        Speaker: {{ w.speaker }}<br/>
-        Bible: <span id="bible_verse"></span><br/>
-        Outline: {{ w.outline }}</b>
-    </p>
-    <p>
-        {% for team in w.content %}
-            {{ team.role }}: {{ team.user_name }}<br/>
-        {% endfor %}
-    </p>
-    <p>
-        <b>Worship Leader's Notes:</b>
-        {{ w.notes }}
-    </p>
 
+    <div id="summary_container" class="app-card">
+        <!-- Dynamically populated by get_sermon() -->
+    </div>
+    
     <!-- Container of worship songs -->
-    <div class="worship_controls_button_container">
+    <div class="action_btn_container">
         <button class="toggle-btn view" onclick="loadTab('view')">View</button>
         <button class="toggle-btn chord" onclick="loadTab('chord')">Chord</button>
         <button class="toggle-btn bi" onclick="loadTab('bi')">Bilingual</button>
         <button class="toggle-btn video" onclick="loadTab('video')">Youtube</button>
-        <button class="toggle-btn" onclick="load_chords()">All Chords</button>
-        <button class="toggle-btn" onclick="load_sheets()">All Sheets</button>
+        <a href="{{ url_for('get_weekly_chords', id=id) }}">
+            <button class="toggle-btn view">All Chords</button>
+        </a>
+        <a href="{{ url_for('get_weekly_sheets', id=id) }}">
+            <button class="toggle-btn view">All Sheets</button>
+        </a>
+
+        
     </div>
 
     <div id="worship">
@@ -152,18 +154,90 @@ span.chunk:before {
 {% endblock %}
 
 {% block extra_js %}
+<script src="/static/config.js"></script>
 <script src="/static/bible.js"></script>
 <script>
     // --- DATA INITIALIZATION ---
     const sharp = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
     const flat = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"];
 
-    const worshipData = {{ songs|safe }};
-    const worshipInfo = {{ w|safe }};
+    const worshipData = {{ songs|tojson|safe }};
+    const worshipInfo = {{ w|tojson|safe }};
     const initialTab = '{{ tab|safe }}' || 'view';
     const song_id = worshipData.map(o=> o.id);
 
     // --- FUNCTIONS ---
+
+    /**
+    * Builds and injects the Sermon Card HTML
+    */
+    function get_sermon() {
+        function buildBibleLinks(bibleText) {
+            var bible = (bibleText || '').replace(/(、|;)/g, '，').split('，');
+            var b = '';
+            for (var i=0; i<bible.length; i++) {
+                var verse = bible[i].trim();
+                if (verse !== "") {
+                    var escapedVerse = verse.replace(/'/g, "\\'").replace(/"/g, '\\"');
+                    b += ' <a class="bible-link" href="javascript:void(0)" onclick="get_bible(show_verse, \'' + escapedVerse + '\'); return false;">' + verse + '</a>';
+                }
+            }
+            return b;
+        }
+
+        var sermonVariants = worshipInfo.sermons || {};
+        var sermonLangs = [
+            { key: 'zh', label: '中文', shortLabel: '中' },
+            { key: 'zh-TW', label: '台語', shortLabel: '台' },
+            { key: 'en', label: 'English', shortLabel: 'EN' }
+        ];
+
+        var titleHtml = "<h3>{{ w.date }} 敬拜筆記 (Worship Notes)</h3>";
+
+        var cardHtml = sermonLangs.filter(function(item) {
+            var sermon = sermonVariants[item.key] || {};
+            return sermon.title || sermon.speaker || sermon.bible || sermon.outline;
+        }).map(function(item) {
+            var sermon = sermonVariants[item.key] || {};
+            var bibleText = buildBibleLinks(sermon.bible || '');
+            return `
+                <div class="sermon-header">
+                    <h4 class="sermon-title"><strong>${item.label}:</strong> ${sermon.title || ''}</h4>
+                    <span class="sermon-speaker">By: ${sermon.speaker || ''}</span>
+                </div>
+                <div class="sermon-bible"><strong>Scripture Reference:</strong> ${bibleText}</div>
+                <div class="sermon-outline"><strong>Sermon Outline:</strong><br/>${sermon.outline || ''}</div>
+            `;
+        }).join('');
+
+        var teamHtml = '';
+        if (worshipInfo.content && worshipInfo.content.length > 0) {
+            var teamRows = worshipInfo.content.map(function(team) {
+                return `<strong>${team.role}:</strong> ${team.user_name}`;
+            }).join('<br/>');
+
+            teamHtml = `
+                <div class="card-row" style="border-top: 1px solid #eee; padding-top: 12px;">
+                    <p>${teamRows}</p>
+                </div>
+            `;
+        }
+
+        var notesHtml = '';
+        if (worshipInfo.notes) {
+            notesHtml = `
+                <div class="card-row" style="border-top: 1px solid #eee; padding-top: 12px;">
+                    <p>
+                        <strong>Worship Leader's Notes:</strong><br/>
+                        ${worshipInfo.notes.replace(/\n/g, '<br/>')}
+                    </p>
+                </div>
+            `;
+        }
+
+        $('#summary_container').html(titleHtml + cardHtml + teamHtml + notesHtml);
+    }
+
     /**
     * Transposes a single chord string (e.g., "G/B") by a specific number of steps (diff).
     */
@@ -250,6 +324,51 @@ span.chunk:before {
     }
 
     /**
+    * Generate Dropdowns for Media Links
+    */
+    function getMediaLinksHtml(item) {
+        let html = '';
+
+        // Sheet Music Links (Score)
+        if (item.score && item.score.length > 0) {
+            if (item.score.length === 1) {
+                html += `<a href="${item.score[0]}" target="_blank"><i style="font-size:24px" class="fa" title="Sheet Music">&#xf0f6;</i></a>`;
+            } else {
+                html += `<div class="media-dropdown">
+                    <span class="media-dropbtn"><i class="fa" style="font-size:24px" title="Sheet Music">&#xf0f6;</i><span class="badge">${item.score.length}</span></span>
+                    <div class="media-dropdown-content">`;
+                item.score.forEach((link, idx) => {
+                    html += `<a href="${link}" target="_blank">Sheet Music ${idx + 1}</a>`;
+                });
+                html += `</div></div>`;
+            }
+        }
+
+        // ABC Interactive Sheets
+        if (item.abc && item.abc.length > 0) {
+            html += `<a href="/worship/sheets/${item.id}" target="_blank"><i style="font-size:24px" class="fa" title="Interactive Sheet Music">&#xf1c7;</i></a>`;
+        }
+
+        // Video Links
+        if (item.video && item.video.length > 0) {
+            if (item.video.length === 1) {
+                html += `<a href="${item.video[0]}" target="_blank"><i class="fa fa-play-circle" style="font-size:24px" title="Youtube Video"></i></a>`;
+            } else {
+                html += `<div class="media-dropdown">
+                    <span class="media-dropbtn"><i class="fa fa-play-circle" style="font-size:24px" title="Youtube Videos"></i><span class="badge">${item.video.length}</span></span>
+                    <div class="media-dropdown-content">`;
+                item.video.forEach((link, idx) => {
+                    html += `<a href="${link}" target="_blank">Video ${idx + 1}</a>`;
+                });
+                html += `</div></div>`;
+            }
+        }
+        
+        // Return wrapped inside our flexbox container if there are links
+        return html ? `<span class="media-icons-wrapper">${html}</span>` : '';
+    }
+
+    /**
     * Loads the tab based on the button that was clicked (view, chord, bi, video) and updates the content accordingly.
     */
     function loadTab(mode) {
@@ -267,10 +386,17 @@ span.chunk:before {
             }
 
             if (mode === 'video') {
-                let videoUrl = item.video.replace('youtu.be/', 'www.youtube.com/embed/').replace('watch?v=', 'embed/');
-                finalHtml += `<div class="video-container"><iframe src="${videoUrl}"></iframe></div><br/>`;
-            }else {
-                //Build the Header
+                if (item.video && item.video.length > 0) {
+                    finalHtml += `<div style="text-align: center; margin-bottom: 15px; font-weight: bold; font-size: 1.2em;">${item.title}</div>`;
+                    
+                    finalHtml += `<div class="video-grid">`;
+                    item.video.forEach(v => {
+                        let videoUrl = v.replace('youtu.be/', 'www.youtube.com/embed/').replace('watch?v=', 'embed/');
+                        finalHtml += `<div class="video-container"><iframe src="${videoUrl}" frameborder="0" allowfullscreen></iframe></div>`;
+                    });
+                    finalHtml += `</div>`;
+                }
+            } else {
                 let currentKey = transposeChord(item.song_key, parseInt(item.transpose));
                 let header = `
                     <div class="songs">
@@ -278,27 +404,17 @@ span.chunk:before {
                             ${item.title} (${currentKey})
                             ${getLangTag(item.lang)} ${getLangTag(item.lang_2)} 
                             [${item.alt_sequence}]
-                            ${item.score ? `&nbsp;&nbsp;<a href="${item.score}" target="_blank"><i style="font-size:24px" class="fa" title="Sheet Music">&#xf0f6;</i></a>` : ''}
-                            ${item.abc ? `&nbsp;&nbsp;<a href="/sheets/${item.id}" target="_blank"><i style="font-size:24px" class="fa" title="Interactive Sheet Music">&#xf1c7;</i></a>` : ''}
-                            ${item.video ? `&nbsp;&nbsp;<a href="${item.video}" target="_blank"><i class="fa fa-play-circle" style="font-size:24px" title="Youtube Video"></i></a>` : ''}
+                            ${getMediaLinksHtml(item)}
                         </div>
                         <div class="song_container">
                             <div class="song_block">${renderSongContent(item, mode)}</div>
                             <div class="notes">${item.notes.replace(/\n/g, '<br/>')}</div>
                         </div>
-                    </div>`;
+                    </div><br/>`;
                 finalHtml += header;
             }
         }
         document.getElementById('worship').innerHTML = finalHtml;
-    }
-
-    function load_chords() {
-        window.open('/chords/' + song_id.toString(), '_blank').focus();
-    }
-
-    function load_sheets() {
-        window.open('/sheets/' + song_id.toString(), '_blank').focus();
     }
 
     // console.log(tab)
@@ -315,15 +431,10 @@ span.chunk:before {
     window.onload = () => {
         if (worshipInfo && worshipInfo.date) {
             document.title = `${worshipInfo.date} Worship Notes - Worship Manager`;
-
-            // Bible Link generation logic
-            const bibleContainer = document.getElementById('bible_verse');
-            const bibleVerses = worshipInfo.bible.replace(/(、|;)/g, '，').split('，');
-        
-            bibleContainer.innerHTML = bibleVerses.map(v =>
-                ` <a href="javascript:void(0)" onclick="get_bible(show_verse, '${v.trim()}')">${v.trim()}</a>`
-            ).join('');
         }
+
+        get_sermon();
+
         // Load initial view
         loadTab(initialTab);
     };

@@ -12,7 +12,7 @@ project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, project_root)
 
 
-from flask import Flask, render_template, request
+from flask import Flask, redirect, render_template, request, url_for
 from flask_socketio import SocketIO, emit
 from app import utils as Utils
 from app import tools as Tools
@@ -100,21 +100,18 @@ def profile():
 	return render_template('profile.html', team=team)
 
 # -------- Worship Pages ---------
-@app.route("/worship")
+@app.route("/worship", endpoint="worship_home_base")
+@app.route("/worship/edit", endpoint="worship_home_edit")
 def worship_home():
-	id = request.args.get('id', None)
-	if id:
-		songs = Utils.get_worship_songs(id)
-		w = Utils.get_worship(id)
-		return render_template('worship/songs.html', songs=songs, id=id, w=w)
 	sundays = Tools.allsundays()
 	worship = Utils.worship_list()
 	worship = [{'date': x, 'worship': next((y for y in worship if y['date'] == x), -1)} for x in sundays[1]]
-	return render_template('worship/worship.html', worship=worship, sundays=sundays)
+	is_edit_route = request.path.rstrip('/').endswith('/worship/edit')
+	return render_template('worship/worship.html', worship=worship, sundays=sundays, is_edit_route=is_edit_route)
 
 @app.route("/worship/<id>")
 @app.route("/worship/<id>/<tab>")
-def worship(id, tab=''):
+def worship_notes(id, tab=''):
 	json_file = request.args.get('json', None)
 	if json_file:
 		json_file = Tools.get_worship_json(id)
@@ -127,6 +124,69 @@ def worship(id, tab=''):
 	if w:
 		w = w[0]
 	return render_template('worship/notes.html', songs=songs, id=id, w=w, tab=tab)
+
+@app.route("/worship/<id>/edit")
+def worship_songs_editor(id):
+	songs = Utils.get_worship_songs(id)
+	w = Utils.get_worship(id)
+	return render_template('worship/songs.html', songs=songs, id=id, w=w)
+
+@app.route("/worship/<id>/chords")
+def get_weekly_chords(id):
+	songs = Utils.get_worship_songs(id)
+	ids = [str(song['id']) for song in songs]
+	chords = Utils.get_song_chords(ids)
+
+	for chord_data in chords:
+		chord_id = chord_data.get("id")
+    	# Find the matching weekly data for this specific song
+		weekly_data = next((song for song in songs if str(song.get("id")) == str(chord_id)), None)
+
+		if weekly_data and 'transpose' in weekly_data:
+			t_val = weekly_data['transpose']
+			chord_data['transpose_amount'] = int(t_val[0])
+		else:
+			chord_data['transpose_amount'] = 0
+
+	return render_template('/worship/chords.html', chords=chords)
+
+@app.route("/worship/<id>/sheets")
+def get_weekly_sheets(id):
+    songs = Utils.get_worship_songs(id)
+    
+    ids = [str(song['id']) for song in songs]
+    sheets = Utils.get_song_sheet(ids)
+    keys_1 = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
+    keys_2 = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B']
+
+    for sheet in sheets:
+        sheet_id = sheet.get("id")
+        print(sheet_id)
+        weekly_data = next((song for song in songs if str(song.get("id")) == str(sheet_id)), None)
+
+        if weekly_data and 'transpose' in weekly_data:
+            t_val = weekly_data['transpose']
+            print(int(t_val[0]))
+            sheet['transpose_amount'] = int(t_val[0])
+        else:
+            sheet['transpose_amount'] = 0
+
+        song_key = sheet.get('song_key')
+        if song_key:
+            keyof = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+            if song_key in keys_1:
+                k_init = keys_1.index(song_key)
+                keys = keys_1
+            else:
+                k_init = keys_2.index(song_key)
+                keys = keys_2
+            
+            keyof = [(x - k_init) % 12 for x in keyof]
+
+            sheet['keyof_name'] = keys
+            sheet['keyof'] = [keys[x] for x in keyof]
+
+    return render_template('worship/sheets.html', sheets=sheets)
 
 @app.route("/worship/schedule")
 def schedule():
@@ -154,15 +214,15 @@ def song_list():
 	songs = Utils.get_songs()
 	return render_template('song/song_list.html', songs=songs)
 
-@app.route("/chords/<ids>")
+@app.route("/worship/chords/<ids>")
 def get_song_chords(ids):
 	ids = ids.split(',')
 	chords = Utils.get_song_chords(ids)
 	return render_template('/worship/chords.html', chords=chords)
 
-@app.route("/sheets")
-@app.route("/sheets/<ids>")
-def get_song_sheet1(ids=None):
+@app.route("/worship/sheets")
+@app.route("/worship/sheets/<ids>")
+def get_song_sheet(ids=None):
 	'''
 	:param ids: song_ids
 	:return: sheet object with ABC content, sheet link, and transpose numbers
@@ -180,6 +240,8 @@ def get_song_sheet1(ids=None):
 	ids = ids.split(',')
 	sheets = Utils.get_song_sheet(ids)
 	for sheet in sheets:
+		sheet['transpose_amount'] = 0
+
 		if sheet['key']:
 			keys = []
 			if sheet['key'] in keys_1:
@@ -259,10 +321,6 @@ def assets():
 
 	return render_template('slides_assets.html', setting=setting, assets=assets, promote=promote)
 
-# @app.route("/people")
-# def people():
-# 	people = Utils.get_teams()
-# 	return render_template('people.html', people=people)
 
 # -------- Slides Pages ---------
 
@@ -299,6 +357,19 @@ def slides_viewer(mode=None):
 	elif mode == 'view':
 		__update_client_mode('')
 		return render_template('slides/slides_view.html', presentation=slides_data, mode=mode)
+	elif mode == 'sheets':
+		__update_client_mode('')
+		coming_sunday = __get_sundays()["sunday"]
+		id = Utils.get_worship_id(coming_sunday)[0]
+
+		return redirect(url_for('get_weekly_sheets', id=id))
+	elif mode == 'chords':
+		__update_client_mode('')
+		coming_sunday = __get_sundays()["sunday"]
+		id = Utils.get_worship_id(coming_sunday)[0]
+
+		return redirect(url_for('get_weekly_chords', id=id))
+	
 	return render_template('slides/slides.html', presentation=slides_data, mode=mode)
 
 # --------- Admin Pages ---------
@@ -336,7 +407,6 @@ def admin_calendar():
 def admin_report(id):
 	report, saved = Tools.get_report(id)
 	return render_template('admin/report_pdf.html', saved=saved, report=report, id=id)
-
 
 # --------- Other Pages ---------
 @app.route("/files")
@@ -403,4 +473,4 @@ def __get_slide_json():
 	return True
 
 if __name__ == '__main__':
-	app.run(host="0.0.0.0", port=80, debug=True)
+	app.run(host="0.0.0.0", port=5000, debug=True)

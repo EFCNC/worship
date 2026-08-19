@@ -4,6 +4,9 @@
 
 {% block extra_css %}
 <style>
+    /*  ===========================
+        Main Layout & Containers
+        =========================== */
     .worship_container {
         display: flex;
         flex-wrap: wrap;
@@ -26,6 +29,9 @@
         }
     }
 
+    /*  ===========================
+        Worship Cards & Flip Animation
+        =========================== */
     .worship-card {
         background-color: transparent;
         width: 300px;
@@ -43,7 +49,7 @@
         box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
     }
 
-    .worship-card:hover .card-inner {
+    .worship-card.is-flipped .card-inner {
         transform: rotateY(180deg);
     }
 
@@ -60,6 +66,9 @@
     .card-front {
         background-color: #8FBC8F;
         color: #556B2F;
+
+        display: flex;
+        flex-direction: column;
     }
 
     .card-back {
@@ -82,24 +91,238 @@
         flex-wrap: wrap;
     }
 
-    .edit_btn {
-        border: none;
-        display: inline-block;
-        padding: 8px 16px;
-        vertical-align: middle;
-        overflow: hidden;
-        text-decoration: none;
-        color: inherit;
-        background-color: inherit;
-        text-align: center;
+    /* Shared styling for buttons and links acting as buttons */
+    button, 
+    .overlay_btns a {
         cursor: pointer;
+        font-family: inherit;
+        font-size: inherit;
+        font-weight: var(--font-weight-bold);
+        padding: var(--spacing-sm) var(--spacing-md);
+        border: none;
+        border-radius: var(--border-radius);
+        background-color: #1abc9c;
+        color: var(--text-light);
+        transition: background-color var(--transition-default), transform var(--transition-default);
+        
+        display: inline-block;
+        text-decoration: none;
+        text-align: center;
         white-space: nowrap;
-        border-radius: 50px;
     }
 
+    @media(hover: hover) and (pointer: fine) {
+        button:hover, 
+        .overlay_btns a:hover {
+            background-color: #3e8e41;
+            color: #fff;
+            transform: translateY(-2px);
+        }
+    }
+
+    .sermon-preview-container {
+        padding: 0px 10px 5px 10px;
+        text-align: left;
+        font-size: 13px;
+        line-height: 1.35;
+
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1; 
+        overflow: hidden; 
+    }
+
+    .sermon-preview-block {
+        background: rgba(255,255,255,0.28);
+        border-radius: 6px;
+        padding: 5px 8px;
+        margin-bottom: 5px;
+    }
+
+    a.bible-preview-badge {
+        display: inline-block;
+        font-size: 0.82em;
+        background: rgba(255, 255, 255, 0.25);
+        color: #333;
+        padding: 1px 3px;
+        border-radius: 4px;
+        margin-top: 3px; 
+        border: 1px solid rgba(0, 0, 0, 0.15);
+        text-decoration: none;
+        transition: background-color 0.2s;
+    }
+
+    a.bible-preview-badge:hover {
+        background: rgba(255, 255, 255, 0.6);
+        color: #000;
+    }
+
+    .sermon-notes-preview {
+        white-space: pre-wrap;
+
+        flex-grow: 1;
+        overflow: hidden;
+        position: relative;
+    }
+
+    /* Fade-out effect at the bottom of the notes */
+    .sermon-notes-preview::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 25px; /* Height of the fade */
+        background: linear-gradient(to bottom, rgba(143, 188, 143, 0), #8FBC8F);
+        pointer-events: none;
+    }
+
+    .joint-badge {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background: #ffef99;
+        color: #6b4f00;
+        border-radius: 999px;
+        padding: 2px 7px;
+        font-size: 10px;
+        font-weight: bold;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+    }
+
+    .no-speaker {
+        color: #d63031;
+        font-style: italic;
+        font-weight: bold;
+    }
+
+    .team-info {
+        overflow-y: auto;
+        max-height: 220px;
+        /* Firefox */
+        scrollbar-width: thin;
+        scrollbar-color: rgba(255, 255, 255, 0.4) transparent;
+        padding-right: 5px;
+        padding-left: 9px;
+    }
+
+    /*  ===========================
+        Scrollbars
+    =========================== */
+    /* Chrome, Edge, and Safari */
+    .team-info::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    .team-info::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .team-info::-webkit-scrollbar-thumb {
+        background-color: rgba(255, 255, 255, 0.4); /* Semi-transparent white */
+        border-radius: 10px;
+    }
+
+    /*  ===========================
+        Popup Stuff
+    =========================== */
     .ui-dialog-titlebar {
         background-color: #008CBA;
         color: #fff;
+    }
+
+    /* Mobile-first layout for the sermon popup */
+    .sermon-editor-wrapper {
+        width: 100%;
+        min-width: 280px;
+    }
+
+    .sermon-lang-container {
+        display: flex;
+        flex-direction: column; /* Stack vertically on mobile */
+        gap: 12px;
+    }
+
+    .sermon-lang-box {
+        width: 100%;
+        border: 1px solid #ddd;
+        padding: 10px;
+        border-radius: 6px;
+        box-sizing: border-box;
+    }
+
+    /* Desktop layout overrides */
+    @media (min-width: 600px) {
+        .sermon-editor-wrapper {
+            min-width: 640px; /* Wide desktop popup */
+        }
+        .sermon-lang-container {
+            flex-direction: row; /* Side-by-side on desktop */
+            flex-wrap: wrap;
+        }
+        .sermon-lang-box {
+            flex: 1 1 240px; /* Allows them to sit next to each other */
+            width: auto;
+        }
+    }
+
+    .popup-form-group {
+        display: flex;
+        align-items: center;
+        margin-bottom: 8px;
+        gap: 2px;
+    }
+    
+    .popup-form-group label {
+        width: 65px;
+        font-weight: normal;
+        margin: 0;
+    }
+    
+    /* Shared text input styling */
+    .single-line-textarea,
+    .sermon-textarea {
+        padding: 4px 6px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+        font-family: inherit;
+        font-size: 13px;
+        line-height: 1.4;
+        resize: vertical;
+    }
+
+    .single-line-textarea {
+        flex: 1;
+    }
+
+    .sermon-textarea {
+        width: 100%;
+        margin-top: 4px;
+    }
+
+    .remove-btn {
+        background: transparent; 
+        border: none;
+        color: #999; 
+        cursor: pointer;
+        padding: 6px 8px;
+        font-size: 14px; 
+        display: flex;
+        align-items: center; 
+        justify-content: center;
+        border-radius: 4px;
+        transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+    }
+
+    /* Explicitly override the global button:hover */
+    @media(hover: hover) and (pointer: fine) {
+        button.remove-btn:hover {
+            background-color: rgba(231, 76, 60, 0.1);
+            color: #e74c3c;
+            transform: translateY(-1px); 
+        }
     }
 </style>
 {% endblock %}
@@ -112,11 +335,40 @@
                 <div class="card-front">
                     <h3>{{ w.date }}</h3>
                     {% if w.worship %}
-                        <div style="padding:10px;text-align:left;">
-                            <b>{{ w.worship.sermon_title }}</b><br/>
-                            Speaker: {{ w.worship.speaker }}<br/>
-                            Bible: {{ w.worship.bible }}<br/>
-                            Notes: {{ w.worship.notes|truncate(100) }}
+                        {% set sermon_order = w.worship.display_order or ['zh', 'en'] %}
+                        <div class="sermon-preview-container">
+                            {% if w.worship.is_joint %}
+                                <div class="joint-badge">Joint</div>
+                            {% endif %}
+                            {% for lang_key in sermon_order %}
+                                {% set sermon_variant = w.worship.sermons[lang_key] if w.worship.sermons and w.worship.sermons[lang_key] else {} %}
+                                {% if sermon_variant.title or sermon_variant.speaker or sermon_variant.bible or sermon_variant.outline %}
+                                    {% set label = '中' if lang_key == 'zh' else '台' if lang_key == 'zh-TW' else 'EN' %}
+                                    <div class="sermon-preview-block">
+                                        <b>{{ label }}</b>: {{ sermon_variant.title or '' }}<br/>
+                                        
+                                        <small>
+                                            {% if sermon_variant.speaker %}
+                                                {{ sermon_variant.speaker }}
+                                            {% else %}
+                                                <span class="no-speaker">No speaker listed</span>
+                                            {% endif %}
+                                        </small>
+                                        
+                                        {% if sermon_variant.bible %}
+                                            <br/>
+                                            {% set verses = sermon_variant.bible.replace('、', ';').replace('，', ';').split(';') %}
+                                            {% for verse in verses %}
+                                                {% set clean_verse = verse | trim %}
+                                                {% if clean_verse %}
+                                                    <a class="bible-preview-badge" href="javascript:void(0)" onclick="get_bible(show_verse, '{{ clean_verse | replace("'", "\\'") | replace('"', '\\"') }}'); return false;">{{ clean_verse }}</a>
+                                                {% endif %}
+                                            {% endfor %}
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                            <div class="sermon-notes-preview">Notes:<br>{{ w.worship.notes or '' }}</div>
                         </div>
                     {% endif %}
                 </div>
@@ -131,15 +383,15 @@
                             {% endfor %}
                         </div>
                         <div class="overlay_btns">
-                            <button id="info_btn" name="{{ w.worship.date }}">Info</button>
+                            <a href="{{ url_for('admin_info') }}">Info</a>
                             <button id="sermon_btn" name="{{ w.worship.worship_id }}">Edit</button>
-                            <button id="song_btn" name="{{ w.worship.worship_id }}">Songs</button>
-                            <button id="notes_btn" name="{{ w.worship.worship_id }}">Notes</button>
+                            <a href="{{ url_for('worship_songs_editor', id=w.worship.worship_id) }}">Songs</a>
+                            <a href="{{ url_for('worship_notes', id=w.worship.worship_id) }}">Notes</a>
                             <button id="team_btn" name="{{ w.worship.worship_id }}">Teams</button>
                         </div>
                     {% else %}
                         <div class="overlay_btns">
-                            <button id="song_btn" name="{{ w.worship.worship_id }}">Songs</button>
+                            <a href="{{ url_for('worship_songs_editor', id=w.worship.worship_id) }}">Songs</a>
                             <button id="team_btn" name="{{ w.worship.worship_id }}">Teams</button>
                         </div>
                     {% endif %}
@@ -152,136 +404,368 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="/static/config.js"></script>
+<script src="/static/bible.js"></script>
 <script>
-let team;
-let roster;
-let inst;
-let marked;
-let worship_id = -1;
-let sundays = {{ sundays|safe }};
+    let team;
+    let roster;
+    let inst;
+    let marked;
+    let worship_id = -1;
+    let activeCard = null;
+    let sundays = {{ sundays|tojson|safe }};
+    let isEditRoute = {{ is_edit_route|tojson }};
 
-    function pop_role(name) {
-        for (i in taken_role) {
-            if (taken_role[i].name == name) {
-                taken_role.splice(i, 1);
-                break;
+    function getDialogOptions(titleText) {
+        // Check if the screen is mobile-sized
+        const isMobile = $(window).width() < 600;
+        
+        return {
+            title: titleText,
+            width: isMobile ? '95%' : 'auto',
+            minWidth: 280, // Safe minimum for mobile devices
+            maxHeight: $(window).height() * 0.9, // Caps height at 90% of screen so the popup itself scrolls
+            position: { 
+                // Anchor to the top on mobile so it expands downward nicely
+                my: isMobile ? "top" : "center", 
+                at: isMobile ? "top+5%" : "center", 
+                of: window 
             }
-        }
+        };
     }
 
     function add_button() {
-        return '<button class="add_btn" title="Click to confirm" style="display:none">Add</button>';
+        return '<button class="add_btn" title="Click to confirm" disabled style="opacity: 0.5; cursor: not-allowed; padding: 0 10px; margin-left: 4px; height: 28px; font-size: 13px; display: flex; align-items: center; justify-content: center;">Add</button>';
     }
 
-    function add_arrow() {
-        return '<button id="add_arrow" title="Click to Add a New Role"> &gt; </button>';
+    function add_role_button() {
+        return '<button id="add_role_button" title="Click to Add a New Role" style="padding: 4px 10px; margin-top: 10px; font-size: 12px;">+ Add Role</button>';
     }
 
     function inst_option() {
-        html = '<option>Select an Role</option>';
-        for (x in inst) {
-            html += '<option value="' + inst[x].id + '">' + inst[x].name + '</option>';
+        let html = '<option>Select a Role</option>';
+        for (let x in inst) {
+            html += '<option value="' + inst[x].id + '">' + escapeHtml(inst[x].name) + '</option>';
         }
-        var $select = $('<select class="inst"></select>');
+        var $select = $('<select class="inst single-line-textarea"></select>');
         $select.append(html);
         return $select[0].outerHTML;
     }
 
-    function team_option() {
-        html = '<option>Select a User</option>';
-        matched = marked.filter(obj => {
-            return obj.date == date
+    function team_option(date) {
+        let html = '<option>Select a User</option>';
+        const matched = marked.filter(obj => {
+            return obj.date == date;
         }).map(obj => obj.id);
-        for (x in team) {
+        
+        for (let x in team) {
             if (matched.indexOf(team[x].id) >= 0) {
-                html += '<option disabled title="Not Available" value="' + team[x].id + '">' + team[x].name + ' (' + team[x].name_2 + ')</option>';
+                html += '<option disabled title="Not Available" value="' + team[x].id + '">' + escapeHtml(team[x].name) + ' (' + escapeHtml(team[x].name_2) + ')</option>';
             } else {
-                html += '<option value="' + team[x].id + '">' + team[x].name + ' (' + team[x].name_2 + ')</option>';
+                html += '<option value="' + team[x].id + '">' + escapeHtml(team[x].name) + ' (' + escapeHtml(team[x].name_2) + ')</option>';
             }
         }
-        var $select = $('<select class="user"></select>');
+        var $select = $('<select class="user single-line-textarea"></select>');
         $select.append(html);
         return $select[0].outerHTML;
     }
 
     function pick_team(id, date) {
-        dd = new Date();
-        d1 = new Date(date.replace('-', '/'));
-        roster_html = '<div id="current_roster" name="' + id + '_' + date + '"></div>';
-        for (x in roster) {
-            html = '';
-            $div = $('<div>' + roster[x].inst_name + ': </div>');
+        const dd = new Date();
+        const d1 = new Date(date.replace('-', '/'));
+        let roster_html = '<div id="current_roster" name="' + id + '_' + date + '" style="padding-top: 10px;">';
+        
+        for (let x in roster) {
+            let html = '';
+            const $div = $('<div class="popup-form-group"><label style="width: 100px;">' + escapeHtml(roster[x].inst_name) + ':</label></div>');
+            
             inst = inst.filter((item, index) => item.id != roster[x].id);
-            for (t in team) {
-                if (team[t].id == roster[x].id) {
-                    html += '<option selected value="' + roster[x].id + '_' + roster[x].user_id + '">' + roster[x].user_name + ' (' + roster[x].user_name_2 + ')</option>';
+            for (let t in team) {
+                if (team[t].id == roster[x].user_id) {
+                    html += '<option selected value="' + roster[x].id + '_' + roster[x].user_id + '">' + escapeHtml(roster[x].user_name) + ' (' + escapeHtml(roster[x].user_name_2) + ')</option>';
                 } else {
-                    html += '<option value="' + roster[x].id + '_' + team[t].id + '">' + team[t].name + ' (' + team[t].name_2 + ')</option>';
+                    html += '<option value="' + roster[x].id + '_' + team[t].id + '">' + escapeHtml(team[t].name) + ' (' + escapeHtml(team[t].name_2) + ')</option>';
                 }
             }
-            if (dd > d1) {
-                var $select = $('<select class="roster" disabled title="' + roster[x].inst_name + '"></select>');
+            
+            if (dd > d1 && isEditRoute != true) {
+                // Past dates (Read-only view)
+                var $select = $('<select class="roster single-line-textarea" disabled title="' + escapeHtml(roster[x].inst_name) + '"></select>');
+                $select.append(html);
+                $div.append($select);
             } else {
-                var $select = $('<select class="roster" title="' + roster[x].inst_name + '" data-initial-value=' + roster[x].user_id + '></select>');
+                // Future dates (Editable view)
+                var $select = $('<select class="roster single-line-textarea" title="' + escapeHtml(roster[x].inst_name) + '" data-initial-value=' + roster[x].user_id + '></select>');
+                $select.append(html);
+                $div.append($select);
+                
+                // Inject the Delete Button 
+                var deleteBtn = '<button type="button" class="remove-btn remove-roster-btn" title="Remove person" data-role-id="' + roster[x].id + '" data-user-id="' + roster[x].user_id + '" style="margin-left: 4px;"><i class="fas fa-trash"></i></button>';
+                $div.append(deleteBtn);
             }
-            $select.append(html);
-            $div.append($select);
+            
             roster_html += $div[0].outerHTML;
         }
+        
         roster_html += '<div id="roster_options"></div>';
-        if (dd <= d1) {
-            roster_html += add_arrow();
+        if (dd <= d1 || isEditRoute == true) {
+            roster_html += add_role_button();
         }
+        roster_html += '</div>';
         return roster_html;
     }
 
-    function popup(id, date) {
-        $("#popup").dialog({
-            title: "Worship Team (" + date + ")",
-            width: 'auto',
-            buttons: [{
-                id: "button-add",
-                text: "OK",
-                click: function() {
-                    $(this).dialog("close");
-                    location.reload();
-                }
-            }]
-        });
-        get_roster(id, date);
+    function update_card_team_info(card) {
+        if (!card || !roster || !team) {
+            return;
+        }
+        var teamInfo = $(card).find('.card-back .team-info');
+        if (!teamInfo.length) {
+            return;
+        }
+        var html = '<u><b>Worship Team</b></u><br/>';
+        for (var i = 0; i < roster.length; i++) {
+            var entry = roster[i];
+            if (entry.user_name_2 && entry.inst_name) {
+                html += '<b>' + escapeHtml(entry.inst_name) + ':</b>&nbsp;' + escapeHtml(entry.user_name_2) + '<br/>';
+
+                // Another Option: Display both names like the dropdown -> "English (Chinese)"
+                // var displayName = entry.user_name + (entry.user_name_2 ? ' (' + entry.user_name_2 + ')' : '');
+            }
+        }
+        teamInfo.html(html);
     }
 
-    function get_roster(id, date) {
-        $("#popup").empty();
-        url = API_URL + 'inst_team/' + id;
+    function get_roster(id, date, card) {
+        const url = API_URL + 'inst_team/' + id;
         $.when($.ajax(url)).then(function(response, textStatus, jqXHR) {
             if (response) {
                 inst = response['inst'];
                 team = response['team'];
-                roster = response['roster']
-                marked = response['marked']
-                $("#popup").html(pick_team(id, date));
+                roster = response['roster'];
+                marked = response['marked'];
+                
+                // Check if the popup dialog is already open on screen
+                var isDialogOpen = $("#popup").hasClass('ui-dialog-content') && $("#popup").dialog('isOpen');
+
+                if (isDialogOpen) {
+                    // Update content without re-initializing the dialog frame
+                    $("#popup").html(pick_team(id, date));
+                    $('#popup').dialog("option", "position", getDialogOptions().position);
+                } else {
+                    // First time opening: inject HTML and initialize the dialog widget
+                    $("#popup").html(pick_team(id, date));
+                    $("#popup").dialog($.extend(getDialogOptions("Worship Team (" + date + ")"), {
+                        buttons: [{
+                            id: "button-add",
+                            text: "OK",
+                            click: function() {
+                                var dialogElement = $(this);
+                                if (card) {
+                                    update_card_team_info(card);
+                                }
+                                dialogElement.dialog("close");
+                            }
+                        }]
+                    }));
+                }
             }
         });
     }
 
-    function get_sermon(id) {
-        url = API_URL + 'sermon/' + id;
+    function escapeHtml(value) {
+        return String(value || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    function getSermonVariant(sermons, langKey) {
+        return (sermons && sermons[langKey]) || {};
+    }
+
+    function getPreferredSermonKey(sermons, displayOrder) {
+        var order = displayOrder && displayOrder.length ? displayOrder : ['zh', 'en'];
+        for (var i = 0; i < order.length; i++) {
+            var langKey = order[i];
+            var variant = getSermonVariant(sermons, langKey);
+            if (variant && (variant.title || variant.speaker || variant.bible || variant.outline)) {
+                return langKey;
+            }
+        }
+        return 'zh';
+    }
+
+    function getLanguageLabel(langKey) {
+        if (langKey === 'zh-TW') return '台';
+        if (langKey === 'en') return 'EN';
+        return '中';
+    }
+
+    function buildInteractiveBibleBadges(bibleText) {
+        if (!bibleText) return '';
+        var bible = bibleText.replace(/(、|;)/g, '，').split('，');
+        var b = '<br/>';
+        for (var i=0; i<bible.length; i++) {
+            var verse = bible[i].trim();
+            if (verse !== "") {
+                var escapedVerse = verse.replace(/'/g, "\\'").replace(/"/g, '\\"');
+                b += '<a class="bible-preview-badge" href="javascript:void(0)" onclick="get_bible(show_verse, \'' + escapedVerse + '\'); return false;">' + escapeHtml(verse) + '</a>';
+            }
+        }
+        return b;
+    }
+
+    function buildSermonPreviewHtml(sermonData) {
+        let html = '';
+        if (sermonData.is_joint) {
+            html += '<div class="joint-badge">Joint</div>';
+        }
+        var displayOrder = sermonData.display_order && sermonData.display_order.length ? sermonData.display_order : ['zh', 'en'];
+        displayOrder.forEach(function(langKey) {
+            var langVariant = getSermonVariant(sermonData.sermons, langKey);
+            if (langVariant.title || langVariant.speaker || langVariant.bible || langVariant.outline) {
+                
+                var bibleHtml = buildInteractiveBibleBadges(langVariant.bible);
+                
+                var speakerHtml = langVariant.speaker ? escapeHtml(langVariant.speaker) : '<span class="no-speaker">No speaker listed</span>';
+                
+                html += '<div class="sermon-preview-block"><b>' + getLanguageLabel(langKey) + '</b>: ' + escapeHtml(langVariant.title || '') + '<br/><small>' + speakerHtml + '</small>' + bibleHtml + '</div>';
+            }
+        });
+
+        html += '<div class="sermon-notes-preview">Notes:<br>' + escapeHtml(sermonData.notes || '') + '</div>';
+
+        return html;
+    }
+
+    function buildSermonEditorHtml(sermonData, selectedLang, sermonLangs) {
+        let html = '';
+        html += '<div class="sermon-lang-container">';
+        sermonData.display_order.forEach(function(langKey) {
+            var langVariant = getSermonVariant(sermonData.sermons, langKey);
+            html += '<div class="sermon-lang-box">';
+            html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">';
+            html += '<b>' + getLanguageLabel(langKey) + '</b>';
+            html += '<button type="button" class="sermon-remove-lang" data-lang-key="' + langKey + '" style="padding:4px 8px;">Remove</button>';
+            html += '</div>';
+            html += '<div class="popup-form-group"><label>Title:</label><textarea rows="1" class="single-line-textarea" data-lang-key="' + langKey + '" data-field="title">' + escapeHtml(langVariant.title || '') + '</textarea></div>';
+            html += '<div class="popup-form-group"><label>Speaker:</label><textarea rows="1" class="single-line-textarea" data-lang-key="' + langKey + '" data-field="speaker">' + escapeHtml(langVariant.speaker || '') + '</textarea></div>';
+            
+            /* Bible Logic */
+            // Split existing data by semicolon, default to one empty row if blank
+            var bibleString = langVariant.bible || '';
+            var bibleArray = bibleString.split(';').map(function(s) { return s.trim(); }).filter(function(s) { return s.length > 0; });
+            if (bibleArray.length === 0) bibleArray = ['']; 
+
+            // Build the container (align-items flex-start keeps the "Bible" label at the top of the stack)
+            html += '<div class="popup-form-group" style="align-items: flex-start;"><label style="margin-top: 6px;">Bible:</label>';
+            html += '<div class="bible-container" data-lang-key="' + langKey + '" style="flex: 1; display: flex; flex-direction: column; gap: 4px;">';
+            
+            // Loop through and create a row for each verse
+            bibleArray.forEach(function(verse) {
+                html += '<div class="bible-row" style="display: flex; gap: 4px; align-items: center;">';
+                html += '<textarea rows="1" class="single-line-textarea bible-input" data-lang-key="' + langKey + '" data-field="bible">' + escapeHtml(verse) + '</textarea>';
+                html += '<button type="button" class="remove-btn" title="Remove verse"><i class="fas fa-trash"></i></button>';
+                html += '</div>';
+            });
+
+            // Add verse button
+            html += '<button type="button" class="add-bible-btn" data-lang-key="' + langKey + '" style="align-self: flex-start; padding: 4px 8px; font-size: 11px; margin-top: 2px;">+ Add Verse</button>';
+            html += '</div></div>';
+            
+
+            html += '<div style="margin-top: 8px;">Outline:<br/><textarea rows="4" class="sermon-textarea" data-lang-key="' + langKey + '" data-field="outline">' + escapeHtml(langVariant.outline || '') + '</textarea></div>';
+            html += '</div>';
+        });
+        html += '</div>';
+        html += '<div style="margin-top:10px;">';
+        
+        /* Language Dropdown Logic */
+        // Calculate how many languages are actually left to add
+        var availableLangs = sermonLangs.filter(function(item) {
+            return sermonData.display_order.indexOf(item.key) === -1;
+        });
+
+        // Lock the width, disable if empty
+        html += '<label>Add language: <select id="sermon_add_language_select" style="width: 120px;" ' + (availableLangs.length === 0 ? 'disabled' : '') + '>';
+        
+        if (availableLangs.length === 0) {
+            html += '<option> </option>';
+        } else {
+            availableLangs.forEach(function(item) {
+                html += '<option value="' + item.key + '">' + item.display + '</option>';
+            });
+        }
+        
+        html += '</select></label>';
+        
+        // Disable the add button and fade it out if no languages are left
+        var btnDisabledState = availableLangs.length === 0 ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : '';
+        html += ' <button type="button" id="sermon_add_language_btn" ' + btnDisabledState + '>Add</button>';
+        
+        html += '</div>';
+        return html;
+    }
+
+    function get_sermon(id, card, date) {
+        const url = API_URL + 'sermon/' + id;
         $.when($.ajax(url)).then(function(response, textStatus, jqXHR) {
             if (response) {
-                var sermon_data = {};
+                var sermon_data = {
+                    date: date,
+                    notes: response.notes || '',
+                    sermons: {
+                        zh: {
+                            title: (response.sermons && response.sermons.zh && response.sermons.zh.title) || '',
+                            speaker: (response.sermons && response.sermons.zh && response.sermons.zh.speaker) || '',
+                            bible: (response.sermons && response.sermons.zh && response.sermons.zh.bible) || '',
+                            outline: (response.sermons && response.sermons.zh && response.sermons.zh.outline) || ''
+                        },
+                        'zh-TW': {
+                            title: (response.sermons && response.sermons['zh-TW'] && response.sermons['zh-TW'].title) || '',
+                            speaker: (response.sermons && response.sermons['zh-TW'] && response.sermons['zh-TW'].speaker) || '',
+                            bible: (response.sermons && response.sermons['zh-TW'] && response.sermons['zh-TW'].bible) || '',
+                            outline: (response.sermons && response.sermons['zh-TW'] && response.sermons['zh-TW'].outline) || ''
+                        },
+                        en: {
+                            title: (response.sermons && response.sermons.en && response.sermons.en.title) || '',
+                            speaker: (response.sermons && response.sermons.en && response.sermons.en.speaker) || '',
+                            bible: (response.sermons && response.sermons.en && response.sermons.en.bible) || '',
+                            outline: (response.sermons && response.sermons.en && response.sermons.en.outline) || ''
+                        }
+                    },
+                    display_order: (response.display_order && response.display_order.length ? response.display_order : ['zh', 'en']),
+                    is_joint: !!response.is_joint
+                };
+                if (sermon_data.display_order.length === 0 || (sermon_data.display_order.length === 1 && sermon_data.display_order[0] === 'zh-TW')) {
+                    sermon_data.display_order = ['zh', 'en'];
+                }
+                var sermonLangs = [
+                    { key: 'zh', label: '中', display: 'Chinese' },
+                    { key: 'zh-TW', label: '台', display: 'Taiwanese' },
+                    { key: 'en', label: 'EN', display: 'English' }
+                ];
                 $("#popup").empty();
-                html = 'Title: <input type="text" id="title" value="' + response.title + '"></input><br/>Speaker: <input type="text" id="speaker" value="' + response.speaker + '"></input><br/>&nbsp;Bible: <input type="text" id="bible_verse" value="' + response.bible + '"></input><br/>Outline<br/><textarea rows="3" cols="2" style="width:95%" id="outline">' + response.outline + '</textarea><br/>Notes<br/><textarea rows="3" cols="2" style="width:95%" id="notes">' + response.notes + '</textarea>';
+                let html = '<div class="sermon-editor-wrapper">';
+                html += '<div style="margin-bottom:8px;">';
+                html += '<label><input type="checkbox" id="is_joint" ' + (response.is_joint ? 'checked' : '') + '> Joint sermon</label>';
+                html += '</div>';
+                html += '<div id="sermon_language_editor" style="border:1px solid #ddd;padding:10px;border-radius:6px;">';
+                html += buildSermonEditorHtml(sermon_data, null, sermonLangs);
+                html += '</div>';
+                html += 'Notes<br/><textarea rows="3" class="sermon-textarea" id="notes">' + escapeHtml(response.notes || '') + '</textarea>';
+                html += '</div>';
                 $("#popup").append(html);
-                $("#popup").dialog({
-                    title: "Sermon Information (" + date + ")",
-                    width: 'auto',
+                $("#popup").dialog($.extend(getDialogOptions("Sermon Information (" + date + ")"), {
                     buttons: [{
                         id: "button-add",
                         text: "OK",
                         click: function() {
+                            var dialogElement = $(this);
                             if (!jQuery.isEmptyObject(sermon_data)) {
-                                sermon_data["date"] = date;
                                 $.ajax({
                                     type: "post",
                                     url: url,
@@ -290,41 +774,155 @@ let sundays = {{ sundays|safe }};
                                     dataType: 'json',
                                     complete: function(response) {
                                         if (response.status == 200) {
-                                            location.reload();
+                                            if (card) {
+                                                var preview = $(card).find('.card-front .sermon-preview-container');
+                                                if (preview.length) {
+                                                    preview.html(buildSermonPreviewHtml(sermon_data));
+                                                }
+                                            }
+                                            dialogElement.dialog("close");
                                         } else {
                                             alert(response.responseText);
                                         }
                                     }
                                 });
+                            } else {
+                                dialogElement.dialog("close");
                             }
-                            $(this).dialog("close");
                         }
                     }]
+                }));
+
+                $('#popup').off('input change', 'input, textarea');
+                $('#popup').on('input change', 'input, textarea', function() {
+                    if (this.id === 'notes') {
+                        sermon_data.notes = $(this).val();
+                    } else if (this.id === 'is_joint') {
+                        sermon_data.is_joint = $(this).is(':checked') ? 1 : 0;
+                    } else if ($(this).data('lang-key')) {
+                        var langKey = $(this).data('lang-key');
+                        var field = $(this).data('field');
+                        
+                        if (!sermon_data.sermons[langKey]) {
+                            sermon_data.sermons[langKey] = {};
+                        }
+                        
+                        // Consolidation logic for Bible fields
+                        if (field === 'bible') {
+                            var verses = [];
+                            $('.bible-input[data-lang-key="' + langKey + '"]').each(function() {
+                                var val = $(this).val().trim();
+                                val = val.replace(/;/g, ''); // Strip user-entered semicolons to protect formatting
+                                if (val) verses.push(val);
+                            });
+                            sermon_data.sermons[langKey].bible = verses.join('; ');
+                        } else {
+                            sermon_data.sermons[langKey][field] = $(this).val();
+                        }
+                    }
                 });
-                $('#popup input').change(function() {
-                    sermon_data[this.id] = $(this).val();
+
+                // Handle Adding a Bible Row
+                $('#popup').off('click', '.add-bible-btn');
+                $('#popup').on('click', '.add-bible-btn', function() {
+                    var langKey = $(this).data('lang-key');
+                    var newRow = '<div class="bible-row" style="display: flex; gap: 4px; align-items: center;"><textarea rows="1" class="single-line-textarea bible-input" data-lang-key="' + langKey + '" data-field="bible"></textarea><button type="button" class="remove-btn" title="Remove verse"><i class="fas fa-trash"></i></button></div>';
+                    $(this).before(newRow);
+                    
+                    // Recenter popup
+                    $('#popup').dialog("option", "position", getDialogOptions().position);
                 });
-                $('#popup textarea').change(function() {
-                    sermon_data[this.id] = $(this).val();
+
+                // Handle Removing a Bible Row
+                $('#popup').off('click', '.remove-btn');
+                $('#popup').on('click', '.remove-btn', function() {
+                    var container = $(this).closest('.bible-container');
+                    var rows = container.find('.bible-row');
+                    
+                    // If it is the last row, just empty it instead of deleting it
+                    if (rows.length === 1) {
+                        rows.find('.bible-input').val('').trigger('change');
+                        return;
+                    }
+
+                    // Otherwise, safely remove the row
+                    $(this).closest('.bible-row').remove();
+                    
+                    // Force a trigger to re-save the consolidated data without the deleted row
+                    container.find('.bible-input').first().trigger('change');
+                    
+                    // Recenter popup
+                    $('#popup').dialog("option", "position", getDialogOptions().position);
+                });
+
+                $('#popup').off('click', '#sermon_add_language_btn');
+                $('#popup').on('click', '#sermon_add_language_btn', function() {
+                    var langKey = $('#sermon_add_language_select').val();
+                    if (!langKey || sermon_data.display_order.indexOf(langKey) !== -1) {
+                        return;
+                    }
+                    if (!sermon_data.sermons[langKey]) {
+                        sermon_data.sermons[langKey] = {};
+                    }
+                    var insertIndex = sermon_data.display_order.indexOf('en');
+                    if (insertIndex === -1) {
+                        insertIndex = sermon_data.display_order.length;
+                    }
+                    sermon_data.display_order.splice(insertIndex, 0, langKey);
+                    $('#sermon_language_editor').html(buildSermonEditorHtml(sermon_data, null, sermonLangs));
+
+                    $('#popup').dialog("option", "position", getDialogOptions().position);
+                });
+
+                $('#popup').off('click', '.sermon-remove-lang');
+                $('#popup').on('click', '.sermon-remove-lang', function() {
+                    var langKey = $(this).data('lang-key');
+                    sermon_data.display_order = sermon_data.display_order.filter(function(item) { return item !== langKey; });
+                    delete sermon_data.sermons[langKey];
+                    $('#sermon_language_editor').html(buildSermonEditorHtml(sermon_data, null, sermonLangs));
+
+                    $('#popup').dialog("option", "position", getDialogOptions().position);
+                });
+
+                // Block the Enter key from creating a new line
+                $('#popup').off('keydown', '.single-line-textarea');
+                $('#popup').on('keydown', '.single-line-textarea', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                    }
+                });
+
+                // Strip line breaks if the user pastes text in
+                $('#popup').off('input.strip', '.single-line-textarea');
+                $('#popup').on('input.strip', '.single-line-textarea', function() {
+                    if (this.value.match(/[\r\n]/)) {
+                        this.value = this.value.replace(/[\r\n]+/g, ' '); // Replace line breaks with a space
+                        $(this).trigger('input'); // Re-trigger the save logic
+                    }
                 });
             }
         });
     }
 
-    $(document).on('click', '#add_arrow', function() {
-        $("#roster_options").append(inst_option() + team_option() + add_button());
-        $('#add_arrow').hide();
+    $(document).on('click', '#add_role_button', function() {
+        const rosterDate = $('#current_roster').attr('name').split('_')[1];
+        const newGroup = '<div class="popup-form-group" style="margin-top: 10px;">' + inst_option() + team_option(rosterDate) + add_button() + '</div>';
+        $("#roster_options").append(newGroup);
+        $('#add_role_button').hide();
+        
+        $('#popup').dialog("option", "position", getDialogOptions().position);
     });
 
     $(document).on('change', ".roster", function() {
-        data = $(this).val().split('_');
-        pre = $(this).data('initial-value');
+        const rosterDate = $('#current_roster').attr('name').split('_')[1];
+        const selected = $(this).val().split('_');
+        const pre = $(this).data('initial-value');
         if (confirm('Are you sure?')) {
-            url = API_URL + 'roles/' + date;
-            data = {
+            const url = API_URL + 'roles/' + rosterDate;
+            const data = {
                 'pre_id': pre,
-                'user_id': data[1],
-                'role_id': data[0]
+                'user_id': selected[1],
+                'role_id': selected[0]
             };
             $('#loading').show();
             $.ajax({
@@ -335,7 +933,7 @@ let sundays = {{ sundays|safe }};
                 dataType: 'json',
                 complete: function(response) {
                     if (response.status == 200) {
-                        get_roster(worship_id, date);
+                        get_roster(worship_id, rosterDate, activeCard);
                     } else {
                         alert(response);
                     }
@@ -346,20 +944,26 @@ let sundays = {{ sundays|safe }};
     });
 
     $(document).on('change', ".inst, .user", function() {
-        if ($('.inst').val() != 'Select an Role' && $('.user').val() != 'Select a User') {
-            $('.add_btn').show();
+        if ($('.inst').val() != 'Select a Role' && $('.user').val() != 'Select a User') {
+            $('.add_btn').prop('disabled', false).css({
+                'opacity': '1',
+                'cursor': 'pointer'
+            });
         } else {
-            $('.add_btn').hide();
+            $('.add_btn').prop('disabled', true).css({
+                'opacity': '0.5',
+                'cursor': 'not-allowed'
+            });
         }
     });
 
     $(document).on('click', ".add_btn", function() {
-        id_date = $("#current_roster").attr('name').split('_');
-        url = API_URL + 'roles/' + id_date[1];
-        data = {
+        const idDate = $("#current_roster").attr('name').split('_');
+        const url = API_URL + 'roles/' + idDate[1];
+        const data = {
             'user_id': Number($('.user').val()),
             'role_id': Number($('.inst').val()),
-            'worship_id': id_date[0]
+            'worship_id': idDate[0]
         };
         $.ajax({
             type: "post",
@@ -369,7 +973,8 @@ let sundays = {{ sundays|safe }};
             dataType: 'json',
             complete: function(response) {
                 if (response.status == 200) {
-                    get_roster(id_date[0], id_date[1]);
+                    // Pass activeCard so the main card updates
+                    get_roster(idDate[0], idDate[1], activeCard);
                 } else {
                     alert(response);
                 }
@@ -377,37 +982,82 @@ let sundays = {{ sundays|safe }};
         });
     });
 
+    $(document).on('click', '.remove-roster-btn', function(e) {
+        e.stopPropagation();
 
-$(document).ready(function () {
-    move_top('date="'+sundays[0] + '"');
+        var idDate = $('#current_roster').attr('name').split('_');
+        var worshipId = Number(idDate[0]);
+        var rosterDate = idDate[1];
+        var roleId = Number($(this).data('role-id'));
+        var userId = Number($(this).data('user-id'));
 
-    $(".overlay_btns button").on('click', function () {
-        id = $(this).attr('name');
-        date = $(this).parent().parent().parent().attr('date')
-        if(!id) {
-            $("#popup").html();
+        if (!confirm('Are you sure you want to remove this person from the roster?')) {
+            return;
         }
-        else {
-            worship_id = Number(id);
-            if (this.id == 'song_btn') {
-                window.location.href = '?id='+id;
+
+        $('#loading').show();
+        $.ajax({
+            type: 'delete',
+            url: API_URL + 'roles/' + rosterDate,
+            data: JSON.stringify({
+                'user_id': userId,
+                'role_id': roleId
+            }),
+            contentType: 'application/json',
+            dataType: 'json',
+            complete: function(response) {
+                if (response.status == 200) {
+                    get_roster(worshipId, rosterDate, activeCard);
+                } else {
+                    alert(response.responseText || 'Unable to remove roster member.');
+                }
+                $('#loading').hide();
             }
-            else if (this.id == 'team_btn') {
-                popup(id, date);
-            }
-            else if (this.id == 'sermon_btn') {
-                get_sermon(worship_id);
-            }
-            else if (this.id == 'info_btn') {
-                location.href = '/admin/info';
-            }
-            else if (this.id == 'notes_btn') {
-                location.href = '/worship/'+id;
-            }
-        }
+        });
     });
 
-});
+    $(document).ready(function () {
+        move_top('date="'+sundays[0] + '"');
+
+        $(".worship-card").on("click", function (e) {
+            // Prevent flipping if text is currently highlighted/selected
+            if (window.getSelection().toString().length > 0) {
+                return;
+            }
+
+            // Prevent flipping if the user clicks a button, link, or input inside the card
+            if ($(e.target).closest('button, a, input, select, textarea').length) {
+                return;
+            }
+
+            // Flip back all other cards
+            $('.worship-card').not(this).removeClass("is-flipped");
+
+            $(this).toggleClass("is-flipped");
+        });
+
+        $(".overlay_btns button").on('click', function () {
+            const id = $(this).attr('name');
+            const date = $(this).parent().parent().parent().attr('date');
+
+            if(!id) {
+                $("#popup").html();
+            }
+            
+            else {
+                worship_id = Number(id);
+                if (this.id == 'team_btn') {
+                    activeCard = $(this).closest('.worship-card');
+                    get_roster(id, date, activeCard);
+                }
+                else if (this.id == 'sermon_btn') {
+                    activeCard = $(this).closest('.worship-card');
+                    get_sermon(worship_id, activeCard, date);
+                }
+            }
+        });
+
+    });
 
 </script>
 {% endblock %}

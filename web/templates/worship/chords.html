@@ -3,35 +3,60 @@
 {% block page_title %}Worship Chords{% endblock %}
 
 {% block extra_css %}
-<link href="../static/presentation.css" rel="stylesheet">
+<link href="/static/presentation.css" rel="stylesheet">
 <style>
-span.chunk {
+  span.chunk {
     position: relative;
-}
+  }
 
-span.chunk:before {
+  span.chunk:before {
     font-size: 0.65em;
     content: attr(data-chord);
     position: absolute;
     top: -2em;
-}
+  }
 
-#sheet {
+  #sheet {
     font-size: 1.25em;
     line-height: 200%;
-}
+    width: 100%;
+  }
+
+  /* Flexbox Layout Styles */
+  #container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  #control_panel_container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+
+  /* Center the dropdown text */
+  #transpose_select {
+    text-align-last:center;
+    min-width: 80px; 
+  }
 </style>
 {% endblock %}
 
 {% block content %}
-<div id="my_score">
-    <div id="top">
-        <span id="sheet_title"></span>&nbsp;<span id="sheet_btn"></span>
-    </div>
-    <div id="abc">
-        <div id="keys"></div>
-    </div>
-    <div style="text-align:center" id="sheet"></div>
+<div id="container">
+  <div id="song_title" style="margin-bottom: 10px;"></div>
+  
+  <div id="control_panel_container">
+    <div id="transpose_select_container" style="display: flex; align-items: center; gap: 5px;"></div>
+  </div>
+  
+  <div style="text-align:center" id="sheet"></div>
 </div>
 {% endblock %}
 
@@ -45,10 +70,6 @@ span.chunk:before {
     let index = 0;
 
     // --- FUNCTIONS ---
-    /**
-     * Transposes a single chord string by a specific number of steps (diff).
-     * Imported from worship notes file to replace the older parse_chord logic.
-     */
     function transposeChord(chord, diff) {
         if (diff === 0) return chord;
         
@@ -81,21 +102,41 @@ span.chunk:before {
         
         // Determine if we should use sharps or flats based on the original key
         const activeKeys = sharp.indexOf(data.key) >= 0 ? sharp : flat;
-        
-        // Render key toggle buttons
-        let keyHtml = '';
-        const currentKey = targetKey || data.key;
-        
-        for (let i = 0; i < activeKeys.length; i++) {
-            if (currentKey === activeKeys[i]) {
-                keyHtml += `<button title="Original Key" name="${activeKeys[i]}"><b>${activeKeys[i]}</b></button>`;
+        let currentKey = targetKey;
+
+        // Determine the target key based on session memory, weekly transpose, or original key
+        if (!currentKey) {
+            if (data.saved_key_name) {
+                // 1. Load user's session preference if it exists
+                currentKey = data.saved_key_name;
+            } else if (data.transpose_amount !== undefined && data.transpose_amount !== 0) {
+                // 2. Apply weekly transpose amount
+                let rootIdx = activeKeys.indexOf(data.key);
+                let newIdx = (rootIdx + data.transpose_amount) % 12;
+                if (newIdx < 0) newIdx += 12; // Handle negative transpositions
+                currentKey = activeKeys[newIdx];
             } else {
-                keyHtml += `<button name="${activeKeys[i]}">${activeKeys[i]}</button>`;
+                // 3. Fallback to original key
+                currentKey = data.key;
             }
         }
-        $('#keys').html(keyHtml);
+        
+        // Render key select dropdown with + / - buttons
+        let html = '<button id="btn_transpose_down">-1</button>';
+        html += '<select id="transpose_select">';
+        for (let i = 0; i < activeKeys.length; i++) {
+            let is_selected = (activeKeys[i] === currentKey) ? 'selected' : '';
+            // Shortened to (Orig) to help with width, change to (Original) if preferred
+            let label = (activeKeys[i] === data.key) ? activeKeys[i] + ' (Orig)' : activeKeys[i];
+            
+            html += '<option value="' + activeKeys[i] + '" ' + is_selected + '>' + label + '</option>';
+        }
+        html += '</select>';
+        html += '<button id="btn_transpose_up">+1</button>';
+        
+        $('#transpose_select_container').html(html);
 
-        // Calculate transposition difference
+        // Calculate transposition difference based on the resolved currentKey
         let transpose = 0;
         if (currentKey) {
             transpose = activeKeys.indexOf(currentKey) - activeKeys.indexOf(data.key);
@@ -121,27 +162,110 @@ span.chunk:before {
         $('#sheet').empty().html(sheetHtml).show();
     }
 
+    // Helper to safely change the song index from swipe/arrows
+    function changeSong(direction) {
+        let newIndex = parseInt(index) + direction;
+        // Check array bounds
+        if (newIndex >= 0 && newIndex < chords.length) {
+            index = newIndex;
+            $('#song_list').val(index); // Keep the dropdown UI synced
+            load_sheet(index);
+        }
+    }
+
+    // --- EVENT LISTENERS ---
     $(document).ready(function() {
         // Form select box with song title
         if (chords.length >= 1) {
             let songsHtml = '<select name="songs" id="song_list">';
             for (let s = 0; s < chords.length; s++) {
-                songsHtml += `<option value="${s}">${chords[s].title} (${chords[s].key})</option>`;
+                songsHtml += `<option value="${s}">${chords[s].title}</option>`;
             }
             songsHtml += '</select>';
             
-            $("#sheet_title").html(songsHtml);
-            load_sheet(0, chords[0].key);
+            $("#song_title").html(songsHtml);
+            load_sheet(0);
         }
 
         $('#song_list').change(function() {
             index = this.value;
-            load_sheet(index, chords[index].key);
+            load_sheet(index);
         });
     });
 
-    $(document).on('click', 'button', function() {
-        load_sheet(index, this.name);
+    $(document).on('change', '#transpose_select', function() {
+        let selected_key = $(this).val();
+        chords[index].saved_key_name = selected_key;
+        load_sheet(index, selected_key);
     });
+
+    // -1 Transpose Button
+    $(document).on('click', '#btn_transpose_down', function() {
+        let select = $('#transpose_select')[0];
+        let newIndex = select.selectedIndex - 1;
+        if (newIndex < 0) newIndex = select.options.length - 1; // Wrap to end
+        
+        let selected_key = select.options[newIndex].value;
+        chords[index].saved_key_name = selected_key;
+        load_sheet(index, selected_key);
+    });
+
+    // +1 Transpose Button
+    $(document).on('click', '#btn_transpose_up', function() {
+        let select = $('#transpose_select')[0];
+        let newIndex = select.selectedIndex + 1;
+        if (newIndex >= select.options.length) newIndex = 0; // Wrap to start
+        
+        let selected_key = select.options[newIndex].value;
+        chords[index].saved_key_name = selected_key;
+        load_sheet(index, selected_key);
+    });
+
+    // --- KEYBOARD & SWIPE NAVIGATION ---
+
+    // Arrow keys
+    $(document).keydown(function(e) {
+        // Prevent arrows from changing songs if the user is interacting with a dropdown
+        if (e.target.tagName.toLowerCase() === 'select') return;
+
+        if (e.key === 'ArrowLeft') {
+            changeSong(-1);
+        } else if (e.key === 'ArrowRight') {
+            changeSong(1);
+        }
+    });
+
+    // // Touch Swiping
+    // let touchStartX = 0;
+    // let touchEndX = 0;
+    // let touchStartY = 0;
+    // let touchEndY = 0;
+
+    // $(document).on('touchstart', function(e) {
+    //     touchStartX = e.changedTouches[0].screenX;
+    //     touchStartY = e.changedTouches[0].screenY;
+    // });
+
+    // $(document).on('touchend', function(e) {
+    //     touchEndX = e.changedTouches[0].screenX;
+    //     touchEndY = e.changedTouches[0].screenY;
+    //     handleSwipe();
+    // });
+
+    // function handleSwipe() {
+    //     let swipeThresholdX = 50; 
+    //     let swipeThresholdY = 50; 
+
+    //     // If the user scrolls vertically more than they swipe horizontally, ignore it
+    //     if (Math.abs(touchEndY - touchStartY) > swipeThresholdY) return;
+
+    //     if (touchEndX < touchStartX - swipeThresholdX) {
+    //         // Swiped Left -> Move forward to next song
+    //         changeSong(1);
+    //     } else if (touchEndX > touchStartX + swipeThresholdX) {
+    //         // Swiped Right -> Move backward to previous song
+    //         changeSong(-1);
+    //     }
+    // }
 </script>
 {% endblock %}

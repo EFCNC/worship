@@ -36,6 +36,13 @@
 <!-- Inline script to start image loading ASAP (before DOMContentLoaded) -->
 <script>
     (function() {
+        // const currentPath = window.location.pathname.replace(/\/$/, ""); 
+        // if (currentPath === '/admin') {
+        //     // visibility: 'hidden' hides the button but preserves its width/space so the home icon stays centered
+        //     document.getElementById('menu-toggle').style.visibility = 'hidden';
+        //     document.getElementById('main-nav').style.display = 'none';
+        // }
+
         const userCookie = $.cookie("user_name");
         const profileImg = document.getElementById('profile-img');
         const profileInitials = document.getElementById('profile-initials');

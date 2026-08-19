@@ -99,13 +99,15 @@ def simplify_json(json):
     slides = json['slides']
     simple = []
     for slide in slides:
-        contents = slide['content']
+        contents = slide.get('content', [])
         cc = []
         temp = {key: slide[key] for key in slide.keys() & {'id', 'title', 'notes', 'style', 'author', 'lyricist', 'ccli', 'book', 'copyright', 'key', 'type'}}
         if isinstance(contents, list):
             for content in contents:
-                cc.append(
-                    {key: content[key] for key in content.keys() & {'name', 'origin_text', 'region_text'}})
+                if isinstance(content, dict):
+                    cc.append({key: content[key] for key in content.keys() & {'name', 'origin_text', 'region_text'}})
+                else:
+                    cc.append({'origin_text': content})
             temp['content'] = cc
         else:
             temp['content'] = contents
@@ -176,7 +178,14 @@ def create_json(id, worship=None):
         template["announcement"]["content"]["region_text"] = a_region
         template["caring"]["content"]["origin_text"] = c_origin
         template["caring"]["content"]["region_text"] = c_region
-        template["sermon"]["content"]["origin_text"] = '{title}<br/>{bible}<br/>{speaker}<br/>{outline}'.format(bible=sermon['bible'], title=sermon['title'], outline=sermon['outline'], speaker=sermon['speaker'])
+        sermons = sermon.get('sermons', {}) or {}
+        sermon_variant = next((sermons.get(lang) or {} for lang in ['zh', 'zh-TW', 'en'] if (sermons.get(lang) or {}).get('title') or (sermons.get(lang) or {}).get('speaker') or (sermons.get(lang) or {}).get('bible') or (sermons.get(lang) or {}).get('outline')), {})
+        template["sermon"]["content"]["origin_text"] = '{title}<br/>{bible}<br/>{speaker}<br/>{outline}'.format(
+            title=sermon_variant.get('title', ''),
+            bible=sermon_variant.get('bible', ''),
+            speaker=sermon_variant.get('speaker', ''),
+            outline=sermon_variant.get('outline', ''),
+        )
 
         order = template["order"]
         temp = []
