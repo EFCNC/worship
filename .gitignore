@@ -2,4 +2,5 @@ web/static/presentation/
 /files
 /app/pptx_tools
 web/static/video
+web/static/config.js
 db/worship.db

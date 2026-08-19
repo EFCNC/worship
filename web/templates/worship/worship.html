@@ -121,7 +121,7 @@
     }
 
     .sermon-preview-container {
-        padding: 10px;
+        padding: 0px 10px 5px 10px;
         text-align: left;
         font-size: 13px;
         line-height: 1.35;
@@ -135,13 +135,30 @@
     .sermon-preview-block {
         background: rgba(255,255,255,0.28);
         border-radius: 6px;
-        padding: 6px 8px;
-        margin-bottom: 6px;
+        padding: 5px 8px;
+        margin-bottom: 5px;
+    }
+
+    a.bible-preview-badge {
+        display: inline-block;
+        font-size: 0.82em;
+        background: rgba(255, 255, 255, 0.25);
+        color: #333;
+        padding: 1px 3px;
+        border-radius: 4px;
+        margin-top: 3px; 
+        border: 1px solid rgba(0, 0, 0, 0.15);
+        text-decoration: none;
+        transition: background-color 0.2s;
+    }
+
+    a.bible-preview-badge:hover {
+        background: rgba(255, 255, 255, 0.6);
+        color: #000;
     }
 
     .sermon-notes-preview {
-         white-space: pre-wrap;
-        margin-top: 5px;
+        white-space: pre-wrap;
 
         flex-grow: 1;
         overflow: hidden;
@@ -172,6 +189,12 @@
         font-weight: bold;
         letter-spacing: 0.04em;
         text-transform: uppercase;
+    }
+
+    .no-speaker {
+        color: #d63031;
+        font-style: italic;
+        font-weight: bold;
     }
 
     .team-info {
@@ -323,7 +346,25 @@
                                     {% set label = '中' if lang_key == 'zh' else '台' if lang_key == 'zh-TW' else 'EN' %}
                                     <div class="sermon-preview-block">
                                         <b>{{ label }}</b>: {{ sermon_variant.title or '' }}<br/>
-                                        <small>{{ sermon_variant.speaker or '' }}</small>
+                                        
+                                        <small>
+                                            {% if sermon_variant.speaker %}
+                                                {{ sermon_variant.speaker }}
+                                            {% else %}
+                                                <span class="no-speaker">No speaker listed</span>
+                                            {% endif %}
+                                        </small>
+                                        
+                                        {% if sermon_variant.bible %}
+                                            <br/>
+                                            {% set verses = sermon_variant.bible.replace('、', ';').replace('，', ';').split(';') %}
+                                            {% for verse in verses %}
+                                                {% set clean_verse = verse | trim %}
+                                                {% if clean_verse %}
+                                                    <a class="bible-preview-badge" href="javascript:void(0)" onclick="get_bible(show_verse, '{{ clean_verse | replace("'", "\\'") | replace('"', '\\"') }}'); return false;">{{ clean_verse }}</a>
+                                                {% endif %}
+                                            {% endfor %}
+                                        {% endif %}
                                     </div>
                                 {% endif %}
                             {% endfor %}
@@ -363,6 +404,8 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="/static/config.js"></script>
+<script src="/static/bible.js"></script>
 <script>
     let team;
     let roster;
@@ -561,6 +604,20 @@
         return '中';
     }
 
+    function buildInteractiveBibleBadges(bibleText) {
+        if (!bibleText) return '';
+        var bible = bibleText.replace(/(、|;)/g, '，').split('，');
+        var b = '<br/>';
+        for (var i=0; i<bible.length; i++) {
+            var verse = bible[i].trim();
+            if (verse !== "") {
+                var escapedVerse = verse.replace(/'/g, "\\'").replace(/"/g, '\\"');
+                b += '<a class="bible-preview-badge" href="javascript:void(0)" onclick="get_bible(show_verse, \'' + escapedVerse + '\'); return false;">' + escapeHtml(verse) + '</a>';
+            }
+        }
+        return b;
+    }
+
     function buildSermonPreviewHtml(sermonData) {
         let html = '';
         if (sermonData.is_joint) {
@@ -570,7 +627,12 @@
         displayOrder.forEach(function(langKey) {
             var langVariant = getSermonVariant(sermonData.sermons, langKey);
             if (langVariant.title || langVariant.speaker || langVariant.bible || langVariant.outline) {
-                html += '<div class="sermon-preview-block"><b>' + getLanguageLabel(langKey) + '</b>: ' + escapeHtml(langVariant.title || '') + '<br/><small>' + escapeHtml(langVariant.speaker || '') + '</small></div>';
+                
+                var bibleHtml = buildInteractiveBibleBadges(langVariant.bible);
+                
+                var speakerHtml = langVariant.speaker ? escapeHtml(langVariant.speaker) : '<span class="no-speaker">No speaker listed</span>';
+                
+                html += '<div class="sermon-preview-block"><b>' + getLanguageLabel(langKey) + '</b>: ' + escapeHtml(langVariant.title || '') + '<br/><small>' + speakerHtml + '</small>' + bibleHtml + '</div>';
             }
         });
 
