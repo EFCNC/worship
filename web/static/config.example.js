@@ -1,0 +1,1 @@
+const ESV_API_KEY = "YOUR_ESV_API_KEY_HERE";
