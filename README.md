@@ -8,10 +8,14 @@
 *** for contributors-url, forks-url, etc. This is an optional, concise syntax you may use.
 *** https://www.markdownguide.org/basic-syntax/#reference-style-links
 -->
-[![Contributors][contributors-shield]][contributors-url]
-[![Forks][forks-shield]][forks-url]
-[![Stargazers][stars-shield]][stars-url]
-[![Issues][issues-shield]][issues-url]
+<div align="center">
+
+  [![Contributors][contributors-shield]][contributors-url]
+  [![Forks][forks-shield]][forks-url]
+  [![Stargazers][stars-shield]][stars-url]
+  [![Issues][issues-shield]][issues-url]
+
+</div>
 
 <!-- PROJECT LOGO -->
 <br />
@@ -73,10 +77,8 @@ WASP helps churches plan each Sunday service with:
 - admin info and reporting
 - live presentation support for slides and lyrics
 
-This project is designed to support worship teams before, during, and after a Sunday service. It combines planning tools with presentation views so a church can manage service content from a single app.
-
 ### Built With
-[![JQuery][JQuery.com]][JQuery-url] [![Jinja][Jinja.com]][Jinja-url]
+[![JQuery][JQuery.com]][JQuery-url] [![Jinja][Jinja.com]][Jinja-url] [![revealjs][revealjs.com]][revealjs-url]
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -117,7 +119,7 @@ This project is designed to support worship teams before, during, and after a Su
     ```
     * Optional ESV API key can be obtained here: [https://api.esv.org/](https://api.esv.org/)
 4. Start the web server:
-   ```js
+   ```sh
    python web/index.py
    ```
     - Website is viewable at [http://localhost:5000/](http://localhost:5000/)
@@ -237,8 +239,6 @@ See the [open issues](https://github.com/EFCNC/worship/issues) for a full list o
 [issues-url]: https://github.com/EFCNC/worship/issues
 [license-shield]: https://img.shields.io/github/license/EFCNC/worship.svg?style=for-the-badge
 [license-url]: https://github.com/EFCNC/worship/blob/master/LICENSE.txt
-[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
-[linkedin-url]: https://linkedin.com/in/linkedin_username
 [product-screenshot]: images/screenshot.png
 <!-- Shields.io badges. You can a comprehensive list with many more badges at: https://github.com/inttter/md-badges -->
 
@@ -247,3 +247,6 @@ See the [open issues](https://github.com/EFCNC/worship/issues) for a full list o
 
 [Jinja.com]: https://img.shields.io/badge/jinja-white.svg?style=for-the-badge&logo=jinja&logoColor=black
 [Jinja-url]: https://jinja.palletsprojects.com/en/stable/
+
+[revealjs.com]: https://img.shields.io/badge/reveal.js-black?style=for-the-badge&logo=revealdotjs&logoColor=%23F2E142
+[revealjs-url]: https://revealjs.com/
