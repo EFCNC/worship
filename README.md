@@ -111,19 +111,16 @@ This project is designed to support worship teams before, during, and after a Su
    ```sh
    pip install -r requirements.txt
    ```
-3. *(Optional)* Add ESV API
-    1. Get a free ESV API Key at [https://api.esv.org/](https://api.esv.org/)
-    2. Enter your API in `web/static/config.example.js`
-   ```js
-   const ESV_API_KEY = "YOUR_ESV_API_KEY_HERE";
-   ```
-    3. Rename `web/static/config.example.js` to `web/static/config.js`
-4. Rename `db/worship.example.db` to `db/worship.db`
-5. Start the web server:
+3. Run the Makefile and follow the prompts:
+    ```sh
+    make setup
+    ```
+    * Optional ESV API key can be obtained here: [https://api.esv.org/](https://api.esv.org/)
+4. Start the web server:
    ```js
    python web/index.py
    ```
-   Website is viewable at [http://localhost:5000/](http://localhost:5000/)
+    - Website is viewable at [http://localhost:5000/](http://localhost:5000/)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
