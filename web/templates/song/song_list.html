@@ -4,7 +4,7 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<link href="/static/datatables.min.css" rel="stylesheet">
+<link href="/static/vendor/datatables/datatables.min.css" rel="stylesheet">
 <style>
 #dialog {
     padding:5px;
@@ -64,7 +64,7 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="/static/datatables.js"></script>
+<script src="/static/vendor/datatables/datatables.js"></script>
 <script>
     let songs = {{ songs|safe }};
     let langs = [];

@@ -404,8 +404,8 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="/static/config.js"></script>
-<script src="/static/bible.js"></script>
+<script src="/static/js/config.js"></script>
+<script src="/static/js/bible.js"></script>
 <script>
     let team;
     let roster;
@@ -439,7 +439,7 @@
     }
 
     function add_role_button() {
-        return '<button id="add_role_button" title="Click to Add a New Role" style="padding: 4px 10px; margin-top: 10px; font-size: 12px;">+ Add Role</button>';
+        return '<button id="add_role_button" title="Click to Add a New Role" style="padding: 4px 10px; font-size: 12px;">+ Add Role</button>';
     }
 
     function inst_option() {
@@ -473,7 +473,7 @@
     function pick_team(id, date) {
         const dd = new Date();
         const d1 = new Date(date.replace('-', '/'));
-        let roster_html = '<div id="current_roster" name="' + id + '_' + date + '" style="padding-top: 10px;">';
+        let roster_html = '<div id="current_roster" name="' + id + '_' + date + '">';
         
         for (let x in roster) {
             let html = '';
