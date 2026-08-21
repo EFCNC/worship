@@ -36,17 +36,27 @@
 <script>
     team = {{ team|safe }};
     html = '';
-    for(x in team) {
-        if($.cookie("user_id") == team[x].id) {
-            html += '<option selected value=' + team[x].id + '>' + team[x].name + ' (' + team[x].name_2 + ')</option>';
+
+    // If no users exist, show a clear placeholder and disable the OK button
+    if (!team || team.length === 0) {
+        $('#user').append('<option value="">No users available</option>');
+        $('#ok_btn').prop('disabled', true).css({ opacity: 0.5, cursor: 'not-allowed' });
+    } else {
+        for (let x = 0; x < team.length; x++) {
+            const u = team[x];
+            if ($.cookie("user_id") == u.id) {
+                html += '<option selected value="' + u.id + '">' + u.name + ' (' + u.name_2 + ')</option>';
+            } else {
+                html += '<option value="' + u.id + '">' + u.name + ' (' + u.name_2 + ')</option>';
+            }
         }
-        else {
-            html += '<option value=' + team[x].id + '>' + team[x].name + ' (' + team[x].name_2 + ')</option>';
-        }
+        $('#user').append(html);
+        // Ensure OK is enabled when there are users
+        $('#ok_btn').prop('disabled', false).css({ opacity: 1, cursor: 'pointer' });
     }
-    $('#user').append(html);
 
     $('#ok_btn').click(function() {
+        if ($(this).prop('disabled')) return false;
         user_id = $('#user').val();
         console.log(user_id);
         user_name = $('#user :selected').text();

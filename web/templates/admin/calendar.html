@@ -3,7 +3,7 @@
 {% block page_title %}EFCNC Calendar{% endblock %}
 
 {% block extra_css %}
-<link href="/static/datatables.min.css" rel="stylesheet">
+<link href="/static/vendor/datatables/datatables.min.css" rel="stylesheet">
 <style>
     table.fixedHeader-floating,table.fixedHeader-locked{position:relative !important;background-color:var(--dt-html-background);background-color:var(--dt-html-background)}@media print{table.fixedHeader-floating,table.fixedHeader-locked{display:none}};
     .layout-start {
@@ -23,8 +23,8 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="/static/datatables.js"></script>
-<script src="/static/dataTables.fixedHeader.min.js"></script>
+<script src="/static/vendor/datatables/datatables.js"></script>
+<script src="/static/vendor/datatables/dataTables.fixedHeader.min.js"></script>
 <script>
     let calendar = {{ calendar|safe }};
     let column = {{ column|safe }};

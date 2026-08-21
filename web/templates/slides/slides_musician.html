@@ -3,7 +3,7 @@
 {% block page_title %}Worship Home - Worship Manager{% endblock %}
 
 {% block extra_css %}
-<link href="../static/musician_view.css" rel="stylesheet">
+<link href="/static/css/musician_view.css" rel="stylesheet">
 <style>
     body, html {
         height: 100%;
@@ -16,9 +16,9 @@
 {% endblock %}
 
 {% block extra_js %}
-    <script src="../static/jquery-3.6.0.min.js"></script>
-    <script src="../static/socket.io.js"></script>
-    <script src="../static/worship.js"></script>
+    <script src="/static/vendor/jquery/jquery-3.6.0.min.js"></script>
+    <script src="/static/vendor/socket.io/socket.io.js"></script>
+    <script src="/static/js/worship.js"></script>
     <script>
         // init variables
         let slides;
