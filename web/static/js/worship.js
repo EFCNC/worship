@@ -50,7 +50,7 @@ var API_URL = '/API/';
                 // Row 3: Notes
                 html += `
                     <div class="song-notes-row">
-                        <label for="song-notes-${index}">Notes:</label>
+                        <label for="song-notes-${index}">Song Notes:</label>
                         <textarea id="song-notes-${index}" name="song_notes" data-index="${index}" rows="5" cols="60">${data.notes || ''}</textarea>
                     </div>`;
 
