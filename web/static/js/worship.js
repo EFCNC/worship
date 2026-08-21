@@ -48,20 +48,21 @@ var API_URL = '/API/';
                 html += '</div>';
                 
                 // Row 3: Notes
-                html += '<div class="song-notes-row">';
-                html += '<p>Notes: <textarea name="song_notes" index="' + index + '" rows="5" cols="60">' + data.notes + '</textarea></p>';
-                html += '</div>';
+                html += `
+                    <div class="song-notes-row">
+                        <p>Notes: <textarea name="song_notes" index="' + index + '" rows="5" cols="60">' + data.notes + '</textarea></p>
+                    </div>`;
 
                 // Row 4: Sequence Container
-                html += '<div class="sequence-container">';
-
-                html += `<div class="song_sequence_toggle" name="${data.id}" title="Click to arrange song sequence">`;
-                html += '<i class="fa-solid fa-caret-right toggle-icon"></i>'; // The toggle triangle
-                html += `<span class="song_sequence">Song Sequence: <span class="sequence" id="song-${data.id}_alt">${data.sequence}</span></span>`;
-
-                html += '</div>'; // End toggle button
-
-                html += '</div>'; // End sequence container
+                html += `
+                        <div class="song_sequence_toggle" name="${data.id}" title="Click to arrange song sequence">
+                            <i class="fa-solid fa-caret-right toggle-icon"></i>
+                            <span class="song_sequence">Song Sequence: 
+                                <span class="sequence" id="song-${data.id}_alt">${data.sequence}</span>
+                            </span>
+                        </div>
+                        <div class="sequence-container">
+                        </div>`;
 
                 html += '</div>'; // End main wrapper
                 
@@ -83,12 +84,14 @@ var API_URL = '/API/';
 
                     list_1.innerHTML = 
                         '<div name="lyrics_parts" class="lyric-content ' + l.name + '">' + 
-                            '<strong>[' + l.name + ']</strong><br/>' + 
-                            formatted_lyrics + 
-                        '</div>' + 
-                        '<div class="lyrics_buttons">' + 
+
+                            '<div class="lyrics_buttons_container">' + 
                             '<button type="button" class="btn-lyric btn-lyric-add add_sequence_btn" title="Add Section"><i class="fa-solid fa-plus"></i></button>' + 
                             '<button type="button" class="btn-lyric btn-lyric-remove remove_sequence_btn" title="Remove Section"><i class="fa-solid fa-trash"></i></button>' + 
+                            '</div>' +
+
+                            '<strong>[' + l.name + ']</strong><br/>' + 
+                            formatted_lyrics + 
                         '</div>';
                         
                     ul.append(list_1);

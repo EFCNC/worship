@@ -45,7 +45,7 @@
    Song Editor Cards & Lists
    ========================================= */
 
-#songs, .lyrics {
+#songs {
     text-align:left;
     list-style-type: none;
     margin: 0;
@@ -53,8 +53,13 @@
     width: 100%;
 }
 
-/* Override */
 .lyrics {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-auto-rows: 1fr;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
     text-align:center;
 }
 
@@ -104,19 +109,61 @@
    Lyrics & Sequences
    ========================================= */
 .lyric-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    padding: 10px;
-    margin: 10px 0px;
+    display: flex; 
+    flex-direction: column;
+    /* justify-content: space-between; */
+    /* align-items: flex-start; */
+    /* padding: 10px;*/
+    margin: 0 !important;
+    box-sizing: border-box;
+
+    
     border: 1px solid #eee;
     border-radius: 4px;
 }
 
-.lyric-content { flex-grow: 0.5; text-align: center; padding: 5px; margin: 5px; border-radius: 4px; }
-.lyrics_buttons { display: flex; gap: 8px; flex-shrink: 0; }
+/* Tablet: Switch to 2 columns */
+@media (max-width: 900px) {
+    .lyrics {
+        grid-template-columns: repeat(2, 1fr); /* 2 columns for tablets */
+    }
+}
 
-.sequence-container { display: flex; flex-direction: column; align-items: flex-start; }
+@media (max-width: 600px) {
+    .lyrics {
+        grid-template-columns: 1fr; /* 1 column for phones */
+    }
+}
+
+.lyric-content {
+    flex-grow: 1;
+    text-align: center;
+    padding: 5px;
+    border-radius: 4px;
+    position: relative;
+}
+
+.lyrics_buttons_container {
+    display: flex;
+    gap: 4px;
+    position: absolute;
+    top: 5px;
+    right: 5px;
+}
+
+.btn-lyric {
+    font-size: 0.75em;
+    padding: 3px 8px;
+    background:rgba(255, 255, 255, 0.4);
+    transition: all 0.2s ease;
+}
+
+.btn-lyric:hover {
+    background:rgba(255, 255, 255, 0.8);
+    color: rgba(0, 0, 0, 0.2);
+}
+
+.sequence-container { display: flex; flex-direction: row; align-items: flex-start; }
 .song_sequence_toggle { display: flex; align-items: center; cursor: pointer; gap: 8px; }
 
 /* Sequence Colored Tags */
@@ -124,6 +171,13 @@
 .v, [class~="1"], [class~="2"], [class~="3"], [class~="4"], [class~="5"], [class~="6"], [class~="7"], [class~="8"] { background-color: #D6B588; color: #fff; }
 .chorus, .Chorus, .c { background-color: #556b2f; color: #fff}
 .bridge, .b, .b2, .b3, .b4 { background-color: #003153; color: #fff}
+
+.ui-sortable-placeholder {
+    visibility: visible !important;
+    background: rgba(0, 0, 0, 0.05) !important;
+    border: 2px dashed #ccc !important;
+    border-radius: 4px;
+}
 
 /* =========================================
    Buttons
@@ -578,6 +632,11 @@
 
         $(".lyrics").sortable({
             cancel: 'input, textarea, button, select, option',
+            tolerance: "pointer", 
+            helper: "clone",             /* Prevents the grid from collapsing when you pick up an item */
+            forcePlaceholderSize: true,  /* Forces the empty space to stay the exact same size */
+            opacity: 0.8,                /* Makes the dragged item slightly transparent so you can see targets */
+            //revert: 150,
             create: function( event, ui ) {
                 //is_changed($(this).sortable('toArray', {attribute: 'name'}));
                 update_alt($(this).sortable('toArray'));
