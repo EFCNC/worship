@@ -415,7 +415,7 @@
 
     // When Notes are changed
     $(document).on('input', 'textarea[name="song_notes"]', function() {
-        index = $(this).attr('index');
+        let index = $(this).data('index');
         songs_temp[index].notes = $(this).val();
         checkActionButtons();
     });
