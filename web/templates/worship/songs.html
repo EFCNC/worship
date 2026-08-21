@@ -54,6 +54,7 @@
 }
 
 .lyrics {
+    counter-reset: sequence-counter;
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     grid-auto-rows: 1fr;
@@ -116,10 +117,10 @@
     /* padding: 10px;*/
     margin: 0 !important;
     box-sizing: border-box;
-
-    
     border: 1px solid #eee;
     border-radius: 4px;
+
+    counter-increment: sequence-counter;
 }
 
 /* Tablet: Switch to 2 columns */
@@ -141,6 +142,31 @@
     padding: 5px;
     border-radius: 4px;
     position: relative;
+}
+
+/* Draw the number badge in the top left */
+.lyric-content::before {
+    content: counter(sequence-counter);
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #4a5568; 
+    color: white;
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    font-size: 0.85em;
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    z-index: 10;
+}
+
+/* Freeze the number on the cloned card while dragging, JS will update if needed */
+.ui-sortable-helper .lyric-content::before {
+    content: attr(data-drag-number) !important;
 }
 
 .lyrics_buttons_container {
@@ -635,8 +661,21 @@
             tolerance: "pointer", 
             helper: "clone",             /* Prevents the grid from collapsing when you pick up an item */
             forcePlaceholderSize: true,  /* Forces the empty space to stay the exact same size */
-            opacity: 0.8,                /* Makes the dragged item slightly transparent so you can see targets */
-            //revert: 150,
+            opacity: 0.8,
+
+            // Set the initial number when picked up
+            start: function(event, ui) {
+                let startIndex = ui.placeholder.prevAll('.lyric-item:not(.ui-sortable-helper)').length + 1;
+                ui.helper.find('.lyric-content').attr('data-drag-number', startIndex);
+            },
+            
+            // Dynamically update the number in hand as it moves across the grid
+            sort: function(event, ui) {
+                // Count how many normal, non-hidden lyric items are currently before the placeholder
+                let currentIndex = ui.placeholder.prevAll('.lyric-item:not(.ui-sortable-helper):visible').length + 1;
+                ui.helper.find('.lyric-content').attr('data-drag-number', currentIndex);
+            },
+
             create: function( event, ui ) {
                 //is_changed($(this).sortable('toArray', {attribute: 'name'}));
                 update_alt($(this).sortable('toArray'));
