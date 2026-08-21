@@ -22,40 +22,108 @@ with open(os.path.join(path, 'conf.json'), encoding="utf8") as json_file:
 
 search_db = conf["db"]["imported"]
 
+def _score_and_sort_results(result, clean_kw, new_keyword):
+    """
+    Helper function to score and sort raw database search results.
+    Returns a sorted list of tuples: (score, row_data)
+    """
+    scored = []
+    for x in result:
+        title_text = str(x[1]).lower() if len(x) > 1 and x[1] else ""
+        all_text = " ".join([str(val).lower() for val in x if val])
+        
+        score = 0
+        
+        # 1. Exact or Sub-phrase Title Hits
+        if clean_kw == title_text:
+            score += 10000
+        elif clean_kw in title_text:
+            score += 5000
+        
+        # 2. Individual Keyword Title Hits
+        title_matches = sum(1 for k in new_keyword if k and k.lower() in title_text)
+        score += (title_matches * 1000)
+        
+        # 3. Individual Keyword Body Hits in Lyrics 
+        # (DOES NOT WORK CURRENTLY AS WE DO NOT READ "CONTENT" FIELD, all_text does have score though)
+        # matched_keywords = sum(1 for k in new_keyword if k and k.lower() in all_text)
+        # score += (matched_keywords * 100)
+
+        # 4. "AND" Bonus (Found all words anywhere)
+        # if len(new_keyword) > 1 and matched_keywords == len(new_keyword):
+        #     score += 500
+            
+        # 5. Threshold (Setting to 0 for now, as we are SQL searching for through the lyrics but not Python searching through the lyrics)
+        if score >= 0:
+            scored.append((score, x))
+
+    # Sort highest score first
+    scored.sort(key=lambda item: item[0], reverse=True)
+    return scored
+
+
 def search_songs(keyword, match=None):
     titles = []
+    clean_kw = keyword.strip().lower()
+    
     for db in search_db:
-        # Split keywords from space
-        new_keyword = keyword.split(' ')
-        if db["enabled"] == 1:
+        if db.get("enabled") == 1:
             #if db["lang"] == 'zh-CN':  # covert traditional chinese to simplified
             #    converter = opencc.OpenCC('t2s.json')
             #    new_keyword = [converter.convert(x) for x in new_keyword]
+
+            # Split keywords by space
+            new_keyword = keyword.split(' ')
+
+            cols = db["search"].get("columns", ["title"])
+
             para = {
                 "name": db["name"],
                 "sql": db["search"]["query"],
                 "keywords": new_keyword,
                 "match": 'like',
                 "result": 'or',
-                "cols": db["search"]["columns"]
+                "cols": cols
             }
             result = dB.search(para)
-            titles += [{'id': x[0], 'title': x[1], 'db': db["name"], 'lang': x[2] if x[2] else db["name"].split('.')[0]} for x in result if len(result)>0]
+            if not result or isinstance(result, Exception):
+                continue
+
+            scored = _score_and_sort_results(result, clean_kw, new_keyword)
+
+            titles += [
+                {
+                    'id': x[0], 
+                    'title': x[1], 
+                    'db': db["name"], 
+                    'lang': x[2] if len(x) > 2 and x[2] else db["name"].split('.')[0]
+                } 
+                for _, x in scored
+            ]
     return titles
+
 
 def search_song_efcnc(keyword):
     db = conf["db"]["default"]
     new_keyword = keyword.split(' ')
+    clean_kw = keyword.strip().lower()
+
+    cols = db["search"].get("columns", ["title"])
+
     para = {
         "name": db["name"],
         "sql": db["search"]["query"],
         "keywords": new_keyword,
         "match": 'like',
         "result": 'or',
-        "cols": db["search"]["columns"]
+        "cols": cols
     }
     result = dB.search(para)
-    
+    if not result or isinstance(result, Exception):
+        return []
+
+    scored = _score_and_sort_results(result, clean_kw, new_keyword)
+
     # Split the media strings into arrays so the frontend get_links() function can iterate over them
     titles = [{
         'id': x[0], 
@@ -66,7 +134,7 @@ def search_song_efcnc(keyword):
         'video': x[5].split(';;;') if x[5] else [], 
         'score': x[6].split(';;;') if x[6] else [], 
         'abc': x[7].split(';;;') if x[7] else []
-    } for x in result]
+    } for _, x in scored]
     
     return titles
 

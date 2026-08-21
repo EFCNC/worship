@@ -35,8 +35,27 @@
 .sermon-bible { font-size: 1.05em; margin-bottom: 12px; }
 .sermon-outline { color: #34495e; line-height: 1.6; background: #f9f9f9; padding: 10px; margin-bottom: 12px; border-radius: 4px; border-left: 3px solid #bdc3c7; }
 
-.bible-link { color: #009698; text-decoration: none; font-weight: bold; margin-right: 6px; padding: 2px 6px; border: 1px solid #009698; border-radius: 4px; background: #f0fbfc; }
-.bible-link:hover { background: #009698; color: #fff; }
+.sermon-outline:last-child {
+    margin-bottom: 0; 
+}
+
+.bible-link {
+    display: inline-block;
+    white-space: nowrap;
+    color: #009698;
+    text-decoration: none;
+    font-weight: bold;
+    margin: 2px 0px;
+    padding: 1px 5px;
+    border: 1px solid #009698;
+    border-radius: 4px;
+    background: #f0fbfc;
+}
+
+.bible-link:hover {
+    background: #009698;
+    color: #fff;
+}
 
 /* =========================================
    Language Tags

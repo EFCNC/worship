@@ -1,5 +1,6 @@
 import sqlite3
 import os
+import re
 
 con = None
 db_name = "worship.db"
@@ -7,21 +8,50 @@ db_name = "worship.db"
 def search(query):
     db = query["name"]
     sql = query["sql"]
-    cols = query["cols"]
-    keywords = query["keywords"]
-    match = query["match"]
-    result = query["result"]
-    cols = ['{} {} ?'.format(x, match) for x in cols]
-    if match == 'like':
-        keywords = ['%{}%'.format(x) for x in keywords]
-    temp = []
-    params = keywords * len(cols)
+    cols = query.get("cols", [])
+    keywords = query.get("keywords", [])
+    match = query.get("match", "like")
+    result_op = query.get("result", "or").upper()
+
+    if not cols or not keywords:
+        return []
+
+    keywords = [str(k).strip() for k in keywords if str(k).strip()]
+    if not keywords:
+        return []
+
+    where_clauses = []
+    params = []
+
     for col in cols:
-        temp.append([col] * len(keywords))
-    condition = 'or'    #
-    temp = ['({})'.format(' {} '.format(condition).join(x)) for x in temp]
-    sql = sql.format(' {} '.join(temp).format(result))
-    return run_para(sql, params, db)
+        col_conditions = []
+        for kw in keywords:
+            if match == 'like':
+                col_conditions.append(f"{col} LIKE ?")
+                params.append(f"%{kw}%")
+            else:
+                col_conditions.append(f"{col} = ?")
+                params.append(kw)
+            
+        if col_conditions:
+            col_sql = f"({f' {result_op} '.join(col_conditions)})"
+            where_clauses.append(col_sql)
+
+    if not where_clauses:
+        return []
+
+    where_sql = " OR ".join(where_clauses)
+    final_sql = sql.format(where_sql)
+
+    # Execute query
+    res = run_para(final_sql, params, db)
+
+    # Safely handle SQLite errors
+    if isinstance(res, Exception):
+        print(f"[DB Search Error in {db}]: {res}")
+        return []
+
+    return res if res else []
 
 def get_song(query):
     db = query["name"]
