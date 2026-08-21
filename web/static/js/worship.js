@@ -43,7 +43,7 @@ var API_URL = '/API/';
                 // Row 2: Key, Media Links
                 html += '<div class="song-details-row">';
                 html += '<span>Current Key: <select class="key" name="' + data.transpose + '" init="' + data.song_key + '"><option>' + data.song_key + '</option></select></span>';
-                html += '<span>&nbsp;Original Key: ' + data.song_key + '</span>';
+                html += '<span>Original Key: ' + data.song_key + '</span>';
                 html += get_links(data.video, data.score, data.abc, data.id);
                 html += '</div>';
                 

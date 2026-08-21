@@ -53,17 +53,6 @@
     width: 100%;
 }
 
-.lyrics {
-    counter-reset: sequence-counter;
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    grid-auto-rows: 1fr;
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-    text-align:center;
-}
-
 #songs li, .lyrics li, #song_list li {
     border-radius: 5px;
     margin: 5px;
@@ -75,26 +64,30 @@
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 5px;
     padding: 5px;
 }
 
 .song-header-row {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
+    align-items: center;
 }
 
-.song-title {
-    margin: 3px;
+/* .song-title {
     border: 1px solid transparent;
-}
+} */
 
 .song-details-row {
     display: flex;
     align-items: center;
     gap: 15px;
     flex-wrap: wrap;
+}
+
+.song-details-row select {
+    height: auto;
+    padding: 3px 5px;
 }
 
 .song-notes-row p {
@@ -109,6 +102,18 @@
 /* =========================================
    Lyrics & Sequences
    ========================================= */
+.lyrics {
+    counter-reset: sequence-counter;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-auto-rows: 1fr;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    text-align:center;
+    width: 100%;
+}
+
 .lyric-item {
     display: flex; 
     flex-direction: column;
@@ -189,7 +194,12 @@
     color: rgba(0, 0, 0, 0.2);
 }
 
-.sequence-container { display: flex; flex-direction: row; align-items: flex-start; }
+.sequence-container {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    width: 100%;
+}
 .song_sequence_toggle { display: flex; align-items: center; cursor: pointer; gap: 8px; }
 
 /* Sequence Colored Tags */
