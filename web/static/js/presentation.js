@@ -185,6 +185,12 @@
 
     function load_slides() {
         $('.slides').empty();
+        if (!slides.length) {
+            $('#slide_title, #slide_notes').empty();
+            document.dispatchEvent(new CustomEvent('presentation:slides-loaded'));
+            return;
+        }
+        pos = Math.max(0, Math.min(pos, slides.length - 1));
         $('#slide_title').html(slides[pos].title);
         $('#slide_notes').html(slides[pos].notes);
         for(var i=0;i<slides.length;i++) {
@@ -288,19 +294,27 @@
 		    }
     		$('.slides').append(section);
     	}
+        document.dispatchEvent(new CustomEvent('presentation:slides-loaded'));
     }
 
-    function update_json(download) {
-    $('#loading').show();
-    data = JSON.stringify({"setting": setting, "slides": slides});
-        $.ajax({
+    function update_json(download, callbacks) {
+        callbacks = callbacks || {};
+        $('#loading').show();
+        if (mode === 'admin' && typeof refresh_admin_preview === 'function') {
+            refresh_admin_preview();
+        }
+        var jsonData = JSON.stringify({"setting": setting, "slides": slides});
+        return $.ajax({
             type: "post",
             url: "/API/worship/" + w_id + "/json",
-            data: data,
+            data: jsonData,
             contentType: "application/json",
             dataType: 'json',
             complete: function(response) {
                 if(response.status==200) {
+                    if (callbacks.success) {
+                        callbacks.success(response);
+                    }
                     if(download) {
                         window.location = '/API/download?file=' + response.responseText;
                     }
@@ -308,9 +322,12 @@
                         socket.emit('reload');
                     }
                 }
+                else if (callbacks.error) {
+                    callbacks.error(response);
+                }
+                $('#loading').hide();
             }
         });
-        $('#loading').hide();
     }
 
 
@@ -325,6 +342,7 @@
         console.log('Admin reload json data', slides);
         w_id = presentation['id'];
         adding_slide = 0;
+        pos = Math.max(0, Math.min(pos, Math.max(0, slides.length - 1)));
 
         // When reload is broadcast, load the slide from the data and sync it before move to current pos and order
         load_slides();

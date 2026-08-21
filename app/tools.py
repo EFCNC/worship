@@ -115,6 +115,32 @@ def simplify_json(json):
     json['slides'] = simple
     return json
 
+
+def _slide_identity(slide):
+    """Return a repeatable identity for matching regenerated presentation slides."""
+    slide_id = slide.get('id')
+    slide_type = slide.get('type', '')
+    if slide_id not in (None, -1, '-1'):
+        return slide_type, 'id', str(slide_id)
+    return slide_type, 'title', slide.get('title', '')
+
+
+def _preserve_slide_order(generated_slides, previous_slides):
+    """Keep the user's prior column order while retaining newly generated slides."""
+    remaining = list(generated_slides)
+    ordered = []
+    for previous in previous_slides or []:
+        previous_identity = _slide_identity(previous)
+        match_index = next((
+            index for index, slide in enumerate(remaining)
+            if _slide_identity(slide) == previous_identity
+        ), None)
+        if match_index is not None:
+            ordered.append(remaining.pop(match_index))
+    ordered.extend(remaining)
+    return ordered
+
+
 def create_json(id, worship=None):
     root = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'files')
     if not worship:
@@ -208,6 +234,7 @@ def create_json(id, worship=None):
                         temp.append(song)
                 else:
                     temp.append(template[item])
+        temp = _preserve_slide_order(temp, slides)
         worship_json = {"setting": {"slide_order": order, "assets": []}, "slides": temp}
 
     else:

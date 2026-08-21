@@ -5,7 +5,9 @@
 {% block extra_css %}
     <script src="/static/vendor/socket.io/socket.io.js"></script>
     <script src="/static/js/presentation.js"></script>
+    <script src="/static/js/slides_admin_matrix.js"></script>
     <link href="/static/css/presentation.css" rel="stylesheet">
+    <link href="/static/css/slides_admin_matrix.css" rel="stylesheet">
     <link rel="stylesheet" href="/static/vendor/jquery/jquery-ui.css">
     <link rel="stylesheet" href="/static/vendor/reveal/reset.css">
 	<link rel="stylesheet" href="/static/vendor/reveal/reveal.css">
@@ -108,9 +110,17 @@
 	    height: 100vh;
 }
 
-.reveal {
+.slide-viewport {
     grid-column: span 4 / span 4;
     grid-row: span 5 / span 5;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.slide-viewport .reveal {
+    width: 100%;
+    height: 100%;
 }
 
 .menu {
@@ -125,9 +135,14 @@
 <body>
 <div id="dialog"></div>
 <div class="admin_container">
-    <div class="reveal">
-		<div class="slides"></div>
-	</div>
+    <div class="slide-viewport">
+        <div class="reveal">
+		    <div class="slides"></div>
+	    </div>
+        <div id="slide_matrix" class="slide-matrix" aria-label="General slide view" hidden>
+            <div id="slide_matrix_columns" class="slide-matrix-columns"></div>
+        </div>
+    </div>
     <div id="bottom-left" style="display: flex; justify-content: center;align-items: center"><span title="Set the numbers of line in one slide. 0=all lines">Fragment:</span> <select id="fragment"></select>&nbsp;<i class="material-icons link" id="add_link" title="Add a link">&#xE250;</i></div>
     <div class="menu">
         <div id="control_panel">
@@ -144,6 +159,7 @@
             <i class="material-icons small" name="6" title="Broadcast Message">&#xE0C9;</i>
             <i class="material-icons small" name="7" title="Edit Josn File">&#xE3C9;</i>
             <i class="material-icons small" name="8" title="Casting View">&#xE30C;</i>
+            <i class="material-icons small" id="general_view_btn" name="matrix" title="General / Matrix View" role="button" tabindex="0" aria-pressed="false">&#xE3EC;</i>
         </div>
         <hr/>
         <!-- 2nd layer buttons toggle by first layer function -->
@@ -175,9 +191,31 @@
         background = presentation['background'];
         w_id = presentation['id'];
         focus_div = null;
+        new_slide_editor = null;
         bible = [];
 
         // Slide related functions
+
+        function get_content_index(horizontalIndex, verticalIndex) {
+            var slide = Reveal.getSlide(horizontalIndex, verticalIndex);
+            var value = slide ? Number(slide.getAttribute('order')) : 0;
+            return Number.isInteger(value) ? value : 0;
+        }
+
+        function select_admin_slide(horizontalIndex, verticalIndex) {
+            if (!slides.length) {
+                return;
+            }
+            Reveal.slide(horizontalIndex, verticalIndex);
+            pos = horizontalIndex;
+            order = verticalIndex;
+            content_index = get_content_index(pos, order);
+            focus_div = $(Reveal.getSlide(pos, order)).find('.origin').first();
+            change_slide();
+            if (typeof update_matrix_selection === 'function') {
+                update_matrix_selection();
+            }
+        }
 
         function toggle_panel(name) {
             panels = ['image_bg', 'msgbox', 'bible_panel'];
@@ -245,8 +283,9 @@
         function delete_slide() {
             // Delete current slide
             song = false;
-            if (Array.isArray(slides[pos].content)) {
-                title = slides[pos].content[content_index].name;
+            if (Array.isArray(slides[pos].content) && slides[pos].content.length) {
+                content_index = get_content_index(pos, order);
+                title = slides[pos].content[content_index].name || slides[pos].title || 'Untitled slide';
                 text = 'This will delete the song slide "' + title + '", are you sure?';
                 song = true;
             }
@@ -254,11 +293,54 @@
                 text = 'This will delete the current slide with the title "' + slides[pos].title + '", are you sure?';
             }
             if (confirm(text) == true) {
+                var nextSelection = null;
                 if(song) {
-                    slides[pos].content.splice(order, 1);
+                    if (slides[pos].content.length === 1) {
+                        if (slides.length === 1) {
+                            alert('A presentation must contain at least one slide.');
+                            return;
+                        }
+                        slides.splice(pos, 1);
+                        pos = Math.min(pos, slides.length - 1);
+                        order = 0;
+                        nextSelection = {
+                            slide: slides[pos],
+                            horizontalIndex: pos,
+                            verticalIndex: 0,
+                            content: null,
+                            fragmentOffset: 0
+                        };
+                    }
+                    else {
+                        var nextContent = slides[pos].content[content_index + 1] || slides[pos].content[content_index - 1];
+                        slides[pos].content.splice(content_index, 1);
+                        nextSelection = {
+                            slide: slides[pos],
+                            horizontalIndex: pos,
+                            verticalIndex: 0,
+                            content: nextContent,
+                            fragmentOffset: 0
+                        };
+                    }
                 }
                 else {
+                    if (slides.length === 1) {
+                        alert('A presentation must contain at least one slide.');
+                        return;
+                    }
                     slides.splice(pos, 1);
+                    pos = Math.min(pos, slides.length - 1);
+                    order = 0;
+                    nextSelection = {
+                        slide: slides[pos],
+                        horizontalIndex: pos,
+                        verticalIndex: 0,
+                        content: null,
+                        fragmentOffset: 0
+                    };
+                }
+                if (nextSelection && typeof refresh_admin_preview === 'function') {
+                    refresh_admin_preview(nextSelection);
                 }
                 update_json();
             }
@@ -277,28 +359,32 @@
         function add_slide() {
             // Add a slide after the current one
             adding_slide = 1;
+            if (typeof prepare_matrix_inline_edit === 'function') {
+                prepare_matrix_inline_edit();
+            }
             $('#edit_btn').css('left', $('.reveal').width()-100);
             $('#edit_btn').show();
             slide_div = Reveal.getSlide(pos, order);
             info_div = '<div contenteditable="true" class="info origin">' + origin_text + '</div><div contenteditable="true" class="info region">' + region_text + '</div>'
             slide_div.children[0].innerHTML = info_div;
+            new_slide_editor = $(slide_div);
 
-            $(".info.origin").click(function() {
+            new_slide_editor.find(".info.origin").click(function() {
                 if($(this).html() == origin_text) {
                     $(this).html('');
                 }
             });
-            $(".info.region").click(function() {
+            new_slide_editor.find(".info.region").click(function() {
                 if($(this).html() == region_text) {
                     $(this).html('');
                 }
             });
-            $(".info.origin").focusout(function() {
+            new_slide_editor.find(".info.origin").focusout(function() {
                 if($(this).html() == '' && $(this).html != origin_text) {
                     $(this).html(origin_text);
                 }
             });
-            $(".info.region").focusout(function() {
+            new_slide_editor.find(".info.region").focusout(function() {
                 if($(this).html() == '' && $(this).html != region_text) {
                     $(this).html(region_text);
                 }
@@ -475,6 +561,10 @@
                 update_current_bg();
             }
             $('#edit_btn').hide();
+            new_slide_editor = null;
+            if (typeof restore_matrix_after_inline_edit === 'function') {
+                restore_matrix_after_inline_edit();
+            }
         }
 
         function apply(name) {
@@ -491,8 +581,9 @@
                 }
             }
             else if (a_type == 'info') {
-                origin = $('.info.origin').html();
-                region = $('.info.region').html();
+                var editor = new_slide_editor || $(Reveal.getSlide(pos, order));
+                origin = editor.find('.info.origin').first().html();
+                region = editor.find('.info.region').first().html();
                 if ((origin == '' || origin == origin_text) && (region == '' || region == region_text)) {
                     alert("No information is entered!!");
                     return false;
@@ -502,26 +593,31 @@
                     slides.splice(pos+1, 0, info);
                     $('#edit_btn').hide();
                     adding_slide = 0;
+                    new_slide_editor = null;
                 }
             }
             a_type = '';
+            if (typeof restore_matrix_after_inline_edit === 'function') {
+                restore_matrix_after_inline_edit();
+            }
             update_json();
         }
 
         $("#add_link").click(function() {
+            if (!focus_div || !focus_div.length || (!focus_div.hasClass('origin') && !focus_div.hasClass('region'))) {
+                focus_div = $(Reveal.getSlide(pos, order)).find('.origin').first();
+            }
+            if (!focus_div.length) {
+                alert('The selected page does not contain editable text.');
+                return;
+            }
             link = prompt('Enter the link to current slide');
             if(link) {
                 link = '&nbsp;<a href="' + link + '" data-preview-link>Click</a>';
                 adding_slide = 0;
                 html = focus_div.html();
                 focus_div.html(html + link);
-                if(focus_div.attr('class').indexOf('origin')>0) {
-                    slides[pos].content.origin_text = focus_div.html();
-                }
-                else if(focus_div.attr('class').indexOf('region')>0) {
-                    slides[pos].content.region_text = focus_div.html();
-                }
-                update_json();
+                focus_div.trigger('change');
             }
 
         });
@@ -558,6 +654,9 @@
                 case '8':
                     window.open('/slides/view', '_blank');
                     break;
+                case 'matrix':
+                    toggle_general_view();
+                    break;
                 case 'one':
                     apply('one');
                     break;
@@ -577,22 +676,21 @@
         });
 
         Reveal.on('slidechanged', (event) => {
-            if(slide_refreshed) {            // slide refreshed by socket, reset flag
-                slide_refreshed = false;
-                return true;
-            }
             pos = event.indexh;
             order = event.indexv;
-            pre = $(event.previousSlide).children().attr('name');
-            cur = $(event.currentSlide).children().attr('name');
-            change_slide();
-
-            if (order == 0) {
-                content_index = 0;
+            content_index = get_content_index(pos, order);
+            focus_div = $(event.currentSlide).find('.origin').first();
+            if(slide_refreshed) {            // slide refreshed by socket, reset flag
+                slide_refreshed = false;
+                change_slide();
+                if (typeof update_matrix_selection === 'function') {
+                    update_matrix_selection();
+                }
+                return true;
             }
-            if(order>0&&pre!=cur) {
-                // maintain content_index in order to delete corresponding sequence
-                content_index ++;
+            change_slide();
+            if (typeof update_matrix_selection === 'function') {
+                update_matrix_selection();
             }
             if(adding_slide==1) {
                 load_slides();
