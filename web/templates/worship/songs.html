@@ -343,8 +343,24 @@
         });
     });
 
+    // Intercept touches on their way DOWN the DOM to hide them from jQuery UI Sortable
+    document.addEventListener('touchstart', function(e) {
+        const tag = e.target.tagName;
+        
+        if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || tag === 'OPTION') {
+            e.stopPropagation();
+        }
+    }, true);
+
+    document.addEventListener('mousedown', function(e) {
+        const tag = e.target.tagName;
+        if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || tag === 'OPTION') {
+            e.stopPropagation();
+        }
+    }, true);
+
     // When Notes are changed
-    $(document).on('change', 'textarea[name="song_notes"]', function() {
+    $(document).on('input', 'textarea[name="song_notes"]', function() {
         index = $(this).attr('index');
         songs_temp[index].notes = $(this).val();
         checkActionButtons();
@@ -554,13 +570,14 @@
     // init sortable, triggered after the worship div is loaded
     function init() {
         $("#songs").sortable({
+            cancel: 'input, textarea, button, select, option',
             update: function () {
                 checkActionButtons();
             }
         });
 
         $(".lyrics").sortable({
-            cancel: "input, textarea, button, select, option",
+            cancel: 'input, textarea, button, select, option',
             create: function( event, ui ) {
                 //is_changed($(this).sortable('toArray', {attribute: 'name'}));
                 update_alt($(this).sortable('toArray'));

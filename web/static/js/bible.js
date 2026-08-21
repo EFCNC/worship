@@ -89,11 +89,14 @@ function extractText(node) {
 }
 
 function show_verse(title, htmlContent) {
+    // Check if the screen is mobile-sized
+    const isMobile = $(window).width() < 600;
+
     $("#dialog").html(htmlContent);
     $("#dialog").dialog({
         title: title,
-        width: 500,
-        maxWidth: $(window).width() * 0.9,
+        width: isMobile ? '95%' : 500, 
+        maxWidth: isMobile ? 'none' : $(window).width() * 0.9,
         maxHeight: 500, 
         position: { my: "center", at: "center", of: window },
         buttons: [
