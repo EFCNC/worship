@@ -5,10 +5,7 @@ var API_URL = '/API/';
         device = 'mobile';
     }
 
-
-
     // functions for rendering UI
-
     function move_top(tag) {
         scrollTo = $('div[' + tag + ']');
         $('html, body').animate({
@@ -43,25 +40,42 @@ var API_URL = '/API/';
                 // Row 2: Key, Media Links
                 html += '<div class="song-details-row">';
                 html += '<span>Current Key: <select class="key" name="' + data.transpose + '" init="' + data.song_key + '"><option>' + data.song_key + '</option></select></span>';
-                html += '<span>&nbsp;Original Key: ' + data.song_key + '</span>';
+                html += '<span>Original Key: ' + data.song_key + '</span>';
                 html += get_links(data.video, data.score, data.abc, data.id);
                 html += '</div>';
                 
+                // Extract unique section names directly from the lyrics content
+                let uniqueSections = [...new Set(data.content.map(l => l.name))];
+                let paletteButtons = uniqueSections.map(sec => 
+                    `<button type="button" class="btn-palette ${sec}" data-sec="${sec}" data-id="${data.id}">[${sec}]</button>`
+                ).join('');
+
                 // Row 3: Notes
-                html += '<div class="song-notes-row">';
-                html += '<p>Notes: <textarea name="song_notes" index="' + index + '" rows="5" cols="60">' + data.notes + '</textarea></p>';
-                html += '</div>';
+                html += `
+                    <div class="song-notes-row">
+                        <div class="notes-container">
+                            <label for="song-notes-${index}">Song Notes:</label>
+                            <textarea id="song-notes-${index}" name="song_notes" data-index="${index}" rows="3">${data.notes || ''}</textarea>
+                        </div>
+                        <div class="palette-container">
+                            <label>Quick Add / Tools:</label>
+                            <div class="palette-buttons">
+                                <button type="button" class="btn-lang-swap" title="Swap Language" data-id="${data.id}"><i class="fa-solid fa-language"></i></button>
+                                ${paletteButtons}
+                            </div>
+                        </div>
+                    </div>`;
 
                 // Row 4: Sequence Container
-                html += '<div class="sequence-container">';
-
-                html += `<div class="song_sequence_toggle" name="${data.id}" title="Click to arrange song sequence">`;
-                html += '<i class="fa-solid fa-caret-right toggle-icon"></i>'; // The toggle triangle
-                html += `<span class="song_sequence">Song Sequence: <span class="sequence" id="song-${data.id}_alt">${data.sequence}</span></span>`;
-
-                html += '</div>'; // End toggle button
-
-                html += '</div>'; // End sequence container
+                html += `
+                        <div class="song_sequence_toggle" name="${data.id}" title="Click to arrange song sequence">
+                            <i class="fa-solid fa-caret-right toggle-icon"></i>
+                            <span class="song_sequence">Song Sequence: 
+                                <span class="sequence" id="song-${data.id}_alt">${data.sequence}</span>
+                            </span>
+                        </div>
+                        <div class="sequence-container">
+                        </div>`;
 
                 html += '</div>'; // End main wrapper
                 
@@ -79,16 +93,19 @@ var API_URL = '/API/';
                     list_1.setAttribute('id', 'song-' + data.id + '_' + l.name);
                     
                     // Store the formatted text in a variable to keep the HTML string clean
-                    var formatted_lyrics = l.origin_text.split("\n").join("<br />");
+                    var formatted_lyrics = l.origin_text ? l.origin_text.split("\n").join("<br />") : '';
+                    // Pull the translation from the region attribute
+                    var formatted_region = l.region ? l.region.split("\n").join("<br />") : '';
 
                     list_1.innerHTML = 
                         '<div name="lyrics_parts" class="lyric-content ' + l.name + '">' + 
+                            '<div class="lyrics_buttons_container">' + 
+                                '<button type="button" class="btn-lyric btn-lyric-add add_sequence_btn" title="Add Section"><i class="fa-solid fa-plus"></i></button>' + 
+                                '<button type="button" class="btn-lyric btn-lyric-remove remove_sequence_btn" title="Remove Section"><i class="fa-solid fa-trash"></i></button>' + 
+                            '</div>' +
                             '<strong>[' + l.name + ']</strong><br/>' + 
-                            formatted_lyrics + 
-                        '</div>' + 
-                        '<div class="lyrics_buttons">' + 
-                            '<button type="button" class="btn-lyric btn-lyric-add add_sequence_btn" title="Add Section"><i class="fa-solid fa-plus"></i></button>' + 
-                            '<button type="button" class="btn-lyric btn-lyric-remove remove_sequence_btn" title="Remove Section"><i class="fa-solid fa-trash"></i></button>' + 
+                            '<div class="text-lang1">' + formatted_lyrics + '</div>' +
+                            '<div class="text-lang2" style="display:none;">' + formatted_region + '</div>' +
                         '</div>';
                         
                     ul.append(list_1);
@@ -106,6 +123,62 @@ var API_URL = '/API/';
         
         return list;
     }
+
+    // --- Language Swap Button Handler ---
+    $(document).on('click', '.btn-lang-swap', function() {
+        let id = $(this).data('id');
+        let $sequenceContainer = $('#sequence_' + id);
+        
+        // Check which language is currently visible and toggle
+        let isLang1Visible = $sequenceContainer.find('.text-lang1').first().is(':visible');
+        
+        if (isLang1Visible) {
+            $sequenceContainer.find('.text-lang1').hide();
+            $sequenceContainer.find('.text-lang2').show();
+        } else {
+            $sequenceContainer.find('.text-lang2').hide();
+            $sequenceContainer.find('.text-lang1').show();
+        }
+    });
+
+    // --- Quick Add Palette Button Handler ---
+    $(document).on('click', '.btn-palette', function() {
+        let sectionName = $(this).data('sec');
+        let songId = $(this).data('id');
+        
+        // Find the original content data for this section
+        let songData = songs_temp.find(s => s.id == songId);
+        let sectionData = songData.content.find(c => c.name == sectionName);
+        
+        if (!sectionData) return; // Failsafe
+        
+        var formatted_lyrics = sectionData.origin_text ? sectionData.origin_text.split("\n").join("<br />") : '';
+        var formatted_region = sectionData.region ? sectionData.region.split("\n").join("<br />") : '';
+        
+        // Determine which language is currently active to match the new block's visibility
+        let isLang2Active = $('#sequence_' + songId).find('.text-lang2').first().is(':visible');
+
+        // Build the new lyric item
+        let newBlock = $('<li class="ui-state-default lyric-item" id="song-' + songId + '_' + sectionName + '"></li>');
+        newBlock.html(
+            '<div name="lyrics_parts" class="lyric-content ' + sectionName + '">' + 
+                '<div class="lyrics_buttons_container">' + 
+                    '<button type="button" class="btn-lyric btn-lyric-add add_sequence_btn" title="Add Section"><i class="fa-solid fa-plus"></i></button>' + 
+                    '<button type="button" class="btn-lyric btn-lyric-remove remove_sequence_btn" title="Remove Section"><i class="fa-solid fa-trash"></i></button>' + 
+                '</div>' +
+                '<strong>[' + sectionName + ']</strong><br/>' + 
+                '<div class="text-lang1" style="display:' + (isLang2Active ? 'none' : 'block') + ';">' + formatted_lyrics + '</div>' +
+                '<div class="text-lang2" style="display:' + (isLang2Active ? 'block' : 'none') + ';">' + formatted_region + '</div>' +
+            '</div>'
+        );
+        
+        // Append to the grid and re-initialize sortable logic
+        $('#sequence_' + songId).append(newBlock);
+        
+        $(".lyrics").sortable("destroy");
+        init();
+        checkActionButtons();
+    });
 
     function add_song_to_worship(worship_list) {
         worship_list.empty();

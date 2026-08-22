@@ -387,12 +387,12 @@
                             <button id="sermon_btn" name="{{ w.worship.worship_id }}">Edit</button>
                             <a href="{{ url_for('worship_songs_editor', id=w.worship.worship_id) }}">Songs</a>
                             <a href="{{ url_for('worship_notes', id=w.worship.worship_id) }}">Notes</a>
-                            <button id="team_btn" name="{{ w.worship.worship_id }}">Teams</button>
+                            <button id="team_btn" name="{{ w.worship.worship_id }}">Team</button>
                         </div>
                     {% else %}
                         <div class="overlay_btns">
                             <a href="{{ url_for('worship_songs_editor', id=w.worship.worship_id) }}">Songs</a>
-                            <button id="team_btn" name="{{ w.worship.worship_id }}">Teams</button>
+                            <button id="team_btn" name="{{ w.worship.worship_id }}">Team</button>
                         </div>
                     {% endif %}
                 </div>
