@@ -61,9 +61,10 @@
         }
 
         #edit_btn {
-            position: fixed;
             z-index: 99;
             display: none;
+            text-align: right;
+            min-height: 34px;
         }
 
         #image_bg {
@@ -72,6 +73,37 @@
             background-color: #002147;
             display: none;
             z-index: 1;
+            padding: 12px;
+        }
+
+        #brightness_control {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+
+        #admin_toast {
+            display: none;
+            margin: 8px 0;
+            padding: 8px 12px;
+            border-left: 4px solid #388e3c;
+            border-radius: 4px;
+            color: #fff;
+            background: #211a2b;
+            font-size: 14px;
+        }
+
+        #admin_toast.cancelled {
+            border-left-color: #f57c00;
+        }
+
+        header#header,
+        header#header a,
+        header#header button {
+            font-family: var(--font-family-base);
+            line-height: var(--line-height-base);
         }
 
         #bible_panel {
@@ -157,15 +189,16 @@
             <i class="material-icons small" name="4" title="Change Background">&#xE3F4;</i>
             <i class="material-icons small" name="5" title="Slide Setting">&#xE8B8;</i>
             <i class="material-icons small" name="6" title="Broadcast Message">&#xE0C9;</i>
-            <i class="material-icons small" name="7" title="Edit Josn File">&#xE3C9;</i>
+            <i class="material-icons small" name="7" title="Edit JSON File">&#xE3C9;</i>
             <i class="material-icons small" name="8" title="Casting View">&#xE30C;</i>
             <i class="material-icons small" id="general_view_btn" name="matrix" title="General / Matrix View" role="button" tabindex="0" aria-pressed="false">&#xE3EC;</i>
         </div>
         <hr/>
+        <div id="admin_toast" role="status" aria-live="polite"></div>
         <!-- 2nd layer buttons toggle by first layer function -->
         <div id="msgbox"><textarea id="content" rows="3" cols="40"></textarea>&nbsp;&nbsp;<i class="material-icons small" id="send_msg" title="Send a message to view">&#xE163;</i><i class="material-icons small" id="clear_msg" title="Clear the message">&#xE14C;</i></div>
         <div id="image_bg">
-            <div id="slider" style="width:300px"><div id="custom-handle" class="ui-slider-handle"></div></div>
+            <div id="brightness_control"><span>Brightness</span><div id="slider" style="width:300px"><div id="custom-handle" class="ui-slider-handle"></div></div></div>
             <div id="image_icons"></div>
         </div>
         <div id="bible_panel"></div>
@@ -178,8 +211,9 @@
 <script>
         mode = 'admin';                 // Set mode to admin
         bg_url = '';
-        bg_opacity = 1;
+        bg_brightness = 1;
         a_type = '';
+        admin_toast_timer = null;
         origin_text = '輸入您的資訊';
         region_text = 'Enter your extra language information here';
 
@@ -214,6 +248,38 @@
             change_slide();
             if (typeof update_matrix_selection === 'function') {
                 update_matrix_selection();
+            }
+        }
+
+        function set_background_slider(value) {
+            var sliderValue = Math.max(0, Math.min(10, Math.round(value)));
+            if ($('#slider').hasClass('ui-slider')) {
+                $('#slider').slider('option', 'value', sliderValue);
+            }
+            $('#custom-handle').text(sliderValue);
+        }
+
+        function show_admin_toast(message, type) {
+            clearTimeout(admin_toast_timer);
+            var toast = $('#admin_toast');
+            toast.stop(true, true)
+                .toggleClass('cancelled', type === 'cancelled')
+                .text(message)
+                .fadeIn(150);
+            admin_toast_timer = setTimeout(function() {
+                toast.fadeOut(250);
+            }, 2500);
+        }
+
+        function restore_background_preview(showMessage) {
+            bg_brightness = get_slide_background_brightness(slides[pos]);
+            bg_url = slides[pos].style.background || '';
+            set_background_slider(bg_brightness * 10);
+            update_current_bg();
+            $('#edit_btn, #image_bg').hide();
+            a_type = '';
+            if (showMessage) {
+                show_admin_toast('Background change has been canceled.', 'cancelled');
             }
         }
 
@@ -263,6 +329,11 @@
             // show background images
             toggle_panel('image_bg');
             if ($('#image_bg').is(":visible")) {
+                a_type = 'bg';
+                bg_url = slides[pos].style.background || '';
+                bg_brightness = get_slide_background_brightness(slides[pos]);
+                set_background_slider(bg_brightness * 10);
+                $('#edit_btn').show();
                 var url = '/API/backgrounds';
                 $.when( $.ajax( url ) ).then(function( response, textStatus, jqXHR ) {
                     var temp = '';
@@ -270,13 +341,10 @@
                         temp += '<img src="' + response[i] + '" title="' + response[i] + '"/>';
                     }
                     $('#image_icons').empty().html(temp);
-                    a_type = 'bg';
                 });
             }
             else {
-                bg_url = '';
-                a_type = '';
-                $('#edit_btn').hide();
+                restore_background_preview(false);
             }
         }
 
@@ -362,7 +430,6 @@
             if (typeof prepare_matrix_inline_edit === 'function') {
                 prepare_matrix_inline_edit();
             }
-            $('#edit_btn').css('left', $('.reveal').width()-100);
             $('#edit_btn').show();
             slide_div = Reveal.getSlide(pos, order);
             info_div = '<div contenteditable="true" class="info origin">' + origin_text + '</div><div contenteditable="true" class="info region">' + region_text + '</div>'
@@ -400,18 +467,17 @@
 
         // Document ready events
         $(document).ready(function() {
-            // Init Reveal
-    		Reveal.initialize({
+		load_slides();    // Populate the deck before Reveal binds its controls
+		Reveal.initialize({
 	    		embedded: true,
 	    		loop: true,
 	    		hash: false,
 			    slideNumber: true,
 			    navigationMode: "default",
 			    progress: false
-    		});
-    		load_slides();    // Load slides
+		});
 
-             // init slider for opacity control
+             // init slider for brightness control
              var handle = $( "#custom-handle" );
             $( "#slider" ).slider({
                 range: 'max',
@@ -423,7 +489,7 @@
                 },
                 slide: function( event, ui ) {
                     handle.text( ui.value );
-                    bg_opacity = ui.value/10;
+                    bg_brightness = ui.value/10;
                     update_current_bg();
                 }
             });
@@ -534,50 +600,61 @@
 
         $(document).on('click', '#image_icons img', function() {
             // Get slide background and replace with the clicked one
-            $( "#custom-handle" ).text(10);
-            $( "#slider" ).slider( "option", "value", 10 );
-            bg_opacity = 1;
+            set_background_slider(10);
+            bg_brightness = 1;
             bg_url = this.title;
             update_current_bg();
-            $('#edit_btn').css('left', $('.reveal').width()-100);
             $('#edit_btn').show();
             a_type = 'bg';
         });
 
         function update_current_bg() {
             slide_bg = Reveal.getSlideBackground(pos, order);
-            slide_bg.children[0].setAttribute('style', 'opacity: ' + bg_opacity + '; background-image: url("' + bg_url + '")');
+            if (!slide_bg || !slide_bg.children.length) {
+                return;
+            }
+            var backgroundContent = slide_bg.children[0];
+            backgroundContent.style.opacity = '1';
+            backgroundContent.style.filter = 'brightness(' + bg_brightness + ')';
+            backgroundContent.style.backgroundImage = bg_url ? 'url("' + bg_url + '")' : 'none';
         }
 
         function cancel() {
+            var cancelledType = a_type;
             if (adding_slide == 1) {
                 load_slides();
+                Reveal.sync();
+                apply_background_brightness();
                 Reveal.slide(pos, order);
             }
-            else {
-                bg_opacity = slides[pos].style.opacity;
-                bg_url = slides[pos].style.background;
-                $( "#custom-handle" ).text(10);
-                update_current_bg();
+            else if (cancelledType == 'bg') {
+                restore_background_preview(false);
             }
             $('#edit_btn').hide();
+            a_type = '';
             new_slide_editor = null;
             if (typeof restore_matrix_after_inline_edit === 'function') {
                 restore_matrix_after_inline_edit();
             }
+            if (cancelledType == 'bg') {
+                show_admin_toast('Background change has been canceled.', 'cancelled');
+            }
         }
 
         function apply(name) {
-            if (a_type == 'bg') {
+            var appliedBackground = a_type == 'bg';
+            if (appliedBackground) {
                 if (name == 'all') {
                     for(var i=0;i<slides.length;i++) {
                         slides[i].style.background = bg_url;
-                        slides[i].style.opacity = bg_opacity;
+                        slides[i].style.brightness = bg_brightness;
+                        slides[i].style.opacity = 1;
                     }
                 }
                 else {
                     slides[pos].style.background = bg_url;
-                    slides[pos].style.opacity = bg_opacity;
+                    slides[pos].style.brightness = bg_brightness;
+                    slides[pos].style.opacity = 1;
                 }
             }
             else if (a_type == 'info') {
@@ -597,6 +674,11 @@
                 }
             }
             a_type = '';
+            $('#edit_btn').hide();
+            if (appliedBackground) {
+                $('#image_bg').hide();
+                show_admin_toast('Background change has been applied.', 'applied');
+            }
             if (typeof restore_matrix_after_inline_edit === 'function') {
                 restore_matrix_after_inline_edit();
             }
@@ -673,6 +755,11 @@
             value = $(this).val();
             slides[pos].style.fragment = value;
             update_json();
+        });
+
+        Reveal.on('ready', () => {
+            apply_background_brightness();
+            Reveal.slide(pos, order);
         });
 
         Reveal.on('slidechanged', (event) => {

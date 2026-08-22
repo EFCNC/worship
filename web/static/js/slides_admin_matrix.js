@@ -120,7 +120,8 @@
         if (style.background) {
             background.style.backgroundImage = 'url("' + String(style.background).replace(/"/g, '\\"') + '")';
         }
-        background.style.opacity = style.opacity === undefined ? 1 : style.opacity;
+        background.style.opacity = 1;
+        background.style.filter = 'brightness(' + get_slide_background_brightness(slide) + ')';
 
         var canvas = makeElement('div', 'matrix-thumbnail-canvas');
         Array.from(section.children).forEach(function (child) {
@@ -335,6 +336,7 @@
         suppressNextLoadRender = true;
         load_slides();
         Reveal.sync();
+        apply_background_brightness();
         var next = resolveSelection(descriptor);
         pos = next.h;
         order = next.v;

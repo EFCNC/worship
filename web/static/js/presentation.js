@@ -183,6 +183,39 @@
         }
     }
 
+    function get_slide_background_brightness(slide) {
+        let style = slide && slide.style ? slide.style : {};
+        let brightness = Number(style.brightness);
+        if (!Number.isFinite(brightness)) {
+            brightness = Number(style.opacity);
+        }
+        if (!Number.isFinite(brightness)) {
+            brightness = 1;
+        }
+        return Math.max(0, Math.min(1, brightness));
+    }
+
+    function apply_background_brightness() {
+        if (typeof Reveal === 'undefined' || !slides.length) {
+            return;
+        }
+        slides.forEach(function(slide, horizontalIndex) {
+            let root = document.querySelector('.reveal .slides > section:nth-child(' + (horizontalIndex + 1) + ')');
+            let verticalCount = root ? Array.from(root.children).filter(function(child) {
+                return child.tagName === 'SECTION';
+            }).length : 0;
+            verticalCount = Math.max(1, verticalCount);
+            for (let verticalIndex = 0; verticalIndex < verticalCount; verticalIndex++) {
+                let background = Reveal.getSlideBackground(horizontalIndex, verticalIndex);
+                let backgroundContent = background && background.children ? background.children[0] : null;
+                if (backgroundContent) {
+                    backgroundContent.style.opacity = '1';
+                    backgroundContent.style.filter = 'brightness(' + get_slide_background_brightness(slide) + ')';
+                }
+            }
+        });
+    }
+
     function load_slides() {
         $('.slides').empty();
         if (!slides.length) {
@@ -198,9 +231,9 @@
             bg_url = data.style.background;
             let section = document.createElement('section');
             if (bg_url) {
-                bg_opacity = data.style.opacity
                 section.setAttribute('data-background-image', bg_url);
-                section.setAttribute('data-background-opacity', bg_opacity);
+                section.setAttribute('data-background-opacity', 1);
+                section.setAttribute('data-background-brightness', get_slide_background_brightness(data));
             }
             fragment = data.style.fragment;
             if(data.type == 'info') {
@@ -347,6 +380,7 @@
         // When reload is broadcast, load the slide from the data and sync it before move to current pos and order
         load_slides();
         Reveal.sync();
+        apply_background_brightness();
         Reveal.slide(pos, order);
         change_slide();
     });

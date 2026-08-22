@@ -207,6 +207,7 @@
 
     Reveal.on('ready', (event) => {
         // Move slide to current pos and order when it's ready
+        apply_background_brightness();
         Reveal.slide(pos, order);
     });
 
