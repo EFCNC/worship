@@ -65,7 +65,7 @@
     display: flex;
     flex-direction: column;
     gap: 5px;
-    padding: 5px;
+    padding: 0px 5px;
 }
 
 .song-header-row {
@@ -81,13 +81,27 @@
 .song-details-row {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 3px 15px;
     flex-wrap: wrap;
 }
 
 .song-details-row select {
     height: auto;
     padding: 3px 5px;
+}
+
+/* Flexbox for Notes and Palette */
+.song-notes-row {
+    display: flex;
+    gap: 5px 15px;
+    align-items: flex-start;
+}
+
+.notes-container, .palette-container {
+    flex: 1; /* 50/50 split */
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
 }
 
 .song-notes-row p {
@@ -97,6 +111,39 @@
 .song-notes-row textarea {
     width: 100%;
     box-sizing: border-box;
+    
+}
+
+.palette-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 5px;
+}
+
+/* Base styling for the new buttons */
+.btn-lang-swap, .btn-palette {
+    padding: 4px 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 0.85em;
+    transition: all 0.2s;
+}
+
+.btn-lang-swap:hover, .btn-palette:hover {
+    background: #e0e0e0;
+}
+
+/* Mobile override for the row */
+@media (max-width: 768px) {
+    .song-notes-row {
+        flex-direction: column;
+    }
+    .notes-container, .palette-container {
+        width: 100%;
+    }
 }
 
 /* =========================================
@@ -158,11 +205,12 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background-color: #4a5568; 
-    color: white;
-    border-radius: 50%;
+    line-height: 1;
     width: 22px;
     height: 22px;
+    border-radius: 50%;
+    background-color: #4a5568; 
+    color: white;
     font-size: 0.85em;
     font-weight: bold;
     box-shadow: 0 2px 4px rgba(0,0,0,0.15);
