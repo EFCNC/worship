@@ -59,6 +59,24 @@
     word-break: break-word;
 }
 
+/* Drag Handle */
+.drag-handle {
+    cursor: grab;
+    color: #fff;
+    opacity: 0.5;
+    font-size: 18px;
+    padding: 5px 10px 5px 5px;
+    transition: opacity 0.2s;
+}
+
+.drag-handle:hover {
+    opacity: 1;
+}
+
+.drag-handle:active {
+    cursor: grabbing;
+}
+
 /* Inline Delete Icon */
 .delete-inline {
     cursor: pointer;
@@ -158,6 +176,7 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 <script>
     let content = [];
     let current_week;
@@ -168,12 +187,33 @@
 
 
     $(document).ready(function () {
-            d.setDate(d.getDate() - d.getDay() + 7); // coming Sunday
-            index = sundays.indexOf(d.toLocaleDateString('en-CA'));
-            current_week =  sundays[index];
+        d.setDate(d.getDate() - d.getDay() + 7); // coming Sunday
+        index = sundays.indexOf(d.toLocaleDateString('en-CA'));
+        current_week =  sundays[index];
         $('#current').html(current_week);
         get_info(id);
         showDatesNavigation(index);
+
+        // Initialize SortableJS on the content container
+        Sortable.create(document.getElementById('content'), {
+            handle: '.drag-handle',
+            animation: 150,
+            onEnd: function (evt) {
+                // Rebuild the content array to match the new DOM order
+                let newContent = [];
+                $('#content .info_list').each(function(index) {
+                    let oldIndex = $(this).attr('name');
+                    newContent.push(content[oldIndex]);
+                    
+                    // Update the DOM name attribute to the new array index
+                    $(this).attr('name', index);
+                });
+                content = newContent;
+
+                // NOTE: The local array is updated for the clipboard. 
+                // To save to the database, we need to add an AJAX call here to send the new order to the API.
+            }
+        });
     });
 
     // Inline Delete Handler
@@ -268,7 +308,8 @@
     $('#add_1').click(function() {
         $('.empty-state').remove(); // Clear empty state if present
         let newIndex = content.length;
-        $("#content").append('<div name="' + newIndex + '" class="info_list announcement"><span class="info_content" contenteditable="true" spellcheck="true" autocorrect="on" autocapitalize="sentences"></span><i class="fa fa-trash-o delete-inline" title="Delete"></i></div>');
+        $("#content").append('<div name="' + newIndex + '" class="info_list announcement"><i class="fa fa-bars drag-handle" title="Drag to reorder"></i><span class="info_content" contenteditable="true" spellcheck="true" autocorrect="on" autocapitalize="sentences"></span><i class="fa fa-trash-o delete-inline" title="Delete"></i></div>');
+        // $("#content").append('<div name="' + newIndex + '" class="info_list announcement"><span class="info_content" contenteditable="true" spellcheck="true" autocorrect="on" autocapitalize="sentences"></span><i class="fa fa-trash-o delete-inline" title="Delete"></i></div>');
         $("#content .info_list").last().find('span').focus();
         content.push({'id': -1, 'info': 'New Announcement', 'type': 'announcement', 'date': current_week});
     });
@@ -276,7 +317,8 @@
     $('#add_2').click(function() {
         $('.empty-state').remove(); // Clear empty state if present
         let newIndex = content.length;
-        $("#content").append('<div name="' + newIndex + '" class="info_list caring"><span class="info_content" contenteditable="true" spellcheck="true" autocorrect="on" autocapitalize="sentences"></span><i class="fa fa-trash-o delete-inline" title="Delete"></i></div>');
+        $("#content").append('<div name="' + newIndex + '" class="info_list caring"><i class="fa fa-bars drag-handle" title="Drag to reorder"></i><span class="info_content" contenteditable="true" spellcheck="true" autocorrect="on" autocapitalize="sentences"></span><i class="fa fa-trash-o delete-inline" title="Delete"></i></div>');
+        // $("#content").append('<div name="' + newIndex + '" class="info_list caring"><span class="info_content" contenteditable="true" spellcheck="true" autocorrect="on" autocapitalize="sentences"></span><i class="fa fa-trash-o delete-inline" title="Delete"></i></div>');
         $("#content .info_list").last().find('span').focus();
         content.push({'id': -1, 'info': 'New Prayer Request', 'type': 'caring', 'date': current_week});
     });
@@ -316,7 +358,8 @@
                 i = 0;
                 $.each(content, function() {
                     if (this.info) {
-                        html += '<div name="' + i + '" class="info_list ' + this.type + '"  title="' + this.type + '"><span class="info_content" contenteditable="true" spellcheck="true" autocorrect="on" autocapitalize="sentences">' + this.info + '</span><i class="fa fa-trash-o delete-inline" title="Delete"></i></div>';
+                        html += '<div name="' + i + '" class="info_list ' + this.type + '"  title="' + this.type + '"><i class="fa fa-bars drag-handle" title="Drag to reorder"></i><span class="info_content" contenteditable="true" spellcheck="true" autocorrect="on" autocapitalize="sentences">' + this.info + '</span><i class="fa fa-trash-o delete-inline" title="Delete"></i></div>';
+                        // html += '<div name="' + i + '" class="info_list ' + this.type + '"  title="' + this.type + '"><span class="info_content" contenteditable="true" spellcheck="true" autocorrect="on" autocapitalize="sentences">' + this.info + '</span><i class="fa fa-trash-o delete-inline" title="Delete"></i></div>';
                         i++;
                     }
                 });
