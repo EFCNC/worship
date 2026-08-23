@@ -172,7 +172,7 @@
             temp =  $(r.innerHTML);
             temp_name = temp.attr('name');
             temp_text = temp.find('.origin').html() + '<br/>' + temp.find('.region').html();
-            if(class_name == 'present') {
+            if(r.classList.contains('present')) {
                 slide_preview += '<div class="inner present" id="' + i + '"><div class="preview_name present">' + temp_name + '</div>' + temp_text +'</div>';
             }
             else {
