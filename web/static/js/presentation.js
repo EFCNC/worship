@@ -237,6 +237,20 @@
             }
             fragment = data.style.fragment;
             if(data.type == 'info') {
+                if (Array.isArray(data.content)) {
+                    data.content.forEach(function(content, contentIndex) {
+                        let sub_section = document.createElement('section');
+                        sub_section.append(create_view(
+                            data.type,
+                            content.origin_text || '',
+                            content.region_text || '',
+                            content.name || 'info'
+                        ));
+                        sub_section.setAttribute('order', contentIndex);
+                        section.append(sub_section);
+                    });
+                }
+                else {
                 // SETTING: Tune these numbers based on your presentation font size!
                 //let max_lines_per_slide = 5;
                 let max_chars_per_slide = 120; 
@@ -295,11 +309,19 @@
                         sub_section.append(create_view(data.type, o_html, r_html, 'info'));
                         section.append(sub_section);
                     }
+                }
             }
 		    else if (data.type == 'song') {
 			    for(var j=0;j<data.content.length;j++) {
 			        s_name = data.content[j].name;
-			        if (fragment > 0) {
+			        if (data.content[j].manual === true) {
+			            let sub_section = document.createElement('section');
+                        sub_section.classList.add('top-align');
+			            sub_section.append(create_view(data.type, data.content[j].origin_text || '', data.content[j].region_text || '', s_name));
+                        sub_section.setAttribute('order', j);
+                        section.append(sub_section);
+			        }
+			        else if (fragment > 0) {
 			            origin_ = data.content[j].origin_text.split(/<br\/?>/).filter(n => n);
 			            region_ = data.content[j].region_text.split(/<br\/?>/).filter(n => n);
 			            while(origin_.length>0) {

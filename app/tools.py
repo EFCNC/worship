@@ -105,7 +105,7 @@ def simplify_json(json):
         if isinstance(contents, list):
             for content in contents:
                 if isinstance(content, dict):
-                    cc.append({key: content[key] for key in content.keys() & {'name', 'origin_text', 'region_text'}})
+                    cc.append({key: content[key] for key in content.keys() & {'name', 'origin_text', 'region_text', 'manual'}})
                 else:
                     cc.append({'origin_text': content})
             temp['content'] = cc

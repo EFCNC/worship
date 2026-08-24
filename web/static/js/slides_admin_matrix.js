@@ -4,7 +4,6 @@
     var generalView = false;
     var dragging = false;
     var suppressNextLoadRender = false;
-    var resumeGeneralAfterInlineEdit = false;
     var uidCounter = 0;
     var objectIds = new WeakMap();
 
@@ -322,6 +321,28 @@
         }
     }
 
+    function update_matrix_background_preview(horizontalIndex, backgroundUrl, brightness) {
+        var numericBrightness = Number(brightness);
+        if (!Number.isFinite(numericBrightness)) {
+            numericBrightness = 1;
+        }
+        numericBrightness = Math.max(0, Math.min(1, numericBrightness));
+
+        document.querySelectorAll('.matrix-thumbnail').forEach(function (thumbnail) {
+            if (Number(thumbnail.dataset.horizontalIndex) !== Number(horizontalIndex)) {
+                return;
+            }
+            var background = thumbnail.querySelector('.matrix-thumbnail-background');
+            if (!background) {
+                return;
+            }
+            background.style.backgroundImage = backgroundUrl ?
+                'url("' + String(backgroundUrl).replace(/"/g, '\\"') + '")' : 'none';
+            background.style.opacity = '1';
+            background.style.filter = 'brightness(' + numericBrightness + ')';
+        });
+    }
+
     function refresh_admin_preview(selectionDescriptor) {
         if (!slides.length) {
             suppressNextLoadRender = true;
@@ -348,15 +369,65 @@
         }
     }
 
-    function setGeneralView(nextValue) {
-        if (nextValue && adding_slide === 1) {
-            alert('Apply or cancel the new slide before opening General View.');
+    function syncSelectionFromReveal() {
+        if (typeof Reveal === 'undefined' || typeof Reveal.getIndices !== 'function') {
             return;
         }
-        generalView = nextValue;
-        if (!generalView) {
-            resumeGeneralAfterInlineEdit = false;
+        var indices = Reveal.getIndices();
+        if (Number.isInteger(indices.h)) {
+            pos = indices.h;
         }
+        order = Number.isInteger(indices.v) ? indices.v : 0;
+    }
+
+    function isEditingElement(element) {
+        if (!element || element.nodeType !== Node.ELEMENT_NODE) {
+            return false;
+        }
+        return element.matches('input, textarea, select') ||
+            element.isContentEditable ||
+            Boolean(element.closest('[contenteditable="true"]'));
+    }
+
+    function isVisible(element) {
+        if (!element || element.hidden) {
+            return false;
+        }
+        var style = window.getComputedStyle(element);
+        return style.display !== 'none' && style.visibility !== 'hidden';
+    }
+
+    function hasPriorityEscapeUi() {
+        return Array.from(document.querySelectorAll(
+            '.ui-dialog, dialog[open], [role="dialog"][aria-modal="true"], ' +
+            '#image_bg, #msgbox, #bible_panel, #edit_btn'
+        )).some(isVisible);
+    }
+
+    function handleAdminEscape(event) {
+        if (event.key !== 'Escape' || event.defaultPrevented || event.isComposing) {
+            return;
+        }
+        if (isEditingElement(event.target) || isEditingElement(document.activeElement)) {
+            return;
+        }
+        if (hasPriorityEscapeUi()) {
+            return;
+        }
+
+        event.preventDefault();
+        event.stopPropagation();
+        toggle_general_view();
+    }
+
+    function setGeneralView(nextValue) {
+        if (adding_slide === 1) {
+            return;
+        }
+        if (nextValue) {
+            syncSelectionFromReveal();
+        }
+        generalView = nextValue;
         var reveal = document.querySelector('.slide-viewport > .reveal');
         var matrix = document.getElementById('slide_matrix');
         var button = document.getElementById('general_view_btn');
@@ -381,29 +452,6 @@
 
     function toggle_general_view() {
         setGeneralView(!generalView);
-    }
-
-    function prepare_matrix_inline_edit() {
-        if (!generalView) {
-            return;
-        }
-        var reveal = document.querySelector('.slide-viewport > .reveal');
-        var matrix = document.getElementById('slide_matrix');
-        resumeGeneralAfterInlineEdit = true;
-        reveal.hidden = false;
-        matrix.hidden = true;
-        Reveal.layout();
-        Reveal.slide(pos, order);
-    }
-
-    function restore_matrix_after_inline_edit() {
-        if (!resumeGeneralAfterInlineEdit || !generalView) {
-            return;
-        }
-        resumeGeneralAfterInlineEdit = false;
-        document.querySelector('.slide-viewport > .reveal').hidden = true;
-        document.getElementById('slide_matrix').hidden = false;
-        renderSlideMatrix();
     }
 
     function handleMatrixActivation(event) {
@@ -441,6 +489,7 @@
                 }
             });
         }
+        document.addEventListener('keydown', handleAdminEscape, true);
     });
 
     document.addEventListener('presentation:slides-loaded', function () {
@@ -456,8 +505,7 @@
     window.toggle_general_view = toggle_general_view;
     window.refresh_admin_preview = refresh_admin_preview;
     window.update_matrix_selection = update_matrix_selection;
-    window.prepare_matrix_inline_edit = prepare_matrix_inline_edit;
-    window.restore_matrix_after_inline_edit = restore_matrix_after_inline_edit;
+    window.update_matrix_background_preview = update_matrix_background_preview;
     window.AdminSlideMatrix = {
         isGeneralView: function () { return generalView; },
         render: renderSlideMatrix

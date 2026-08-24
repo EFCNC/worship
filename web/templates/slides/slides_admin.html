@@ -98,9 +98,139 @@
         font-size: 14px;
     }
 
-    #admin_toast.cancelled {
-        border-left-color: #f57c00;
-    }
+        #admin_toast.cancelled {
+            border-left-color: #f57c00;
+        }
+
+        #slide_composer {
+            position: fixed;
+            inset: 0;
+            z-index: 500;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            background: rgba(0, 0, 0, 0.78);
+        }
+
+        #slide_composer.is-open {
+            display: flex;
+        }
+
+        .slide-composer-card {
+            width: min(900px, 94vw);
+            max-height: 94vh;
+            overflow-y: auto;
+            padding: 20px;
+            border: 1px solid #5f536d;
+            border-radius: 10px;
+            background: #18131f;
+            color: #fff;
+            box-shadow: 0 18px 55px rgba(0, 0, 0, 0.55);
+        }
+
+        .slide-composer-card h2 {
+            margin: 0 0 14px;
+            font-family: var(--font-family-base);
+            font-size: 22px;
+        }
+
+        #slide_composer_preview {
+            position: relative;
+            display: grid;
+            grid-template-rows: 1fr 1fr;
+            align-items: center;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            overflow: hidden;
+            border: 2px solid #826fee;
+            border-radius: 8px;
+            background: #000;
+        }
+
+        .slide-composer-preview-background {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+
+        .slide-composer-preview-text {
+            position: relative;
+            z-index: 1;
+            padding: 12px 36px;
+            font-family: var(--font-family-base);
+            font-size: clamp(22px, 3.2vw, 46px);
+            line-height: 1.2;
+            text-align: center;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+            text-shadow: -1px 0 #000, 0 1px #000, 1px 0 #000, 0 -1px #000;
+        }
+
+        #slide_composer_preview_origin {
+            align-self: end;
+            color: #fff;
+        }
+
+        #slide_composer_preview_region {
+            align-self: start;
+            color: #ffd800;
+        }
+
+        .slide-composer-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-top: 16px;
+        }
+
+        .slide-composer-inputs label {
+            display: grid;
+            gap: 6px;
+            font-family: var(--font-family-base);
+            font-weight: 600;
+        }
+
+        .slide-composer-inputs textarea {
+            min-height: 100px;
+            resize: vertical;
+            padding: 10px;
+            border: 1px solid #5f536d;
+            border-radius: 6px;
+            color: #fff;
+            background: #0d0a11;
+            font: inherit;
+        }
+
+        .slide-composer-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .slide-composer-actions button {
+            padding: 9px 18px;
+            border: 1px solid #826fee;
+            border-radius: 6px;
+            color: #fff;
+            background: #826fee;
+            cursor: pointer;
+        }
+
+        .slide-composer-actions #slide_composer_cancel {
+            border-color: #5f536d;
+            background: #28202f;
+        }
+
+        @media (max-width: 720px) {
+            .slide-composer-inputs {
+                grid-template-columns: 1fr;
+            }
+        }
 
     header#header,
     header#header a,
@@ -186,7 +316,8 @@
             <!-- Control buttons -->
             <br/>
             <i name="0" id="save" class="material-icons small" title="Refresh Slide">&#xE5D5;</i>
-            <i class="material-icons small" name="1" title="Add a Slide">&#xE89C;</i>
+            <i class="material-icons small" name="1" title="Add New Slide (Column)">&#xE146;</i>
+            <i class="material-icons small" name="subpage" title="Add New Subpage (Row)">&#xE147;</i>
             <i class="material-icons small" name="2" title="Add an Image or Video Slide">&#xE04A;</i>
             <i class="material-icons small" name="3" title="Delete current Slide">&#xE92B;</i>
             <i class="material-icons small" name="4" title="Change Background">&#xE3F4;</i>
@@ -201,11 +332,33 @@
         <!-- 2nd layer buttons toggle by first layer function -->
         <div id="msgbox"><textarea id="content" rows="3" cols="40"></textarea>&nbsp;&nbsp;<i class="material-icons small" id="send_msg" title="Send a message to view">&#xE163;</i><i class="material-icons small" id="clear_msg" title="Clear the message">&#xE14C;</i></div>
         <div id="image_bg">
-            <div id="brightness_control"><span>Brightness</span><div id="slider" style="width:300px"><div id="custom-handle" class="ui-slider-handle"></div></div></div>
+            <div id="brightness_control"><span>Brightness:</span><div id="slider" style="width:300px;"><div id="custom-handle" class="ui-slider-handle" style="text-align: center; color: white; background-color: #826fee; border:#000; border-width: 10px;"></div></div></div>
             <div id="image_icons"></div>
         </div>
         <div id="bible_panel"></div>
         <b>Title</b><div id="slide_title" class="admin title" title="Slide Title" contenteditable="true"></div><br/><b>Notes</b><div id="slide_notes" class="admin notes" title="Slide Notes" contenteditable="true"></div>
+    </div>
+    <div id="slide_composer" role="dialog" aria-modal="true" aria-labelledby="slide_composer_title">
+        <div class="slide-composer-card">
+            <h2 id="slide_composer_title">Add New Slide</h2>
+            <div id="slide_composer_preview" aria-label="New slide preview">
+                <div class="slide-composer-preview-background"></div>
+                <div id="slide_composer_preview_origin" class="slide-composer-preview-text"></div>
+                <div id="slide_composer_preview_region" class="slide-composer-preview-text"></div>
+            </div>
+            <div class="slide-composer-inputs">
+                <label for="slide_composer_origin">中文
+                    <textarea id="slide_composer_origin" placeholder="輸入中文內容"></textarea>
+                </label>
+                <label for="slide_composer_region">English
+                    <textarea id="slide_composer_region" placeholder="Enter English text"></textarea>
+                </label>
+            </div>
+            <div class="slide-composer-actions">
+                <button type="button" id="slide_composer_apply">Apply</button>
+                <button type="button" id="slide_composer_cancel">Cancel</button>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}
@@ -217,8 +370,7 @@
         bg_brightness = 1;
         a_type = '';
         admin_toast_timer = null;
-        origin_text = '輸入您的資訊';
-        region_text = 'Enter your extra language information here';
+        slide_composer_state = null;
 
         presentation = {{ presentation|safe }};
         slides = presentation['data'];
@@ -228,7 +380,6 @@
         background = presentation['background'];
         w_id = presentation['id'];
         focus_div = null;
-        new_slide_editor = null;
         bible = [];
 
         // Slide related functions
@@ -353,19 +504,19 @@
 
         function delete_slide() {
             // Delete current slide
-            song = false;
+            pageCollection = false;
             if (Array.isArray(slides[pos].content) && slides[pos].content.length) {
                 content_index = get_content_index(pos, order);
                 title = slides[pos].content[content_index].name || slides[pos].title || 'Untitled slide';
-                text = 'This will delete the song slide "' + title + '", are you sure?';
-                song = true;
+                text = 'This will delete the selected page "' + title + '", are you sure?';
+                pageCollection = true;
             }
             else {
                 text = 'This will delete the current slide with the title "' + slides[pos].title + '", are you sure?';
             }
             if (confirm(text) == true) {
                 var nextSelection = null;
-                if(song) {
+                if(pageCollection) {
                     if (slides[pos].content.length === 1) {
                         if (slides.length === 1) {
                             alert('A presentation must contain at least one slide.');
@@ -427,40 +578,161 @@
             }
         }
 
-        function add_slide() {
-            // Add a slide after the current one
-            adding_slide = 1;
-            if (typeof prepare_matrix_inline_edit === 'function') {
-                prepare_matrix_inline_edit();
-            }
-            $('#edit_btn').show();
-            slide_div = Reveal.getSlide(pos, order);
-            info_div = '<div contenteditable="true" class="info origin">' + origin_text + '</div><div contenteditable="true" class="info region">' + region_text + '</div>'
-            slide_div.children[0].innerHTML = info_div;
-            new_slide_editor = $(slide_div);
+        function composer_text_to_html(value) {
+            return $('<div>').text(value || '').html().replace(/\r?\n/g, '<br/>');
+        }
 
-            new_slide_editor.find(".info.origin").click(function() {
-                if($(this).html() == origin_text) {
-                    $(this).html('');
-                }
+        function update_slide_composer_preview() {
+            $('#slide_composer_preview_origin').text($('#slide_composer_origin').val());
+            $('#slide_composer_preview_region').text($('#slide_composer_region').val());
+        }
+
+        function close_slide_composer(showMessage) {
+            var cancelledMode = slide_composer_state ? slide_composer_state.mode : null;
+            slide_composer_state = null;
+            adding_slide = 0;
+            $('#slide_composer').removeClass('is-open');
+            $('#slide_composer_origin, #slide_composer_region').val('');
+            update_slide_composer_preview();
+            if (showMessage && cancelledMode) {
+                show_admin_toast(
+                    cancelledMode === 'column' ?
+                        'New slide creation has been canceled.' :
+                        'New subpage creation has been canceled.',
+                    'cancelled'
+                );
+            }
+        }
+
+        function open_slide_composer(composerMode) {
+            if (adding_slide === 1 || !slides.length) {
+                return;
+            }
+            if (composerMode === 'subpage' && slides[pos].type === 'media') {
+                alert('A subpage cannot be added to a media slide. Add a new slide column instead.');
+                return;
+            }
+            if (typeof AdminSlideMatrix !== 'undefined' && !AdminSlideMatrix.isGeneralView()) {
+                toggle_general_view();
+            }
+
+            slide_composer_state = {
+                mode: composerMode,
+                horizontalIndex: pos,
+                verticalIndex: order
+            };
+            adding_slide = 1;
+
+            var sourceSlide = slides[pos] || {};
+            var sourceStyle = sourceSlide.style || {};
+            var previewBackground = $('#slide_composer_preview .slide-composer-preview-background');
+            previewBackground.css({
+                'background-image': sourceStyle.background ? 'url("' + sourceStyle.background + '")' : 'none',
+                'filter': 'brightness(' + get_slide_background_brightness(sourceSlide) + ')'
             });
-            new_slide_editor.find(".info.region").click(function() {
-                if($(this).html() == region_text) {
-                    $(this).html('');
+            $('#slide_composer_title').text(
+                composerMode === 'column' ? 'Add New Slide (Column)' : 'Add New Subpage (Row)'
+            );
+            $('#slide_composer_origin, #slide_composer_region').val('');
+            update_slide_composer_preview();
+            $('#slide_composer').addClass('is-open');
+            $('#slide_composer_origin').trigger('focus');
+        }
+
+        function create_composer_content() {
+            return {
+                name: slide_composer_state.mode === 'column' ? 'Custom Slide' : 'Custom Page',
+                origin_text: composer_text_to_html($('#slide_composer_origin').val()),
+                region_text: composer_text_to_html($('#slide_composer_region').val()),
+                manual: true
+            };
+        }
+
+        function create_custom_slide(content, sourceSlide) {
+            var sourceStyle = sourceSlide && sourceSlide.style ? sourceSlide.style : {};
+            return {
+                id: -1,
+                title: 'New Slide',
+                notes: 'Custom bilingual slide',
+                style: {
+                    align: sourceStyle.align || '',
+                    background: sourceStyle.background || '',
+                    brightness: get_slide_background_brightness(sourceSlide),
+                    opacity: 1,
+                    fragment: 0,
+                    color: sourceStyle.color || ''
+                },
+                author: '',
+                lyricist: '',
+                ccli: '',
+                book: '',
+                copyright: '',
+                key: '',
+                type: 'info',
+                content: [content]
+            };
+        }
+
+        function apply_slide_composer() {
+            if (!slide_composer_state) {
+                return;
+            }
+            var originValue = $('#slide_composer_origin').val().trim();
+            var regionValue = $('#slide_composer_region').val().trim();
+            if (!originValue && !regionValue) {
+                alert('Enter Chinese, English, or both before applying.');
+                return;
+            }
+
+            var state = slide_composer_state;
+            var content = create_composer_content();
+            var selection;
+            if (state.mode === 'column') {
+                var newSlide = create_custom_slide(content, slides[state.horizontalIndex]);
+                var newHorizontalIndex = state.horizontalIndex + 1;
+                slides.splice(newHorizontalIndex, 0, newSlide);
+                pos = newHorizontalIndex;
+                order = 0;
+                selection = {
+                    slide: newSlide,
+                    horizontalIndex: newHorizontalIndex,
+                    verticalIndex: 0,
+                    content: content,
+                    fragmentOffset: 0
+                };
+            }
+            else {
+                var targetSlide = slides[state.horizontalIndex];
+                if (!Array.isArray(targetSlide.content)) {
+                    var legacyContent = targetSlide.content || {};
+                    targetSlide.content = [{
+                        name: 'Information',
+                        origin_text: legacyContent.origin_text || '',
+                        region_text: legacyContent.region_text || ''
+                    }];
                 }
-            });
-            new_slide_editor.find(".info.origin").focusout(function() {
-                if($(this).html() == '' && $(this).html != origin_text) {
-                    $(this).html(origin_text);
-                }
-            });
-            new_slide_editor.find(".info.region").focusout(function() {
-                if($(this).html() == '' && $(this).html != region_text) {
-                    $(this).html(region_text);
-                }
-            });
-            a_type = 'info';
-            console.log(pos, order, w_id);
+                var selectedContentIndex = get_content_index(state.horizontalIndex, state.verticalIndex);
+                selectedContentIndex = Math.max(0, Math.min(selectedContentIndex, targetSlide.content.length - 1));
+                targetSlide.content.splice(selectedContentIndex + 1, 0, content);
+                pos = state.horizontalIndex;
+                selection = {
+                    slide: targetSlide,
+                    horizontalIndex: state.horizontalIndex,
+                    verticalIndex: state.verticalIndex + 1,
+                    content: content,
+                    fragmentOffset: 0
+                };
+            }
+
+            close_slide_composer(false);
+            refresh_admin_preview(selection);
+            show_admin_toast(
+                state.mode === 'column' ?
+                    'New slide has been created.' :
+                    'New subpage has been created.',
+                'applied'
+            );
+            update_json();
         }
 
         function send_msg(data, mode='view') {
@@ -475,6 +747,7 @@
 	    		embedded: true,
 	    		loop: true,
 	    		hash: false,
+			    overview: false,
 			    slideNumber: true,
 			    navigationMode: "default",
 			    progress: false
@@ -496,6 +769,26 @@
                     update_current_bg();
                 }
             });
+        });
+
+        $(document).on('input', '#slide_composer_origin, #slide_composer_region', function() {
+            update_slide_composer_preview();
+        });
+
+        $('#slide_composer_apply').on('click', function() {
+            apply_slide_composer();
+        });
+
+        $('#slide_composer_cancel').on('click', function() {
+            close_slide_composer(true);
+        });
+
+        $(document).on('keydown', function(event) {
+            if (event.key === 'Escape' && $('#slide_composer').hasClass('is-open')) {
+                event.preventDefault();
+                event.stopImmediatePropagation();
+                close_slide_composer(true);
+            }
         });
 
         $('div').on('focus', '[contenteditable]', function() {
@@ -549,7 +842,7 @@
             new_data = new_data.join('<br/>');
 
             if(element_class.indexOf('origin')>0) {
-                if(element_class.indexOf('song')>=0) {
+                if(Array.isArray(slides[pos].content)) {
                     slides[pos].content[order_num].origin_text = new_data;
                 }
                 else {
@@ -557,7 +850,7 @@
                 }
             }
             else if(element_class.indexOf('region')>0) {
-                if(element_class.indexOf('song')>=0) {
+                if(Array.isArray(slides[pos].content)) {
                     slides[pos].content[order_num].region_text = new_data;
                 }
                 else {
@@ -612,6 +905,9 @@
         });
 
         function update_current_bg() {
+            if (typeof update_matrix_background_preview === 'function') {
+                update_matrix_background_preview(pos, bg_url, bg_brightness);
+            }
             slide_bg = Reveal.getSlideBackground(pos, order);
             if (!slide_bg || !slide_bg.children.length) {
                 return;
@@ -624,21 +920,11 @@
 
         function cancel() {
             var cancelledType = a_type;
-            if (adding_slide == 1) {
-                load_slides();
-                Reveal.sync();
-                apply_background_brightness();
-                Reveal.slide(pos, order);
-            }
-            else if (cancelledType == 'bg') {
+            if (cancelledType == 'bg') {
                 restore_background_preview(false);
             }
             $('#edit_btn').hide();
             a_type = '';
-            new_slide_editor = null;
-            if (typeof restore_matrix_after_inline_edit === 'function') {
-                restore_matrix_after_inline_edit();
-            }
             if (cancelledType == 'bg') {
                 show_admin_toast('Background change has been canceled.', 'cancelled');
             }
@@ -660,30 +946,11 @@
                     slides[pos].style.opacity = 1;
                 }
             }
-            else if (a_type == 'info') {
-                var editor = new_slide_editor || $(Reveal.getSlide(pos, order));
-                origin = editor.find('.info.origin').first().html();
-                region = editor.find('.info.region').first().html();
-                if ((origin == '' || origin == origin_text) && (region == '' || region == region_text)) {
-                    alert("No information is entered!!");
-                    return false;
-                }
-                else {
-                    info = {"alt_sequence": "", "author": "", "style": {"align": "", "background": "", "opacity": 1, "fragment": 4, "color": ""}, "bible": "", "book": "", "ccli": "", "content": {"origin_text": origin, "region_text": region}, "copyright": "", "date": "", "id": 115, "key": "", "lang": "", "lang_2": "", "lyricist": "", "lyrics_raw": "", "notes": "歡迎報告", "score": "", "sequence": "", "title": "Information", "transpose": "0", "type": "info", "version": "", "video": ""};
-                    slides.splice(pos+1, 0, info);
-                    $('#edit_btn').hide();
-                    adding_slide = 0;
-                    new_slide_editor = null;
-                }
-            }
             a_type = '';
             $('#edit_btn').hide();
             if (appliedBackground) {
                 $('#image_bg').hide();
                 show_admin_toast('Background change has been applied.', 'applied');
-            }
-            if (typeof restore_matrix_after_inline_edit === 'function') {
-                restore_matrix_after_inline_edit();
             }
             update_json();
         }
@@ -716,7 +983,10 @@
                     save_slides();
                     break;
                 case '1':
-                    add_slide();
+                    open_slide_composer('column');
+                    break;
+                case 'subpage':
+                    open_slide_composer('subpage');
                     break;
                 case '2':
                     add_media_slide();
@@ -781,9 +1051,6 @@
             change_slide();
             if (typeof update_matrix_selection === 'function') {
                 update_matrix_selection();
-            }
-            if(adding_slide==1) {
-                load_slides();
             }
             console.log("slide changed", pos, order, content_index);
             socket.emit('control', {'type': 'pos', 'value': [pos, order], 'from': 'admin'});
