@@ -15,131 +15,134 @@
 	<script src="/static/vendor/reveal/reveal.js"></script>
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 <style>
-        html {
-            height: 100%;
-            background-color: #000;
-        }
-
-        body {
-            overflow: hidden;
-        }
-
-        .material-icons {
-            font-size: 40px;
-            padding: 10px;
-        }
-
-        .material-icons.small {
-            font-size: 25px;
-            padding: 4px;
-        }
-
-        .material-icons.link {
-            font-size: 25px;
-            margin: auto;
-        }
-
-        .material-icons.disabled {
-            //display: none;
-        }
-
-        .material-icons:hover {
-            cursor: pointer;
-            color: #fff;
-            background-color: #000;
-        }
-
-        #image_icons img {
-            padding: 5px;
-            width: 50px;
-        }
-
-        #image_icons img:hover {
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        #edit_btn {
-            z-index: 99;
-            display: none;
-            text-align: right;
-            min-height: 34px;
-        }
-
-        #image_bg {
-            border: 1px solid #000;
-            border-radius: 4px;
-            background-color: #002147;
-            display: none;
-            z-index: 1;
-            padding: 12px;
-        }
-
-        #brightness_control {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 10px;
-            color: #fff;
-        }
-
-        #admin_toast {
-            display: none;
-            margin: 8px 0;
-            padding: 8px 12px;
-            border-left: 4px solid #388e3c;
-            border-radius: 4px;
-            color: #fff;
-            background: #211a2b;
-            font-size: 14px;
-        }
-
-        #admin_toast.cancelled {
-            border-left-color: #f57c00;
-        }
-
-        header#header,
-        header#header a,
-        header#header button {
-            font-family: var(--font-family-base);
-            line-height: var(--line-height-base);
-        }
-
-        #bible_panel {
-            background-color: #f02447;
-            display: none;
-            flex-direction: row;
-        }
-
-        #msgbox {
-            display: none;
-        }
-
-    .bible_book {
-        border: 1px solid #000;
-        border-radius: 4px;
-        margin: 2;
+    #main-content.page-standard {
+        padding: 0;
+    }
+    html {
+        height: 100%;
+        background-color: #000;
     }
 
-    .bible_book:hover {
-        border: 1px solid #fff;
+    body {
+        overflow: hidden;
+    }
+
+    .material-icons {
+        font-size: 40px;
+        padding: 10px;
+    }
+
+    .material-icons.small {
+        font-size: 25px;
+        padding: 4px;
+    }
+
+    .material-icons.link {
+        font-size: 25px;
+        margin: auto;
+    }
+
+    .material-icons.disabled {
+        //display: none;
+    }
+
+    .material-icons:hover {
+        cursor: pointer;
+        color: #fff;
+        background-color: #000;
+    }
+
+    #image_icons img {
+        padding: 5px;
+        width: 50px;
+    }
+
+    #image_icons img:hover {
+        border: 1px solid #ddd;
+        border-radius: 4px;
         cursor: pointer;
     }
 
-    .bible_chapter {
+    #edit_btn {
+        z-index: 99;
+        display: none;
+        text-align: right;
+        min-height: 34px;
+    }
+
+    #image_bg {
         border: 1px solid #000;
-        margin: 5px;
+        border-radius: 4px;
+        background-color: #002147;
+        display: none;
+        z-index: 1;
+        padding: 12px;
+    }
+
+    #brightness_control {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 10px;
+        color: #fff;
+    }
+
+    #admin_toast {
+        display: none;
+        margin: 8px 0;
+        padding: 8px 12px;
+        border-left: 4px solid #388e3c;
+        border-radius: 4px;
+        color: #fff;
+        background: #211a2b;
+        font-size: 14px;
+    }
+
+    #admin_toast.cancelled {
+        border-left-color: #f57c00;
+    }
+
+    header#header,
+    header#header a,
+    header#header button {
+        font-family: var(--font-family-base);
+        line-height: var(--line-height-base);
+    }
+
+    #bible_panel {
+        background-color: #f02447;
+        display: none;
+        flex-direction: row;
+    }
+
+    #msgbox {
         display: none;
     }
 
-    .admin_container {
-        display: grid;
-        grid-template-columns: repeat(6, 1fr);
-        grid-template-rows: repeat(5, 1fr);
-        gap: 8px;
-  	    background-color: #c0c0c0;
-        height: calc(100vh - var(--header-height));
+.bible_book {
+    border: 1px solid #000;
+    border-radius: 4px;
+    margin: 2;
+}
+
+.bible_book:hover {
+    border: 1px solid #fff;
+    cursor: pointer;
+}
+
+.bible_chapter {
+    border: 1px solid #000;
+    margin: 5px;
+    display: none;
+}
+
+.admin_container {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    grid-template-rows: repeat(5, 1fr);
+    gap: 8px;
+    background-color: #c0c0c0;
+    height: calc(100vh - var(--header-height));
 }
 
 .slide-viewport {
