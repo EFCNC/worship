@@ -234,6 +234,9 @@
 
     /* Mobile-first layout for the sermon popup */
     .sermon-editor-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
         width: 100%;
         min-width: 280px;
     }
@@ -245,6 +248,9 @@
     }
 
     .sermon-lang-box {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
         width: 100%;
         border: 1px solid #ddd;
         padding: 10px;
@@ -270,7 +276,7 @@
     .popup-form-group {
         display: flex;
         align-items: center;
-        margin-bottom: 8px;
+        /* margin-bottom: 8px; */
         gap: 2px;
     }
     
@@ -473,7 +479,7 @@
     function pick_team(id, date) {
         const dd = new Date();
         const d1 = new Date(date.replace('-', '/'));
-        let roster_html = '<div id="current_roster" name="' + id + '_' + date + '">';
+        let roster_html = '<div id="current_roster" name="' + id + '_' + date + '" style="display: flex; flex-direction: column; gap: 8px;">';
         
         for (let x in roster) {
             let html = '';
@@ -507,7 +513,7 @@
             roster_html += $div[0].outerHTML;
         }
         
-        roster_html += '<div id="roster_options"></div>';
+        // roster_html += '<div id="roster_options"></div>';
         if (dd <= d1 || isEditRoute == true) {
             roster_html += add_role_button();
         }
@@ -647,7 +653,7 @@
         sermonData.display_order.forEach(function(langKey) {
             var langVariant = getSermonVariant(sermonData.sermons, langKey);
             html += '<div class="sermon-lang-box">';
-            html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">';
+            html += '<div style="display:flex;justify-content:space-between;align-items:center;">';
             html += '<b>' + getLanguageLabel(langKey) + '</b>';
             html += '<button type="button" class="sermon-remove-lang" data-lang-key="' + langKey + '" style="padding:4px 8px;">Remove</button>';
             html += '</div>';
@@ -677,7 +683,7 @@
             html += '</div></div>';
             
 
-            html += '<div style="margin-top: 8px;">Outline:<br/><textarea rows="4" class="sermon-textarea" data-lang-key="' + langKey + '" data-field="outline">' + escapeHtml(langVariant.outline || '') + '</textarea></div>';
+            html += '<div name="outline_box">Outline:<br/><textarea rows="4" class="sermon-textarea" data-lang-key="' + langKey + '" data-field="outline">' + escapeHtml(langVariant.outline || '') + '</textarea></div>';
             html += '</div>';
         });
         html += '</div>';
@@ -750,7 +756,7 @@
                 ];
                 $("#popup").empty();
                 let html = '<div class="sermon-editor-wrapper">';
-                html += '<div style="margin-bottom:8px;">';
+                html += '<div>';
                 html += '<label><input type="checkbox" id="is_joint" ' + (response.is_joint ? 'checked' : '') + '> Joint sermon</label>';
                 html += '</div>';
                 html += '<div id="sermon_language_editor" style="border:1px solid #ddd;padding:10px;border-radius:6px;">';
@@ -906,9 +912,11 @@
 
     $(document).on('click', '#add_role_button', function() {
         const rosterDate = $('#current_roster').attr('name').split('_')[1];
-        const newGroup = '<div class="popup-form-group" style="margin-top: 10px;">' + inst_option() + team_option(rosterDate) + add_button() + '</div>';
-        $("#roster_options").append(newGroup);
-        $('#add_role_button').hide();
+        const newGroup = '<div class="popup-form-group">' + inst_option() + team_option(rosterDate) + add_button() + '</div>';
+        
+        // Insert the new row directly above the button
+        $(this).before(newGroup);
+        $(this).hide();
         
         $('#popup').dialog("option", "position", getDialogOptions().position);
     });
