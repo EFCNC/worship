@@ -415,7 +415,11 @@
             }
             return;
         }
-        if (data.control_type === 'pos' && mode === 'view' && data.from === 'admin') {
+        if (data.target_mode && data.target_mode !== mode) {
+            return;
+        }
+        if (data.control_type === 'pos' && mode === 'view' &&
+                data.from === 'admin' && !data.live_sync) {
             return;
         }
         pos = data.pos[0];

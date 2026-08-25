@@ -405,7 +405,7 @@
     function hasPriorityEscapeUi() {
         return Array.from(document.querySelectorAll(
             '.ui-dialog, dialog[open], [role="dialog"][aria-modal="true"], ' +
-            '#image_bg, #msgbox, #bible_panel, #edit_btn'
+            '#msgbox, #bible_panel'
         )).some(isVisible);
     }
 

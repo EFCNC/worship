@@ -66,9 +66,10 @@ def reload_json():
 @socketio.on('control')
 def handle_control(data):
 	print('Received message:', data)
-	# Admin navigation is only a local editor preview. It must not change the
-	# shared presentation position or move any connected viewer.
-	if data.get('type') == 'pos' and data.get('from') == 'admin':
+	# Edit Mode keeps Admin navigation local. Live Mode marks its position
+	# updates explicitly so only those events can move the connected View.
+	if (data.get('type') == 'pos' and data.get('from') == 'admin' and
+			not data.get('live_sync')):
 		return
 	if data['type'] == 'pos': # When data is about position change, empty dynamic
 		slides_data['dynamic'] = ''
@@ -81,6 +82,7 @@ def handle_control(data):
 	response = dict(slides_data)
 	response['control_type'] = data['type']
 	response['target_mode'] = data.get('mode', '')
+	response['live_sync'] = bool(data.get('live_sync'))
 	emit('response', response, broadcast=True)
 
 @socketio.on('msg')

@@ -111,6 +111,60 @@
         font-size: 14px;
     }
 
+    #admin_mode_switch {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        flex: 0 0 auto;
+        gap: 8px;
+        width: 100%;
+        margin: 8px 0;
+        padding: 10px;
+        border: 1px solid #5f536d;
+        border-radius: 8px;
+        background: #211a2b;
+        box-sizing: border-box;
+    }
+
+    #admin_mode_switch button {
+        min-height: 44px;
+        padding: 8px 12px;
+        border: 2px solid #5f536d;
+        border-radius: 6px;
+        color: #fff;
+        background: #17131d;
+        font: 700 15px/1.2 var(--font-family-base);
+        cursor: pointer;
+    }
+
+    #admin_mode_switch button:hover {
+        border-color: #826fee;
+        background: #000;
+    }
+
+    #admin_mode_switch button[data-admin-mode="live"].is-active {
+        border-color: #ff5252;
+        background: #9f1f2f;
+        box-shadow: 0 0 0 2px rgba(255, 82, 82, 0.25);
+    }
+
+    #admin_mode_switch button[data-admin-mode="edit"].is-active {
+        border-color: #826fee;
+        background: #4f3fa3;
+        box-shadow: 0 0 0 2px rgba(130, 111, 238, 0.25);
+    }
+
+    #admin_mode_status {
+        grid-column: 1 / -1;
+        min-height: 18px;
+        color: #ddd6e7;
+        font: 600 13px/1.35 var(--font-family-base);
+        text-align: center;
+    }
+
+    .menu.is-live-mode #control_panel [data-admin-mode-control="edit"] {
+        display: none;
+    }
+
         #admin_toast.cancelled {
             border-left-color: #f57c00;
         }
@@ -322,6 +376,18 @@
     grid-column: span 2 / span 2;
     grid-row: span 5 / span 5;
     grid-column-start: 5;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+    padding-right: 8px;
+    box-sizing: border-box;
+}
+
+#admin_sidebar_content {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
 }
 </style>
 {% endblock %}
@@ -340,36 +406,43 @@
     </div>
     <div id="bottom-left" style="display: flex; justify-content: center;align-items: center"><span title="Set the numbers of line in one slide. 0=all lines">Fragment:</span> <select id="fragment"></select>&nbsp;<i class="material-icons link" id="add_link" title="Add a link">&#xE250;</i></div>
     <div class="menu">
-        <div id="control_panel">
+        <div id="admin_sidebar_content">
+            <div id="control_panel">
             <!-- Control buttons -->
             <br/>
             <i name="0" id="save" class="material-icons small" title="Refresh Slide">&#xE5D5;</i>
-            <i class="material-icons small" name="1" title="Add New Slide (Column)">&#xE146;</i>
-            <i class="material-icons small" name="subpage" title="Add New Subpage (Row)">&#xE147;</i>
-            <i class="material-icons small" name="2" title="Add an Image or Video Slide">&#xE04A;</i>
-            <i class="material-icons small" name="3" title="Delete current Slide">&#xE92B;</i>
-            <i class="material-icons small" name="4" title="Change Background">&#xE3F4;</i>
-            <i class="material-icons small" name="5" title="Slide Setting">&#xE8B8;</i>
+            <i class="material-icons small" name="1" data-admin-mode-control="edit" title="Add New Slide (Column)">&#xE146;</i>
+            <i class="material-icons small" name="subpage" data-admin-mode-control="edit" title="Add New Subpage (Row)">&#xE147;</i>
+            <i class="material-icons small" name="2" data-admin-mode-control="edit" title="Add an Image or Video Slide">&#xE04A;</i>
+            <i class="material-icons small" name="3" data-admin-mode-control="edit" title="Delete current Slide">&#xE92B;</i>
+            <i class="material-icons small" name="4" data-admin-mode-control="edit" title="Change Background">&#xE3F4;</i>
+            <i class="material-icons small" name="5" data-admin-mode-control="edit" title="Slide Setting">&#xE8B8;</i>
             <i class="material-icons small" name="6" title="Broadcast Message">&#xE0C9;</i>
-            <i class="material-icons small" name="7" title="Edit JSON File">&#xE3C9;</i>
+            <i class="material-icons small" name="7" data-admin-mode-control="edit" title="Edit JSON File">&#xE3C9;</i>
             <i class="material-icons small" name="8" title="Casting View">&#xE30C;</i>
             <i class="material-icons small" id="general_view_btn" name="matrix" title="General / Matrix View" role="button" tabindex="0" aria-pressed="false">&#xE3EC;</i>
-        </div>
-        <hr/>
-        <div id="admin_toast" role="status" aria-live="polite"></div>
-        <!-- 2nd layer buttons toggle by first layer function -->
-        <div id="msgbox"><textarea id="content" rows="3" cols="40"></textarea>&nbsp;&nbsp;<i class="material-icons small" id="send_msg" title="Send a message to view">&#xE163;</i><i class="material-icons small" id="clear_msg" title="Clear the message">&#xE14C;</i></div>
-        <div id="image_bg">
-            <div id="brightness_control">
-                <span>Brightness:</span>
-                <div id="slider" style="width:300px;"><div id="custom-handle" class="ui-slider-handle" style="text-align: center; color: white; background-color: #826fee; border:#000; border-width: 10px;"></div></div>
-                <!-- Apply, Apply all and cancel background buttons -->
-                <div id="edit_btn"><i class="material-icons small disabled" name="one" title="Apply">&#xE876;</i><i class="material-icons small disabled" name="all" title="Apply All">&#xE877;</i><i class="material-icons small disabled" name="cancel" title="Cancel">&#xE5C9;</i></div>
             </div>
-            <div id="image_icons"></div>
+            <hr/>
+            <div id="admin_toast" role="status" aria-live="polite"></div>
+            <!-- 2nd layer buttons toggle by first layer function -->
+            <div id="msgbox"><textarea id="content" rows="3" cols="40"></textarea>&nbsp;&nbsp;<i class="material-icons small" id="send_msg" title="Send a message to view">&#xE163;</i><i class="material-icons small" id="clear_msg" title="Clear the message">&#xE14C;</i></div>
+            <div id="image_bg">
+                <div id="brightness_control">
+                    <span>Brightness:</span>
+                    <div id="slider" style="width:300px;"><div id="custom-handle" class="ui-slider-handle" style="text-align: center; color: white; background-color: #826fee; border:#000; border-width: 10px;"></div></div>
+                    <!-- Apply, Apply all and cancel background buttons -->
+                    <div id="edit_btn"><i class="material-icons small disabled" name="one" title="Apply">&#xE876;</i><i class="material-icons small disabled" name="all" title="Apply All">&#xE877;</i><i class="material-icons small disabled" name="cancel" title="Cancel">&#xE5C9;</i></div>
+                </div>
+                <div id="image_icons"></div>
+            </div>
+            <div id="bible_panel"></div>
+            <b>Title</b><div id="slide_title" class="admin title" title="Slide Title" contenteditable="true"></div><br/><b>Notes</b><div id="slide_notes" class="admin notes" title="Slide Notes" contenteditable="true"></div>
         </div>
-        <div id="bible_panel"></div>
-        <b>Title</b><div id="slide_title" class="admin title" title="Slide Title" contenteditable="true"></div><br/><b>Notes</b><div id="slide_notes" class="admin notes" title="Slide Notes" contenteditable="true"></div>
+        <div id="admin_mode_switch" role="group" aria-label="Admin navigation mode">
+            <button type="button" data-admin-mode="live" aria-pressed="false">Live Mode</button>
+            <button type="button" data-admin-mode="edit" class="is-active" aria-pressed="true">Edit Mode</button>
+            <div id="admin_mode_status" role="status" aria-live="polite">Edit Mode — Admin navigation is local.</div>
+        </div>
     </div>
     <div id="slide_composer" role="dialog" aria-modal="true" aria-labelledby="slide_composer_title">
         <div class="slide-composer-card">
@@ -407,6 +480,7 @@
         a_type = '';
         admin_toast_timer = null;
         slide_composer_state = null;
+        admin_navigation_mode = 'edit';
 
         presentation = {{ presentation|tojson }};
         slides = presentation['data'];
@@ -797,8 +871,62 @@
             });
         }
 
+        function sync_admin_position_to_view() {
+            if (admin_navigation_mode !== 'live') {
+                return;
+            }
+            socket.emit('control', {
+                'type': 'pos',
+                'value': [pos, order],
+                'from': 'admin',
+                'mode': 'view',
+                'live_sync': true
+            });
+        }
+
+        function set_admin_navigation_mode(nextMode, announce) {
+            if (nextMode !== 'live' && nextMode !== 'edit') {
+                return;
+            }
+            admin_navigation_mode = nextMode;
+            $('.menu').toggleClass('is-live-mode', nextMode === 'live');
+            $('#admin_mode_switch button').each(function() {
+                var isActive = $(this).data('admin-mode') === nextMode;
+                $(this).toggleClass('is-active', isActive);
+                $(this).attr('aria-pressed', isActive ? 'true' : 'false');
+            });
+            $('#admin_mode_status').text(
+                nextMode === 'live' ?
+                    'Live Mode — View follows Admin navigation.' :
+                    'Edit Mode — Admin navigation is local.'
+            );
+            if (nextMode === 'live') {
+                if ($('#image_bg').is(':visible') && slides[pos]) {
+                    restore_background_preview(false);
+                }
+                else {
+                    close_background_panel();
+                }
+                $('#bible_panel').hide();
+                sync_admin_position_to_view();
+            }
+            if (announce !== false) {
+                show_admin_toast(
+                    nextMode === 'live' ?
+                        'Live Mode enabled. View now follows Admin.' :
+                        'Edit Mode enabled. Admin navigation is local.',
+                    nextMode === 'live' ? 'applied' : 'cancelled'
+                );
+            }
+        }
+
+        $(document).on('click', '#admin_mode_switch button', function() {
+            set_admin_navigation_mode($(this).data('admin-mode'), true);
+        });
+
         // Document ready events
         $(document).ready(function() {
+		set_admin_navigation_mode('edit', false);
 		load_slides();    // Populate the deck before Reveal binds its controls
 		Reveal.initialize({
 	    		embedded: true,
@@ -1068,7 +1196,10 @@
                     window.open('/worship/'+w_id+'?json=true', '_blank');
                     break;
                 case '8':
-                    window.open('/slides/view', '_blank');
+                    window.open(
+                        '/slides/view?h=' + encodeURIComponent(pos) + '&v=' + encodeURIComponent(order),
+                        '_blank'
+                    );
                     break;
                 case 'matrix':
                     toggle_general_view();
@@ -1114,7 +1245,7 @@
                 update_matrix_selection();
             }
             console.log("slide changed", pos, order, content_index);
-            socket.emit('control', {'type': 'pos', 'value': [pos, order], 'from': 'admin'});
+            sync_admin_position_to_view();
         });
 </script>
 {% endblock %}
