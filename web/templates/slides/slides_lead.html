@@ -146,7 +146,7 @@
 </body>
 <script>
     mode = 'lead';                 // Set mode to lead
-    presentation = {{ presentation|safe }};
+    presentation = {{ presentation|tojson }};
     slides = presentation['data'];
     setting = presentation['setting'];
     pos = presentation['pos'][0];

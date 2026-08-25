@@ -42,7 +42,7 @@
     <script>
 
     // init data from flask
-        presentation = {{ presentation|safe }};
+        presentation = {{ presentation|tojson }};
         slides = presentation['data'];
         mode = '{{ mode|safe }}';
 

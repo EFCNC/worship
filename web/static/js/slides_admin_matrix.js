@@ -307,6 +307,8 @@
 
     function update_matrix_selection() {
         var selected = null;
+        var focusedThumbnail = document.activeElement && document.activeElement.closest ?
+            document.activeElement.closest('.matrix-thumbnail') : null;
         document.querySelectorAll('.matrix-thumbnail').forEach(function (thumbnail) {
             var isSelected = Number(thumbnail.dataset.horizontalIndex) === pos &&
                 Number(thumbnail.dataset.verticalIndex) === order;
@@ -317,6 +319,9 @@
             }
         });
         if (generalView && selected && !dragging) {
+            if (focusedThumbnail && focusedThumbnail !== selected) {
+                selected.focus({ preventScroll: true });
+            }
             selected.scrollIntoView({ block: 'nearest', inline: 'nearest' });
         }
     }
