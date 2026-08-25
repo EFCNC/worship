@@ -408,6 +408,16 @@
     });
 
     socket.on('response', function (data) {
+        if (data.control_type === 'msg') {
+            msg = data.msg;
+            if (!data.target_mode || data.target_mode === mode) {
+                show_msg();
+            }
+            return;
+        }
+        if (data.control_type === 'pos' && mode === 'view' && data.from === 'admin') {
+            return;
+        }
         pos = data.pos[0];
         order = data.pos[1];
         msg = data.msg;

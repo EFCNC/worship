@@ -787,9 +787,14 @@
             update_json();
         }
 
-        function send_msg(data, mode='view') {
+        function send_msg(data, targetMode='view') {
             // Broadcast Message to View
-            socket.emit('control', {'type': 'msg', 'value': data, 'mode': mode});
+            socket.emit('control', {
+                'type': 'msg',
+                'value': data,
+                'mode': targetMode,
+                'from': mode
+            });
         }
 
         // Document ready events
