@@ -66,6 +66,7 @@
     #edit_btn {
         z-index: 99;
         display: none;
+        flex: 0 0 auto;
         text-align: right;
         min-height: 34px;
         margin-left: auto;
@@ -79,14 +80,24 @@
         display: none;
         z-index: 1;
         padding: 12px;
+        box-sizing: border-box;
     }
 
     #brightness_control {
         display: flex;
         align-items: center;
         gap: 12px;
-        margin-bottom: 10px;
+        min-height: 42px;
+        margin-bottom: 8px;
+        padding: 4px 0;
+        box-sizing: border-box;
         color: #fff;
+    }
+
+    #brightness_control #slider {
+        flex: 0 0 300px;
+        width: 300px !important;
+        min-width: 300px;
     }
 
     #admin_toast {
@@ -363,8 +374,8 @@
     <div id="slide_composer" role="dialog" aria-modal="true" aria-labelledby="slide_composer_title">
         <div class="slide-composer-card">
             <h2 id="slide_composer_title">Add New Slide</h2>
-            <label class="slide-composer-name" for="slide_composer_name">Slide Name
-                <input id="slide_composer_name" type="text" placeholder="Enter slide name">
+            <label class="slide-composer-name" for="slide_composer_name">Title Name
+                <input id="slide_composer_name" type="text" placeholder="Enter title name">
             </label>
             <div id="slide_composer_preview" aria-label="New slide preview">
                 <div class="slide-composer-preview-background"></div>
@@ -450,15 +461,29 @@
             }, 2500);
         }
 
+        function finish_background_action(message, type) {
+            $('#edit_btn').hide();
+            a_type = '';
+            if (message) {
+                show_admin_toast(message, type);
+            }
+        }
+
+        function close_background_panel() {
+            $('#edit_btn, #image_bg').hide();
+            a_type = '';
+        }
+
         function restore_background_preview(showMessage) {
             bg_brightness = get_slide_background_brightness(slides[pos]);
             bg_url = slides[pos].style.background || '';
             set_background_slider(bg_brightness * 10);
             update_current_bg();
-            $('#edit_btn, #image_bg').hide();
-            a_type = '';
             if (showMessage) {
-                show_admin_toast('Background change has been canceled.', 'cancelled');
+                finish_background_action('Background change has been canceled.', 'cancelled');
+            }
+            else {
+                close_background_panel();
             }
         }
 
@@ -948,13 +973,10 @@
         function cancel() {
             var cancelledType = a_type;
             if (cancelledType == 'bg') {
-                restore_background_preview(false);
+                restore_background_preview(true);
+                return;
             }
-            $('#edit_btn').hide();
-            a_type = '';
-            if (cancelledType == 'bg') {
-                show_admin_toast('Background change has been canceled.', 'cancelled');
-            }
+            finish_background_action('', 'cancelled');
         }
 
         function apply(name) {
@@ -973,12 +995,19 @@
                     slides[pos].style.opacity = 1;
                 }
             }
-            a_type = '';
-            $('#edit_btn').hide();
             if (appliedBackground) {
-                $('#image_bg').hide();
-                show_admin_toast('Background change has been applied.', 'applied');
+                finish_background_action('', 'applied');
+                update_json(false, {
+                    success: function() {
+                        show_admin_toast('Background change has been applied.', 'applied');
+                    },
+                    error: function() {
+                        show_admin_toast('Background change could not be applied.', 'cancelled');
+                    }
+                });
+                return;
             }
+            finish_background_action('', 'applied');
             update_json();
         }
 
@@ -1002,7 +1031,7 @@
         });
 
         // Control icons click events
-        $("#control_panel i").click(function() {
+        $(document).on('click', '#control_panel i, #edit_btn i', function() {
             name = $(this).attr('name');
             switch(name) {
                 case '0':
