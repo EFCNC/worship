@@ -42,6 +42,29 @@
 }
 
 /* =========================================
+   Sermon-Notes Textarea
+   ========================================= */
+.sermon-notes-editor {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 2px solid #eee;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.sermon-notes-editor textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-family: inherit;
+    resize: vertical;
+}
+
+
+/* =========================================
    Song Editor Cards & Lists
    ========================================= */
 
@@ -397,6 +420,7 @@
     let lyrics_raw = '';
     let worship_data = {{ w|tojson|safe }};
     let worship_id = {{ id|safe }};
+    let worship_notes_temp = worship_data.notes || '';
     let worship = $('#worship');
 
     let hasUnsavedChanges = false;
@@ -498,6 +522,11 @@
     }, true);
 
     // When Notes are changed
+    $(document).on('input', 'textarea[name="worship_notes"]', function() {
+        worship_notes_temp = $(this).val();
+        checkActionButtons();
+    });
+
     $(document).on('input', 'textarea[name="song_notes"]', function() {
         let index = $(this).data('index');
         songs_temp[index].notes = $(this).val();
@@ -545,7 +574,21 @@
                 <div class="sermon-outline"><strong>Sermon Outline:</strong><br/>${sermon.outline || ''}</div>
             `;
         }).join('');
+        cardHtml += `
+            <div class="sermon-notes-editor">
+                <label for="worship-notes"><strong>Worship Leader's Notes:</strong></label>
+                <textarea id="worship-notes" name="worship_notes" rows="3" placeholder="Add any notes, reminders, 感想, or instructions for the team here...">${escapeHtml(worship_notes_temp)}</textarea>
+            </div>`;
         $('#sermon-data_card').html(cardHtml);
+    }
+
+    function escapeHtml(value) {
+        return String(value || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
     }
 
 
@@ -553,7 +596,18 @@
     // Action Buttons Stuff
     // ========================
     $(document).on('click', '.save_btn', function() {
-        save(worship_id);
+        let notesChanged = worship_notes_temp !== (worship_data.notes || '');
+        let songsChanged = songs_have_changes();
+
+        if (notesChanged) {
+            save_worship_notes();
+        }
+        if (songsChanged) {
+            save(worship_id);
+        }
+        if (!notesChanged && !songsChanged) {
+            alert("Nothing was changed!!");
+        }
     });
 
     $(document).on('click', '.reset_btn', function() {
@@ -570,44 +624,61 @@
 
     // Reactive State Management (Show/Hide Save & Reset Buttons)
     function checkActionButtons() {
-        let orderChanged = false;
-        if ($('#songs').data('ui-sortable')) {
-            let currentOrder = $('#songs').sortable('toArray', {attribute: 'name'});
-            let originalOrder = songs.map(item => String(item.id));
-            orderChanged = JSON.stringify(currentOrder) !== JSON.stringify(originalOrder);
-        }
+        let notesChanged = worship_notes_temp !== (worship_data.notes || '');
         
-        let contentChanged = false;
-        
-        // Check if songs were added or removed
-        if (songs.length !== songs_temp.length) {
-            contentChanged = true;
-        } else {
-            // Compare the specific fields that matter to avoid false positives
-            for (let song of songs) {
-                let tempSong = songs_temp.find(s => s.id === song.id);
-                
-                // Force both transposes to be integers so "0", ["0"], and 0 all match perfectly
-                let origTranspose = parseInt(song.transpose) || 0;
-                let tempTranspose = parseInt(tempSong.transpose) || 0;
-
-                if (!tempSong || 
-                    origTranspose !== tempTranspose || 
-                    song.notes != tempSong.notes || 
-                    song.alt_sequence != tempSong.alt_sequence) {
-                    contentChanged = true;
-                    break;
-                }
-            }
-        }
-
-        hasUnsavedChanges = orderChanged || contentChanged;
+        // Use the helper function instead of repeating the loop logic
+        hasUnsavedChanges = songs_have_changes() || notesChanged;
 
         if (hasUnsavedChanges) {
             $('.save_btn, .reset_btn').show();
         } else {
             $('.save_btn, .reset_btn').hide();
         }
+    }
+
+    function songs_have_changes() {
+        let currentOrder = $('#songs').data('ui-sortable')
+            ? $('#songs').sortable('toArray', {attribute: 'name'})
+            : songs.map(item => String(item.id));
+        let originalOrder = songs.map(item => String(item.id));
+
+        if (JSON.stringify(currentOrder) !== JSON.stringify(originalOrder) || songs.length !== songs_temp.length) {
+            return true;
+        }
+
+        return songs.some(function(song) {
+            let tempSong = songs_temp.find(s => s.id === song.id);
+            return !tempSong ||
+                (parseInt(song.transpose) || 0) !== (parseInt(tempSong.transpose) || 0) ||
+                song.notes != tempSong.notes ||
+                song.alt_sequence != tempSong.alt_sequence;
+        });
+    }
+
+    function save_worship_notes() {
+        let sermonData = {
+            date: worship_data.date,
+            notes: worship_notes_temp,
+            sermons: worship_data.sermons || {},
+            display_order: worship_data.display_order || [],
+            is_joint: worship_data.is_joint || 0
+        };
+
+        $.ajax({
+            type: 'post',
+            url: API_URL + 'sermon/' + worship_id,
+            data: JSON.stringify(sermonData),
+            contentType: 'application/json',
+            complete: function(response) {
+                if (response.status === 200) {
+                    worship_data.notes = worship_notes_temp;
+                    checkActionButtons();
+                    alert('Worship Notes Saved!');
+                } else {
+                    alert(response.responseText);
+                }
+            }
+        });
     }
 
     // This function will detect if arrangement has been changed compare to the origin one
@@ -699,6 +770,8 @@
     // Reset all the changes (songs order, lyrics order)
     function reset() {
         songs_temp = JSON.parse(JSON.stringify(songs));
+        worship_notes_temp = worship_data.notes || '';
+        get_sermon();
         $.when( add_song_to_worship(worship)).then(function() {
             init();
             checkActionButtons();
