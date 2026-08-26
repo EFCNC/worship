@@ -63,11 +63,22 @@ def reload_json():
 	if __get_slide_json():
 		emit('reload', slides_data, broadcast=True)
 
+@socketio.on('sync_live_mode')
+def sync_live_mode():
+	# Lead is the source of truth when Admin first enters Live Mode. View
+	# navigation is local, so the shared position remains Lead's position.
+	response = dict(slides_data)
+	response['control_type'] = 'pos'
+	response['target_mode'] = ''
+	response['live_sync'] = True
+	response['from'] = 'lead'
+	emit('response', response, broadcast=True)
+
 @socketio.on('control')
 def handle_control(data):
 	print('Received message:', data)
 	# Edit Mode keeps Admin navigation local. Live Mode marks its position
-	# updates explicitly so only those events can move the connected View.
+	# updates explicitly so those events can move both Lead and View.
 	if (data.get('type') == 'pos' and data.get('from') == 'admin' and
 			not data.get('live_sync')):
 		return

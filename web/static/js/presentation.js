@@ -418,6 +418,12 @@
         if (data.target_mode && data.target_mode !== mode) {
             return;
         }
+        if (data.control_type === 'pos' && mode === 'admin' &&
+                data.from === 'lead' &&
+                typeof admin_navigation_mode !== 'undefined' &&
+                admin_navigation_mode !== 'live') {
+            return;
+        }
         if (data.control_type === 'pos' && mode === 'view' &&
                 data.from === 'admin' && !data.live_sync) {
             return;
@@ -431,7 +437,9 @@
         key_change = data.key;
         console.log('Server sent: pos:', pos, 'order', order, 'msg:', msg, 'key:', key_change, 'dynamic:', dynamic, 'from:', from);
         if (from!= mode) {
-            slide_refreshed = true;
+            var currentIndices = Reveal.getIndices();
+            slide_refreshed = currentIndices.h !== pos ||
+                (Number.isInteger(currentIndices.v) ? currentIndices.v : 0) !== order;
             Reveal.slide(pos, order);
             change_slide();
         }

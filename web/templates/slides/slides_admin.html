@@ -871,7 +871,7 @@
             });
         }
 
-        function sync_admin_position_to_view() {
+        function sync_admin_live_position() {
             if (admin_navigation_mode !== 'live') {
                 return;
             }
@@ -879,9 +879,12 @@
                 'type': 'pos',
                 'value': [pos, order],
                 'from': 'admin',
-                'mode': 'view',
                 'live_sync': true
             });
+        }
+
+        function align_live_mode_to_lead() {
+            socket.emit('sync_live_mode');
         }
 
         function set_admin_navigation_mode(nextMode, announce) {
@@ -897,7 +900,7 @@
             });
             $('#admin_mode_status').text(
                 nextMode === 'live' ?
-                    'Live Mode — View follows Admin navigation.' :
+                    'Live Mode — All 3 are synchronized.' :
                     'Edit Mode — Admin navigation is local.'
             );
             if (nextMode === 'live') {
@@ -908,12 +911,12 @@
                     close_background_panel();
                 }
                 $('#bible_panel').hide();
-                sync_admin_position_to_view();
+                align_live_mode_to_lead();
             }
             if (announce !== false) {
                 show_admin_toast(
                     nextMode === 'live' ?
-                        'Live Mode enabled. View now follows Admin.' :
+                        'Live Mode enabled. All 3 are synchronized.' :
                         'Edit Mode enabled. Admin navigation is local.',
                     nextMode === 'live' ? 'applied' : 'cancelled'
                 );
@@ -1245,7 +1248,7 @@
                 update_matrix_selection();
             }
             console.log("slide changed", pos, order, content_index);
-            sync_admin_position_to_view();
+            sync_admin_live_position();
         });
 </script>
 {% endblock %}
