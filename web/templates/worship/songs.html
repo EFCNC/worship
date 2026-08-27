@@ -426,7 +426,6 @@
     /*  ==================================
         Initialization Stuff
         ================================== */
-    
     // Song Database Setup Stuff
     $(document).ready(function () {
         get_sermon();
@@ -523,9 +522,9 @@
         checkActionButtons();
     });
     
-    // ======================
-    // Functions
-    // ======================
+    /* =========================================================
+       Functions
+       ========================================================= */
 
     // Sermon Card Functions:
     function get_sermon() {
@@ -582,9 +581,9 @@
     }
 
 
-    // ========================
-    // Action Buttons Stuff
-    // ========================
+    /* =========================================================
+       Action Buttons (Save & Reset)
+       ========================================================= */
     $(document).on('click', '.save_btn', function() {
         let notesChanged = worship_notes_temp !== (worship_data.notes || '');
         let songsChanged = songs_have_changes();
@@ -831,10 +830,9 @@
         }
     }
 
-    // ======================
-    // Transpose and Key Stuff
-    // ======================
-
+    /* =========================================================
+       Transpose and Key Stuff
+       ========================================================= */
     // When the Key is changed
     $(document).on('change', '.key', function () {
         let transposeVal = keys.indexOf(this.value) - keys.indexOf($(this).attr('init'));
@@ -913,9 +911,9 @@
         });
     }
 
-    /* ======================
-        Song Sequence and Lyrics
-    */
+    /* =========================================================
+       Song Sequence and Lyrics
+       ========================================================= */
     // When lyrics sequence is clicked, open up movable lyrics sections
     $(document).on('click', '.song_sequence_toggle', function(){
         $(this).find('.toggle-icon').toggleClass('fa-caret-down fa-caret-right');
