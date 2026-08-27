@@ -43,28 +43,21 @@ var API_URL = '/API/';
                 html += '<span>Original Key: ' + data.song_key + '</span>';
                 html += get_links(data.video, data.score, data.abc, data.id);
                 html += '</div>';
-                
+
+                // Row 3: Notes
+                html += `
+                    <div class="song-notes-row">
+                        <div class="notes-container" style="width: 100%;">
+                            <label for="song-notes-${index}" style="display: block; margin-bottom: 5px; font-weight: bold;">Song Notes:</label>
+                            <textarea id="song-notes-${index}" name="song_notes" data-index="${index}" rows="2">${data.notes || ''}</textarea>
+                        </div>
+                    </div>`;
+
                 // Extract unique section names directly from the lyrics content
                 let uniqueSections = [...new Set(data.content.map(l => l.name))];
                 let paletteButtons = uniqueSections.map(sec => 
                     `<button type="button" class="btn-palette ${sec}" data-sec="${sec}" data-id="${data.id}">[${sec}]</button>`
                 ).join('');
-
-                // Row 3: Notes
-                html += `
-                    <div class="song-notes-row">
-                        <div class="notes-container">
-                            <label for="song-notes-${index}">Song Notes:</label>
-                            <textarea id="song-notes-${index}" name="song_notes" data-index="${index}" rows="3">${data.notes || ''}</textarea>
-                        </div>
-                        <div class="palette-container">
-                            <label>Quick Add / Tools:</label>
-                            <div class="palette-buttons">
-                                <button type="button" class="btn-lang-swap" title="Swap Language" data-id="${data.id}"><i class="fa-solid fa-language"></i></button>
-                                ${paletteButtons}
-                            </div>
-                        </div>
-                    </div>`;
 
                 // Row 4: Sequence Container
                 html += `
@@ -74,7 +67,14 @@ var API_URL = '/API/';
                                 <span class="sequence" id="song-${data.id}_alt">${data.sequence}</span>
                             </span>
                         </div>
-                        <div class="sequence-container">
+                        <div class="sequence-container" style="display: none;">
+                            <div class="palette-container">
+                                <label style="margin: 0; font-weight: bold;">Quick Add / Tools:</label>
+                                <div class="palette-buttons">
+                                    <button type="button" class="btn-lang-swap" title="Swap Language" data-id="${data.id}"><i class="fa-solid fa-language"></i></button>
+                                    ${paletteButtons}
+                                </div>
+                            </div>
                         </div>`;
 
                 html += '</div>'; // End main wrapper
@@ -84,7 +84,6 @@ var API_URL = '/API/';
                 var ul = document.createElement('ul');
                 ul.setAttribute('id', 'sequence_' + data.id);
                 ul.setAttribute('class', 'lyrics');
-                ul.setAttribute('style', 'display:none'); // Keeps it hidden initially
 
                 for (let l of data.content) {
                     var list_1 = document.createElement('li');

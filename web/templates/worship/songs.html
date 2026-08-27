@@ -113,20 +113,6 @@
     padding: 3px 5px;
 }
 
-/* Flexbox for Notes and Palette */
-.song-notes-row {
-    display: flex;
-    gap: 5px 15px;
-    align-items: flex-start;
-}
-
-.notes-container, .palette-container {
-    flex: 1; /* 50/50 split */
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-}
-
 .song-notes-row p {
     margin: 0;
 }
@@ -134,14 +120,28 @@
 .song-notes-row textarea {
     width: 100%;
     box-sizing: border-box;
-    
+    field-sizing: content;
+    min-height: 3lh;
+    resize: none;
+}
+
+.notes-container {
+    width: 100%;
+}
+
+.palette-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    margin-bottom: 5px;
 }
 
 .palette-buttons {
     display: flex;
-    flex-wrap: wrap;
     gap: 5px;
-    margin-top: 5px;
 }
 
 /* Base styling for the new buttons */
@@ -157,16 +157,6 @@
 
 .btn-lang-swap:hover, .btn-palette:hover {
     background: #e0e0e0;
-}
-
-/* Mobile override for the row */
-@media (max-width: 768px) {
-    .song-notes-row {
-        flex-direction: column;
-    }
-    .notes-container, .palette-container {
-        width: 100%;
-    }
 }
 
 /* =========================================
@@ -267,7 +257,7 @@
 
 .sequence-container {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     align-items: flex-start;
     width: 100%;
 }
@@ -928,9 +918,8 @@
     */
     // When lyrics sequence is clicked, open up movable lyrics sections
     $(document).on('click', '.song_sequence_toggle', function(){
-        id = $(this).attr('name');
         $(this).find('.toggle-icon').toggleClass('fa-caret-down fa-caret-right');
-        $("#sequence_"+id).toggle('slow');
+        $(this).next('.sequence-container').toggle('slow');
     });
 
     // When add_sequence_btn for lyrics sequence is clicked
