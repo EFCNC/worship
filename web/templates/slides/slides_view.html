@@ -42,12 +42,17 @@
     <script>
 
     // init data from flask
-        presentation = {{ presentation|safe }};
+        presentation = {{ presentation|tojson }};
         slides = presentation['data'];
         mode = '{{ mode|safe }}';
 
-        pos = presentation['pos'][0];
-        order = presentation['pos'][1];
+        const initialPosition = new URLSearchParams(window.location.search);
+        const requestedHorizontal = Number(initialPosition.get('h'));
+        const requestedVertical = Number(initialPosition.get('v'));
+        pos = initialPosition.has('h') && Number.isInteger(requestedHorizontal) && requestedHorizontal >= 0 ?
+            requestedHorizontal : presentation['pos'][0];
+        order = initialPosition.has('v') && Number.isInteger(requestedVertical) && requestedVertical >= 0 ?
+            requestedVertical : presentation['pos'][1];
         msg = presentation['msg'];
 
     $(document).ready(function() {
@@ -64,6 +69,7 @@
     });
 
     Reveal.on('ready', (event) => {
+        apply_background_brightness();
         Reveal.slide(pos, order);
     });
 
