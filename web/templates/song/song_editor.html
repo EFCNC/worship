@@ -283,13 +283,13 @@
         <div class="lyrics-split-container">
             <div class="form-group">
                 <label style="color: #3182ce; display: flex; align-items: center; gap: 5px;">
-                    <span>🔵</span> Primary Language
+                    <span>🔵</span> Primary Language <span id="lang_origin"></span>
                 </label>
                 <textarea id="lyrics_lang1" class="lyrics-area" spellcheck="false"></textarea>
             </div>
             <div class="form-group">
                 <label style="color: #805ad5; display: flex; align-items: center; gap: 5px;">
-                    <span>🟣</span> Translation
+                    <span>🟣</span> Translation <span id="lang_region"></span>
                 </label>
                 <textarea id="lyrics_lang2" class="lyrics-area" spellcheck="false"></textarea>
             </div>
@@ -480,38 +480,47 @@
     
     // --- Pulling and Loading Lyrics from Database ---
     function loadAndSplitLyrics() {
-        const rawContent = (originalData.lyrics || "").trim();
+        let rawContent = (originalData.lyrics || "").trim();
         if (!rawContent) return;
 
-        let lang1Result = "";
-        let lang2Result = "";
+        let origin = "";
+        let region = "";
+        rawContent = JSON.parse(rawContent);
 
-        const sectionRegex = /<([^>]+)>([\s\S]*?)<\/\1>/g;
-        let match;
-
-        while ((match = sectionRegex.exec(rawContent)) !== null) {
-            const tagName = match[1];
-            const innerContent = match[2];
-
-            let p1 = innerContent;
-            let p2 = "";
-
-            if (innerContent.includes('[region 2]')) {
-                const parts = innerContent.split('[region 2]');
-                p1 = parts[0].trim();
-                p2 = parts[1].trim();
+        // Parsing origin lyrics
+        for (var key in rawContent['origin']) {
+            if (key != 'lang') {
+                cc = rawContent['origin'][key]
+                if(cc.length>0) {
+                    for(var i=0;i<cc.length;i++) {
+                        origin += '<' + key + (i+1) + '>' + cc[i] + '</' + key + (i+1) + '>\n\n';
+                    }
+                }
             }
-
-            lang1Result += `<${tagName}>\n${p1}\n</${tagName}>\n\n`;
-            lang2Result += `<${tagName}>\n${p2}\n</${tagName}>\n\n`;
+            else {
+                $('#lang_origin').text('('+rawContent['origin'][key]+')');
+            }
         }
+        $('#lyrics_lang1').val(origin);
 
-        if (lang1Result === "") {
-            $('#lyrics_lang1').val(rawContent);
-        } else {
-            $('#lyrics_lang1').val(lang1Result.trim());
-            $('#lyrics_lang2').val(lang2Result.trim());
+        // Parsing region lyrics
+        r_lyrics = rawContent['region']
+        for (var c=0;c<r_lyrics.length;c++) {  // Loop through region array, currently only one
+            for (var key in r_lyrics[c]) {
+                if (key != 'lang') {
+                    cc = r_lyrics[c][key]
+                    if(cc.length>0) {
+                        for(var i=0;i<cc.length;i++) {
+                            region += '<' + key + (i+1) + '>' + cc[i] + '</' + key + (i+1) + '>\n\n';
+                        }
+                    }
+                }
+                else {
+                    $('#lang_region').text('('+r_lyrics[c][key]+')');
+                }
+            }
         }
+        $('#lyrics_lang2').val(region);
     }
 
     // --- Combining Lyrics back into a single content string for submission ---
