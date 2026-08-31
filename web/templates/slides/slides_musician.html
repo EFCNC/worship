@@ -22,7 +22,7 @@
     <script>
         // init variables
         let slides;
-        let presentation = {{ presentation|tojson }};
+        let presentation = {{ presentation|safe }};
         slides_data = {{ pos|safe if pos else []}};
         let pos = 0;
         let order = 0;

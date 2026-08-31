@@ -89,7 +89,7 @@ a {
 input, textarea, select {
     font-family: inherit;
     font-size: inherit;
-    padding: var(--spacing-sm) var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius);
     transition: border-color var(--transition-default), box-shadow var(--transition-default);

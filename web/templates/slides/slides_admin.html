@@ -5,9 +5,7 @@
 {% block extra_css %}
     <script src="/static/vendor/socket.io/socket.io.js"></script>
     <script src="/static/js/presentation.js"></script>
-    <script src="/static/js/slides_admin_matrix.js"></script>
     <link href="/static/css/presentation.css" rel="stylesheet">
-    <link href="/static/css/slides_admin_matrix.css" rel="stylesheet">
     <link rel="stylesheet" href="/static/vendor/jquery/jquery-ui.css">
     <link rel="stylesheet" href="/static/vendor/reveal/reset.css">
 	<link rel="stylesheet" href="/static/vendor/reveal/reveal.css">
@@ -15,379 +13,110 @@
 	<script src="/static/vendor/reveal/reveal.js"></script>
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 <style>
-    #main-content.page-standard {
-        padding: 0;
-    }
-    html {
-        height: 100%;
-        background-color: #000;
-    }
-
-    body {
-        overflow: hidden;
-    }
-
-    .material-icons {
-        font-size: 40px;
-        padding: 10px;
-    }
-
-    .material-icons.small {
-        font-size: 25px;
-        padding: 4px;
-    }
-
-    .material-icons.link {
-        font-size: 25px;
-        margin: auto;
-    }
-
-    .material-icons.disabled {
-        //display: none;
-    }
-
-    .material-icons:hover {
-        cursor: pointer;
-        color: #fff;
-        background-color: #000;
-    }
-
-    #image_icons img {
-        padding: 5px;
-        width: 50px;
-    }
-
-    #image_icons img:hover {
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        cursor: pointer;
-    }
-
-    #edit_btn {
-        z-index: 99;
-        display: none;
-        flex: 0 0 auto;
-        text-align: right;
-        min-height: 34px;
-        margin-left: auto;
-        white-space: nowrap;
-    }
-
-    #image_bg {
-        border: 1px solid #000;
-        border-radius: 4px;
-        background-color: #002147;
-        display: none;
-        z-index: 1;
-        padding: 12px;
-        box-sizing: border-box;
-    }
-
-    #brightness_control {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        min-height: 42px;
-        margin-bottom: 8px;
-        padding: 4px 0;
-        box-sizing: border-box;
-        color: #fff;
-    }
-
-    #brightness_control #slider {
-        flex: 0 0 300px;
-        width: 300px !important;
-        min-width: 300px;
-    }
-
-    #admin_toast {
-        display: none;
-        margin: 8px 0;
-        padding: 8px 12px;
-        border-left: 4px solid #388e3c;
-        border-radius: 4px;
-        color: #fff;
-        background: #211a2b;
-        font-size: 14px;
-    }
-
-    #admin_mode_switch {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        flex: 0 0 auto;
-        gap: 8px;
-        width: 100%;
-        margin: 8px 0;
-        padding: 10px;
-        border: 1px solid #5f536d;
-        border-radius: 8px;
-        background: #211a2b;
-        box-sizing: border-box;
-    }
-
-    #admin_mode_switch button {
-        min-height: 44px;
-        padding: 8px 12px;
-        border: 2px solid #5f536d;
-        border-radius: 6px;
-        color: #fff;
-        background: #17131d;
-        font: 700 15px/1.2 var(--font-family-base);
-        cursor: pointer;
-    }
-
-    #admin_mode_switch button:hover {
-        border-color: #826fee;
-        background: #000;
-    }
-
-    #admin_mode_switch button[data-admin-mode="live"].is-active {
-        border-color: #ff5252;
-        background: #9f1f2f;
-        box-shadow: 0 0 0 2px rgba(255, 82, 82, 0.25);
-    }
-
-    #admin_mode_switch button[data-admin-mode="edit"].is-active {
-        border-color: #826fee;
-        background: #4f3fa3;
-        box-shadow: 0 0 0 2px rgba(130, 111, 238, 0.25);
-    }
-
-    #admin_mode_status {
-        grid-column: 1 / -1;
-        min-height: 18px;
-        color: #ddd6e7;
-        font: 600 13px/1.35 var(--font-family-base);
-        text-align: center;
-    }
-
-    .menu.is-live-mode #control_panel [data-admin-mode-control="edit"] {
-        display: none;
-    }
-
-        #admin_toast.cancelled {
-            border-left-color: #f57c00;
+        html {
+            height: 100%;
+            background-color: #000;
         }
 
-        #slide_composer {
-            position: fixed;
-            inset: 0;
-            z-index: 500;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 24px;
-            background: rgba(0, 0, 0, 0.78);
-        }
-
-        #slide_composer.is-open {
-            display: flex;
-        }
-
-        .slide-composer-card {
-            width: min(900px, 94vw);
-            max-height: 94vh;
-            overflow-y: auto;
-            padding: 20px;
-            border: 1px solid #5f536d;
-            border-radius: 10px;
-            background: #18131f;
-            color: #fff;
-            box-shadow: 0 18px 55px rgba(0, 0, 0, 0.55);
-        }
-
-        .slide-composer-card h2 {
-            margin: 0 0 14px;
-            font-family: var(--font-family-base);
-            font-size: 22px;
-        }
-
-        .slide-composer-name {
-            display: grid;
-            gap: 6px;
-            margin-bottom: 16px;
-            font-family: var(--font-family-base);
-            font-weight: 600;
-        }
-
-        .slide-composer-name input {
-            padding: 10px;
-            border: 1px solid #5f536d;
-            border-radius: 6px;
-            color: #fff;
-            background: #0d0a11;
-            font: inherit;
-        }
-
-        #slide_composer_preview {
-            position: relative;
-            display: grid;
-            grid-template-rows: 1fr 1fr;
-            align-items: center;
-            width: 100%;
-            aspect-ratio: 16 / 9;
+        body {
             overflow: hidden;
-            border: 2px solid #826fee;
-            border-radius: 8px;
-            background: #000;
         }
 
-        .slide-composer-preview-background {
-            position: absolute;
-            inset: 0;
-            z-index: 0;
-            background-position: center;
-            background-repeat: no-repeat;
-            background-size: cover;
-        }
-
-        .slide-composer-preview-text {
-            position: relative;
-            z-index: 1;
-            padding: 12px 36px;
-            font-family: var(--font-family-base);
-            font-size: clamp(22px, 3.2vw, 46px);
-            line-height: 1.2;
-            text-align: center;
-            white-space: pre-wrap;
-            overflow-wrap: anywhere;
-            text-shadow: -1px 0 #000, 0 1px #000, 1px 0 #000, 0 -1px #000;
-        }
-
-        #slide_composer_preview_origin {
-            align-self: end;
-            color: #fff;
-        }
-
-        #slide_composer_preview_region {
-            align-self: start;
-            color: #ffd800;
-        }
-
-        .slide-composer-inputs {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 14px;
-            margin-top: 16px;
-        }
-
-        .slide-composer-inputs label {
-            display: grid;
-            gap: 6px;
-            font-family: var(--font-family-base);
-            font-weight: 600;
-        }
-
-        .slide-composer-inputs textarea {
-            min-height: 100px;
-            resize: vertical;
+        .material-icons {
+            font-size: 40px;
             padding: 10px;
-            border: 1px solid #5f536d;
-            border-radius: 6px;
-            color: #fff;
-            background: #0d0a11;
-            font: inherit;
         }
 
-        .slide-composer-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            margin-top: 16px;
+        .material-icons.small {
+            font-size: 25px;
+            padding: 4px;
         }
 
-        .slide-composer-actions button {
-            padding: 9px 18px;
-            border: 1px solid #826fee;
-            border-radius: 6px;
+        .material-icons.link {
+            font-size: 25px;
+            margin: auto;
+        }
+
+        .material-icons.disabled {
+            //display: none;
+        }
+
+        .material-icons:hover {
+            cursor: pointer;
             color: #fff;
-            background: #826fee;
+            background-color: #000;
+        }
+
+        #image_icons img {
+            padding: 5px;
+            width: 50px;
+        }
+
+        #image_icons img:hover {
+            border: 1px solid #ddd;
+            border-radius: 4px;
             cursor: pointer;
         }
 
-        .slide-composer-actions #slide_composer_cancel {
-            border-color: #5f536d;
-            background: #28202f;
+        #edit_btn {
+            position: fixed;
+            z-index: 99;
+            display: none;
         }
 
-        @media (max-width: 720px) {
-            .slide-composer-inputs {
-                grid-template-columns: 1fr;
-            }
+        #image_bg {
+            border: 1px solid #000;
+            border-radius: 4px;
+            background-color: #002147;
+            display: none;
+            z-index: 1;
         }
 
-    header#header,
-    header#header a,
-    header#header button {
-        font-family: var(--font-family-base);
-        line-height: var(--line-height-base);
+        #bible_panel {
+            background-color: #f02447;
+            display: none;
+            flex-direction: row;
+        }
+
+        #msgbox {
+            display: none;
+        }
+
+    .bible_book {
+        border: 1px solid #000;
+        border-radius: 4px;
+        margin: 2;
     }
 
-    #bible_panel {
-        background-color: #f02447;
+    .bible_book:hover {
+        border: 1px solid #fff;
+        cursor: pointer;
+    }
+
+    .bible_chapter {
+        border: 1px solid #000;
+        margin: 5px;
         display: none;
-        flex-direction: row;
     }
 
-    #msgbox {
-        display: none;
-    }
-
-.bible_book {
-    border: 1px solid #000;
-    border-radius: 4px;
-    margin: 2;
+    .admin_container {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        grid-template-rows: repeat(5, 1fr);
+        gap: 8px;
+  	    background-color: #c0c0c0;
+	    height: 100vh;
 }
 
-.bible_book:hover {
-    border: 1px solid #fff;
-    cursor: pointer;
-}
-
-.bible_chapter {
-    border: 1px solid #000;
-    margin: 5px;
-    display: none;
-}
-
-.admin_container {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    grid-template-rows: repeat(5, 1fr);
-    gap: 8px;
-    background-color: #c0c0c0;
-    height: calc(100vh - var(--header-height));
-}
-
-.slide-viewport {
+.reveal {
     grid-column: span 4 / span 4;
     grid-row: span 5 / span 5;
-    min-width: 0;
-    min-height: 0;
-    overflow: hidden;
-}
-
-.slide-viewport .reveal {
-    width: 100%;
-    height: 100%;
 }
 
 .menu {
     grid-column: span 2 / span 2;
     grid-row: span 5 / span 5;
     grid-column-start: 5;
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-    min-height: 0;
-    padding-right: 8px;
-    box-sizing: border-box;
-}
-
-#admin_sidebar_content {
-    flex: 1 1 auto;
-    min-height: 0;
-    overflow-y: auto;
 }
 </style>
 {% endblock %}
@@ -396,78 +125,35 @@
 <body>
 <div id="dialog"></div>
 <div class="admin_container">
-    <div class="slide-viewport">
-        <div class="reveal">
-		    <div class="slides"></div>
-	    </div>
-        <div id="slide_matrix" class="slide-matrix" aria-label="General slide view" hidden>
-            <div id="slide_matrix_columns" class="slide-matrix-columns"></div>
-        </div>
-    </div>
+    <div class="reveal">
+		<div class="slides"></div>
+	</div>
     <div id="bottom-left" style="display: flex; justify-content: center;align-items: center"><span title="Set the numbers of line in one slide. 0=all lines">Fragment:</span> <select id="fragment"></select>&nbsp;<i class="material-icons link" id="add_link" title="Add a link">&#xE250;</i></div>
     <div class="menu">
-        <div id="admin_sidebar_content">
-            <div id="control_panel">
+        <div id="control_panel">
+            <!-- Apply, Apply all and cancel buttons -->
+            <div id="edit_btn"><i class="material-icons small disabled" name="one" title="Apply">&#xE876;</i><i class="material-icons small disabled" name="all" title="Apply All">&#xE877;</i><i class="material-icons small disabled" name="cancel" title="Cancel">&#xE5C9;</i></div>
             <!-- Control buttons -->
             <br/>
             <i name="0" id="save" class="material-icons small" title="Refresh Slide">&#xE5D5;</i>
-            <i class="material-icons small" name="1" data-admin-mode-control="edit" title="Add New Slide (Column)">&#xE146;</i>
-            <i class="material-icons small" name="subpage" data-admin-mode-control="edit" title="Add New Subpage (Row)">&#xE147;</i>
-            <i class="material-icons small" name="2" data-admin-mode-control="edit" title="Add an Image or Video Slide">&#xE04A;</i>
-            <i class="material-icons small" name="3" data-admin-mode-control="edit" title="Delete current Slide">&#xE92B;</i>
-            <i class="material-icons small" name="4" data-admin-mode-control="edit" title="Change Background">&#xE3F4;</i>
-            <i class="material-icons small" name="5" data-admin-mode-control="edit" title="Slide Setting">&#xE8B8;</i>
+            <i class="material-icons small" name="1" title="Add a Slide">&#xE89C;</i>
+            <i class="material-icons small" name="2" title="Add an Image or Video Slide">&#xE04A;</i>
+            <i class="material-icons small" name="3" title="Delete current Slide">&#xE92B;</i>
+            <i class="material-icons small" name="4" title="Change Background">&#xE3F4;</i>
+            <i class="material-icons small" name="5" title="Slide Setting">&#xE8B8;</i>
             <i class="material-icons small" name="6" title="Broadcast Message">&#xE0C9;</i>
-            <i class="material-icons small" name="7" data-admin-mode-control="edit" title="Edit JSON File">&#xE3C9;</i>
+            <i class="material-icons small" name="7" title="Edit Josn File">&#xE3C9;</i>
             <i class="material-icons small" name="8" title="Casting View">&#xE30C;</i>
-            <i class="material-icons small" id="general_view_btn" name="matrix" title="General / Matrix View" role="button" tabindex="0" aria-pressed="false">&#xE3EC;</i>
-            </div>
-            <hr/>
-            <div id="admin_toast" role="status" aria-live="polite"></div>
-            <!-- 2nd layer buttons toggle by first layer function -->
-            <div id="msgbox"><textarea id="content" rows="3" cols="40"></textarea>&nbsp;&nbsp;<i class="material-icons small" id="send_msg" title="Send a message to view">&#xE163;</i><i class="material-icons small" id="clear_msg" title="Clear the message">&#xE14C;</i></div>
-            <div id="image_bg">
-                <div id="brightness_control">
-                    <span>Brightness:</span>
-                    <div id="slider" style="width:300px;"><div id="custom-handle" class="ui-slider-handle" style="text-align: center; color: white; background-color: #826fee; border:#000; border-width: 10px;"></div></div>
-                    <!-- Apply, Apply all and cancel background buttons -->
-                    <div id="edit_btn"><i class="material-icons small disabled" name="one" title="Apply">&#xE876;</i><i class="material-icons small disabled" name="all" title="Apply All">&#xE877;</i><i class="material-icons small disabled" name="cancel" title="Cancel">&#xE5C9;</i></div>
-                </div>
-                <div id="image_icons"></div>
-            </div>
-            <div id="bible_panel"></div>
-            <b>Title</b><div id="slide_title" class="admin title" title="Slide Title" contenteditable="true"></div><br/><b>Notes</b><div id="slide_notes" class="admin notes" title="Slide Notes" contenteditable="true"></div>
         </div>
-        <div id="admin_mode_switch" role="group" aria-label="Admin navigation mode">
-            <button type="button" data-admin-mode="live" aria-pressed="false">Live Mode</button>
-            <button type="button" data-admin-mode="edit" class="is-active" aria-pressed="true">Edit Mode</button>
-            <div id="admin_mode_status" role="status" aria-live="polite">Edit Mode — Admin navigation is local.</div>
+        <hr/>
+        <!-- 2nd layer buttons toggle by first layer function -->
+        <div id="msgbox"><textarea id="content" rows="3" cols="40"></textarea>&nbsp;&nbsp;<i class="material-icons small" id="send_msg" title="Send a message to view">&#xE163;</i><i class="material-icons small" id="clear_msg" title="Clear the message">&#xE14C;</i></div>
+        <div id="image_bg">
+            <div id="slider" style="width:300px"><div id="custom-handle" class="ui-slider-handle"></div></div>
+            <div id="image_icons"></div>
         </div>
-    </div>
-    <div id="slide_composer" role="dialog" aria-modal="true" aria-labelledby="slide_composer_title">
-        <div class="slide-composer-card">
-            <h2 id="slide_composer_title">Add New Slide</h2>
-            <label class="slide-composer-name" for="slide_composer_name">Title Name
-                <input id="slide_composer_name" type="text" placeholder="Enter title name">
-            </label>
-            <div id="slide_composer_preview" aria-label="New slide preview">
-                <div class="slide-composer-preview-background"></div>
-                <div id="slide_composer_preview_origin" class="slide-composer-preview-text"></div>
-                <div id="slide_composer_preview_region" class="slide-composer-preview-text"></div>
-            </div>
-            <div class="slide-composer-inputs">
-                <label for="slide_composer_origin">中文
-                    <textarea id="slide_composer_origin" placeholder="輸入中文內容"></textarea>
-                </label>
-                <label for="slide_composer_region">English
-                    <textarea id="slide_composer_region" placeholder="Enter English text"></textarea>
-                </label>
-            </div>
-            <div class="slide-composer-actions">
-                <button type="button" id="slide_composer_apply">Apply</button>
-                <button type="button" id="slide_composer_cancel">Cancel</button>
-            </div>
-        </div>
+        <div id="bible_panel"></div>
+        <b>Title</b><div id="slide_title" class="admin title" title="Slide Title" contenteditable="true"></div><br/><b>Notes</b><div id="slide_notes" class="admin notes" title="Slide Notes" contenteditable="true"></div>
     </div>
 </div>
 {% endblock %}
@@ -476,13 +162,12 @@
 <script>
         mode = 'admin';                 // Set mode to admin
         bg_url = '';
-        bg_brightness = 1;
+        bg_opacity = 1;
         a_type = '';
-        admin_toast_timer = null;
-        slide_composer_state = null;
-        admin_navigation_mode = 'edit';
+        origin_text = '輸入您的資訊';
+        region_text = 'Enter your extra language information here';
 
-        presentation = {{ presentation|tojson }};
+        presentation = {{ presentation|safe }};
         slides = presentation['data'];
         setting = presentation['setting'];
         pos = presentation['pos'][0];
@@ -493,73 +178,6 @@
         bible = [];
 
         // Slide related functions
-
-        function get_content_index(horizontalIndex, verticalIndex) {
-            var slide = Reveal.getSlide(horizontalIndex, verticalIndex);
-            var value = slide ? Number(slide.getAttribute('order')) : 0;
-            return Number.isInteger(value) ? value : 0;
-        }
-
-        function select_admin_slide(horizontalIndex, verticalIndex) {
-            if (!slides.length) {
-                return;
-            }
-            Reveal.slide(horizontalIndex, verticalIndex);
-            pos = horizontalIndex;
-            order = verticalIndex;
-            content_index = get_content_index(pos, order);
-            focus_div = $(Reveal.getSlide(pos, order)).find('.origin').first();
-            change_slide();
-            if (typeof update_matrix_selection === 'function') {
-                update_matrix_selection();
-            }
-        }
-
-        function set_background_slider(value) {
-            var sliderValue = Math.max(0, Math.min(10, Math.round(value)));
-            if ($('#slider').hasClass('ui-slider')) {
-                $('#slider').slider('option', 'value', sliderValue);
-            }
-            $('#custom-handle').text(sliderValue);
-        }
-
-        function show_admin_toast(message, type) {
-            clearTimeout(admin_toast_timer);
-            var toast = $('#admin_toast');
-            toast.stop(true, true)
-                .toggleClass('cancelled', type === 'cancelled')
-                .text(message)
-                .fadeIn(150);
-            admin_toast_timer = setTimeout(function() {
-                toast.fadeOut(250);
-            }, 2500);
-        }
-
-        function finish_background_action(message, type) {
-            $('#edit_btn').hide();
-            a_type = '';
-            if (message) {
-                show_admin_toast(message, type);
-            }
-        }
-
-        function close_background_panel() {
-            $('#edit_btn, #image_bg').hide();
-            a_type = '';
-        }
-
-        function restore_background_preview(showMessage) {
-            bg_brightness = get_slide_background_brightness(slides[pos]);
-            bg_url = slides[pos].style.background || '';
-            set_background_slider(bg_brightness * 10);
-            update_current_bg();
-            if (showMessage) {
-                finish_background_action('Background change has been canceled.', 'cancelled');
-            }
-            else {
-                close_background_panel();
-            }
-        }
 
         function toggle_panel(name) {
             panels = ['image_bg', 'msgbox', 'bible_panel'];
@@ -607,11 +225,6 @@
             // show background images
             toggle_panel('image_bg');
             if ($('#image_bg').is(":visible")) {
-                a_type = 'bg';
-                bg_url = slides[pos].style.background || '';
-                bg_brightness = get_slide_background_brightness(slides[pos]);
-                set_background_slider(bg_brightness * 10);
-                $('#edit_btn').hide();
                 var url = '/API/backgrounds';
                 $.when( $.ajax( url ) ).then(function( response, textStatus, jqXHR ) {
                     var temp = '';
@@ -619,74 +232,33 @@
                         temp += '<img src="' + response[i] + '" title="' + response[i] + '"/>';
                     }
                     $('#image_icons').empty().html(temp);
+                    a_type = 'bg';
                 });
             }
             else {
-                restore_background_preview(false);
+                bg_url = '';
+                a_type = '';
+                $('#edit_btn').hide();
             }
         }
 
         function delete_slide() {
             // Delete current slide
-            pageCollection = false;
-            if (Array.isArray(slides[pos].content) && slides[pos].content.length) {
-                content_index = get_content_index(pos, order);
-                title = slides[pos].content[content_index].name || slides[pos].title || 'Untitled slide';
-                text = 'This will delete the selected page "' + title + '", are you sure?';
-                pageCollection = true;
+            song = false;
+            if (Array.isArray(slides[pos].content)) {
+                title = slides[pos].content[content_index].name;
+                text = 'This will delete the song slide "' + title + '", are you sure?';
+                song = true;
             }
             else {
                 text = 'This will delete the current slide with the title "' + slides[pos].title + '", are you sure?';
             }
             if (confirm(text) == true) {
-                var nextSelection = null;
-                if(pageCollection) {
-                    if (slides[pos].content.length === 1) {
-                        if (slides.length === 1) {
-                            alert('A presentation must contain at least one slide.');
-                            return;
-                        }
-                        slides.splice(pos, 1);
-                        pos = Math.min(pos, slides.length - 1);
-                        order = 0;
-                        nextSelection = {
-                            slide: slides[pos],
-                            horizontalIndex: pos,
-                            verticalIndex: 0,
-                            content: null,
-                            fragmentOffset: 0
-                        };
-                    }
-                    else {
-                        var nextContent = slides[pos].content[content_index + 1] || slides[pos].content[content_index - 1];
-                        slides[pos].content.splice(content_index, 1);
-                        nextSelection = {
-                            slide: slides[pos],
-                            horizontalIndex: pos,
-                            verticalIndex: 0,
-                            content: nextContent,
-                            fragmentOffset: 0
-                        };
-                    }
+                if(song) {
+                    slides[pos].content.splice(order, 1);
                 }
                 else {
-                    if (slides.length === 1) {
-                        alert('A presentation must contain at least one slide.');
-                        return;
-                    }
                     slides.splice(pos, 1);
-                    pos = Math.min(pos, slides.length - 1);
-                    order = 0;
-                    nextSelection = {
-                        slide: slides[pos],
-                        horizontalIndex: pos,
-                        verticalIndex: 0,
-                        content: null,
-                        fragmentOffset: 0
-                    };
-                }
-                if (nextSelection && typeof refresh_admin_preview === 'function') {
-                    refresh_admin_preview(nextSelection);
                 }
                 update_json();
             }
@@ -702,246 +274,58 @@
             }
         }
 
-        function composer_text_to_html(value) {
-            return $('<div>').text(value || '').html().replace(/\r?\n/g, '<br/>');
-        }
-
-        function update_slide_composer_preview() {
-            $('#slide_composer_preview_origin').text($('#slide_composer_origin').val());
-            $('#slide_composer_preview_region').text($('#slide_composer_region').val());
-        }
-
-        function close_slide_composer(showMessage) {
-            var cancelledMode = slide_composer_state ? slide_composer_state.mode : null;
-            slide_composer_state = null;
-            adding_slide = 0;
-            $('#slide_composer').removeClass('is-open');
-            $('#slide_composer_name, #slide_composer_origin, #slide_composer_region').val('');
-            update_slide_composer_preview();
-            if (showMessage && cancelledMode) {
-                show_admin_toast(
-                    cancelledMode === 'column' ?
-                        'New slide creation has been canceled.' :
-                        'New subpage creation has been canceled.',
-                    'cancelled'
-                );
-            }
-        }
-
-        function open_slide_composer(composerMode) {
-            if (adding_slide === 1 || !slides.length) {
-                return;
-            }
-            if (composerMode === 'subpage' && slides[pos].type === 'media') {
-                alert('A subpage cannot be added to a media slide. Add a new slide column instead.');
-                return;
-            }
-            if (typeof AdminSlideMatrix !== 'undefined' && !AdminSlideMatrix.isGeneralView()) {
-                toggle_general_view();
-            }
-
-            slide_composer_state = {
-                mode: composerMode,
-                horizontalIndex: pos,
-                verticalIndex: order
-            };
+        function add_slide() {
+            // Add a slide after the current one
             adding_slide = 1;
+            $('#edit_btn').css('left', $('.reveal').width()-100);
+            $('#edit_btn').show();
+            slide_div = Reveal.getSlide(pos, order);
+            info_div = '<div contenteditable="true" class="info origin">' + origin_text + '</div><div contenteditable="true" class="info region">' + region_text + '</div>'
+            slide_div.children[0].innerHTML = info_div;
 
-            var sourceSlide = slides[pos] || {};
-            var sourceStyle = sourceSlide.style || {};
-            var previewBackground = $('#slide_composer_preview .slide-composer-preview-background');
-            previewBackground.css({
-                'background-image': sourceStyle.background ? 'url("' + sourceStyle.background + '")' : 'none',
-                'filter': 'brightness(' + get_slide_background_brightness(sourceSlide) + ')'
-            });
-            $('#slide_composer_title').text(
-                composerMode === 'column' ? 'Add New Slide (Column)' : 'Add New Subpage (Row)'
-            );
-            $('.slide-composer-name').toggle(composerMode === 'column');
-            $('#slide_composer_name').prop('required', composerMode === 'column');
-            $('#slide_composer_name, #slide_composer_origin, #slide_composer_region').val('');
-            update_slide_composer_preview();
-            $('#slide_composer').addClass('is-open');
-            $(composerMode === 'column' ? '#slide_composer_name' : '#slide_composer_origin').trigger('focus');
-        }
-
-        function create_composer_content() {
-            return {
-                name: slide_composer_state.mode === 'column' ?
-                    $('#slide_composer_name').val().trim() : 'Custom Page',
-                origin_text: composer_text_to_html($('#slide_composer_origin').val()),
-                region_text: composer_text_to_html($('#slide_composer_region').val()),
-                manual: true
-            };
-        }
-
-        function create_custom_slide(content, sourceSlide) {
-            var sourceStyle = sourceSlide && sourceSlide.style ? sourceSlide.style : {};
-            return {
-                id: -1,
-                title: content.name,
-                notes: 'Custom bilingual slide',
-                style: {
-                    align: sourceStyle.align || '',
-                    background: sourceStyle.background || '',
-                    brightness: get_slide_background_brightness(sourceSlide),
-                    opacity: 1,
-                    fragment: 0,
-                    color: sourceStyle.color || ''
-                },
-                author: '',
-                lyricist: '',
-                ccli: '',
-                book: '',
-                copyright: '',
-                key: '',
-                type: 'info',
-                content: [content]
-            };
-        }
-
-        function apply_slide_composer() {
-            if (!slide_composer_state) {
-                return;
-            }
-            var titleValue = $('#slide_composer_name').val().trim();
-            var originValue = $('#slide_composer_origin').val().trim();
-            var regionValue = $('#slide_composer_region').val().trim();
-            if (slide_composer_state.mode === 'column' &&
-                    (!titleValue || (!originValue && !regionValue))) {
-                alert('Enter title and Chinese, English, or both before applying.');
-                return;
-            }
-            if (slide_composer_state.mode === 'subpage' && !originValue && !regionValue) {
-                alert('Enter Chinese, English, or both before applying.');
-                return;
-            }
-
-            var state = slide_composer_state;
-            var content = create_composer_content();
-            var originalSlide = slides[state.horizontalIndex];
-            var selection = {
-                slide: originalSlide,
-                horizontalIndex: state.horizontalIndex,
-                verticalIndex: state.verticalIndex,
-                content: null,
-                fragmentOffset: 0
-            };
-            if (state.mode === 'column') {
-                var newSlide = create_custom_slide(content, slides[state.horizontalIndex]);
-                var newHorizontalIndex = state.horizontalIndex + 1;
-                slides.splice(newHorizontalIndex, 0, newSlide);
-            }
-            else {
-                var targetSlide = slides[state.horizontalIndex];
-                if (!Array.isArray(targetSlide.content)) {
-                    var legacyContent = targetSlide.content || {};
-                    targetSlide.content = [{
-                        name: 'Information',
-                        origin_text: legacyContent.origin_text || '',
-                        region_text: legacyContent.region_text || ''
-                    }];
+            $(".info.origin").click(function() {
+                if($(this).html() == origin_text) {
+                    $(this).html('');
                 }
-                var selectedContentIndex = get_content_index(state.horizontalIndex, state.verticalIndex);
-                selectedContentIndex = Math.max(0, Math.min(selectedContentIndex, targetSlide.content.length - 1));
-                targetSlide.content.splice(selectedContentIndex + 1, 0, content);
-            }
-
-            pos = state.horizontalIndex;
-            order = state.verticalIndex;
-
-            close_slide_composer(false);
-            refresh_admin_preview(selection);
-            show_admin_toast(
-                state.mode === 'column' ?
-                    'New slide has been created.' :
-                    'New subpage has been created.',
-                'applied'
-            );
-            update_json();
+            });
+            $(".info.region").click(function() {
+                if($(this).html() == region_text) {
+                    $(this).html('');
+                }
+            });
+            $(".info.origin").focusout(function() {
+                if($(this).html() == '' && $(this).html != origin_text) {
+                    $(this).html(origin_text);
+                }
+            });
+            $(".info.region").focusout(function() {
+                if($(this).html() == '' && $(this).html != region_text) {
+                    $(this).html(region_text);
+                }
+            });
+            a_type = 'info';
+            console.log(pos, order, w_id);
         }
 
-        function send_msg(data, targetMode='view') {
+        function send_msg(data, mode='view') {
             // Broadcast Message to View
-            socket.emit('control', {
-                'type': 'msg',
-                'value': data,
-                'mode': targetMode,
-                'from': mode
-            });
+            socket.emit('control', {'type': 'msg', 'value': data, 'mode': mode});
         }
-
-        function sync_admin_live_position() {
-            if (admin_navigation_mode !== 'live') {
-                return;
-            }
-            socket.emit('control', {
-                'type': 'pos',
-                'value': [pos, order],
-                'from': 'admin',
-                'live_sync': true
-            });
-        }
-
-        function align_live_mode_to_lead() {
-            socket.emit('sync_live_mode');
-        }
-
-        function set_admin_navigation_mode(nextMode, announce) {
-            if (nextMode !== 'live' && nextMode !== 'edit') {
-                return;
-            }
-            admin_navigation_mode = nextMode;
-            $('.menu').toggleClass('is-live-mode', nextMode === 'live');
-            $('#admin_mode_switch button').each(function() {
-                var isActive = $(this).data('admin-mode') === nextMode;
-                $(this).toggleClass('is-active', isActive);
-                $(this).attr('aria-pressed', isActive ? 'true' : 'false');
-            });
-            $('#admin_mode_status').text(
-                nextMode === 'live' ?
-                    'Live Mode — All 3 are synchronized.' :
-                    'Edit Mode — Admin navigation is local.'
-            );
-            if (nextMode === 'live') {
-                if ($('#image_bg').is(':visible') && slides[pos]) {
-                    restore_background_preview(false);
-                }
-                else {
-                    close_background_panel();
-                }
-                $('#bible_panel').hide();
-                align_live_mode_to_lead();
-            }
-            if (announce !== false) {
-                show_admin_toast(
-                    nextMode === 'live' ?
-                        'Live Mode enabled. All 3 are synchronized.' :
-                        'Edit Mode enabled. Admin navigation is local.',
-                    nextMode === 'live' ? 'applied' : 'cancelled'
-                );
-            }
-        }
-
-        $(document).on('click', '#admin_mode_switch button', function() {
-            set_admin_navigation_mode($(this).data('admin-mode'), true);
-        });
 
         // Document ready events
         $(document).ready(function() {
-		set_admin_navigation_mode('edit', false);
-		load_slides();    // Populate the deck before Reveal binds its controls
-		Reveal.initialize({
+            // Init Reveal
+    		Reveal.initialize({
 	    		embedded: true,
 	    		loop: true,
 	    		hash: false,
-			    overview: false,
 			    slideNumber: true,
 			    navigationMode: "default",
 			    progress: false
-		});
+    		});
+    		load_slides();    // Load slides
 
-             // init slider for brightness control
+             // init slider for opacity control
              var handle = $( "#custom-handle" );
             $( "#slider" ).slider({
                 range: 'max',
@@ -953,30 +337,10 @@
                 },
                 slide: function( event, ui ) {
                     handle.text( ui.value );
-                    bg_brightness = ui.value/10;
+                    bg_opacity = ui.value/10;
                     update_current_bg();
                 }
             });
-        });
-
-        $(document).on('input', '#slide_composer_origin, #slide_composer_region', function() {
-            update_slide_composer_preview();
-        });
-
-        $('#slide_composer_apply').on('click', function() {
-            apply_slide_composer();
-        });
-
-        $('#slide_composer_cancel').on('click', function() {
-            close_slide_composer(true);
-        });
-
-        $(document).on('keydown', function(event) {
-            if (event.key === 'Escape' && $('#slide_composer').hasClass('is-open')) {
-                event.preventDefault();
-                event.stopImmediatePropagation();
-                close_slide_composer(true);
-            }
         });
 
         $('div').on('focus', '[contenteditable]', function() {
@@ -1030,7 +394,7 @@
             new_data = new_data.join('<br/>');
 
             if(element_class.indexOf('origin')>0) {
-                if(Array.isArray(slides[pos].content)) {
+                if(element_class.indexOf('song')>=0) {
                     slides[pos].content[order_num].origin_text = new_data;
                 }
                 else {
@@ -1038,7 +402,7 @@
                 }
             }
             else if(element_class.indexOf('region')>0) {
-                if(Array.isArray(slides[pos].content)) {
+                if(element_class.indexOf('song')>=0) {
                     slides[pos].content[order_num].region_text = new_data;
                 }
                 else {
@@ -1084,90 +448,86 @@
 
         $(document).on('click', '#image_icons img', function() {
             // Get slide background and replace with the clicked one
-            set_background_slider(10);
-            bg_brightness = 1;
+            $( "#custom-handle" ).text(10);
+            $( "#slider" ).slider( "option", "value", 10 );
+            bg_opacity = 1;
             bg_url = this.title;
             update_current_bg();
+            $('#edit_btn').css('left', $('.reveal').width()-100);
             $('#edit_btn').show();
             a_type = 'bg';
         });
 
         function update_current_bg() {
-            if (typeof update_matrix_background_preview === 'function') {
-                update_matrix_background_preview(pos, bg_url, bg_brightness);
-            }
             slide_bg = Reveal.getSlideBackground(pos, order);
-            if (!slide_bg || !slide_bg.children.length) {
-                return;
-            }
-            var backgroundContent = slide_bg.children[0];
-            backgroundContent.style.opacity = '1';
-            backgroundContent.style.filter = 'brightness(' + bg_brightness + ')';
-            backgroundContent.style.backgroundImage = bg_url ? 'url("' + bg_url + '")' : 'none';
+            slide_bg.children[0].setAttribute('style', 'opacity: ' + bg_opacity + '; background-image: url("' + bg_url + '")');
         }
 
         function cancel() {
-            var cancelledType = a_type;
-            if (cancelledType == 'bg') {
-                restore_background_preview(true);
-                return;
+            if (adding_slide == 1) {
+                load_slides();
+                Reveal.slide(pos, order);
             }
-            finish_background_action('', 'cancelled');
+            else {
+                bg_opacity = slides[pos].style.opacity;
+                bg_url = slides[pos].style.background;
+                $( "#custom-handle" ).text(10);
+                update_current_bg();
+            }
+            $('#edit_btn').hide();
         }
 
         function apply(name) {
-            var appliedBackground = a_type == 'bg';
-            if (appliedBackground) {
+            if (a_type == 'bg') {
                 if (name == 'all') {
                     for(var i=0;i<slides.length;i++) {
                         slides[i].style.background = bg_url;
-                        slides[i].style.brightness = bg_brightness;
-                        slides[i].style.opacity = 1;
+                        slides[i].style.opacity = bg_opacity;
                     }
                 }
                 else {
                     slides[pos].style.background = bg_url;
-                    slides[pos].style.brightness = bg_brightness;
-                    slides[pos].style.opacity = 1;
+                    slides[pos].style.opacity = bg_opacity;
                 }
             }
-            if (appliedBackground) {
-                finish_background_action('', 'applied');
-                update_json(false, {
-                    success: function() {
-                        show_admin_toast('Background change has been applied.', 'applied');
-                    },
-                    error: function() {
-                        show_admin_toast('Background change could not be applied.', 'cancelled');
-                    }
-                });
-                return;
+            else if (a_type == 'info') {
+                origin = $('.info.origin').html();
+                region = $('.info.region').html();
+                if ((origin == '' || origin == origin_text) && (region == '' || region == region_text)) {
+                    alert("No information is entered!!");
+                    return false;
+                }
+                else {
+                    info = {"alt_sequence": "", "author": "", "style": {"align": "", "background": "", "opacity": 1, "fragment": 4, "color": ""}, "bible": "", "book": "", "ccli": "", "content": {"origin_text": origin, "region_text": region}, "copyright": "", "date": "", "id": 115, "key": "", "lang": "", "lang_2": "", "lyricist": "", "lyrics_raw": "", "notes": "歡迎報告", "score": "", "sequence": "", "title": "Information", "transpose": "0", "type": "info", "version": "", "video": ""};
+                    slides.splice(pos+1, 0, info);
+                    $('#edit_btn').hide();
+                    adding_slide = 0;
+                }
             }
-            finish_background_action('', 'applied');
+            a_type = '';
             update_json();
         }
 
         $("#add_link").click(function() {
-            if (!focus_div || !focus_div.length || (!focus_div.hasClass('origin') && !focus_div.hasClass('region'))) {
-                focus_div = $(Reveal.getSlide(pos, order)).find('.origin').first();
-            }
-            if (!focus_div.length) {
-                alert('The selected page does not contain editable text.');
-                return;
-            }
             link = prompt('Enter the link to current slide');
             if(link) {
                 link = '&nbsp;<a href="' + link + '" data-preview-link>Click</a>';
                 adding_slide = 0;
                 html = focus_div.html();
                 focus_div.html(html + link);
-                focus_div.trigger('change');
+                if(focus_div.attr('class').indexOf('origin')>0) {
+                    slides[pos].content.origin_text = focus_div.html();
+                }
+                else if(focus_div.attr('class').indexOf('region')>0) {
+                    slides[pos].content.region_text = focus_div.html();
+                }
+                update_json();
             }
 
         });
 
         // Control icons click events
-        $(document).on('click', '#control_panel i, #edit_btn i', function() {
+        $("#control_panel i").click(function() {
             name = $(this).attr('name');
             switch(name) {
                 case '0':
@@ -1175,10 +535,7 @@
                     save_slides();
                     break;
                 case '1':
-                    open_slide_composer('column');
-                    break;
-                case 'subpage':
-                    open_slide_composer('subpage');
+                    add_slide();
                     break;
                 case '2':
                     add_media_slide();
@@ -1199,13 +556,7 @@
                     window.open('/worship/'+w_id+'?json=true', '_blank');
                     break;
                 case '8':
-                    window.open(
-                        '/slides/view?h=' + encodeURIComponent(pos) + '&v=' + encodeURIComponent(order),
-                        '_blank'
-                    );
-                    break;
-                case 'matrix':
-                    toggle_general_view();
+                    window.open('/slides/view', '_blank');
                     break;
                 case 'one':
                     apply('one');
@@ -1225,30 +576,29 @@
             update_json();
         });
 
-        Reveal.on('ready', () => {
-            apply_background_brightness();
-            Reveal.slide(pos, order);
-        });
-
         Reveal.on('slidechanged', (event) => {
-            pos = event.indexh;
-            order = event.indexv;
-            content_index = get_content_index(pos, order);
-            focus_div = $(event.currentSlide).find('.origin').first();
             if(slide_refreshed) {            // slide refreshed by socket, reset flag
                 slide_refreshed = false;
-                change_slide();
-                if (typeof update_matrix_selection === 'function') {
-                    update_matrix_selection();
-                }
                 return true;
             }
+            pos = event.indexh;
+            order = event.indexv;
+            pre = $(event.previousSlide).children().attr('name');
+            cur = $(event.currentSlide).children().attr('name');
             change_slide();
-            if (typeof update_matrix_selection === 'function') {
-                update_matrix_selection();
+
+            if (order == 0) {
+                content_index = 0;
+            }
+            if(order>0&&pre!=cur) {
+                // maintain content_index in order to delete corresponding sequence
+                content_index ++;
+            }
+            if(adding_slide==1) {
+                load_slides();
             }
             console.log("slide changed", pos, order, content_index);
-            sync_admin_live_position();
+            socket.emit('control', {'type': 'pos', 'value': [pos, order], 'from': 'admin'});
         });
 </script>
 {% endblock %}

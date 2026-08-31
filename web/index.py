@@ -63,38 +63,16 @@ def reload_json():
 	if __get_slide_json():
 		emit('reload', slides_data, broadcast=True)
 
-@socketio.on('sync_live_mode')
-def sync_live_mode():
-	# Lead is the source of truth when Admin first enters Live Mode. View
-	# navigation is local, so the shared position remains Lead's position.
-	response = dict(slides_data)
-	response['control_type'] = 'pos'
-	response['target_mode'] = ''
-	response['live_sync'] = True
-	response['from'] = 'lead'
-	emit('response', response, broadcast=True)
-
 @socketio.on('control')
 def handle_control(data):
 	print('Received message:', data)
-	# Edit Mode keeps Admin navigation local. Live Mode marks its position
-	# updates explicitly so those events can move both Lead and View.
-	if (data.get('type') == 'pos' and data.get('from') == 'admin' and
-			not data.get('live_sync')):
-		return
 	if data['type'] == 'pos': # When data is about position change, empty dynamic
 		slides_data['dynamic'] = ''
 		if slides_data['pos'][0] != data['value'][0]: # When pos is different (new slide), change key to 0
 			slides_data['key'] = 0
 	slides_data[data['type']] = data['value']
-	# Older admin pages did not include "from" for broadcast messages. An empty
-	# source still tells every connected display to process the live update.
-	slides_data['from'] = data.get('from', '')
-	response = dict(slides_data)
-	response['control_type'] = data['type']
-	response['target_mode'] = data.get('mode', '')
-	response['live_sync'] = bool(data.get('live_sync'))
-	emit('response', response, broadcast=True)
+	slides_data['from'] = data['from']
+	emit('response', slides_data, broadcast=True)
 
 @socketio.on('msg')
 def handle_announcement(data):

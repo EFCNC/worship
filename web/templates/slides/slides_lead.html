@@ -146,7 +146,7 @@
 </body>
 <script>
     mode = 'lead';                 // Set mode to lead
-    presentation = {{ presentation|tojson }};
+    presentation = {{ presentation|safe }};
     slides = presentation['data'];
     setting = presentation['setting'];
     pos = presentation['pos'][0];
@@ -207,7 +207,6 @@
 
     Reveal.on('ready', (event) => {
         // Move slide to current pos and order when it's ready
-        apply_background_brightness();
         Reveal.slide(pos, order);
     });
 
