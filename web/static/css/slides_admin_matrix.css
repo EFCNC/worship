@@ -1,0 +1,218 @@
+.slide-matrix[hidden],
+.slide-viewport > .reveal[hidden] {
+    display: none !important;
+}
+
+.slide-matrix {
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    padding: 18px;
+    color: #f7f3ff;
+    background: #17131d;
+    scrollbar-gutter: stable both-edges;
+}
+
+.slide-matrix-columns {
+    display: flex;
+    align-items: flex-start;
+    gap: 18px;
+    width: max-content;
+    min-width: 100%;
+    min-height: 100%;
+}
+
+.slide-matrix-column {
+    flex: 0 0 250px;
+    box-sizing: border-box;
+    padding: 8px;
+    border: 1px solid #4e4658;
+    border-radius: 8px;
+    background: #25202d;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.matrix-column-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    min-height: 32px;
+    margin-bottom: 8px;
+    padding: 0 6px;
+    border-radius: 4px;
+    cursor: grab;
+    user-select: none;
+}
+
+.matrix-column-header:hover {
+    background: #000;
+}
+
+.matrix-column-header:active {
+    cursor: grabbing;
+}
+
+.matrix-column-title {
+    overflow: hidden;
+    min-width: 0;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.25;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.slide-matrix-pages,
+.matrix-page-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.matrix-page-group {
+    position: relative;
+    padding-left: 0;
+}
+
+.matrix-thumbnail {
+    box-sizing: border-box;
+    width: 234px;
+    padding: 3px;
+    border: 2px solid transparent;
+    border-radius: 6px;
+    outline: none;
+    background: #0c0a10;
+    cursor: pointer;
+    user-select: none;
+    transition: border-color 120ms ease, box-shadow 120ms ease, transform 120ms ease;
+}
+
+.matrix-thumbnail:hover {
+    border-color: var(--primary-color);
+    transform: translateY(-1px);
+}
+
+.matrix-thumbnail:focus-visible {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px #20162e, 0 0 0 5px var(--primary-color);
+}
+
+.matrix-thumbnail.is-selected {
+    border-color: var(--primary-color);
+    background: #3d2358;
+    box-shadow: 0 0 0 2px var(--primary-color), 0 0 18px rgba(130, 111, 238, 0.62);
+}
+
+.matrix-thumbnail-stage {
+    position: relative;
+    width: 224px;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border-radius: 3px;
+    background: #000;
+    pointer-events: none;
+}
+
+.matrix-thumbnail-background,
+.matrix-thumbnail-canvas {
+    position: absolute;
+    inset: 0;
+}
+
+.matrix-thumbnail-background {
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+.matrix-thumbnail-canvas {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    width: 960px;
+    height: 540px;
+    padding: 32px;
+    overflow: hidden;
+    transform: scale(0.2333333);
+    transform-origin: top left;
+    color: #fff;
+    text-align: center;
+}
+
+.matrix-thumbnail-canvas .lyrics {
+    font-size: 42px;
+    line-height: 1.2;
+}
+
+.matrix-thumbnail-canvas .info {
+    width: 100%;
+    font-size: 36px;
+    line-height: 1.2;
+}
+
+.matrix-thumbnail-canvas .region,
+.matrix-thumbnail-canvas .song.region {
+    color: #ffd800;
+}
+
+.matrix-media-label {
+    max-width: 90%;
+    overflow: hidden;
+    color: #ded4e8;
+    font-size: 36px;
+    line-height: 1.35;
+    text-overflow: ellipsis;
+    white-space: pre-line;
+}
+
+.matrix-thumbnail-badge {
+    position: absolute;
+    right: 6px;
+    bottom: 6px;
+    padding: 3px 6px;
+    border-radius: 10px;
+    color: #fff;
+    background: rgba(0, 0, 0, 0.72);
+    font: 600 11px/1 sans-serif;
+}
+
+.matrix-column-placeholder {
+    flex: 0 0 250px;
+    box-sizing: border-box;
+    min-height: 180px;
+    border: 2px dashed var(--primary-color);
+    border-radius: 8px;
+    background: rgba(178, 108, 255, 0.15);
+}
+
+.slide-matrix.is-dragging .matrix-thumbnail {
+    cursor: grabbing;
+}
+
+.slide-matrix .ui-sortable-helper {
+    opacity: 0.82;
+    transform: rotate(1deg);
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.5);
+}
+
+.slide-matrix.matrix-saving::after {
+    position: sticky;
+    right: 12px;
+    bottom: 12px;
+    float: right;
+    padding: 7px 10px;
+    border-radius: 12px;
+    content: 'Saving order…';
+    color: #fff;
+    background: rgba(70, 43, 97, 0.92);
+    font-size: 12px;
+}
+
+#general_view_btn.active {
+    color: #fff;
+    background: #000;
+}

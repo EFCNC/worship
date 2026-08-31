@@ -183,8 +183,47 @@
         }
     }
 
+    function get_slide_background_brightness(slide) {
+        let style = slide && slide.style ? slide.style : {};
+        let brightness = Number(style.brightness);
+        if (!Number.isFinite(brightness)) {
+            brightness = Number(style.opacity);
+        }
+        if (!Number.isFinite(brightness)) {
+            brightness = 1;
+        }
+        return Math.max(0, Math.min(1, brightness));
+    }
+
+    function apply_background_brightness() {
+        if (typeof Reveal === 'undefined' || !slides.length) {
+            return;
+        }
+        slides.forEach(function(slide, horizontalIndex) {
+            let root = document.querySelector('.reveal .slides > section:nth-child(' + (horizontalIndex + 1) + ')');
+            let verticalCount = root ? Array.from(root.children).filter(function(child) {
+                return child.tagName === 'SECTION';
+            }).length : 0;
+            verticalCount = Math.max(1, verticalCount);
+            for (let verticalIndex = 0; verticalIndex < verticalCount; verticalIndex++) {
+                let background = Reveal.getSlideBackground(horizontalIndex, verticalIndex);
+                let backgroundContent = background && background.children ? background.children[0] : null;
+                if (backgroundContent) {
+                    backgroundContent.style.opacity = '1';
+                    backgroundContent.style.filter = 'brightness(' + get_slide_background_brightness(slide) + ')';
+                }
+            }
+        });
+    }
+
     function load_slides() {
         $('.slides').empty();
+        if (!slides.length) {
+            $('#slide_title, #slide_notes').empty();
+            document.dispatchEvent(new CustomEvent('presentation:slides-loaded'));
+            return;
+        }
+        pos = Math.max(0, Math.min(pos, slides.length - 1));
         $('#slide_title').html(slides[pos].title);
         $('#slide_notes').html(slides[pos].notes);
         for(var i=0;i<slides.length;i++) {
@@ -192,12 +231,26 @@
             bg_url = data.style.background;
             let section = document.createElement('section');
             if (bg_url) {
-                bg_opacity = data.style.opacity
                 section.setAttribute('data-background-image', bg_url);
-                section.setAttribute('data-background-opacity', bg_opacity);
+                section.setAttribute('data-background-opacity', 1);
+                section.setAttribute('data-background-brightness', get_slide_background_brightness(data));
             }
             fragment = data.style.fragment;
             if(data.type == 'info') {
+                if (Array.isArray(data.content)) {
+                    data.content.forEach(function(content, contentIndex) {
+                        let sub_section = document.createElement('section');
+                        sub_section.append(create_view(
+                            data.type,
+                            content.origin_text || '',
+                            content.region_text || '',
+                            content.name || 'info'
+                        ));
+                        sub_section.setAttribute('order', contentIndex);
+                        section.append(sub_section);
+                    });
+                }
+                else {
                 // SETTING: Tune these numbers based on your presentation font size!
                 //let max_lines_per_slide = 5;
                 let max_chars_per_slide = 120; 
@@ -256,11 +309,19 @@
                         sub_section.append(create_view(data.type, o_html, r_html, 'info'));
                         section.append(sub_section);
                     }
+                }
             }
 		    else if (data.type == 'song') {
 			    for(var j=0;j<data.content.length;j++) {
 			        s_name = data.content[j].name;
-			        if (fragment > 0) {
+			        if (data.content[j].manual === true) {
+			            let sub_section = document.createElement('section');
+                        sub_section.classList.add('top-align');
+			            sub_section.append(create_view(data.type, data.content[j].origin_text || '', data.content[j].region_text || '', s_name));
+                        sub_section.setAttribute('order', j);
+                        section.append(sub_section);
+			        }
+			        else if (fragment > 0) {
 			            origin_ = data.content[j].origin_text.split(/<br\/?>/).filter(n => n);
 			            region_ = data.content[j].region_text.split(/<br\/?>/).filter(n => n);
 			            while(origin_.length>0) {
@@ -288,19 +349,27 @@
 		    }
     		$('.slides').append(section);
     	}
+        document.dispatchEvent(new CustomEvent('presentation:slides-loaded'));
     }
 
-    function update_json(download) {
-    $('#loading').show();
-    data = JSON.stringify({"setting": setting, "slides": slides});
-        $.ajax({
+    function update_json(download, callbacks) {
+        callbacks = callbacks || {};
+        $('#loading').show();
+        if (mode === 'admin' && typeof refresh_admin_preview === 'function') {
+            refresh_admin_preview();
+        }
+        var jsonData = JSON.stringify({"setting": setting, "slides": slides});
+        return $.ajax({
             type: "post",
             url: "/API/worship/" + w_id + "/json",
-            data: data,
+            data: jsonData,
             contentType: "application/json",
             dataType: 'json',
             complete: function(response) {
                 if(response.status==200) {
+                    if (callbacks.success) {
+                        callbacks.success(response);
+                    }
                     if(download) {
                         window.location = '/API/download?file=' + response.responseText;
                     }
@@ -308,9 +377,12 @@
                         socket.emit('reload');
                     }
                 }
+                else if (callbacks.error) {
+                    callbacks.error(response);
+                }
+                $('#loading').hide();
             }
         });
-        $('#loading').hide();
     }
 
 
@@ -325,15 +397,37 @@
         console.log('Admin reload json data', slides);
         w_id = presentation['id'];
         adding_slide = 0;
+        pos = Math.max(0, Math.min(pos, Math.max(0, slides.length - 1)));
 
         // When reload is broadcast, load the slide from the data and sync it before move to current pos and order
         load_slides();
         Reveal.sync();
+        apply_background_brightness();
         Reveal.slide(pos, order);
         change_slide();
     });
 
     socket.on('response', function (data) {
+        if (data.control_type === 'msg') {
+            msg = data.msg;
+            if (!data.target_mode || data.target_mode === mode) {
+                show_msg();
+            }
+            return;
+        }
+        if (data.target_mode && data.target_mode !== mode) {
+            return;
+        }
+        if (data.control_type === 'pos' && mode === 'admin' &&
+                data.from === 'lead' &&
+                typeof admin_navigation_mode !== 'undefined' &&
+                admin_navigation_mode !== 'live') {
+            return;
+        }
+        if (data.control_type === 'pos' && mode === 'view' &&
+                data.from === 'admin' && !data.live_sync) {
+            return;
+        }
         pos = data.pos[0];
         order = data.pos[1];
         msg = data.msg;
@@ -343,7 +437,9 @@
         key_change = data.key;
         console.log('Server sent: pos:', pos, 'order', order, 'msg:', msg, 'key:', key_change, 'dynamic:', dynamic, 'from:', from);
         if (from!= mode) {
-            slide_refreshed = true;
+            var currentIndices = Reveal.getIndices();
+            slide_refreshed = currentIndices.h !== pos ||
+                (Number.isInteger(currentIndices.v) ? currentIndices.v : 0) !== order;
             Reveal.slide(pos, order);
             change_slide();
         }

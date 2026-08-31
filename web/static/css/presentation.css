@@ -71,7 +71,7 @@ z-index: 10; /* Ensure they stay above the slides */
 }
 #slide_notes {
     color: #fff;
-    width: 300px;
+    /* width: 300px; */
     word-wrap: break-word;
     }
 
@@ -89,6 +89,7 @@ z-index: 10; /* Ensure they stay above the slides */
 
 .notes {
     text-align: left;
+    white-space: pre-wrap;
 }
 
 .inner.current {
