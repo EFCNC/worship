@@ -269,8 +269,7 @@ function add_song_to_worship(worship_list) {
     var top_ul = document.createElement('ul');
     top_ul.setAttribute('id', 'songs');
     var i = 0;
-    for (data of songs_temp) {
-        console.log('data', data);
+    for (let data of songs_temp) {
         var list = generate_song_card(data, i);
         top_ul.append(list);
         i++;
@@ -400,9 +399,9 @@ function submit_song(url, data) {
 }
 
 function data_changed(map2) {
-    temp = [];
+    let temp = [];
     for (let i of form_data) {
-        find = map2.find(o=> o.value != i.value && o.name == i.name)
+        let find = map2.find(o=> o.value != i.value && o.name == i.name)
         if(find) {temp.push(find)}
     }
     return temp;
