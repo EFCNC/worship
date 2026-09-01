@@ -644,6 +644,18 @@
         });
     }
 
+    function checkSequenceEmptyState($container) {
+        let hasItems = $container.children('.lyric-item').not('.empty-sequence-state').length > 0;
+        
+        if (!hasItems) {
+            if ($container.children('.empty-sequence-state').length === 0) {
+                $container.append('<li class="empty-sequence-state" style="grid-column: 1 / -1; padding: 20px; text-align: center; color: #666; font-style: italic; background: #f5f5f5; border: 1px dashed #ccc; border-radius: 5px; list-style: none;">No sequence added yet! Click a quick add button to start.</li>');
+            }
+        } else {
+            $container.children('.empty-sequence-state').remove();
+        }
+    }
+
     function save_worship_notes() {
         let sermonData = {
             date: worship_data.date,
@@ -798,11 +810,11 @@
 
             create: function( event, ui ) {
                 //is_changed($(this).sortable('toArray', {attribute: 'name'}));
-                update_alt($(this).sortable('toArray'));
+                update_alt($(this).sortable('toArray'), $(this).attr('id'));
             },
             update: function(event, ui) {
                 //is_changed($(this).sortable('toArray', {attribute: 'name'}));
-                update_alt($(this).sortable('toArray'));
+                update_alt($(this).sortable('toArray'), $(this).attr('id'));
                 checkActionButtons();
             }
         });
@@ -934,28 +946,36 @@
 
     // When remove_sequence_btn is clicked
     $(document).on('click', '.remove_sequence_btn', function () {
+        let $container = $(this).closest('.lyrics');
         $(this).closest('li').remove();
+
+        checkSequenceEmptyState($container);
 
         $(".lyrics").sortable( "destroy" );
         init();
         checkActionButtons();
     });
    
-    // update alt sequence which will be saved onto song_set table
-    function update_alt(alt) {
-        ids = []
+    function update_alt(alt, listId) {
+        let ids = [];
         $.each(alt, function() {
-            temp = this.split('_');
-            base = temp[0];
-            ids.push(temp[1])
+            // Exclude the empty state placeholder if picked up by sortable
+            if (this && this !== 'empty-sequence-state') {
+                let temp = this.split('_');
+                if (temp.length > 1) ids.push(temp[1]);
+            }
         });
-        id = base.split('-')[1]
-        ids = ids.join(',')
-        $('#'+base+'_alt').html(ids);
-        for (song of songs_temp) {
-            if (song.id == id) {
-               song.alt_sequence = ids;
-                break;
+        
+        // Extract song ID from the ul id (e.g., "sequence_123" -> "123")
+        let songId = listId.split('_')[1];
+        let sequenceStr = ids.join(',');
+        
+        $('#song-' + songId + '_alt').html(sequenceStr);
+        
+        for (let song of songs_temp) {
+            if (song.id == songId) {
+            song.alt_sequence = sequenceStr;
+            break;
             }
         }
     }
