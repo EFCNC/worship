@@ -280,45 +280,15 @@ function add_song_to_worship(worship_list) {
 
 // Validate form values
 function validate_form(data) {
-    // Have to use content instead of lyrics field right now. content is what the API accepts for changes to the lyrics
-
-    // Sequence can not be empty
+    // Sequence cannot be empty
     if (!data.sequence || data.sequence.trim() === '') {
         alert("Sequence needs a value!");
         return false;
     }
 
-    // Lyrics can not be empty
-    if (!data.content || data.content.trim() === '') {
+    // Lyrics cannot be empty (now checking array length)
+    if (!data.content || (Array.isArray(data.content) && data.content.length === 0)) {
         alert("Are there... lyrics? The editor seems empty.");
-        return false;
-    }
-
-    // Check for paired tags (e.g., <chorus>...</chorus>)
-    // We temporarily rename numeric tags so the browser's DOM parser doesn't get confused
-    const tagCompatibilityCheck = data.content.replace(/(<\/?)(\d)+(>)/g, '$1temp$2$3');
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = tagCompatibilityCheck;
-    
-    if (tempDiv.innerHTML !== tagCompatibilityCheck) {
-        alert("Tag mismatch! Ensure all tags are paired correctly (e.g., <1>...</1> or <chorus>...</chorus>).");
-        return false;
-    }
-
-    // Check for duplicated section tags
-    const tags = data.content.match(/<\/?[^>]+>/g) || [];
-    const duplicates = tags.filter((item, index) => tags.indexOf(item) !== index);
-    
-    if (duplicates.length > 0) {
-        alert("Duplicated sequence tags found: " + [...new Set(duplicates)].join(', '));
-        return false;
-    }
-
-    // Check for malformed chord brackets [C [D]
-    const malformedPattern = /\[[^\]]+\[/g;
-    const malformedMatch = data.content.match(malformedPattern);
-    if (malformedMatch) {
-        alert("Check your chord brackets. It looks like some aren't closed properly: " + malformedMatch);
         return false;
     }
 
