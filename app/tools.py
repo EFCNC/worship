@@ -1,4 +1,5 @@
 from app import utils as Utils
+from app import db as dB
 import re
 import os
 import stat
@@ -383,3 +384,66 @@ def match_bible_books(book):
             return short_name.index(book.upper())
     else:
         return full_name.index((book.upper()))
+
+def update_table(old):
+    for r in old:
+        print(str(r['content']))
+        sql = "update songs set content=? where song_id=?"
+        dB.run_para(sql, [str(r['content']), r['id']])
+
+def get_lyrics_json(content, lang, lang_2=None):
+    region = re.findall('\[region\s2\][^<]*', content)
+    content = re.sub('\[region\s2\][^<]*', '', content)
+    lyrics = re.findall('<([0-9a-zA-Z\-]+)>([^<]+)<\/[0-9a-zA-Z\-]+>', content)
+    verse = []
+    bridge = []
+    pre_chorus = []
+    chorus = []
+    verse1 = []
+    bridge1 = []
+    pre_chorus1 = []
+    chorus1 = []
+    r = 0
+    for l in lyrics:
+        if l[0] == 'verse' or re.match('\d', l[0]):
+            verse.append(l[1])
+            if region:
+                try:
+                    verse1.append(region[r].replace('[region 2]', ''))
+                except Exception as e:
+                    pass
+        elif l[0] == 'chorus':
+            chorus.append(l[1])
+            if region:
+                try:
+                    chorus1.append(region[r].replace('[region 2]', ''))
+                except Exception as e:
+                    pass
+        elif l[0] == 'bridge':
+            bridge.append(l[1])
+            if region:
+                try:
+                    bridge1.append(region[r].replace('[region 2]', ''))
+                except Exception as e:
+                    pass
+        elif l[0] == 'pre-chorus':
+            pre_chorus.append(l[1])
+            if region:
+                try:
+                    pre_chorus1.append(region[r].replace('[region 2]', ''))
+                except Exception as e:
+                    pass
+        r += 1
+    return dict(lang=lang, verse=verse, chorus=chorus, bridge=bridge, pre_chorus=pre_chorus), dict(lang=lang_2, verse=verse1, chorus=chorus1, bridge=bridge1, pre_chorus=pre_chorus1)
+
+def convert_songs():
+    sql = "select s.title, s.author, s.lang, s.lang_2, s.song_key, s.sequence, s.bible_verse, s.lyricist, s.book, s.copyright, s.ccli, s.content, s.song_id as id from songs s order by s.song_id"
+    result = dB.run(sql)
+    songs = []
+    for r in result:
+        l1, l2 = get_lyrics_json(r[11], r[2], r[3])
+        if r[3]:
+            songs.append({'id': r[12], 'content': json.dumps(dict(origin=l1, region=[l2]))})
+        else:
+            songs.append({'id': r[12], 'content': json.dumps(dict(origin=l1, region=[]))})
+    update_table(songs)

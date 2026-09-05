@@ -283,13 +283,13 @@
         <div class="lyrics-split-container">
             <div class="form-group">
                 <label style="color: #3182ce; display: flex; align-items: center; gap: 5px;">
-                    <span>🔵</span> Primary Language
+                    <span>🔵</span> Primary Language <span id="lang_origin"></span>
                 </label>
                 <textarea id="lyrics_lang1" class="lyrics-area" spellcheck="false"></textarea>
             </div>
             <div class="form-group">
                 <label style="color: #805ad5; display: flex; align-items: center; gap: 5px;">
-                    <span>🟣</span> Translation
+                    <span>🟣</span> Translation <span id="lang_region"></span>
                 </label>
                 <textarea id="lyrics_lang2" class="lyrics-area" spellcheck="false"></textarea>
             </div>
@@ -480,64 +480,80 @@
     
     // --- Pulling and Loading Lyrics from Database ---
     function loadAndSplitLyrics() {
-        const rawContent = (originalData.lyrics || "").trim();
-        if (!rawContent) return;
-
-        let lang1Result = "";
-        let lang2Result = "";
-
-        const sectionRegex = /<([^>]+)>([\s\S]*?)<\/\1>/g;
-        let match;
-
-        while ((match = sectionRegex.exec(rawContent)) !== null) {
-            const tagName = match[1];
-            const innerContent = match[2];
-
-            let p1 = innerContent;
-            let p2 = "";
-
-            if (innerContent.includes('[region 2]')) {
-                const parts = innerContent.split('[region 2]');
-                p1 = parts[0].trim();
-                p2 = parts[1].trim();
+        if (!originalData.content || !Array.isArray(originalData.content)) return;
+        
+        let lang1Text = "";
+        let lang2Text = "";
+        
+        originalData.content.forEach(section => {
+            let name = section.name;
+            
+            // Parse Primary Language (origin_text)
+            if (section.origin_text && section.origin_text.length > 0) {
+                section.origin_text.forEach((text, i) => {
+                    // Convert <br/> tags to actual line breaks for the textarea
+                    let cleanText = text.replace(/<br\/>/g, '\n').replace(/<br>/g, '\n').trim();
+                    lang1Text += `[${name} ${i + 1}]\n${cleanText}\n\n`;
+                });
             }
-
-            lang1Result += `<${tagName}>\n${p1}\n</${tagName}>\n\n`;
-            lang2Result += `<${tagName}>\n${p2}\n</${tagName}>\n\n`;
-        }
-
-        if (lang1Result === "") {
-            $('#lyrics_lang1').val(rawContent);
-        } else {
-            $('#lyrics_lang1').val(lang1Result.trim());
-            $('#lyrics_lang2').val(lang2Result.trim());
-        }
+            
+            // Parse Translation (region_text)
+            if (section.region_text && section.region_text.length > 0) {
+                section.region_text.forEach((text, i) => {
+                    let cleanText = text.replace(/<br\/>/g, '\n').replace(/<br>/g, '\n').trim();
+                    lang2Text += `[${name} ${i + 1}]\n${cleanText}\n\n`;
+                });
+            }
+        });
+        
+        $('#lyrics_lang1').val(lang1Text.trim());
+        $('#lyrics_lang2').val(lang2Text.trim());
     }
 
-    // --- Combining Lyrics back into a single content string for submission ---
+    // --- Combining Lyrics back into JSON Content Array ---
     function combineLyrics() {
         const lang1Raw = $('#lyrics_lang1').val();
         const lang2Raw = $('#lyrics_lang2').val();
-
-        const sectionRegex = /<([^>]+)>([\s\S]*?)<\/\1>/g;
         
-        let combinedResult = "";
-        let match;
-
-        while ((match = sectionRegex.exec(lang1Raw)) !== null) {
-            const tagName = match[1];
-            const content1 = match[2].trim();
-
-            const escapedTagName = tagName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            const secondRegex = new RegExp(`<${escapedTagName}>([\\s\\S]*?)<\\/${escapedTagName}>`, 'g');
-            const match2 = secondRegex.exec(lang2Raw);
+        // Regex matches [sectionName number] and captures the following text block
+        const sectionRegex = /\[([a-zA-Z\-]+)\s*(\d+)?\]\n([\s\S]*?)(?=\n\[|$)/g;
+        
+        // Copy existing content to preserve chord metadata if present
+        let newContent = JSON.parse(JSON.stringify(originalData.content || []));
+        
+        // Reset text arrays
+        newContent.forEach(sec => {
+            sec.origin_text = [];
+            sec.region_text = [];
+        });
+        
+        function parseText(rawText, targetField) {
+            let match;
+            const localRegex = new RegExp(sectionRegex);
             
-            const content2 = match2 ? match2[1].trim() : "";
-
-            combinedResult += `<${tagName}>\n${content1}\n[region 2]\n${content2}\n</${tagName}>\n\n`;
+            while ((match = localRegex.exec(rawText)) !== null) {
+                let sectionName = match[1].toLowerCase();
+                let sectionIdx = match[2] ? parseInt(match[2]) - 1 : 0;
+                // Convert line breaks back into <br/>
+                let textBody = match[3].trim().replace(/\n/g, '<br/>');
+                
+                let sectionObj = newContent.find(s => s.name === sectionName);
+                
+                if (!sectionObj) {
+                    sectionObj = { name: sectionName, origin_text: [], region_text: [], origin_chord: [], origin: [], region: [] };
+                    newContent.push(sectionObj);
+                }
+                
+                if (!sectionObj[targetField]) sectionObj[targetField] = [];
+                sectionObj[targetField][sectionIdx] = textBody;
+            }
         }
-
-        return combinedResult.trim();
+        
+        parseText(lang1Raw, 'origin_text');
+        parseText(lang2Raw, 'region_text');
+        
+        // Filter out any sections that end up completely empty
+        return newContent.filter(sec => sec.origin_text.length > 0 || sec.region_text.length > 0);
     }
 
     function getCurrentState() {
@@ -698,12 +714,12 @@
         submit_song(url, JSON.stringify(changedFields))
             .done(function(response) {
                 alert("Song saved successfully!");
-                window.location.href = "/song/list";
+                //window.location.href = "/song/list";
             })
             .fail(function(jqXHR) {
                 if (jqXHR.status === 200) {
                     alert("Song saved successfully!");
-                    window.location.href = "/song/list";
+                    //window.location.href = "/song/list";
                 } else {
                     alert("Error saving song: " + (jqXHR.responseText || "Unknown error"));
                 }

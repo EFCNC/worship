@@ -289,6 +289,10 @@
         $(this).find('i').hide();
     });
 
+    function capitalizeFirstLetter(str) {
+        return str[0].toUpperCase() + str.slice(1);
+    }
+
     $(document).on('click', '.title span', function() {
         song_id = $(this).attr('song_id');
         content = songs.filter(obj=>{return obj.id == song_id}).map(obj=>obj.content);
@@ -296,14 +300,24 @@
         tab_div = '<div class="lyrics"><ul>';
         lyrics = '';
         n = 1;
+        console.log(content)
         for (l of content[0]) {
-            if(tabs.indexOf(l.name) >= 0) {
+            /*if(tabs.indexOf(l.name) >= 0) {
                 continue;
+            }*/
+            for(var i=0;i<l.origin_text.length;i++) {
+                name = l.name
+                if(l.origin_text.length > 1) {
+                    name = name + ' ' + (i+1);
+                }
+                tabs.push(capitalizeFirstLetter(name));
+                lyrics += '<div id="tabs-' + n + '">';
+                lyrics += l.origin_text[i] + '<br/>' + l.region_text[i] + '</div>';
+                n++;
             }
-            tabs.push(l.name);
-            lyrics += '<div id="tabs-' + n + '">' + l.origin_text + '<br/>' + l.region_text + '</div>';
-            n++;
+            //n++;
         }
+        console.log(tabs)
         for (var i=0;i<tabs.length;i++) {
             tab_div += '<li><a href="#tabs-'+ (i+1) + '">' + tabs[i] + '</a></li>';
         }

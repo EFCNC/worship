@@ -264,10 +264,16 @@
 .song_sequence_toggle { display: flex; align-items: center; cursor: pointer; gap: 8px; }
 
 /* Sequence Colored Tags */
-.p { background-color: #f78787; color: #fff}
-.v, [class~="1"], [class~="2"], [class~="3"], [class~="4"], [class~="5"], [class~="6"], [class~="7"], [class~="8"] { background-color: #D6B588; color: #fff; }
-.chorus, .Chorus, .c { background-color: #556b2f; color: #fff}
-.bridge, .b, .b2, .b3, .b4 { background-color: #003153; color: #fff}
+.verse { background-color: #D6B588; color: #fff; }
+.chorus { background-color: #556b2f; color: #fff}
+.bridge { background-color: #003153; color: #fff}
+.prechorus { background-color: #f78787; color: #fff}
+.postchorus { background-color: #f78787; color: #fff}
+.tag { background-color: #37a584; color: #fff}
+.vamp { background-color: #37a584; color: #fff}
+.intro {background-color: #000; color: #fff}
+.outro {background-color: #000; color: #fff}
+.interlude {background-color: #319eb1; color: #fff}
 
 .ui-sortable-placeholder {
     visibility: visible !important;
@@ -644,6 +650,18 @@
         });
     }
 
+    function checkSequenceEmptyState($container) {
+        let hasItems = $container.children('.lyric-item').not('.empty-sequence-state').length > 0;
+        
+        if (!hasItems) {
+            if ($container.children('.empty-sequence-state').length === 0) {
+                $container.append('<li class="empty-sequence-state" style="grid-column: 1 / -1; padding: 20px; text-align: center; color: #666; font-style: italic; background: #f5f5f5; border: 1px dashed #ccc; border-radius: 5px; list-style: none;">No sequence added yet! Click a quick add button to start.</li>');
+            }
+        } else {
+            $container.children('.empty-sequence-state').remove();
+        }
+    }
+
     function save_worship_notes() {
         let sermonData = {
             date: worship_data.date,
@@ -672,15 +690,16 @@
 
     // This function will detect if arrangement has been changed compare to the origin one
     function is_changed(order) {
-        temp = []
-        content = []
+        let temp = []
+        let content = []
         if (JSON.stringify(songs) !== JSON.stringify(songs_temp)) {
             console.log('content changed');
             content = JSON.parse(JSON.stringify(songs_temp));
         }
         if(JSON.stringify(order) != JSON.stringify(songs.map(item=>String(item.id)))) {
             console.log('order changed')
-            for (id of order) {
+            for (let id of order) {
+                let entry;
                 if (content.length>0) {
                     entry = content.find(o => o.id == id)
                 }
@@ -798,11 +817,11 @@
 
             create: function( event, ui ) {
                 //is_changed($(this).sortable('toArray', {attribute: 'name'}));
-                update_alt($(this).sortable('toArray'));
+                update_alt($(this).sortable('toArray'), $(this).attr('id'));
             },
             update: function(event, ui) {
                 //is_changed($(this).sortable('toArray', {attribute: 'name'}));
-                update_alt($(this).sortable('toArray'));
+                update_alt($(this).sortable('toArray'), $(this).attr('id'));
                 checkActionButtons();
             }
         });
@@ -853,8 +872,9 @@
     function parse_chord(chord, diff) {
 	    diff = Number(diff);
 	    chord = chord.split('/');
-        new_chord = []
-        for(c in chord) {
+        let new_chord = []
+        for(let c in chord) {
+            let pos;
     	    if(chord[c][1] == 'b' || chord[c][1] == '#') {
               	pos = keys.indexOf(chord[c].substring(0,2))+diff
               	if(pos>= keys.length) {
@@ -934,28 +954,36 @@
 
     // When remove_sequence_btn is clicked
     $(document).on('click', '.remove_sequence_btn', function () {
+        let $container = $(this).closest('.lyrics');
         $(this).closest('li').remove();
+
+        checkSequenceEmptyState($container);
 
         $(".lyrics").sortable( "destroy" );
         init();
         checkActionButtons();
     });
    
-    // update alt sequence which will be saved onto song_set table
-    function update_alt(alt) {
-        ids = []
+    function update_alt(alt, listId) {
+        let ids = [];
         $.each(alt, function() {
-            temp = this.split('_');
-            base = temp[0];
-            ids.push(temp[1])
+            // Exclude the empty state placeholder if picked up by sortable
+            if (this && this !== 'empty-sequence-state') {
+                let temp = this.split('_');
+                if (temp.length > 1) ids.push(temp[1]);
+            }
         });
-        id = base.split('-')[1]
-        ids = ids.join(',')
-        $('#'+base+'_alt').html(ids);
-        for (song of songs_temp) {
-            if (song.id == id) {
-               song.alt_sequence = ids;
-                break;
+        
+        // Extract song ID from the ul id (e.g., "sequence_123" -> "123")
+        let songId = listId.split('_')[1];
+        let sequenceStr = ids.join(',');
+        
+        $('#song-' + songId + '_alt').html(sequenceStr);
+        
+        for (let song of songs_temp) {
+            if (song.id == songId) {
+            song.alt_sequence = sequenceStr;
+            break;
             }
         }
     }
