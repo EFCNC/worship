@@ -488,18 +488,17 @@
         originalData.content.forEach(section => {
             let name = section.name;
             
-            // Parse Primary Language (origin_text)
-            if (section.origin_text && section.origin_text.length > 0) {
-                section.origin_text.forEach((text, i) => {
-                    // Convert <br/> tags to actual line breaks for the textarea
+            // Parse Primary Language
+            if (section.origin && section.origin.length > 0) {
+                section.origin.forEach((text, i) => {
                     let cleanText = text.replace(/<br\/>/g, '\n').replace(/<br>/g, '\n').trim();
                     lang1Text += `[${name} ${i + 1}]\n${cleanText}\n\n`;
                 });
             }
             
-            // Parse Translation (region_text)
-            if (section.region_text && section.region_text.length > 0) {
-                section.region_text.forEach((text, i) => {
+            // Parse Translation
+            if (section.region && section.region.length > 0) {
+                section.region.forEach((text, i) => {
                     let cleanText = text.replace(/<br\/>/g, '\n').replace(/<br>/g, '\n').trim();
                     lang2Text += `[${name} ${i + 1}]\n${cleanText}\n\n`;
                 });
@@ -515,17 +514,11 @@
         const lang1Raw = $('#lyrics_lang1').val();
         const lang2Raw = $('#lyrics_lang2').val();
         
-        // Regex matches [sectionName number] and captures the following text block
-        const sectionRegex = /\[([a-zA-Z\-]+)\s*(\d+)?\]\n([\s\S]*?)(?=\n\[|$)/g;
-        
-        // Copy existing content to preserve chord metadata if present
-        let newContent = JSON.parse(JSON.stringify(originalData.content || []));
-        
-        // Reset text arrays
-        newContent.forEach(sec => {
-            sec.origin_text = [];
-            sec.region_text = [];
-        });
+        // Header must sit on its own line (\n), and the lookahead ensures
+        // the NEXT match is also a standalone section header line, ignoring inline chords like \n[C]
+        const sectionRegex = /(?:^|\n)\[([a-zA-Z\-]+)\s*(\d+)?\][ \t]*\n([\s\S]*?)(?=\n\[[a-zA-Z\-]+\s*\d*\][ \t]*(?:\n|$)|$)/g;
+
+        let newContentMap = {}; 
         
         function parseText(rawText, targetField) {
             let match;
@@ -534,26 +527,38 @@
             while ((match = localRegex.exec(rawText)) !== null) {
                 let sectionName = match[1].toLowerCase();
                 let sectionIdx = match[2] ? parseInt(match[2]) - 1 : 0;
-                // Convert line breaks back into <br/>
+                
+                // Add <br/> at end and replace linebreaks
+                // May want to just use /n in the future?
                 let textBody = match[3].trim().replace(/\n/g, '<br/>');
+                textBody = `${textBody}<br/>`; 
                 
-                let sectionObj = newContent.find(s => s.name === sectionName);
-                
-                if (!sectionObj) {
-                    sectionObj = { name: sectionName, origin_text: [], region_text: [], origin_chord: [], origin: [], region: [] };
-                    newContent.push(sectionObj);
+                if (!newContentMap[sectionName]) {
+                    newContentMap[sectionName] = { name: sectionName, origin: [], region: [] };
                 }
                 
-                if (!sectionObj[targetField]) sectionObj[targetField] = [];
-                sectionObj[targetField][sectionIdx] = textBody;
+                newContentMap[sectionName][targetField][sectionIdx] = textBody;
             }
         }
         
-        parseText(lang1Raw, 'origin_text');
-        parseText(lang2Raw, 'region_text');
+        parseText(lang1Raw, 'origin');
+        parseText(lang2Raw, 'region');
         
-        // Filter out any sections that end up completely empty
-        return newContent.filter(sec => sec.origin_text.length > 0 || sec.region_text.length > 0);
+        // Convert map back to array and strip empty slots
+        let finalContent = [];
+        for (let key in newContentMap) {
+            let sec = newContentMap[key];
+            
+            // Fill any skipped index holes (e.g., if user types [verse 1] then [verse 3])
+            sec.origin = Array.from(sec.origin || []).map(x => x || "");
+            sec.region = Array.from(sec.region || []).map(x => x || "");
+            
+            if (sec.origin.length > 0 || sec.region.length > 0) {
+                finalContent.push(sec);
+            }
+        }
+        
+        return finalContent;
     }
 
     function getCurrentState() {
@@ -699,6 +704,7 @@
         // Check if the object has any keys
         if (changedFields.length === 0) {
             alert("No changes detected.");
+            console.log("currentState:", currentState);
             return;
         }
 
