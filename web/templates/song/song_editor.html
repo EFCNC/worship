@@ -99,18 +99,59 @@
         min-width: 0; /* Prevents flex items from overflowing */
     }
 
+    /* Keeps both layers perfectly bound and clips any stray text bleed */
+    .editor-wrapper {
+        position: relative;
+        width: 100%;
+        overflow: hidden; 
+        border-radius: 4px;
+        background-color: #fff;
+    }
+
+    /* Background mirror layer holding colored highlights */ 
+    .backdrop {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none; /* Let mouse clicks pass straight through to textarea */
+        box-sizing: border-box;
+        overflow: hidden; /* Handled exclusively via JS scroll events */
+        margin: 0;
+        color: #333;
+        background: #fff;
+    }
+
+    /* Top interactive user interface layer */
     .lyrics-area {
+        position: relative;
+        z-index: 2;
         min-height: 500px;
         resize: vertical;
-
-        /* Strict line alignment */
-        line-height: 1.8;       /* Forces equal vertical spacing */
-        font-size: 14px;
-
-        /* Horizontal Scrollbar and preventing overflowrapping */
-        white-space: pre;
-        overflow-wrap: normal;
+        display: block;
+        box-sizing: border-box;
+        margin: 0;
+        
+        /* Make user text invisible to reveal highlighted layer perfectly directly underneath */
+        background: transparent !important;
+        color: transparent !important;
+        caret-color: #000 !important; /* Keep your blinking typing cursor visible */
+        
         overflow-x: auto;
+        overflow-y: auto;
+    }
+
+      .lyrics-area, .backdrop {
+        /* CRITICAL: Must exactly match backdrop structural parameters */
+        padding: 8px !important;
+        border: 1px solid #ccc !important;
+        font-family: Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace !important;
+        font-size: 14px !important;
+        line-height: 1.8 !important;
+        white-space: pre !important;
+        letter-spacing: normal !important;
+        word-spacing: normal !important;
     }
 
     /* Highlight the active textarea slightly */
@@ -119,6 +160,19 @@
         box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
         outline: none;
     }
+
+    /* Highlight Color Styles */
+    span.hl-chorus { color: #38a169; font-weight: bold; }
+    span.hl-verse { color: #3182ce; font-weight: bold; }
+    span.hl-bridge { color: #e53e3e; font-weight: bold; }
+    span.hl-prechorus { color: #d69e2e; font-weight: bold; }
+    
+    span.hl-postchorus { color: #805ad5; font-weight: bold; }
+    span.hl-tag { color: #ed64a6; font-weight: bold; }
+    span.hl-vamp { color: #dd6b20; font-weight: bold; }
+    span.hl-intro { color: #718096; font-weight: bold; }
+    span.hl-outro { color: #4a5568; font-weight: bold; }
+    span.hl-interlude { color: #319795; font-weight: bold; }
 
     /* =========================================
         Chords/Tags and Sequence
@@ -259,14 +313,26 @@
                 <input name="author" type="text" value="{{ content.author }}"/>
             </div>
         </div>
+        <div class="form-row">
+            <div class="form-group" style="flex: 100%;">
+                <label>Arrangement Sequence</label>
+                <input name="sequence" type="text" value="{{ content.sequence }}" placeholder="e.g. Intro, V1, PC, C, V2, C, B, Tag, Outro" style="font-family: monospace; letter-spacing: 0.5px;"/>
+            </div>
+        </div>
 
         <div class="tag-container">
             <label>Structure Helpers (Click to insert):</label><br/>
             <span class="sequence" data-tag="verse">Verse</span>
+            <span class="sequence" data-tag="pre-chorus">Pre-Chorus</span>
             <span class="sequence" data-tag="chorus">Chorus</span>
-            <span class="sequence" data-tag="prechorus">Pre-Chorus</span>
+            <span class="sequence" data-tag="post-chorus">Post-Chorus</span>
             <span class="sequence" data-tag="bridge">Bridge</span>
-            <input name="sequence" type="text" value="{{ content.sequence }}" placeholder="Sequence (V, C, V, C...)" style="width: 200px; margin-left: 10px;"/>
+            <span class="sequence" data-tag="interlude">Interlude</span>
+            <span class="sequence" data-tag="instrumental">Instrumental</span>
+            <span class="sequence" data-tag="vamp">Vamp</span>
+            <span class="sequence" data-tag="tag">Tag</span>
+            <span class="sequence" data-tag="intro">Intro</span>
+            <span class="sequence" data-tag="outro">Outro</span>
         </div>
 
         <div class="tag-container" id="chord_tags">
@@ -285,13 +351,19 @@
                 <label style="color: #3182ce; display: flex; align-items: center; gap: 5px;">
                     <span>🔵</span> Primary Language <span id="lang_origin"></span>
                 </label>
-                <textarea id="lyrics_lang1" class="lyrics-area" spellcheck="false"></textarea>
+                <div class="editor-wrapper">
+                    <div id="highlights_lang1" class="backdrop"></div>
+                    <textarea id="lyrics_lang1" class="lyrics-area" spellcheck="false"></textarea>
+                </div>
             </div>
             <div class="form-group">
                 <label style="color: #805ad5; display: flex; align-items: center; gap: 5px;">
                     <span>🟣</span> Translation <span id="lang_region"></span>
                 </label>
-                <textarea id="lyrics_lang2" class="lyrics-area" spellcheck="false"></textarea>
+                <div class="editor-wrapper">
+                    <div id="highlights_lang2" class="backdrop"></div>
+                    <textarea id="lyrics_lang2" class="lyrics-area" spellcheck="false"></textarea>
+                </div>
             </div>
         </div>
 
@@ -459,6 +531,44 @@
         });
     }
 
+    /* =========================================
+        Visual Syntax Highlighting Processor
+    ========================================= */
+    function updateHighlights(textareaId, backdropId) {
+        let text = $('#' + textareaId).val();
+        
+        // Escape native HTML elements to protect the wrapper framework layout
+        text = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+        // Define all valid song structures
+        const structureClasses = {
+            'verse': 'hl-verse', 'chorus': 'hl-chorus', 'bridge': 'hl-bridge',
+            'pre-chorus': 'hl-prechorus', 'prechorus': 'hl-prechorus',
+            'post-chorus': 'hl-postchorus', 'postchorus': 'hl-postchorus',
+            'tag': 'hl-tag', 'vamp': 'hl-vamp', 'intro': 'hl-intro',
+            'outro': 'hl-outro', 'interlude': 'hl-interlude', 'instrumental': 'hl-interlude'
+        };
+
+        // Single pass for ANY [bracketed] text
+        text = text.replace(/\[([^\]]+)\]/gi, (match, p1) => {
+            const tag = p1.toLowerCase().trim();
+            const baseTag = tag.replace(/\s*\d+$/, ''); // Strip numbers (e.g., "Verse 1" -> "verse")
+            
+            if (structureClasses[baseTag]) {
+                // Match found: highlight as a structural header
+                return `<span class="${structureClasses[baseTag]}">[${p1}]</span>`;
+            } else {
+                // No match found: highlight as an inline chord (Bold Blue with soft background)
+                return `<span style="color: #2b6cb0; font-weight: bold; background: rgba(43, 108, 176, 0.1);">[${p1}]</span>`;
+            }
+        });
+
+        // Fix textarea trailing newline scrolling tracking offset bug
+        if (text.endsWith('\n')) text += ' ';
+        
+        $('#' + backdropId).html(text);
+    }
+
     // --- Editor Interaction ---
     function insertAtCursor(tag, isPaired) {
         const txtarea = lastFocusedTextarea || document.getElementById('lyrics_lang1');
@@ -469,13 +579,17 @@
         const sel = txtarea.value.substring(start, finish);
 
         let textToInsert = isPaired 
-            ? `<${tag}>\n${sel}\n</${tag}>` 
+            ? `[${tag}]\n${sel}` 
             : `[${tag}] `;
 
         if (!document.execCommand('insertText', false, textToInsert)) {
             const value = txtarea.value;
             txtarea.value = value.substring(0, start) + textToInsert + value.substring(finish);
         }
+
+        // Trigger visual markup render recalculation immediately after insertion
+        const targetBackdropId = txtarea.id === 'lyrics_lang1' ? 'highlights_lang1' : 'highlights_lang2';
+        updateHighlights(txtarea.id, targetBackdropId);
     }
     
     // --- Pulling and Loading Lyrics from Database ---
@@ -601,28 +715,77 @@
         return changedFields;
     }
 
-    function syncScrollbars(){
+    function syncScrollbars() {
         const $left = $('#lyrics_lang1');
         const $right = $('#lyrics_lang2');
+        
+        // Grab native DOM elements for high-frequency properties
+        const leftBackdrop = document.getElementById('highlights_lang1');
+        const rightBackdrop = document.getElementById('highlights_lang2');
+        const rightDOM = document.getElementById('lyrics_lang2');
+        const leftDOM = document.getElementById('lyrics_lang1');
 
         let isSyncingLeft = false;
         let isSyncingRight = false;
 
         $left.on('scroll', function() {
+            leftBackdrop.scrollTop = this.scrollTop;
+            leftBackdrop.scrollLeft = this.scrollLeft;
+
             if (!isSyncingLeft) {
                 isSyncingRight = true;
-                $right.scrollTop(this.scrollTop);
+                rightDOM.scrollTop = this.scrollTop;
+                rightBackdrop.scrollTop = this.scrollTop;
             }
             isSyncingLeft = false;
         });
 
         $right.on('scroll', function() {
+            rightBackdrop.scrollTop = this.scrollTop;
+            rightBackdrop.scrollLeft = this.scrollLeft;
+
             if (!isSyncingRight) {
                 isSyncingLeft = true;
-                $left.scrollTop(this.scrollTop);
+                leftDOM.scrollTop = this.scrollTop;
+                leftBackdrop.scrollTop = this.scrollTop;
             }
             isSyncingRight = false;
         });
+    }
+
+    // --- Sync Textarea Resizing ---
+    function syncResizing() {
+        const el1 = document.getElementById('lyrics_lang1');
+        const el2 = document.getElementById('lyrics_lang2');
+
+        if (!el1 || !el2) return;
+
+        let isSyncing = false;
+
+        const observer = new ResizeObserver(entries => {
+            // Prevent an infinite loop of them triggering each other
+            if (isSyncing) return;
+
+            for (let entry of entries) {
+                const target = entry.target;
+                const newHeight = target.offsetHeight + 'px'; 
+                const other = target === el1 ? el2 : el1;
+
+                // Only update if they are actually out of sync
+                if (other.style.height !== newHeight) {
+                    isSyncing = true;
+                    other.style.height = newHeight;
+                    
+                    // Release the lock after the browser paints the new height
+                    requestAnimationFrame(() => {
+                        isSyncing = false;
+                    });
+                }
+            }
+        });
+
+        observer.observe(el1);
+        observer.observe(el2);
     }
 
     var lastFocusedTextarea = null;
@@ -658,6 +821,14 @@
         populateDynamicFields();
         loadAndSplitLyrics();
 
+        // Initialize and fire up structural helper highlights on primary load
+        updateHighlights('lyrics_lang1', 'highlights_lang1');
+        updateHighlights('lyrics_lang2', 'highlights_lang2');
+
+        // Watch formatting inputs to update text styling dynamically on modification
+        $('#lyrics_lang1').on('input', function() { updateHighlights('lyrics_lang1', 'highlights_lang1'); });
+        $('#lyrics_lang2').on('input', function() { updateHighlights('lyrics_lang2', 'highlights_lang2'); });
+
         // TEST: Capture the generated 'content' layout right now so the baseline matches perfectly
         originalData.content = combineLyrics();
 
@@ -670,6 +841,7 @@
         $('input[name="song_key"]').on('input', updateSmartChordLabels);
 
         syncScrollbars();
+        syncResizing();
 
         $('.chord').click(function() {
             const note = getNoteFromKey(parseInt($(this).data('num')));
