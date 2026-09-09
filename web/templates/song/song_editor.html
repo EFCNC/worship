@@ -322,17 +322,17 @@
 
         <div class="tag-container">
             <label>Structure Helpers (Click to insert):</label><br/>
-            <span class="sequence" data-tag="intro" style="pointer-events: none; opacity: 0.4;">Intro</span>
-            <span class="sequence" data-tag="verse" style="pointer-events: none; opacity: 0.4;">Verse</span>
+            <span class="sequence" data-tag="verse">Verse</span>
             <span class="sequence" data-tag="pre-chorus">Pre-Chorus</span>
             <span class="sequence" data-tag="chorus">Chorus</span>
-            <span class="sequence" data-tag="post-chorus" style="pointer-events: none; opacity: 0.4;">Post-Chorus</span>
+            <span class="sequence" data-tag="post-chorus">Post-Chorus</span>
             <span class="sequence" data-tag="bridge">Bridge</span>
-            <span class="sequence" data-tag="interlude" style="pointer-events: none; opacity: 0.4;">Interlude</span>
-            <span class="sequence" data-tag="instrumental" style="pointer-events: none; opacity: 0.4;">Instrumental</span>
-            <span class="sequence" data-tag="vamp" style="pointer-events: none; opacity: 0.4;">Vamp</span>
-            <span class="sequence" data-tag="tag" style="pointer-events: none; opacity: 0.4;">Tag</span>
-            <span class="sequence" data-tag="outro" style="pointer-events: none; opacity: 0.4;">Outro</span>
+            <span class="sequence" data-tag="interlude">Interlude</span>
+            <span class="sequence" data-tag="instrumental">Instrumental</span>
+            <span class="sequence" data-tag="vamp">Vamp</span>
+            <span class="sequence" data-tag="tag">Tag</span>
+            <span class="sequence" data-tag="intro">Intro</span>
+            <span class="sequence" data-tag="outro">Outro</span>
         </div>
 
         <div class="tag-container" id="chord_tags">
@@ -538,47 +538,34 @@
         let text = $('#' + textareaId).val();
         
         // Escape native HTML elements to protect the wrapper framework layout
-        text = text
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;');
+        text = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
         // Define all valid song structures
-        const structures = [
-            { tag: 'verse', cls: 'hl-verse' },
-            { tag: 'chorus', cls: 'hl-chorus' },
-            { tag: 'bridge', cls: 'hl-bridge' },
-            { tag: 'pre-chorus', cls: 'hl-prechorus' },
-            { tag: 'prechorus', cls: 'hl-prechorus' },
-            { tag: 'post-chorus', cls: 'hl-postchorus' },
-            { tag: 'postchorus', cls: 'hl-postchorus' },
-            { tag: 'tag', cls: 'hl-tag' },
-            { tag: 'vamp', cls: 'hl-vamp' },
-            { tag: 'intro', cls: 'hl-intro' },
-            { tag: 'outro', cls: 'hl-outro' },
-            { tag: 'interlude', cls: 'hl-interlude' },
-            { tag: 'instrumental', cls: 'hl-interlude' } 
-        ];
+        const structureClasses = {
+            'verse': 'hl-verse', 'chorus': 'hl-chorus', 'bridge': 'hl-bridge',
+            'pre-chorus': 'hl-prechorus', 'prechorus': 'hl-prechorus',
+            'post-chorus': 'hl-postchorus', 'postchorus': 'hl-postchorus',
+            'tag': 'hl-tag', 'vamp': 'hl-vamp', 'intro': 'hl-intro',
+            'outro': 'hl-outro', 'interlude': 'hl-interlude', 'instrumental': 'hl-interlude'
+        };
 
-        // Loop through and dynamically generate regex replacements
-        structures.forEach(struct => {
-            // Highlight actual storage markup tags (<tag>, </tag>)
-            const xmlRegex = new RegExp(`&lt;(\/?)${struct.tag}&gt;`, 'gi');
-            text = text.replace(xmlRegex, `<span class="${struct.cls}">&lt;$1${struct.tag}&gt;</span>`);
+        // Single pass for ANY [bracketed] text
+        text = text.replace(/\[([^\]]+)\]/gi, (match, p1) => {
+            const tag = p1.toLowerCase().trim();
+            const baseTag = tag.replace(/\s*\d+$/, ''); // Strip numbers (e.g., "Verse 1" -> "verse")
             
-            // Catch traditional fallback structural square brackets: [tag]
-            const bracketRegex = new RegExp(`\\[(${struct.tag})\\]`, 'gi');
-            text = text.replace(bracketRegex, `<span class="${struct.cls}">[$1]</span>`);
+            if (structureClasses[baseTag]) {
+                // Match found: highlight as a structural header
+                return `<span class="${structureClasses[baseTag]}">[${p1}]</span>`;
+            } else {
+                // No match found: highlight as an inline chord (Bold Blue with soft background)
+                return `<span style="color: #2b6cb0; font-weight: bold; background: rgba(43, 108, 176, 0.1);">[${p1}]</span>`;
+            }
         });
 
-        // Catch-all fallback for undefined custom bracket structures (e.g., [Guitar Solo])
-        text = text.replace(/^[ \t]*\[([^\]]+)\][ \t]*$/gm, '<span class="hl-verse" style="color: #805ad5;">[$1]</span>');
-        
         // Fix textarea trailing newline scrolling tracking offset bug
-        if (text.endsWith('\n')) {
-            text += ' ';
-        }
-
+        if (text.endsWith('\n')) text += ' ';
+        
         $('#' + backdropId).html(text);
     }
 
@@ -728,37 +715,39 @@
         return changedFields;
     }
 
-    function syncScrollbars(){
+    function syncScrollbars() {
         const $left = $('#lyrics_lang1');
         const $right = $('#lyrics_lang2');
-        const $leftBackdrop = $('#highlights_lang1');
-        const $rightBackdrop = $('#highlights_lang2');
+        
+        // Grab native DOM elements for high-frequency properties
+        const leftBackdrop = document.getElementById('highlights_lang1');
+        const rightBackdrop = document.getElementById('highlights_lang2');
+        const rightDOM = document.getElementById('lyrics_lang2');
+        const leftDOM = document.getElementById('lyrics_lang1');
 
         let isSyncingLeft = false;
         let isSyncingRight = false;
 
         $left.on('scroll', function() {
-            // Keep its own backdrop styling layer perfectly tracked with real viewport movements
-            $leftBackdrop.scrollTop(this.scrollTop);
-            $leftBackdrop.scrollLeft(this.scrollLeft);
+            leftBackdrop.scrollTop = this.scrollTop;
+            leftBackdrop.scrollLeft = this.scrollLeft;
 
             if (!isSyncingLeft) {
                 isSyncingRight = true;
-                $right.scrollTop(this.scrollTop);
-                $rightBackdrop.scrollTop(this.scrollTop);
+                rightDOM.scrollTop = this.scrollTop;
+                rightBackdrop.scrollTop = this.scrollTop;
             }
             isSyncingLeft = false;
         });
 
         $right.on('scroll', function() {
-            // Keep its own backdrop styling layer perfectly tracked with real viewport movements
-            $rightBackdrop.scrollTop(this.scrollTop);
-            $rightBackdrop.scrollLeft(this.scrollLeft);
+            rightBackdrop.scrollTop = this.scrollTop;
+            rightBackdrop.scrollLeft = this.scrollLeft;
 
             if (!isSyncingRight) {
                 isSyncingLeft = true;
-                $left.scrollTop(this.scrollTop);
-                $leftBackdrop.scrollTop(this.scrollTop);
+                leftDOM.scrollTop = this.scrollTop;
+                leftBackdrop.scrollTop = this.scrollTop;
             }
             isSyncingRight = false;
         });
