@@ -399,10 +399,12 @@ def get_lyrics_json(content, lang, lang_2=None):
     bridge = []
     pre_chorus = []
     chorus = []
+    outro = []
     verse1 = []
     bridge1 = []
     pre_chorus1 = []
     chorus1 = []
+    outro1 = []
     r = 0
     for l in lyrics:
         if l[0] == 'verse' or re.match('\d', l[0]):
@@ -433,17 +435,40 @@ def get_lyrics_json(content, lang, lang_2=None):
                     pre_chorus1.append(region[r].replace('[region 2]', ''))
                 except Exception as e:
                     pass
+        elif l[0] == 'f':
+            outro.append(l[1])
+            if region:
+                try:
+                    outro1.append(region[r].replace('[region 2]', ''))
+                except Exception as e:
+                    pass
         r += 1
-    return dict(lang=lang, verse=verse, chorus=chorus, bridge=bridge, pre_chorus=pre_chorus), dict(lang=lang_2, verse=verse1, chorus=chorus1, bridge=bridge1, pre_chorus=pre_chorus1)
+    '''sequence = sequence.split(',')
+    new_sequence = []
+    for i in range(len(sequence)):
+        s = sequence[i]
+        if s == 'v' or re.match('\d', s):
+            if s == 1 or s == 'v':
+                new_sequence.append('verse.0')
+            else:
+                new_sequence.append('verse.{}'.format(int(s)-1))
+        elif s == 'c':
+            new_sequence.append('chorus.0')
+        elif s == 'p':
+            new_sequence.append('pre_chorus.0')
+        elif s == 'b':
+            new_sequence.append('bridge.0')
+        elif s == 'f':
+            new_sequence.append('outro.0')
+    '''
+    temp = [dict(name='verse', origin=verse, region=verse1), dict(name='pre-chorus',  origin=pre_chorus, region=pre_chorus1), dict(name='chorus', origin=chorus, region=chorus1), dict(name='bridge',  origin=bridge, region=bridge1), dict(name='outro',  origin=outro, region=outro1)]
+    return temp
 
 def convert_songs():
     sql = "select s.title, s.author, s.lang, s.lang_2, s.song_key, s.sequence, s.bible_verse, s.lyricist, s.book, s.copyright, s.ccli, s.content, s.song_id as id from songs s order by s.song_id"
     result = dB.run(sql)
     songs = []
     for r in result:
-        l1, l2 = get_lyrics_json(r[11], r[2], r[3])
-        if r[3]:
-            songs.append({'id': r[12], 'content': json.dumps(dict(origin=l1, region=[l2]))})
-        else:
-            songs.append({'id': r[12], 'content': json.dumps(dict(origin=l1, region=[]))})
+        ll = get_lyrics_json(r[11], r[2], r[3])
+        songs.append({'id': r[12], 'content': json.dumps(ll)})
     update_table(songs)

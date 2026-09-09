@@ -29,6 +29,10 @@ def parse_lyrics(content, sequence):
 
     lyrics_ = []
     lyrics = json.loads(content)
+    for l in lyrics:
+        temp = dict(name=l['name'], origin=l['origin'], region=l['region'], origin_text=[re.sub('(\[[^]]+\])', '', x) for x in l['origin']], origin_chord=parse_chord(l['origin']), region_text=[re.sub('(\[[^]]+\])', '', x) for x in l['region']])
+        lyrics_.append(temp)
+    return lyrics_
     sections = ['verse', 'pre-chorus', 'chorus', 'bridge', 'tag', 'vamp', 'intro', 'outro', 'finish']
     for name in sections:
         if name in lyrics['origin']:
