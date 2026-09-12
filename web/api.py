@@ -119,6 +119,7 @@ def get_song(id):
     '''
     if request.method == "POST":
         song = request.get_json()
+        print(song)
         result = Utils.edit_song(id, song)
         return result
     if request.method == "GET":
