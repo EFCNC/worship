@@ -385,13 +385,58 @@ def match_bible_books(book):
     else:
         return full_name.index((book.upper()))
 
-def update_table(old):
+def update_table(old, s):
     for r in old:
         print(str(r['content']))
-        sql = "update songs set content=? where song_id=?"
-        dB.run_para(sql, [str(r['content']), r['id']])
+        sql = "update songs set content=?, sequence=? where song_id=?"
+        dB.run_para(sql, [str(r['content']), s, r['id']])
 
-def get_lyrics_json(content, lang, lang_2=None):
+def update_sequence():
+    sql = "select song_id, worship_id, sequence from presentation"
+    result = dB.run(sql)
+    sequence = []
+    for r in result:
+        if r[2] != '':
+            sequence.append(dict(song_id=r[0], worship_id=r[1], sequence=r[2]))
+
+    for s in sequence:
+        sql = "update presentation set sequence=? where song_id=? and worship_id=?"
+        ss = convert_sequence(s["sequence"])
+        print(sql, ss, s["song_id"], s["worship_id"])
+        dB.run_para(sql, [ss, s["song_id"], s["worship_id"]])
+
+def convert_sequence(sequence):
+    sequence = sequence.split(',')
+    new_sequence = []
+    v = []
+    c = []
+    p = []
+    o = []
+    b = []
+
+    for s in sequence:
+        if s == 'v' or re.match('\d', s):
+            if s not in v:
+                v.append(s)
+            new_sequence.append('v{}'.format(len(v)))
+        elif re.match('c\d?', s):
+            if s not in c:
+                c.append(s)
+            new_sequence.append('c{}'.format(len(c)))
+        elif s == 'b':
+            if s not in b:
+                b.append(s)
+            new_sequence.append('b{}'.format(len(b)))
+        elif s == 'p':
+            if s not in p:
+                p.append(s)
+            new_sequence.append('pre{}'.format(len(p)))
+        elif s == 'f':
+            if s not in o:
+                o.append(s)
+            new_sequence.append('out{}'.format(len(o)))
+    return ','.join(new_sequence)
+def get_lyrics_json(content, sequence, lang, lang_2=None):
     region = re.findall('\[region\s2\][^<]*', content)
     content = re.sub('\[region\s2\][^<]*', '', content)
     lyrics = re.findall('<([0-9a-zA-Z\-]+)>([^<]+)<\/[0-9a-zA-Z\-]+>', content)
@@ -414,7 +459,7 @@ def get_lyrics_json(content, lang, lang_2=None):
                     verse1.append(region[r].replace('[region 2]', ''))
                 except Exception as e:
                     pass
-        elif l[0] == 'chorus':
+        elif re.match('chorus\d?', l[0]):
             chorus.append(l[1])
             if region:
                 try:
@@ -443,32 +488,16 @@ def get_lyrics_json(content, lang, lang_2=None):
                 except Exception as e:
                     pass
         r += 1
-    '''sequence = sequence.split(',')
-    new_sequence = []
-    for i in range(len(sequence)):
-        s = sequence[i]
-        if s == 'v' or re.match('\d', s):
-            if s == 1 or s == 'v':
-                new_sequence.append('verse.0')
-            else:
-                new_sequence.append('verse.{}'.format(int(s)-1))
-        elif s == 'c':
-            new_sequence.append('chorus.0')
-        elif s == 'p':
-            new_sequence.append('pre_chorus.0')
-        elif s == 'b':
-            new_sequence.append('bridge.0')
-        elif s == 'f':
-            new_sequence.append('outro.0')
-    '''
+
     temp = [dict(name='verse', origin=verse, region=verse1), dict(name='pre-chorus',  origin=pre_chorus, region=pre_chorus1), dict(name='chorus', origin=chorus, region=chorus1), dict(name='bridge',  origin=bridge, region=bridge1), dict(name='outro',  origin=outro, region=outro1)]
-    return temp
+    return temp, convert_sequence(sequence)
 
 def convert_songs():
     sql = "select s.title, s.author, s.lang, s.lang_2, s.song_key, s.sequence, s.bible_verse, s.lyricist, s.book, s.copyright, s.ccli, s.content, s.song_id as id from songs s order by s.song_id"
     result = dB.run(sql)
     songs = []
     for r in result:
-        ll = get_lyrics_json(r[11], r[2], r[3])
+        ll, s = get_lyrics_json(r[11], r[5], r[2], r[3])
         songs.append({'id': r[12], 'content': json.dumps(ll)})
-    update_table(songs)
+    update_table(songs, s)
+    update_sequence()
