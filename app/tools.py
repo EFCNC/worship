@@ -441,9 +441,9 @@ def convert_sequence(sequence):
             if s not in p:
                 p.append(s)
             if p.index(s) == 0:
-                new_sequence.append('p')
+                new_sequence.append('pre')
             else:
-                new_sequence.append('p{}'.format(p.index(s)+1))
+                new_sequence.append('pre{}'.format(p.index(s)+1))
         elif s == 'f':
             if s not in o:
                 o.append(s)
@@ -463,7 +463,7 @@ def convert_sequence(sequence):
     if len(c) > 1:
         new_sequence = [re.sub('^c$', 'c1', x) for x in new_sequence]
     if len(p) > 1:
-        new_sequence = [re.sub('^p$', 'p1', x) for x in new_sequence]
+        new_sequence = [re.sub('^pre$', 'pre1', x) for x in new_sequence]
     if len(o) > 1:
         new_sequence = [re.sub('^o$', 'o1', x) for x in new_sequence]
     if len(b) > 1:
