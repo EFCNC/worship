@@ -448,16 +448,16 @@ def convert_sequence(sequence):
             if s not in o:
                 o.append(s)
             if o.index(s) == 0:
-                new_sequence.append('o')
+                new_sequence.append('out')
             else:
-                new_sequence.append('o{}'.format(o.index(s)+1))
+                new_sequence.append('out{}'.format(o.index(s)+1))
         elif s == 't':
             if s not in t:
                 t.append(s)
             if t.index(s) == 0:
-                new_sequence.append('t')
+                new_sequence.append('tag')
             else:
-                new_sequence.append('t{}'.format(t.index(s)+1))
+                new_sequence.append('tag{}'.format(t.index(s)+1))
     if len(v) > 1:
         new_sequence = [re.sub('^v$', 'v1', x) for x in new_sequence]
     if len(c) > 1:
@@ -465,11 +465,11 @@ def convert_sequence(sequence):
     if len(p) > 1:
         new_sequence = [re.sub('^pre$', 'pre1', x) for x in new_sequence]
     if len(o) > 1:
-        new_sequence = [re.sub('^o$', 'o1', x) for x in new_sequence]
+        new_sequence = [re.sub('^out$', 'out1', x) for x in new_sequence]
     if len(b) > 1:
         new_sequence = [re.sub('^b$', 'b1', x) for x in new_sequence]
     if len(t) > 1:
-        new_sequence = [re.sub('^t$', 't1', x) for x in new_sequence]
+        new_sequence = [re.sub('^tag$', 'tag1', x) for x in new_sequence]
 
 
     return ','.join(new_sequence)
