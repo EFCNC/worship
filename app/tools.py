@@ -422,42 +422,55 @@ def convert_sequence(sequence):
             if v.index(s) == 0:
                 new_sequence.append('v')
             else:
-                new_sequence.append('v{}'.format(v.index(s)))
+                new_sequence.append('v{}'.format(v.index(s)+1))
         elif re.match('c\d?', s):
             if s not in c:
                 c.append(s)
             if c.index(s) == 0:
                 new_sequence.append('c')
             else:
-                new_sequence.append('c{}'.format(c.index(s)))
+                new_sequence.append('c{}'.format(c.index(s)+1))
         elif re.match('b\d?', s):
             if s not in b:
                 b.append(s)
             if b.index(s) == 0:
                 new_sequence.append('b')
             else:
-                new_sequence.append('b{}'.format(b.index(s)))
+                new_sequence.append('b{}'.format(b.index(s)+1))
         elif re.match('p\d?', s):
             if s not in p:
                 p.append(s)
             if p.index(s) == 0:
                 new_sequence.append('p')
             else:
-                new_sequence.append('p{}'.format(p.index(s)))
+                new_sequence.append('p{}'.format(p.index(s)+1))
         elif s == 'f':
             if s not in o:
                 o.append(s)
             if o.index(s) == 0:
                 new_sequence.append('o')
             else:
-                new_sequence.append('o{}'.format(o.index(s)))
+                new_sequence.append('o{}'.format(o.index(s)+1))
         elif s == 't':
             if s not in t:
                 t.append(s)
             if t.index(s) == 0:
                 new_sequence.append('t')
             else:
-                new_sequence.append('t{}'.format(t.index(s)))
+                new_sequence.append('t{}'.format(t.index(s)+1))
+    if len(v) > 1:
+        new_sequence = [re.sub('^v$', 'v1', x) for x in new_sequence]
+    if len(c) > 1:
+        new_sequence = [re.sub('^c$', 'c1', x) for x in new_sequence]
+    if len(p) > 1:
+        new_sequence = [re.sub('^p$', 'p1', x) for x in new_sequence]
+    if len(o) > 1:
+        new_sequence = [re.sub('^o$', 'o1', x) for x in new_sequence]
+    if len(b) > 1:
+        new_sequence = [re.sub('^b$', 'b1', x) for x in new_sequence]
+    if len(t) > 1:
+        new_sequence = [re.sub('^t$', 't1', x) for x in new_sequence]
+
 
     return ','.join(new_sequence)
 def get_lyrics_json(content, lang, lang_2=None):
