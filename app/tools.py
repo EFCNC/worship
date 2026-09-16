@@ -473,7 +473,7 @@ def convert_sequence(sequence):
 
 
     return ','.join(new_sequence)
-def get_lyrics_json(content, lang, lang_2=None):
+def get_lyrics_json(p, content, lang, title, lang_2=None):
     region = re.findall('\[region\s2\][^<]*', content)
     content = re.sub('\[region\s2\][^<]*', '', content)
     lyrics = re.findall('<([0-9a-zA-Z\-]+)>([^<]+)<\/[0-9a-zA-Z\-]+>', content)
@@ -491,59 +491,88 @@ def get_lyrics_json(content, lang, lang_2=None):
     tag1 = []
     r = 0
     for l in lyrics:
+        ll = re.sub('(^\r\n)|(\r\n$)', '', l[1])
         if l[0] == 'verse' or re.match('\d', l[0]):
-            verse.append(l[1])
+            verse.append(ll)
             if region:
                 try:
                     verse1.append(region[r].replace('[region 2]', ''))
                 except Exception as e:
                     pass
         elif re.match('chorus\d?', l[0]):
-            chorus.append(l[1])
+            chorus.append(ll)
             if region:
                 try:
                     chorus1.append(region[r].replace('[region 2]', ''))
                 except Exception as e:
                     pass
         elif re.match('bridge\d?', l[0]):
-            bridge.append(l[1])
+            bridge.append(ll)
             if region:
                 try:
                     bridge1.append(region[r].replace('[region 2]', ''))
                 except Exception as e:
                     pass
         elif re.match('pre-chorus\d?', l[0]) or l[0] == 'prechorus':
-            pre_chorus.append(l[1])
+            pre_chorus.append(ll)
             if region:
                 try:
                     pre_chorus1.append(region[r].replace('[region 2]', ''))
                 except Exception as e:
                     pass
         elif l[0] == 'f':
-            outro.append(l[1])
+            outro.append(ll)
             if region:
                 try:
                     outro1.append(region[r].replace('[region 2]', ''))
                 except Exception as e:
                     pass
         elif l[0] == 'tag':
-            tag.append(l[1])
+            tag.append(ll)
             if region:
                 try:
                     tag1.append(region[r].replace('[region 2]', ''))
                 except Exception as e:
                     pass
         r += 1
-
-    temp = [dict(name='verse', origin=verse, region=verse1), dict(name='pre-chorus',  origin=pre_chorus, region=pre_chorus1), dict(name='chorus', origin=chorus, region=chorus1), dict(name='bridge',  origin=bridge, region=bridge1), dict(name='tag',  origin=tag, region=tag1), dict(name='outro',  origin=outro, region=outro1)]
+    if p == 0:
+        verse = [dict(lang=lang, title=title, content=verse)]
+        if verse1:
+            verse.append(dict(lang=lang_2, title=title, content=verse1))
+        pre_chorus = [dict(lang=lang, title=title, content=pre_chorus)]
+        if pre_chorus1:
+            pre_chorus.append(dict(lang=lang_2, title=title, content=pre_chorus1))
+        chorus = [dict(lang=lang, title=title, content=chorus)]
+        if chorus1:
+            chorus.append(dict(lang=lang_2, title=title, content=chorus1))
+        bridge = [dict(lang=lang, title=title, content=bridge)]
+        if bridge1:
+            bridge.append(dict(lang=lang_2, title=title, content=bridge1))
+        tag = [dict(lang=lang, title=title, content=tag)]
+        if tag1:
+            tag.append(dict(lang=lang_2, title=title, content=tag1))
+        outro = [dict(lang=lang, title=title, content=outro)]
+        if outro1:
+            outro.append(dict(lang=lang_2, title=title, content=outro1))
+        temp = [dict(name='verse', lyrics=verse), dict(name='pre-chorus',  lyrics=pre_chorus), dict(name='chorus', lyrics=chorus), dict(name='bridge',  lyrics=bridge), dict(name='tag',  lyrics=tag), dict(name='outro',  lyrics=outro)]
+    elif p == 1:
+        temp_l = [dict(name='verse', lyrics=verse), dict(name='pre-chorus', lyrics=pre_chorus),
+                dict(name='chorus', lyrics=chorus), dict(name='bridge', lyrics=bridge), dict(name='tag', lyrics=tag),
+                dict(name='outro', lyrics=outro)]
+        temp = [dict(lang=lang, title=title, lyrics=temp_l)]
+        if lang_2:
+            temp_l = [dict(name='verse', lyrics=verse1), dict(name='pre-chorus', lyrics=pre_chorus1),
+                dict(name='chorus', lyrics=chorus1), dict(name='bridge', lyrics=bridge1), dict(name='tag', lyrics=tag1),
+                dict(name='outro', lyrics=outro1)]
+            temp.append(dict(lang=lang_2, title=title, lyrics=temp_l))
     return temp
 
-def convert_songs():
+def convert_songs(p=0):
     sql = "select s.title, s.author, s.lang, s.lang_2, s.song_key, s.sequence, s.bible_verse, s.lyricist, s.book, s.copyright, s.ccli, s.content, s.song_id as id from songs s order by s.song_id"
     result = dB.run(sql)
     songs = []
     for r in result:
-        ll = get_lyrics_json(r[11], r[2], r[3])
+        ll = get_lyrics_json(p, r[11], r[2], r[0], r[3])
         songs.append({'id': r[12], 'content': json.dumps(ll), 'sequence': convert_sequence(r[5])})
     update_table(songs)
     update_sequence()
