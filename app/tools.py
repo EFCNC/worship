@@ -556,15 +556,31 @@ def get_lyrics_json(p, content, lang, title, lang_2=None):
             outro.append(dict(lang=lang_2, title=title, content=outro1))
         temp = [dict(name='verse', lyrics=verse), dict(name='pre-chorus',  lyrics=pre_chorus), dict(name='chorus', lyrics=chorus), dict(name='bridge',  lyrics=bridge), dict(name='tag',  lyrics=tag), dict(name='outro',  lyrics=outro)]
     elif p == 1:
-        temp_l = [dict(name='verse', lyrics=verse), dict(name='pre-chorus', lyrics=pre_chorus),
-                dict(name='chorus', lyrics=chorus), dict(name='bridge', lyrics=bridge), dict(name='tag', lyrics=tag),
-                dict(name='outro', lyrics=outro)]
+        temp_l = [dict(name='verse', lyrics=verse)]
+        if pre_chorus:
+            temp_l.append(dict(name='pre-chorus', lyrics=pre_chorus))
+        if chorus:
+            temp_l.append(dict(name='chorus', lyrics=chorus))
+        if bridge:
+            temp_l.append(dict(name='bridge', lyrics=bridge))
+        if tag:
+            temp_l.append(dict(name='tag', lyrics=tag))
+        if outro:
+            temp_l.append(dict(name='outro', lyrics=outro))
         temp = [dict(lang=lang, title=title, lyrics=temp_l)]
         if lang_2:
-            temp_l = [dict(name='verse', lyrics=verse1), dict(name='pre-chorus', lyrics=pre_chorus1),
-                dict(name='chorus', lyrics=chorus1), dict(name='bridge', lyrics=bridge1), dict(name='tag', lyrics=tag1),
-                dict(name='outro', lyrics=outro1)]
-            temp.append(dict(lang=lang_2, title=title, lyrics=temp_l))
+            temp_l = [dict(name='verse', lyrics=verse1)]
+            if pre_chorus:
+                temp_l.append(dict(name='pre-chorus', lyrics=pre_chorus1))
+            if chorus:
+                temp_l.append(dict(name='chorus', lyrics=chorus1))
+            if bridge:
+                temp_l.append(dict(name='bridge', lyrics=bridge1))
+            if tag:
+                temp_l.append(dict(name='tag', lyrics=tag1))
+            if outro:
+                temp_l.append(dict(name='outro', lyrics=outro1))
+            temp.append(dict(lang=lang_2, title='', lyrics=temp_l))
     return temp
 
 def convert_songs(p=0):
