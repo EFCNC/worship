@@ -195,24 +195,33 @@
         return Math.max(0, Math.min(1, brightness));
     }
 
+    function apply_slide_background_brightness(horizontalIndex, brightness) {
+        // Column images belong to the horizontal background; media can belong
+        // to a vertical page. Filter each content layer, not the stack wrapper,
+        // so nested backgrounds are not dimmed twice and text stays unchanged.
+        let root = Reveal.getSlide(horizontalIndex);
+        let backgrounds = [Reveal.getSlideBackground(horizontalIndex)];
+        let pages = root ? Array.from(root.children).filter(function(child) {
+            return child.tagName === 'SECTION';
+        }) : [];
+        pages.forEach(function(page, verticalIndex) {
+            backgrounds.push(Reveal.getSlideBackground(horizontalIndex, verticalIndex));
+        });
+        backgrounds.forEach(function(background) {
+            let content = background && background.children ? background.children[0] : null;
+            if (content) {
+                content.style.opacity = '1';
+                content.style.filter = 'brightness(' + brightness + ')';
+            }
+        });
+    }
+
     function apply_background_brightness() {
         if (typeof Reveal === 'undefined' || !slides.length) {
             return;
         }
         slides.forEach(function(slide, horizontalIndex) {
-            let root = document.querySelector('.reveal .slides > section:nth-child(' + (horizontalIndex + 1) + ')');
-            let verticalCount = root ? Array.from(root.children).filter(function(child) {
-                return child.tagName === 'SECTION';
-            }).length : 0;
-            verticalCount = Math.max(1, verticalCount);
-            for (let verticalIndex = 0; verticalIndex < verticalCount; verticalIndex++) {
-                let background = Reveal.getSlideBackground(horizontalIndex, verticalIndex);
-                let backgroundContent = background && background.children ? background.children[0] : null;
-                if (backgroundContent) {
-                    backgroundContent.style.opacity = '1';
-                    backgroundContent.style.filter = 'brightness(' + get_slide_background_brightness(slide) + ')';
-                }
-            }
+            apply_slide_background_brightness(horizontalIndex, get_slide_background_brightness(slide));
         });
     }
 
@@ -503,4 +512,3 @@
             div_content = {};
         }
     });
-
