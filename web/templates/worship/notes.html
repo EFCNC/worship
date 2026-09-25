@@ -289,33 +289,39 @@ h3 {
     */
     function renderSongContent(song, mode) {
         let contentHtml = '';
-        let seenSections = new Set();
         for (let section of song.content) {
-            if (seenSections.has(section.name)) continue; // Skip duplicate sections
-            seenSections.add(section.name);
 
+            if(section.origin_text.length==0) {
+                continue;
+            }
             contentHtml += `<div><span>${section.name}</span>`;
             
-            switch(mode){
+            switch(mode) {
                 case 'view':
-                    contentHtml += `<div class="song">${section.origin_text.replace(/\n/g, '<br/>')}</div>`;
+                    for (let n of section.origin_text) {
+                        contentHtml += `<div class="song">${n.replace(/\n/g, '<br/>')}</div>`;
+                    }
                     break;
 
                 case 'chord':
-                    let chords = section.origin_chord.replace(/\n/g, '<br/>');
-                    if(song.transpose != '0') {
-                        let key_change = parseInt(song.transpose);
-                        chords = chords.replace(/(data-chord=")([^"]+)/g, (match, g1, g2) => {return g1+transposeChord(g2, key_change);});
+                    for (let n of section.origin_chord) {
+                        let chords = n.replace(/\n/g, '<br/>');
+                        if(song.transpose != '0') {
+                            let key_change = parseInt(song.transpose);
+                            chords = chords.replace(/(data-chord=")([^"]+)/g, (match, g1, g2) => {return g1+transposeChord(g2, key_change);});
+                        }
+                        contentHtml += `<div class="song_chord">${chords}</div>`;
                     }
-                    contentHtml += `<div class="song_chord">${chords}</div>`;
                     break;
 
                 case 'bi':
-                    contentHtml += `
-                        <div class="song">
-                            <div class="origin">${section.origin_text.replace(/\n/g, '<br/>')}</div>
-                            <div class="region">${section.region}</div>
-                        </div>`;
+                    for (let n=0;n<section.origin_text.length;n++) {
+                        contentHtml += `
+                            <div class="song">
+                                <div class="origin">${section.origin_text[n].replace(/\n/g, '<br/>')}</div>
+                                <div class="region">${section.region_text[n]}</div>
+                            </div>`;
+                    }
                     break;
             }
             contentHtml += '</div><br/>';

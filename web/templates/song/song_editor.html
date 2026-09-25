@@ -99,18 +99,59 @@
         min-width: 0; /* Prevents flex items from overflowing */
     }
 
+    /* Keeps both layers perfectly bound and clips any stray text bleed */
+    .editor-wrapper {
+        position: relative;
+        width: 100%;
+        overflow: hidden; 
+        border-radius: 4px;
+        background-color: #fff;
+    }
+
+    /* Background mirror layer holding colored highlights */ 
+    .backdrop {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none; /* Let mouse clicks pass straight through to textarea */
+        box-sizing: border-box;
+        overflow: hidden; /* Handled exclusively via JS scroll events */
+        margin: 0;
+        color: #333;
+        background: #fff;
+    }
+
+    /* Top interactive user interface layer */
     .lyrics-area {
+        position: relative;
+        z-index: 2;
         min-height: 500px;
         resize: vertical;
-
-        /* Strict line alignment */
-        line-height: 1.8;       /* Forces equal vertical spacing */
-        font-size: 14px;
-
-        /* Horizontal Scrollbar and preventing overflowrapping */
-        white-space: pre;
-        overflow-wrap: normal;
+        display: block;
+        box-sizing: border-box;
+        margin: 0;
+        
+        /* Make user text invisible to reveal highlighted layer perfectly directly underneath */
+        background: transparent !important;
+        color: transparent !important;
+        caret-color: #000 !important; /* Keep typing cursor visible */
+        
         overflow-x: auto;
+        overflow-y: auto;
+    }
+
+    /* lyrics-area and backdrop structural parameters ust match exactly */
+    .lyrics-area, .backdrop {
+        padding: 8px !important;
+        border: 1px solid #ccc !important;
+        font-family: Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace !important;
+        font-size: 14px !important;
+        line-height: 1.8 !important;
+        white-space: pre !important;
+        letter-spacing: normal !important;
+        word-spacing: normal !important;
     }
 
     /* Highlight the active textarea slightly */
@@ -120,6 +161,18 @@
         outline: none;
     }
 
+    /* Highlight Color Styles */
+    span.hl-verse { color: #3182ce; font-weight: bold; }
+    span.hl-prechorus { color: #d69e2e; font-weight: bold; }
+    span.hl-chorus { color: #38a169; font-weight: bold; }
+    span.hl-postchorus { color: #805ad5; font-weight: bold; }
+    span.hl-bridge { color: #e53e3e; font-weight: bold; }
+    span.hl-interlude { color: #319795; font-weight: bold; }
+    span.hl-vamp { color: #dd6b20; font-weight: bold; }
+    span.hl-tag { color: #ed64a6; font-weight: bold; }
+    span.hl-intro { color: #718096; font-weight: bold; }
+    span.hl-outro { color: #4a5568; font-weight: bold; }
+    
     /* =========================================
         Chords/Tags and Sequence
     ========================================= */
@@ -234,39 +287,46 @@
         </div>
 
         <div class="form-row">
-            <div class="form-group" style="flex: 0 1 120px;">
-                <label>Lang 1</label>
-                <select name="lang">
-                    <option value="" {% if not content.lang %}selected{% endif %}></option>
-                    <option value="en" {% if content.lang == 'en' %}selected{% endif %}>en</option>
-                    <option value="zh" {% if content.lang == 'zh' %}selected{% endif %}>zh</option>
-                    <option value="zh-TW" {% if content.lang == 'zh-TW' %}selected{% endif %}>tw</option>
-                    <option value="pinyin" {% if content.lang == 'pinyin' %}selected{% endif %}>pinyin</option>
-                </select>
-            </div>
-            <div class="form-group" style="flex: 0 1 120px;">
-                <label>Lang 2</label>
-                <select name="lang_2">
-                    <option value="" {% if not content.lang_2 %}selected{% endif %}></option>
-                    <option value="en" {% if content.lang_2 == 'en' %}selected{% endif %}>en</option>
-                    <option value="zh" {% if content.lang_2 == 'zh' %}selected{% endif %}>zh</option>
-                    <option value="zh-TW" {% if content.lang_2 == 'zh-TW' %}selected{% endif %}>zh-TW</option>
-                    <option value="pinyin" {% if content.lang_2 == 'pinyin' %}selected{% endif %}>pinyin</option>
-                </select>
-            </div>
+        
+        <div class="form-group" style="flex: 0 1 120px;">
+            <label>Primary Lang</label>
+            <select name="primary_lang">
+                <option value="{{ content.primary_lang or '' }}" selected>{{ content.primary_lang or '' }}</option>
+            </select>
+        </div>
+
+        <div class="form-group" style="flex: 0 1 120px;">
+            <label>Secondary Lang</label>
+            <select name="secondary_lang">
+                <option value="{{ content.secondary_lang or '' }}" selected>{{ content.secondary_lang or '' }}</option>
+            </select>
+        </div>
+
             <div class="form-group">
                 <label>Author</label>
                 <input name="author" type="text" value="{{ content.author }}"/>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group" style="flex: 100%;">
+                <label>Arrangement Sequence</label>
+                <input name="sequence" type="text" value="{{ content.sequence }}" placeholder="e.g. Intro, V1, PC, C, V2, C, B, Tag, Outro" style="font-family: monospace; letter-spacing: 0.5px;"/>
             </div>
         </div>
 
         <div class="tag-container">
             <label>Structure Helpers (Click to insert):</label><br/>
             <span class="sequence" data-tag="verse">Verse</span>
+            <span class="sequence" data-tag="pre-chorus">Pre-Chorus</span>
             <span class="sequence" data-tag="chorus">Chorus</span>
-            <span class="sequence" data-tag="prechorus">Pre-Chorus</span>
+            <span class="sequence" data-tag="post-chorus">Post-Chorus</span>
             <span class="sequence" data-tag="bridge">Bridge</span>
-            <input name="sequence" type="text" value="{{ content.sequence }}" placeholder="Sequence (V, C, V, C...)" style="width: 200px; margin-left: 10px;"/>
+            <span class="sequence" data-tag="interlude">Interlude</span>
+            <span class="sequence" data-tag="instrumental">Instrumental</span>
+            <span class="sequence" data-tag="vamp">Vamp</span>
+            <span class="sequence" data-tag="tag">Tag</span>
+            <span class="sequence" data-tag="intro">Intro</span>
+            <span class="sequence" data-tag="outro">Outro</span>
         </div>
 
         <div class="tag-container" id="chord_tags">
@@ -281,18 +341,43 @@
         </div>
 
         <div class="lyrics-split-container">
+
+            <!-- Left Pane -->
             <div class="form-group">
-                <label style="color: #3182ce; display: flex; align-items: center; gap: 5px;">
-                    <span>🔵</span> Primary Language
-                </label>
-                <textarea id="lyrics_lang1" class="lyrics-area" spellcheck="false"></textarea>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <div style="display: flex; align-items: center; gap: 10px; flex-grow: 1;">
+                        <label style="color: #3182ce; display: flex; align-items: center; gap: 5px; margin: 0; white-space: nowrap;">
+                            <span>🔵</span>
+                            <select id="pane1_lang_selector" style="padding: 2px 5px; font-weight: bold; border-radius: 4px; border: 1px solid #ccc; min-width: 90px;"></select>
+                        </label>
+                        <input type="text" id="pane1_title" placeholder="Variant Title (e.g. 10,000 Reasons)" style="flex-grow: 1; padding: 4px 8px; font-size: 0.9rem; border: 1px solid #ccc; border-radius: 4px;" />
+                    </div>
+                    <button type="button" class="btn btn-outline" style="padding: 2px 8px; font-size: 0.8rem; margin-left: 10px;" id="btn_add_lang_left">+ Add Lang</button>
+                </div>
+                <div class="editor-wrapper">
+                    <div id="highlights_lang1" class="backdrop"></div>
+                    <textarea id="lyrics_lang1" class="lyrics-area" spellcheck="false"></textarea>
+                </div>
             </div>
+
+            <!-- Right Pane -->
             <div class="form-group">
-                <label style="color: #805ad5; display: flex; align-items: center; gap: 5px;">
-                    <span>🟣</span> Translation
-                </label>
-                <textarea id="lyrics_lang2" class="lyrics-area" spellcheck="false"></textarea>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <div style="display: flex; align-items: center; gap: 10px; flex-grow: 1;">
+                        <label style="color: #805ad5; display: flex; align-items: center; gap: 5px; margin: 0; white-space: nowrap;">
+                            <span>🟣</span>
+                            <select id="pane2_lang_selector" style="padding: 2px 5px; font-weight: bold; border-radius: 4px; border: 1px solid #ccc; min-width: 90px;"></select>
+                        </label>
+                        <input type="text" id="pane2_title" placeholder="Variant Title (e.g. 萬個理由)" style="flex-grow: 1; padding: 4px 8px; font-size: 0.9rem; border: 1px solid #ccc; border-radius: 4px;" />
+                    </div>
+                    <button type="button" class="btn btn-outline" style="padding: 2px 8px; font-size: 0.8rem; margin-left: 10px;" id="btn_add_lang_right">+ Add Lang</button>
+                </div>
+                <div class="editor-wrapper">
+                    <div id="highlights_lang2" class="backdrop"></div>
+                    <textarea id="lyrics_lang2" class="lyrics-area" spellcheck="false"></textarea>
+                </div>
             </div>
+
         </div>
 
         <div class="form-row" style="margin-top:15px;">
@@ -354,11 +439,6 @@
     }
     
     console.log("Normalized Original Data:", originalData);
-
-    // --- Delete Song Logic ---
-    function deleteSong(){
-        console.log ("No clue what to do :)")
-    }
 
     // --- Dynamic Inputs Logic ---
     function addDynamicInput(wrapperId, inputName, placeholder, value = "") {
@@ -459,6 +539,44 @@
         });
     }
 
+    /* =========================================
+        Visual Syntax Highlighting Processor
+    ========================================= */
+    function updateHighlights(textareaId, backdropId) {
+        let text = $('#' + textareaId).val();
+        
+        // Escape native HTML elements to protect the wrapper framework layout
+        text = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+        // Define all valid song structures
+        const structureClasses = {
+            'verse': 'hl-verse', 'chorus': 'hl-chorus', 'bridge': 'hl-bridge',
+            'pre-chorus': 'hl-prechorus', 'prechorus': 'hl-prechorus',
+            'post-chorus': 'hl-postchorus', 'postchorus': 'hl-postchorus',
+            'tag': 'hl-tag', 'vamp': 'hl-vamp', 'intro': 'hl-intro',
+            'outro': 'hl-outro', 'interlude': 'hl-interlude', 'instrumental': 'hl-interlude'
+        };
+
+        // Single pass for ANY [bracketed] text
+        text = text.replace(/\[([^\]]+)\]/gi, (match, p1) => {
+            const tag = p1.toLowerCase().trim();
+            const baseTag = tag.replace(/\s*\d+$/, ''); // Strip numbers (e.g., "Verse 1" -> "verse")
+            
+            if (structureClasses[baseTag]) {
+                // Match found: highlight as a structural header
+                return `<span class="${structureClasses[baseTag]}">[${p1}]</span>`;
+            } else {
+                // No match found: highlight as an inline chord (Bold Blue with soft background)
+                return `<span style="color: #2b6cb0; font-weight: bold; background: rgba(43, 108, 176, 0.1);">[${p1}]</span>`;
+            }
+        });
+
+        // Fix textarea trailing newline scrolling tracking offset bug
+        if (text.endsWith('\n')) text += ' ';
+        
+        $('#' + backdropId).html(text);
+    }
+
     // --- Editor Interaction ---
     function insertAtCursor(tag, isPaired) {
         const txtarea = lastFocusedTextarea || document.getElementById('lyrics_lang1');
@@ -469,85 +587,179 @@
         const sel = txtarea.value.substring(start, finish);
 
         let textToInsert = isPaired 
-            ? `<${tag}>\n${sel}\n</${tag}>` 
+            ? `[${tag}]\n${sel}` 
             : `[${tag}] `;
 
         if (!document.execCommand('insertText', false, textToInsert)) {
             const value = txtarea.value;
             txtarea.value = value.substring(0, start) + textToInsert + value.substring(finish);
         }
+
+        // Trigger visual markup render recalculation immediately after insertion
+        const targetBackdropId = txtarea.id === 'lyrics_lang1' ? 'highlights_lang1' : 'highlights_lang2';
+        updateHighlights(txtarea.id, targetBackdropId);
     }
     
-    // --- Pulling and Loading Lyrics from Database ---
-    function loadAndSplitLyrics() {
-        const rawContent = (originalData.lyrics || "").trim();
-        if (!rawContent) return;
+    // --- In-Memory State for Concept 1 ---
+    let contentState = [];
+    let activeLang1 = '';
+    let activeLang2 = '';
 
-        let lang1Result = "";
-        let lang2Result = "";
+    // Converts JSON array [{name: "verse", lyrics: ["..."]}] back to textarea format
+    function renderLyricsToText(langObj) {
+        if (!langObj || !langObj.lyrics) return "";
+            let text = "";
+            langObj.lyrics.forEach(section => {
+                // Check if there are multiple parts for this specific section
+                const isMultiple = section.lyrics.length > 1;
+                
+                section.lyrics.forEach((lyricText, idx) => {
+                    if(lyricText) {
+                        // Conditionally append the number based on the length
+                        const tag = isMultiple ? `[${section.name} ${idx + 1}]` : `[${section.name}]`;
+                        text += `${tag}\n${lyricText}\n\n`;
+                    }
+                });
+            });
+        return text.trim();
+    }
 
-        const sectionRegex = /<([^>]+)>([\s\S]*?)<\/\1>/g;
+    // Converts textarea format back to JSON array [{name: "verse", lyrics: ["..."]}]
+    function parseTextToLyrics(rawText) {
+        const sectionRegex = /(?:^|\n)\[([a-zA-Z\-]+)\s*(\d+)?\][ \t]*\n([\s\S]*?)(?=\n\[[a-zA-Z\-]+\s*\d*\][ \t]*(?:\n|$)\vert{}$)/g;
         let match;
+        let sectionsMap = {};
 
-        while ((match = sectionRegex.exec(rawContent)) !== null) {
-            const tagName = match[1];
-            const innerContent = match[2];
+        while ((match = sectionRegex.exec(rawText)) !== null) {
+            let sectionName = match[1].toLowerCase();
+            let textBody = match[3].trim(); 
 
-            let p1 = innerContent;
-            let p2 = "";
-
-            if (innerContent.includes('[region 2]')) {
-                const parts = innerContent.split('[region 2]');
-                p1 = parts[0].trim();
-                p2 = parts[1].trim();
-            }
-
-            lang1Result += `<${tagName}>\n${p1}\n</${tagName}>\n\n`;
-            lang2Result += `<${tagName}>\n${p2}\n</${tagName}>\n\n`;
+            // Initialize the array before determining the index
+            if (!sectionsMap[sectionName]) sectionsMap[sectionName] = [];
+            
+            // If a number is explicitly provided (e.g., [verse 2]), use it (subtract 1 for 0-index). 
+            // If no number is provided (e.g., [verse]), simply append to the end of the existing array.
+            let sectionIdx = match[2] ? parseInt(match[2]) - 1 : sectionsMap[sectionName].length;
+            
+            sectionsMap[sectionName][sectionIdx] = textBody;
         }
 
-        if (lang1Result === "") {
-            $('#lyrics_lang1').val(rawContent);
-        } else {
-            $('#lyrics_lang1').val(lang1Result.trim());
-            $('#lyrics_lang2').val(lang2Result.trim());
+        let finalLyrics = [];
+        for (let name in sectionsMap) {
+            let arr = Array.from(sectionsMap[name] || []).map(x => x || "");
+            if (arr.length > 0) finalLyrics.push({ name: name, lyrics: arr });
+        }
+        return finalLyrics;
+    }
+
+    // Keep dropdowns matching memory
+    function updatePaneDropdowns() {
+        let optionsHtml = '';
+        
+        // Empty option for the top metadata dropdowns so they aren't forced to a value
+        let metaOptionsHtml = '<option value=""></option>'; 
+        
+        contentState.forEach(item => {
+            let opt = `<option value="${item.lang}">${item.lang}</option>`;
+            optionsHtml += opt;
+            metaOptionsHtml += opt;
+        });
+        
+        // Update the editor pane selectors (preserves what you are currently viewing)
+        let val1 = $('#pane1_lang_selector').val();
+        let val2 = $('#pane2_lang_selector').val();
+        $('#pane1_lang_selector').html(optionsHtml).val(val1);
+        $('#pane2_lang_selector').html(optionsHtml).val(val2);
+
+        // Update the main form metadata selectors (preserves what was saved to the DB)
+        let primaryVal = $('select[name="primary_lang"]').val();
+        let secondaryVal = $('select[name="secondary_lang"]').val();
+        $('select[name="primary_lang"]').html(metaOptionsHtml).val(primaryVal);
+        $('select[name="secondary_lang"]').html(metaOptionsHtml).val(secondaryVal);
+        
+        // Apply the gray-out logic
+        updateDisabledLanguages();
+    }
+
+    // Disables the selected language in the sibling dropdown to prevent duplicates
+    function updateDisabledLanguages() {
+        // Handle Editor Panes
+        let pane1Val = $('#pane1_lang_selector').val();
+        let pane2Val = $('#pane2_lang_selector').val();
+
+        $('#pane1_lang_selector option').each(function() {
+            $(this).prop('disabled', $(this).val() === pane2Val && pane2Val !== "");
+        });
+        $('#pane2_lang_selector option').each(function() {
+            $(this).prop('disabled', $(this).val() === pane1Val && pane1Val !== "");
+        });
+
+        // Handle Main Metadata Dropdowns
+        let primaryVal = $('select[name="primary_lang"]').val();
+        let secondaryVal = $('select[name="secondary_lang"]').val();
+
+        $('select[name="primary_lang"] option').each(function() {
+            $(this).prop('disabled', $(this).val() === secondaryVal && secondaryVal !== "");
+        });
+        $('select[name="secondary_lang"] option').each(function() {
+            $(this).prop('disabled', $(this).val() === primaryVal && primaryVal !== "");
+        });
+    }
+
+    // State Syncing
+    function syncPaneToState(paneNum) {
+        let currentLang = paneNum === 1 ? activeLang1 : activeLang2;
+        if (!currentLang) return;
+        
+        let target = contentState.find(c => c.lang === currentLang);
+        if (target) {
+            // Save the title and lyrics back to the in-memory array
+            target.title = $(`#pane${paneNum}_title`).val();
+            target.lyrics = parseTextToLyrics($(`#lyrics_lang${paneNum}`).val());
         }
     }
 
-    // --- Combining Lyrics back into a single content string for submission ---
-    function combineLyrics() {
-        const lang1Raw = $('#lyrics_lang1').val();
-        const lang2Raw = $('#lyrics_lang2').val();
-
-        const sectionRegex = /<([^>]+)>([\s\S]*?)<\/\1>/g;
+    function loadPane(paneNum, targetLang) {
+        syncPaneToState(paneNum); 
         
-        let combinedResult = "";
-        let match;
+        if (paneNum === 1) activeLang1 = targetLang;
+        else activeLang2 = targetLang;
+        
+        $(`#pane${paneNum}_lang_selector`).val(targetLang);
+        
+        // Load the title and lyrics from memory into the UI
+        let data = contentState.find(c => c.lang === targetLang);
+        $(`#pane${paneNum}_title`).val(data ? (data.title || '') : '');
+        $(`#lyrics_lang${paneNum}`).val(data ? renderLyricsToText(data) : '');
+        
+        updateHighlights(`lyrics_lang${paneNum}`, `highlights_lang${paneNum}`);
+    }
 
-        while ((match = sectionRegex.exec(lang1Raw)) !== null) {
-            const tagName = match[1];
-            const content1 = match[2].trim();
+    function initContentState() {
+        contentState = JSON.parse(JSON.stringify(originalData.content || []));
+        if (contentState.length === 0) contentState.push({ lang: $('select[name="primary_lang"]').val() || 'en', lyrics: [] });
 
-            const escapedTagName = tagName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            const secondRegex = new RegExp(`<${escapedTagName}>([\\s\\S]*?)<\\/${escapedTagName}>`, 'g');
-            const match2 = secondRegex.exec(lang2Raw);
-            
-            const content2 = match2 ? match2[1].trim() : "";
+        updatePaneDropdowns();
 
-            combinedResult += `<${tagName}>\n${content1}\n[region 2]\n${content2}\n</${tagName}>\n\n`;
-        }
-
-        return combinedResult.trim();
+        // Default load primary/secondary from metadata
+        let pLang = $('select[name="primary_lang"]').val() || contentState[0].lang;
+        let sLang = $('select[name="secondary_lang"]').val() || (contentState[1] ? contentState[1].lang : contentState[0].lang);
+        
+        loadPane(1, pLang);
+        loadPane(2, sLang);
     }
 
     function getCurrentState() {
+        syncPaneToState(1); // Force save what's currently in textareas to memory
+        syncPaneToState(2);
+
         return {
             id: Number(songId),
             title: $('input[name="title"]').val(),
             song_key: $('input[name="song_key"]').val(),
             book: $('input[name="book"]').val(),
-            lang: $('select[name="lang"]').val(),
-            lang_2: $('select[name="lang_2"]').val(),
+            primary_lang: $('select[name="primary_lang"]').val(), // Updated
+            secondary_lang: $('select[name="secondary_lang"]').val(), // Updated
             author: $('input[name="author"]').val(),
             sequence: $('input[name="sequence"]').val(),
             copyright: $('input[name="copyright"]').val(),
@@ -561,7 +773,7 @@
             // Grabs each textarea block whole without splitting into individual lines
             abc: $('textarea[name="abc[]"]').map(function(){ return this.value.trim(); }).get().filter(sheet => sheet !== ""),
             
-            content: combineLyrics() 
+            content: contentState
         };
     }
 
@@ -580,41 +792,83 @@
         return changedFields;
     }
 
-    function syncScrollbars(){
+    function syncScrollbars() {
         const $left = $('#lyrics_lang1');
         const $right = $('#lyrics_lang2');
+        
+        // Grab native DOM elements for high-frequency properties
+        const leftBackdrop = document.getElementById('highlights_lang1');
+        const rightBackdrop = document.getElementById('highlights_lang2');
+        const leftDOM = document.getElementById('lyrics_lang1');
+        const rightDOM = document.getElementById('lyrics_lang2');
 
         let isSyncingLeft = false;
         let isSyncingRight = false;
 
         $left.on('scroll', function() {
+            leftBackdrop.scrollTop = this.scrollTop;
+            leftBackdrop.scrollLeft = this.scrollLeft;
+
             if (!isSyncingLeft) {
                 isSyncingRight = true;
-                $right.scrollTop(this.scrollTop);
+                rightDOM.scrollTop = this.scrollTop;
+                rightBackdrop.scrollTop = this.scrollTop;
             }
             isSyncingLeft = false;
         });
 
         $right.on('scroll', function() {
+            rightBackdrop.scrollTop = this.scrollTop;
+            rightBackdrop.scrollLeft = this.scrollLeft;
+
             if (!isSyncingRight) {
                 isSyncingLeft = true;
-                $left.scrollTop(this.scrollTop);
+                leftDOM.scrollTop = this.scrollTop;
+                leftBackdrop.scrollTop = this.scrollTop;
             }
             isSyncingRight = false;
         });
     }
 
+    // --- Sync Textarea Resizing ---
+    function syncResizing() {
+        const el1 = document.getElementById('lyrics_lang1');
+        const el2 = document.getElementById('lyrics_lang2');
+
+        if (!el1 || !el2) return;
+
+        let isSyncing = false;
+
+        const observer = new ResizeObserver(entries => {
+            // Prevent an infinite loop of them triggering each other
+            if (isSyncing) return;
+
+            for (let entry of entries) {
+                const target = entry.target;
+                const newHeight = target.offsetHeight + 'px'; 
+                const other = target === el1 ? el2 : el1;
+
+                // Only update if they are actually out of sync
+                if (other.style.height !== newHeight) {
+                    isSyncing = true;
+                    other.style.height = newHeight;
+                    
+                    // Release the lock after the browser paints the new height
+                    requestAnimationFrame(() => {
+                        isSyncing = false;
+                    });
+                }
+            }
+        });
+
+        observer.observe(el1);
+        observer.observe(el2);
+    }
+
     var lastFocusedTextarea = null;
     
     // --- Detect Popup Mode ---
-    function isInPopup() {
-        // Check if we're inside a jQuery dialog
-        return $(window).parent() !== window || $('#dialog').length > 0 || 
-               window !== window.parent || $('body').closest('.ui-dialog').length > 0;
-    }
-
-    // --- Event Listeners ---
-    $(document).ready(function() {
+    function initDialogModes() {
         // Detect if we're in popup/dialog mode
         const inPopup = window !== window.parent || parent.document.body.classList.contains('popup-mode');
         if (inPopup) {
@@ -632,23 +886,72 @@
                 $('body').addClass('dialog-mode');
             }
         }, 100);
+    }
+
+    function handleAddLanguage(btnId) {
+        let paneNum = btnId.includes('left') ? 1 : 2;
+        let newLang = prompt("Enter a new language code (e.g., 'en', 'zh', 'zh-TW', 'en2'):");
         
+        if (!newLang || newLang.trim() === "") return;
+        newLang = newLang.trim();
+        
+        if (contentState.find(c => c.lang === newLang)) {
+            alert("This language is already loaded.");
+            return;
+        }
+        
+        contentState.push({ lang: newLang, title: '', lyrics: [] });
+        updatePaneDropdowns();
+        loadPane(paneNum, newLang);
+        updateDisabledLanguages();
+    }
+
+    // --- Event Listeners ---
+    $(document).ready(function() {
+        // --- Setup Environment and State ---
+        initDialogModes();
         // Populate the dynamic fields (video and score) and textareas (lyrics)
         populateDynamicFields();
-        loadAndSplitLyrics();
+        initContentState();
+        // Update the test baseline to use the new contentState object directly
+        originalData.content = JSON.parse(JSON.stringify(contentState));
 
-        // TEST: Capture the generated 'content' layout right now so the baseline matches perfectly
-        originalData.content = combineLyrics();
+        // --- Visuals/Formatting ---
+        // Initialize and fire up structural helper highlights on primary load
+        updateHighlights('lyrics_lang1', 'highlights_lang1');
+        updateHighlights('lyrics_lang2', 'highlights_lang2');
+        updateSmartChordLabels();
+        syncScrollbars();
+        syncResizing();
 
-        lastFocusedTextarea = document.getElementById('lyrics_lang1');
+        // --- Dropdown and Language Listners ---
+        $('#pane1_lang_selector').change(function() { 
+            loadPane(1, $(this).val()); 
+            updateDisabledLanguages(); 
+        });
+        $('#pane2_lang_selector').change(function() { 
+            loadPane(2, $(this).val()); 
+            updateDisabledLanguages(); 
+        });
+        $('select[name="primary_lang"], select[name="secondary_lang"]').change(function() {
+            updateDisabledLanguages();
+        });
+        $('#btn_add_lang_left, #btn_add_lang_right').click(function() {
+            handleAddLanguage($(this).attr('id'));
+        });
+
+        // --- Text and Typing Listeners ---
+        // Sync titles to memory as you type so they save to the JSON
+        $('#pane1_title').on('input', function() { syncPaneToState(1); });
+        $('#pane2_title').on('input', function() { syncPaneToState(2); });
+        // Watch formatting inputs to update text styling dynamically on modification
+        $('#lyrics_lang1').on('input', function() { updateHighlights('lyrics_lang1', 'highlights_lang1'); });
+        $('#lyrics_lang2').on('input', function() { updateHighlights('lyrics_lang2', 'highlights_lang2'); });
+        // Focus for smart insert buttons
         $('#lyrics_lang1, #lyrics_lang2').on('focus', function() {
             lastFocusedTextarea = this;
         });
-        
-        updateSmartChordLabels();
         $('input[name="song_key"]').on('input', updateSmartChordLabels);
-
-        syncScrollbars();
 
         $('.chord').click(function() {
             const note = getNoteFromKey(parseInt($(this).data('num')));
@@ -660,6 +963,7 @@
             insertAtCursor($(this).data('tag'), true);
         });
 
+        // --- Form Specific Buttons ---
         // Cancel
         $('#btn_cancel').click(function(e) {
             window.location.href = "/song/list";
@@ -669,6 +973,16 @@
         $('#btn_save').click(function(e) {
             e.preventDefault();
             performSave();
+        });
+
+        // --- Unsaved Changes Warning ---
+        $(window).on('beforeunload', function() {
+            const currentState = getCurrentState();
+            const changedFields = getChangedFields(originalData, currentState);
+
+            if (changedFields.length > 0) {
+                return "You have unsaved changes. Are you sure you want to leave?";
+            }
         });
     });
     
@@ -683,6 +997,7 @@
         // Check if the object has any keys
         if (changedFields.length === 0) {
             alert("No changes detected.");
+            console.log("currentState:", currentState);
             return;
         }
 
@@ -698,12 +1013,12 @@
         submit_song(url, JSON.stringify(changedFields))
             .done(function(response) {
                 alert("Song saved successfully!");
-                window.location.href = "/song/list";
+                //window.location.href = "/song/list";
             })
             .fail(function(jqXHR) {
                 if (jqXHR.status === 200) {
                     alert("Song saved successfully!");
-                    window.location.href = "/song/list";
+                    //window.location.href = "/song/list";
                 } else {
                     alert("Error saving song: " + (jqXHR.responseText || "Unknown error"));
                 }
@@ -712,8 +1027,8 @@
 
     function deleteSong() {
         if(confirm("Are you sure you want to delete this song?")) {
-            id =$('input[name="id"').val();
-            url = API_URL + 'song/' + id;
+            let id = $('input[name="id"]').val();
+            let url = API_URL + 'song/' + id;
             $.ajax({
                 url: url,
                 type: 'DELETE',
