@@ -770,7 +770,7 @@
     // init sortable, triggered after the worship div is loaded
     function init() {
         $("#songs").sortable({
-            cancel: 'input, textarea, button, select, option',
+            cancel: 'input, textarea, button, select, option, .song-title',
             update: function () {
                 checkActionButtons();
             }
