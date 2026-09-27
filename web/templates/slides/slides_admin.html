@@ -189,6 +189,11 @@
             border-left-color: #f57c00;
         }
 
+        #slide_composer,
+        #slide_composer * {
+            box-sizing: border-box;
+        }
+
         #slide_composer {
             position: fixed;
             inset: 0;
@@ -205,8 +210,8 @@
         }
 
         .slide-composer-card {
-            width: min(900px, 94vw);
-            max-height: 94vh;
+            width: min(900px, 100%);
+            max-height: 100%;
             overflow-y: auto;
             padding: 20px;
             border: 1px solid #5f536d;
@@ -231,6 +236,8 @@
         }
 
         .slide-composer-name input {
+            width: 100%;
+            min-width: 0;
             padding: 10px;
             border: 1px solid #5f536d;
             border-radius: 6px;
@@ -244,7 +251,8 @@
             display: grid;
             grid-template-rows: 1fr 1fr;
             align-items: center;
-            width: 100%;
+            width: min(100%, 80vh);
+            margin-inline: auto;
             aspect-ratio: 16 / 9;
             overflow: hidden;
             border: 2px solid #826fee;
@@ -286,19 +294,22 @@
 
         .slide-composer-inputs {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
             gap: 14px;
             margin-top: 16px;
         }
 
         .slide-composer-inputs label {
             display: grid;
+            min-width: 0;
             gap: 6px;
             font-family: var(--font-family-base);
             font-weight: 600;
         }
 
         .slide-composer-inputs textarea {
+            width: 100%;
+            min-width: 0;
             min-height: 100px;
             resize: vertical;
             padding: 10px;
@@ -498,6 +509,7 @@
         bg_url = '';
         bg_brightness = 1;
         background_image_changed = false;
+        background_slide = null;
         a_type = '';
         admin_toast_timer = null;
         slide_composer_state = null;
@@ -569,6 +581,26 @@
             $('#edit_btn, #image_bg').hide();
             a_type = '';
             background_image_changed = false;
+            background_slide = null;
+        }
+
+        function sync_background_panel() {
+            if (!$('#image_bg').is(':visible') || !slides[pos] || background_slide === slides[pos]) {
+                return;
+            }
+            // Discard an unconfirmed preview on the old column before loading
+            // the new column's saved settings. Subpage navigation keeps it.
+            var previousIndex = slides.indexOf(background_slide);
+            if (previousIndex !== -1) {
+                update_current_bg(previousIndex, background_slide.style.background || '',
+                    get_slide_background_brightness(background_slide));
+            }
+            background_slide = slides[pos];
+            bg_url = background_slide.style.background || '';
+            bg_brightness = get_slide_background_brightness(background_slide);
+            set_background_slider(bg_brightness * 10);
+            finish_background_action('', 'cancelled');
+            update_current_bg();
         }
 
         function restore_background_preview(showMessage) {
@@ -631,6 +663,7 @@
             toggle_panel('image_bg');
             if ($('#image_bg').is(":visible")) {
                 a_type = 'bg';
+                background_slide = slides[pos];
                 background_image_changed = false;
                 bg_url = slides[pos].style.background || '';
                 bg_brightness = get_slide_background_brightness(slides[pos]);
@@ -1120,17 +1153,17 @@
             a_type = 'bg';
         });
 
-        function update_current_bg() {
+        function update_current_bg(horizontalIndex = pos, backgroundUrl = bg_url, brightness = bg_brightness) {
             if (typeof update_matrix_background_preview === 'function') {
-                update_matrix_background_preview(pos, bg_url, bg_brightness);
+                update_matrix_background_preview(horizontalIndex, backgroundUrl, brightness);
             }
-            apply_slide_background_brightness(pos, bg_brightness);
-            var slide_bg = Reveal.getSlideBackground(pos);
+            apply_slide_background_brightness(horizontalIndex, brightness);
+            var slide_bg = Reveal.getSlideBackground(horizontalIndex);
             if (!slide_bg || !slide_bg.children.length) {
                 return;
             }
             var backgroundContent = slide_bg.children[0];
-            backgroundContent.style.backgroundImage = bg_url ? 'url("' + bg_url + '")' : 'none';
+            backgroundContent.style.backgroundImage = backgroundUrl ? 'url("' + backgroundUrl + '")' : 'none';
         }
 
         function cancel() {

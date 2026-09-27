@@ -457,6 +457,9 @@
     function change_slide() {
         show_data(pos);
         show_msg();
+        if (mode === 'admin' && typeof sync_background_panel === 'function') {
+            sync_background_panel();
+        }
         if(mode=='lead') {
             load_preview();
         }

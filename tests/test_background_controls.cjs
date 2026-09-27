@@ -11,6 +11,9 @@ const presentationScript = fs.readFileSync(path.join(root, 'web/static/js/presen
 const brightnessFunctions = presentationScript.slice(
     presentationScript.indexOf('    function get_slide_background_brightness('),
     presentationScript.indexOf('    function load_slides('));
+const changeSlideFunction = presentationScript.slice(
+    presentationScript.indexOf('    function change_slide('),
+    presentationScript.indexOf('    // contentEditable'));
 const presentation = {
     data: [
         { style: { background: 'first.png', brightness: 0.8, opacity: 1 } },
@@ -67,6 +70,7 @@ function editor() {
             },
         }, console, setTimeout: () => 1, clearTimeout() {},
         load_slides() {},
+        show_data() {}, show_msg() {},
         Reveal: {
             on() {}, initialize() {},
             getSlide: h => ({ children: backgrounds[h].pages.map(() => ({ tagName: 'SECTION' })) }),
@@ -78,6 +82,7 @@ function editor() {
         },
     });
     vm.runInContext(brightnessFunctions, context);
+    vm.runInContext(changeSlideFunction, context);
     vm.runInContext(script.replace('{{ presentation|tojson }}', JSON.stringify(presentation)), context);
     ready();
     context.show_background();
@@ -85,6 +90,8 @@ function editor() {
         context, saves, preview, backgrounds,
         controlsVisible: () => $('#edit_btn').visible,
         sliderValue: () => $('#custom-handle').value,
+        panelVisible: () => $('#image_bg').visible,
+        select(h, v = 0) { context.pos = h; context.order = v; context.change_slide(); },
         brightness(value) { slider.slide({}, { value }); },
         image(url) { handlers.get('click:#image_icons img').call({ title: url }); },
     };
@@ -177,4 +184,44 @@ test('preview and cancel update the shared column image instead of adding a subp
         assert.equal(page.children[0].style.backgroundImage, undefined);
         assert.equal(page.children[0].style.filter, 'brightness(0.8)');
     });
+});
+
+test('switching slides updates the open slider and saves subsequent changes to the new slide', () => {
+    const ui = editor();
+    ui.select(1);
+    assert.equal(ui.panelVisible(), true);
+    assert.equal(ui.sliderValue(), 5);
+    assert.equal(ui.context.bg_url, 'second.png');
+    assert.equal(ui.controlsVisible(), false);
+    ui.brightness(2);
+    ui.context.apply('one');
+    assert.deepEqual(ui.saves[0].map(slide => slide.style.brightness), [0.8, 0.2]);
+    ui.select(0);
+    assert.equal(ui.sliderValue(), 8);
+    ui.select(1);
+    assert.equal(ui.sliderValue(), 2);
+});
+
+test('switching columns restores pending previews without carrying them to the new slide', () => {
+    const ui = editor();
+    ui.image('pending.png');
+    ui.brightness(3);
+    ui.select(1);
+    assert.equal(ui.preview.style.filter, 'brightness(0.8)');
+    assert.equal(ui.preview.style.backgroundImage, 'url("first.png")');
+    assert.equal(ui.sliderValue(), 5);
+    assert.equal(ui.context.background_image_changed, false);
+    assert.equal(ui.controlsVisible(), false);
+    assert.equal(ui.saves.length, 0);
+});
+
+test('switching subpages keeps the same column brightness preview pending', () => {
+    const ui = editor();
+    ui.brightness(3);
+    ui.select(0, 1);
+    assert.equal(ui.sliderValue(), 3);
+    assert.equal(ui.controlsVisible(), true);
+    assert.equal(ui.preview.style.filter, 'brightness(0.3)');
+    ui.context.cancel();
+    assert.equal(ui.sliderValue(), 8);
 });
