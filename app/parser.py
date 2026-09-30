@@ -1,5 +1,6 @@
 import xml.etree.ElementTree as ET
 import re
+import json
 
 def parse_lyrics_for_import(content):
     try:
@@ -25,36 +26,74 @@ def parse_lyrics_for_import(content):
         return [content, '']
 
 def parse_lyrics(content, sequence):
+
+    try:
+        parsed_data = json.loads(content)
+        print(parsed_data)
+    except (TypeError, ValueError):
+        return []
+
+    if not parsed_data:
+        return []
+    
     lyrics_ = []
-    lyrics = re.findall('<([0-9a-zA-Z\-]+)>([^<]+)<\/[0-9a-zA-Z\-]+>', content)
-    for l in lyrics:
-        c = re.sub('\r?\n', '<br/>', l[1])
-        origin = re.sub('\[region 2\].+', '', c, flags=re.IGNORECASE)
-        origin = re.sub('(^<br\/?>)|(<br\/?>$)', '', origin)
-        origin = origin.replace("''", "'")
-        region = None
-        if re.search('.+\[region 2\]', c, flags=re.IGNORECASE):
-            region = re.sub('.+\[region 2\]', '', c, flags=re.IGNORECASE)
-            region = re.sub('(^<br\/?>)|(<br\/?>$)', '', region)
-            region = region.replace("''", "'")
-        s = l[0]
-        if re.match('.+\d', s):
-            s = s[0]+s[-1]
-        else:
-            s = s[0]
-        lyrics_.append({'name': s, 'origin': origin, 'region': region if region else '',
-                        'origin_text': re.sub('(\[[^]]+\])', '', origin),
-                        'region_text': re.sub('(\[[^]]+\])', '', region) if region else '',
-                        'origin_chord': parse_chord(origin)})
-    sequence = sequence.split(',')
-    sequence = [next((y for y in lyrics_ if y['name'].lower() == x.lower()), '') for x in sequence]
-    return sequence
+
+    for lang_block in parsed_data:
+        processed_sections = []
+
+        for section in lang_block.get('lyrics', []):
+            lines = [re.sub(r'(^\n)|(\n$)', '', x) for x in section.get('lyrics', [])]
+            
+            processed_sections.append({
+                "name": section.get("name", ""),
+                "lyrics": lines,
+                "lyrics_text": [re.sub(r'(\[[^]]+\])', '', x) for x in lines],
+                "lyrics_chord": parse_chord(lines)
+            })
+            
+        lyrics_.append({
+            "lang": lang_block.get('lang', ''),
+            "lyrics": processed_sections
+        })
+        
+    return lyrics_
+
+    # lyrics_ = []
+    # lyrics = json.loads(content)
+    # for l in lyrics:
+    #     origin = [re.sub('(^\\n)|(\\n$)', '', x) for x in l['origin']]
+    #     region = [re.sub('(^\\n)|(\\n$)', '', x) for x in l['region']]
+    #     temp = dict(
+    #         name=l['name'], 
+    #         origin=origin, 
+    #         region=region, 
+    #         origin_text=[re.sub('(\[[^]]+\])', '', x) for x in origin], 
+    #         origin_chord=parse_chord(origin),
+    #         region_text=[re.sub('(\[[^]]+\])', '', x) for x in region]
+    #     )
+    #     lyrics_.append(temp)
+    # return lyrics_
+    # sections = ['verse', 'pre-chorus', 'chorus', 'bridge', 'tag', 'vamp', 'intro', 'outro', 'finish']
+    # for name in sections:
+    #     if name in lyrics['origin']:
+    #         origin = [re.sub('\r?\n', '<br/>', x) for x in lyrics['origin'][name]]
+    #         region = ''
+    #         if lyrics['region']:
+    #             region = [re.sub('\r?\n', '<br/>', x) for x in lyrics['region'][0][name]]
+    #         temp = dict(name=name, origin=origin, region=region, origin_text=[re.sub('(\[[^]]+\])', '', x) for x in origin], origin_chord=parse_chord(origin), region_text=[re.sub('(\[[^]]+\])', '', x) for x in region])
+    #         lyrics_.append(temp)
+    # #sequence = sequence.split(',')
+    # #sequence = [next((y for y in lyrics_ if y['name'].lower() == x.lower()), '') for x in sequence]
+    # return lyrics_
 
 def parse_chord(content):
     # chunk approach
-    chords = re.sub(r'\[([^]]+)\](\s?\w+)?(\s?)', '<span class="chunk" data-chord="\\1">\\2</span>\\3', content)
-    chords = re.sub('">([^<]*)<\/span>', add_space, chords)
-    return chords
+    chords_ = []
+    for c in content:
+        chords = re.sub(r'\[([^]]+)\](\s?\w+)?(\s?)', '<span class="chunk" data-chord="\\1">\\2</span>\\3', c)
+        chords = re.sub('">([^<]*)<\/span>', add_space, chords)
+        chords_.append(chords)
+    return chords_
 
 def add_space(obj):
     l = len(obj[1])
