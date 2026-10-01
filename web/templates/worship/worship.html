@@ -481,11 +481,23 @@
         const d1 = new Date(date.replace('-', '/'));
         let roster_html = '<div id="current_roster" name="' + id + '_' + date + '" style="display: flex; flex-direction: column; gap: 8px;">';
         
+        let leaderCount = 0;
+
         for (let x in roster) {
+            const isLeader = roster[x].inst_name === "Leader";
+
+            if(isLeader) {
+                if(leaderCount >= 1) {
+                    continue; // Skip this entry if it's a leader and we already have one
+                }
+                leaderCount++;
+                inst = inst.filter((item, index) => item.name !== "Leader"); // Remove "Leader" from the dropdown options
+            }
+
             let html = '';
             const $div = $('<div class="popup-form-group"><label style="width: 100px;">' + escapeHtml(roster[x].inst_name) + ':</label></div>');
             
-            inst = inst.filter((item, index) => item.id != roster[x].id);
+            // inst = inst.filter((item, index) => item.id != roster[x].id);
             for (let t in team) {
                 if (team[t].id == roster[x].user_id) {
                     html += '<option selected value="' + roster[x].id + '_' + roster[x].user_id + '">' + escapeHtml(roster[x].user_name) + ' (' + escapeHtml(roster[x].user_name_2) + ')</option>';
