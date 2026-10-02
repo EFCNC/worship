@@ -25,14 +25,18 @@ def parse_lyrics_for_import(content):
         print(e)
         return [content, '']
 
-def parse_lyrics(content, sequence):
+def parse_lyrics(content, sequence, lang):
 
     lyrics_ = []
-    lyrics = json.loads(content)
-    for l in lyrics:
-        origin = [re.sub('(^\\n)|(\\n$)', '', x) for x in l['origin']]
-        region = [re.sub('(^\\n)|(\\n$)', '', x) for x in l['region']]
-        temp = dict(name=l['name'], origin=origin, region=region, origin_text=[re.sub('(\[[^]]+\])', '', x) for x in origin], origin_chord=parse_chord(origin), region_text=[re.sub('(\[[^]]+\])', '', x) for x in region])
+    content = json.loads(content)
+    return content
+    for c in content:
+        for l in c["lyrics"]:
+            if l['lang'] == lang:
+                origin = [re.sub('(^\\n)|(\\n$)', '', x) for x in l['content']]
+            else:
+                region = [re.sub('(^\\n)|(\\n$)', '', x) for x in l['content']]
+        temp = dict(name=c['name'], origin=origin, region=region, origin_text=[re.sub('(\[[^]]+\])', '', x) for x in origin], origin_chord=parse_chord(origin), region_text=[re.sub('(\[[^]]+\])', '', x) for x in region])
         lyrics_.append(temp)
     return lyrics_
     sections = ['verse', 'pre-chorus', 'chorus', 'bridge', 'tag', 'vamp', 'intro', 'outro', 'finish']

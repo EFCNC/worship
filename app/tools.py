@@ -386,10 +386,17 @@ def match_bible_books(book):
         return full_name.index((book.upper()))
 
 def update_table(old):
+    #sql = "alter table presentation add langs TEXT"
+    #result = dB.run(sql)
     for r in old:
         print('update {} with sequence {}'.format(r['id'], r['sequence']))
         sql = "update songs set content=?, sequence=? where song_id=?"
         dB.run_para(sql, [str(r['content']), r['sequence'], r['id']])
+        lang_txt = r['lang']
+        if r['lang_2']:
+            lang_txt += ',{}'.format(r['lang_2'])
+        sql = 'update presentation set version="{}" where song_id=?'.format(lang_txt)
+        dB.run_para(sql, r['id'])
 
 def update_sequence():
     sql = "select song_id, worship_id, sequence from presentation"
@@ -589,6 +596,6 @@ def convert_songs(p=0):
     songs = []
     for r in result:
         ll = get_lyrics_json(p, r[11], r[2], r[0], r[3])
-        songs.append({'id': r[12], 'content': json.dumps(ll), 'sequence': convert_sequence(r[5])})
+        songs.append({'id': r[12], 'content': json.dumps(ll), 'sequence': convert_sequence(r[5]), 'lang': r[2], 'lang_2': r[3]})
     update_table(songs)
     update_sequence()
