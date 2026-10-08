@@ -29,7 +29,8 @@ def parse_lyrics(content, sequence, lang):
 
     lyrics_ = []
     content = json.loads(content)
-    return content
+    langs = [x['lang'] for x in content]
+    return content, langs
     for c in content:
         for l in c["lyrics"]:
             if l['lang'] == lang:

@@ -497,48 +497,49 @@ def get_lyrics_json(p, content, lang, title, lang_2=None):
     outro1 = []
     tag1 = []
     r = 0
+    region = [re.sub('(^\r?\n?)|(\r?\n?$)', '', x.replace('[region 2]', '')) for x in region]
     for l in lyrics:
-        ll = re.sub('(^\r\n)|(\r\n$)', '', l[1])
+        ll = re.sub('(^\r?\n?)|(\r?\n?$)', '', l[1])
         if l[0] == 'verse' or re.match('\d', l[0]):
             verse.append(ll)
             if region:
                 try:
-                    verse1.append(region[r].replace('[region 2]', ''))
+                    verse1.append(region[r])
                 except Exception as e:
                     pass
         elif re.match('chorus\d?', l[0]):
             chorus.append(ll)
             if region:
                 try:
-                    chorus1.append(region[r].replace('[region 2]', ''))
+                    chorus1.append(region[r])
                 except Exception as e:
                     pass
         elif re.match('bridge\d?', l[0]):
             bridge.append(ll)
             if region:
                 try:
-                    bridge1.append(region[r].replace('[region 2]', ''))
+                    bridge1.append(region[r])
                 except Exception as e:
                     pass
         elif re.match('pre-chorus\d?', l[0]) or l[0] == 'prechorus':
             pre_chorus.append(ll)
             if region:
                 try:
-                    pre_chorus1.append(region[r].replace('[region 2]', ''))
+                    pre_chorus1.append(region[r])
                 except Exception as e:
                     pass
         elif l[0] == 'f':
             outro.append(ll)
             if region:
                 try:
-                    outro1.append(region[r].replace('[region 2]', ''))
+                    outro1.append(region[r])
                 except Exception as e:
                     pass
         elif l[0] == 'tag':
             tag.append(ll)
             if region:
                 try:
-                    tag1.append(region[r].replace('[region 2]', ''))
+                    tag1.append(region[r])
                 except Exception as e:
                     pass
         r += 1
