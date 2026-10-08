@@ -575,7 +575,7 @@ def get_lyrics_json(p, content, lang, title, lang_2=None):
             temp_l.append(dict(name='tag', lyrics=tag))
         if outro:
             temp_l.append(dict(name='outro', lyrics=outro))
-        temp = [dict(lang=lang, title=title, lyrics=temp_l)]
+        temp = [dict(lang=lang, version=lang, title=title, lyrics=temp_l)]
         if lang_2:
             temp_l = [dict(name='verse', lyrics=verse1)]
             if pre_chorus:
@@ -588,7 +588,7 @@ def get_lyrics_json(p, content, lang, title, lang_2=None):
                 temp_l.append(dict(name='tag', lyrics=tag1))
             if outro:
                 temp_l.append(dict(name='outro', lyrics=outro1))
-            temp.append(dict(lang=lang_2, title='', lyrics=temp_l))
+            temp.append(dict(lang=lang_2, version=lang_2, title='', lyrics=temp_l))
     return temp
 
 def convert_songs(p=0):
