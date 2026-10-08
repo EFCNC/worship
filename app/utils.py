@@ -518,7 +518,7 @@ def get_songs(ids=None):
                 'bible': r[6] if r[6] else '', 'lyricist': r[7] if r[7] else '',
                 'book': r[8] if r[8] else '', 'copyright': r[9] if r[9] else '',
                 'ccli': r[10] if r[10] else '', 'lyrics_raw': r[11],
-                'content': Parser.parse_lyrics(r[11], r[5], r[2]),
+                'content': Parser.parse_lyrics(r[11], r[5]),
                 'video': [r[12]] if r[13] == 'video' and r[12] else [],
                 'score': [r[12]] if r[13] == 'score' and r[12] else [],
                 'abc': [r[14]] if r[13] == 'abc' and r[14] else [],
@@ -565,7 +565,7 @@ def get_song_chords(ids):
     result = dB.run_para(sql, ids)
     chords = []
     for r in result:
-        chords.append({'id': r[0], 'title': r[1], 'content': Parser.parse_lyrics(r[2], r[3], r[5]), 'key': r[4]})
+        chords.append({'id': r[0], 'title': r[1], 'content': Parser.parse_lyrics(r[2], r[3]), 'key': r[4]})
     if ids:
         # Sort the results based on the index of the ID in the original 'ids' list
         string_ids = [str(i) for i in ids]
@@ -592,7 +592,7 @@ def get_song_by_id(id):
                 abc.append(s[14])
     if songs:
         r = songs[0]
-        content, langs = Parser.parse_lyrics(r[11], r[5], r[2])
+        content, langs = Parser.parse_lyrics(r[11], r[5])
         return {'type': 'song', 'title': r[0], 'author': r[1] if r[1] else '', 'lang': langs,
                 'lang_2': r[3] if r[3] else '', 'song_key': r[4] if r[4] else '', 'sequence': r[5] if r[5] else '',
                 'bible_verse': r[6] if r[6] else '', 'lyricist': r[7] if r[7] else '', 'book': r[8] if r[8] else '',
@@ -988,7 +988,7 @@ def get_worship_songs(id):
                           'sequence': r[5] if r[5] else '', 'bible_verse': r[6] if r[6] else '',
                           'lyricist': r[7] if r[7] else '', 'book': r[8] if r[8] else '',
                           'copyright': r[9] if r[9] else '', 'ccli': r[10] if r[10] else '', 'lyrics_raw': r[11],
-                          'content': Parser.parse_lyrics(r[11], r[17], r[2]),
+                          'content': Parser.parse_lyrics(r[11], r[17]),
                           'video': r[12].split('||') if r[12] else [],
                           'score': r[13].split('||') if r[13] else [],
                           'date': r[14], 'id': r[15], 'transpose': r[16].split(',') if r[16] else [0],

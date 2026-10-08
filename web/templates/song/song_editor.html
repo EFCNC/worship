@@ -54,7 +54,8 @@
     /* =========================================
         Form Crap
     ========================================= */
-    .form-row { display: flex; 
+    .form-row {
+        display: flex; 
         gap: 15px; 
         margin-bottom: 15px; 
         flex-wrap: wrap; 
@@ -67,7 +68,8 @@
         min-width: 0;
     }
 
-    .form-group label { font-weight: bold;
+    .form-group label {
+        font-weight: bold;
         font-size: 0.85rem;
         margin-bottom: 5px;
         color: #555;
@@ -84,6 +86,42 @@
         border-radius: 4px; 
         font-size: 1rem; 
         background-color: #fff;
+    }
+    
+    /* =========================================
+        Language Priority UI
+    ========================================= */
+    .lang-priority-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        list-style: none;
+        /* padding: 5px 10px; */
+        margin: 0;
+        background: #f8fafc;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        min-height: 38px;
+        align-items: center;
+    }
+
+    .lang-priority-item {
+        background: #fff;
+        border: 1px solid #cbd5e1;
+        padding: 4px 10px;
+        border-radius: 4px;
+        cursor: grab;
+        font-weight: bold;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        user-select: none;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+
+    .lang-priority-item:active {
+        cursor: grabbing;
     }
     
     /* =========================================
@@ -287,26 +325,17 @@
         </div>
 
         <div class="form-row">
-        
-        <div class="form-group" style="flex: 0 1 120px;">
-            <label>Primary Lang</label>
-            <select name="primary_lang">
-                <option value="{{ content.primary_lang or '' }}" selected>{{ content.primary_lang or '' }}</option>
-            </select>
-        </div>
+            <div class="form-group" style="flex: 2;">
+                <label>Language Order Priority (drag items to reorder)</label>
+                <ul id="lang_priority_list" class="lang-priority-list"></ul>
+            </div>
 
-        <div class="form-group" style="flex: 0 1 120px;">
-            <label>Secondary Lang</label>
-            <select name="secondary_lang">
-                <option value="{{ content.secondary_lang or '' }}" selected>{{ content.secondary_lang or '' }}</option>
-            </select>
-        </div>
-
-            <div class="form-group">
+            <div class="form-group" style="flex: 1;">
                 <label>Author</label>
                 <input name="author" type="text" value="{{ content.author }}"/>
             </div>
         </div>
+
         <div class="form-row">
             <div class="form-group" style="flex: 100%;">
                 <label>Arrangement Sequence</label>
@@ -600,8 +629,9 @@
         updateHighlights(txtarea.id, targetBackdropId);
     }
     
-    // --- In-Memory State for Concept 1 ---
+    // --- In-Memory State ---
     let contentState = [];
+    let langPriority = [];
     let activeLang1 = '';
     let activeLang2 = '';
 
@@ -626,7 +656,7 @@
 
     // Converts textarea format back to JSON array [{name: "verse", lyrics: ["..."]}]
     function parseTextToLyrics(rawText) {
-        const sectionRegex = /(?:^|\n)\[([a-zA-Z\-]+)\s*(\d+)?\][ \t]*\n([\s\S]*?)(?=\n\[[a-zA-Z\-]+\s*\d*\][ \t]*(?:\n|$)\vert{}$)/g;
+        const sectionRegex = /(?:^|\n)\[([a-zA-Z\-]+)\s*(\d+)?\][ \t]*\n([\s\S]*?)(?=\n\[[a-zA-Z\-]+\s*\d*\][ \t]*(?:\n|$)|$)/g;
         let match;
         let sectionsMap = {};
 
@@ -652,57 +682,64 @@
         return finalLyrics;
     }
 
+    function renderLangPriorityUI() {
+        let $list =$('#lang_priority_list');
+        $list.empty();
+        
+        langPriority.forEach((langCode, idx) => {
+            $list.append(`
+                <li class="lang-priority-item" data-lang="${langCode}">
+                    <i class="fa-solid fa-grip-lines" style="color: #888;"></i>
+                    <span>${langCode}</span>
+                    <span style="font-size: 0.75rem; color: #666;">(#${idx + 1})</span>
+                </li>
+            `);
+        });
+
+        if ($list.hasClass('ui-sortable')) {$list.sortable('refresh');
+        } else {
+            $list.sortable({
+                axis: 'x',
+                cursor: 'grabbing',
+                update: function() {
+                    langPriority = $list.children().map(function() {
+                        return $(this).data('lang');
+                    }).get();
+                    renderLangPriorityUI();
+                }
+            });
+        }
+    }
+
     // Keep dropdowns matching memory
     function updatePaneDropdowns() {
         let optionsHtml = '';
-        
-        // Empty option for the top metadata dropdowns so they aren't forced to a value
-        let metaOptionsHtml = '<option value=""></option>'; 
-        
         contentState.forEach(item => {
-            let opt = `<option value="${item.lang}">${item.lang}</option>`;
-            optionsHtml += opt;
-            metaOptionsHtml += opt;
+            optionsHtml += `<option value="${item.lang}">${item.lang}</option>`;
         });
         
-        // Update the editor pane selectors (preserves what you are currently viewing)
         let val1 = $('#pane1_lang_selector').val();
         let val2 = $('#pane2_lang_selector').val();
-        $('#pane1_lang_selector').html(optionsHtml).val(val1);
-        $('#pane2_lang_selector').html(optionsHtml).val(val2);
 
-        // Update the main form metadata selectors (preserves what was saved to the DB)
-        let primaryVal = $('select[name="primary_lang"]').val();
-        let secondaryVal = $('select[name="secondary_lang"]').val();
-        $('select[name="primary_lang"]').html(metaOptionsHtml).val(primaryVal);
-        $('select[name="secondary_lang"]').html(metaOptionsHtml).val(secondaryVal);
-        
-        // Apply the gray-out logic
+        $('#pane1_lang_selector').html(optionsHtml);
+        $('#pane2_lang_selector').html(optionsHtml);
+
+        if (val1) $('#pane1_lang_selector').val(val1);
+        if (val2) $('#pane2_lang_selector').val(val2);
+
         updateDisabledLanguages();
     }
 
     // Disables the selected language in the sibling dropdown to prevent duplicates
     function updateDisabledLanguages() {
-        // Handle Editor Panes
-        let pane1Val = $('#pane1_lang_selector').val();
-        let pane2Val = $('#pane2_lang_selector').val();
+        let pane1Val = activeLang1;
+        let pane2Val = activeLang2;
 
         $('#pane1_lang_selector option').each(function() {
-            $(this).prop('disabled', $(this).val() === pane2Val && pane2Val !== "");
+            let val = $(this).val();$(this).prop('disabled', val === pane2Val && pane2Val !== "");
         });
         $('#pane2_lang_selector option').each(function() {
-            $(this).prop('disabled', $(this).val() === pane1Val && pane1Val !== "");
-        });
-
-        // Handle Main Metadata Dropdowns
-        let primaryVal = $('select[name="primary_lang"]').val();
-        let secondaryVal = $('select[name="secondary_lang"]').val();
-
-        $('select[name="primary_lang"] option').each(function() {
-            $(this).prop('disabled', $(this).val() === secondaryVal && secondaryVal !== "");
-        });
-        $('select[name="secondary_lang"] option').each(function() {
-            $(this).prop('disabled', $(this).val() === primaryVal && primaryVal !== "");
+            let val = $(this).val();$(this).prop('disabled', val === pane1Val && pane1Val !== "");
         });
     }
 
@@ -736,14 +773,37 @@
     }
 
     function initContentState() {
-        contentState = JSON.parse(JSON.stringify(originalData.content || []));
-        if (contentState.length === 0) contentState.push({ lang: $('select[name="primary_lang"]').val() || 'en', lyrics: [] });
+        // Normalize content state schema (strips transient keys like lyrics_text and lyrics_chord)
+        contentState = (originalData.content || []).map(item => ({
+            lang: item.lang || '',
+            version: item.version || '',
+            title: item.title || '',
+            lyrics: (item.lyrics || []).map(section => ({
+                name: section.name || '',
+                lyrics: section.lyrics || []
+            }))
+        }));
 
+        if (Array.isArray(originalData.lang) && originalData.lang.length > 0) {
+            langPriority = [...originalData.lang];
+        } else {
+            langPriority = contentState.map(c => c.lang);
+        }
+
+        contentState.forEach(c => {
+            if (!langPriority.includes(c.lang)) langPriority.push(c.lang);
+        });
+
+        if (langPriority.length === 0) {
+            langPriority = ['en'];
+            contentState.push({ lang: 'en', lyrics: [] });
+        }
+
+        renderLangPriorityUI();
         updatePaneDropdowns();
 
-        // Default load primary/secondary from metadata
-        let pLang = $('select[name="primary_lang"]').val() || contentState[0].lang;
-        let sLang = $('select[name="secondary_lang"]').val() || (contentState[1] ? contentState[1].lang : contentState[0].lang);
+        let pLang = langPriority[0] || contentState[0].lang;
+        let sLang = langPriority[1] || (contentState[1] ? contentState[1].lang : pLang);
         
         loadPane(1, pLang);
         loadPane(2, sLang);
@@ -758,8 +818,7 @@
             title: $('input[name="title"]').val(),
             song_key: $('input[name="song_key"]').val(),
             book: $('input[name="book"]').val(),
-            primary_lang: $('select[name="primary_lang"]').val(), // Updated
-            secondary_lang: $('select[name="secondary_lang"]').val(), // Updated
+            lang: langPriority,
             author: $('input[name="author"]').val(),
             sequence: $('input[name="sequence"]').val(),
             copyright: $('input[name="copyright"]').val(),
@@ -901,6 +960,11 @@
         }
         
         contentState.push({ lang: newLang, title: '', lyrics: [] });
+        if (!langPriority.includes(newLang)) {
+            langPriority.push(newLang);
+        }
+
+        renderLangPriorityUI();
         updatePaneDropdowns();
         loadPane(paneNum, newLang);
         updateDisabledLanguages();
@@ -933,9 +997,8 @@
             loadPane(2, $(this).val()); 
             updateDisabledLanguages(); 
         });
-        $('select[name="primary_lang"], select[name="secondary_lang"]').change(function() {
-            updateDisabledLanguages();
-        });
+        updateDisabledLanguages(); 
+
         $('#btn_add_lang_left, #btn_add_lang_right').click(function() {
             handleAddLanguage($(this).attr('id'));
         });

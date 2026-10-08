@@ -284,47 +284,153 @@ h3 {
         return lang ? `<span class="${config.class}" title="${config.title}">${config.label}</span>` : "";
     }
     
+    const SECTION_PREFIX_MAP = {
+        'v': 'verse', 'verse': 'verse',
+        'c': 'chorus', 'chorus': 'chorus',
+        'b': 'bridge', 'bridge': 'bridge',
+        'pre': 'prechorus', 'prechorus': 'prechorus',
+        'post': 'postchorus', 'postchorus': 'postchorus',
+        'tag': 'tag',
+        'vamp': 'vamp',
+        'in': 'intro', 'intro': 'intro',
+        'out': 'outro', 'outro': 'outro',
+        'inst': 'interlude', 'interlude': 'interlude', 'instrumental': 'instrumental'
+    };
+
+    function getSectionDisplayLabel(rawToken, canonicalName, index, totalCount) {
+        const defaultLabels = {
+            'verse': 'Verse',
+            'chorus': 'Chorus',
+            'bridge': 'Bridge',
+            'prechorus': 'Pre-Chorus',
+            'postchorus': 'Post-Chorus',
+            'tag': 'Tag',
+            'vamp': 'Vamp',
+            'intro': 'Intro',
+            'outro': 'Outro',
+            'interlude': 'Interlude',
+            'instrumental': 'Instrumental'
+        };
+        let base = defaultLabels[canonicalName] || canonicalName;
+        if (totalCount > 1 || rawToken.match(/\d+$/)) {
+            return `${base} ${index + 1}`;
+        }
+        return base;
+    }
+
     /**
-    * Renders the song content based on the selected mode (view, chord, bi).
+    * Renders the song content according to alt_sequence order and new content JSON structure.
     */
     function renderSongContent(song, mode) {
-        let contentHtml = '';
-        for (let section of song.content) {
+        if (!song || !Array.isArray(song.content) || song.content.length === 0) return '';
 
-            if(section.origin_text.length==0) {
-                continue;
+        // Primary language block (matches song.lang or defaults to 1st)
+        let primaryBlock = song.content.find(c => c.lang === song.lang) || song.content[0];
+        // Secondary language block (matches song.lang_2 or defaults to 2nd)
+        let secondaryBlock = song.content.find(c => c.lang === song.lang_2) || (song.content.length > 1 ? song.content[1] : null);
+
+        const findSection = (block, secName) => {
+            if (!block || !Array.isArray(block.lyrics)) return null;
+            let target = secName.toLowerCase().replace('-', '');
+            return block.lyrics.find(s => s.name && s.name.toLowerCase().replace('-', '') === target);
+        };
+
+        const getSectionData = (block, secName, index, field) => {
+            let sec = findSection(block, secName);
+            if (!sec) return '';
+            let arr = sec[field] || sec.lyrics_text || sec.lyrics || [];
+            if (Array.isArray(arr)) {
+                return arr[index] !== undefined ? arr[index] : (arr[0] || '');
             }
-            contentHtml += `<div><span>${section.name}</span>`;
-            
+            if (typeof arr === 'string') return arr;
+            return '';
+        };
+
+        // Build the ordered sequence of section stanzas to display
+        let sequenceItems = [];
+        let rawSequence = (song.alt_sequence || '').trim();
+
+        if (rawSequence) {
+            let tokens = rawSequence.split(',').map(s => s.trim()).filter(Boolean);
+            for (let token of tokens) {
+                let match = token.match(/^([a-zA-Z\-]+)(\d*)$/);
+                if (match) {
+                    let prefix = match[1].toLowerCase();
+                    let numStr = match[2];
+                    let index = numStr ? Math.max(0, parseInt(numStr, 10) - 1) : 0;
+                    let canonicalName = SECTION_PREFIX_MAP[prefix] || prefix;
+
+                    let secObj = findSection(primaryBlock, canonicalName);
+                    let textArr = secObj ? (secObj.lyrics_text || secObj.lyrics) : null;
+                    let totalCount = Array.isArray(textArr) ? textArr.length : 1;
+
+                    let label = getSectionDisplayLabel(token, canonicalName, index, totalCount);
+                    sequenceItems.push({ name: canonicalName, index: index, label: label });
+                } else {
+                    sequenceItems.push({ name: token, index: 0, label: token });
+                }
+            }
+        } else {
+            // Fallback: render each section in order if no sequence was specified
+            if (primaryBlock && Array.isArray(primaryBlock.lyrics)) {
+                for (let sec of primaryBlock.lyrics) {
+                    let textArr = sec.lyrics_text || sec.lyrics || [];
+                    let count = Array.isArray(textArr) ? textArr.length : 1;
+                    for (let i = 0; i < count; i++) {
+                        let label = getSectionDisplayLabel(sec.name, sec.name, i, count);
+                        sequenceItems.push({ name: sec.name, index: i, label: label });
+                    }
+                }
+            }
+        }
+
+        let contentHtml = '';
+        for (let item of sequenceItems) {
+            let text1 = '', chords = '', text2 = '';
+
             switch(mode) {
                 case 'view':
-                    for (let n of section.origin_text) {
-                        contentHtml += `<div class="song">${n.replace(/\n/g, '<br/>')}</div>`;
-                    }
+                    text1 = getSectionData(primaryBlock, item.name, item.index, 'lyrics_text');
+                    if (!text1) text1 = getSectionData(primaryBlock, item.name, item.index, 'lyrics');
+                    if (!text1) continue;
+
+                    contentHtml += `<div><span><strong>[${item.label}]</strong></span>`;
+                    contentHtml += `<div class="song">${text1.replace(/\n/g, '<br/>')}</div>`;
+                    contentHtml += `</div><br/>`;
                     break;
 
                 case 'chord':
-                    for (let n of section.origin_chord) {
-                        let chords = n.replace(/\n/g, '<br/>');
-                        if(song.transpose != '0') {
-                            let key_change = parseInt(song.transpose);
-                            chords = chords.replace(/(data-chord=")([^"]+)/g, (match, g1, g2) => {return g1+transposeChord(g2, key_change);});
-                        }
-                        contentHtml += `<div class="song_chord">${chords}</div>`;
+                    chords = getSectionData(primaryBlock, item.name, item.index, 'lyrics_chord');
+                    if (!chords) chords = getSectionData(primaryBlock, item.name, item.index, 'lyrics');
+                    if (!chords) continue;
+
+                    if (song.transpose && song.transpose !== '0') {
+                        let key_change = parseInt(song.transpose);
+                        chords = chords.replace(/(data-chord=")([^"]+)/g, (match, g1, g2) => {
+                            return g1 + transposeChord(g2, key_change);
+                        });
                     }
+
+                    contentHtml += `<div><span><strong>[${item.label}]</strong></span>`;
+                    contentHtml += `<div class="song_chord">${chords.replace(/\n/g, '<br/>')}</div>`;
+                    contentHtml += `</div><br/>`;
                     break;
 
                 case 'bi':
-                    for (let n=0;n<section.origin_text.length;n++) {
-                        contentHtml += `
-                            <div class="song">
-                                <div class="origin">${section.origin_text[n].replace(/\n/g, '<br/>')}</div>
-                                <div class="region">${section.region_text[n]}</div>
-                            </div>`;
-                    }
+                    text1 = getSectionData(primaryBlock, item.name, item.index, 'lyrics_text');
+                    if (!text1) text1 = getSectionData(primaryBlock, item.name, item.index, 'lyrics');
+                    text2 = secondaryBlock ? (getSectionData(secondaryBlock, item.name, item.index, 'lyrics_text') || getSectionData(secondaryBlock, item.name, item.index, 'lyrics')) : '';
+
+                    if (!text1 && !text2) continue;
+
+                    contentHtml += `<div><span><strong>[${item.label}]</strong></span>`;
+                    contentHtml += `<div class="song">
+                        <div class="origin">${text1.replace(/\n/g, '<br/>')}</div>
+                        ${text2 ? `<div class="region">${text2.replace(/\n/g, '<br/>')}</div>` : ''}
+                    </div>`;
+                    contentHtml += `</div><br/>`;
                     break;
             }
-            contentHtml += '</div><br/>';
         }
         return contentHtml;
     }

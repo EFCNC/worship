@@ -62,22 +62,31 @@ const SEQUENCE_MAPPER = {
         return totalCount > 1 ? `${prefix}${index + 1}` : prefix; 
     },
 
-    getLyricText: function(contentArray, sectionName, index) {
-        if (!Array.isArray(contentArray)) return { lang1: '', lang2: '' };
+    getLyricText: function(contentArray, sectionName, index, lang1Code, lang2Code) {
+        if (!Array.isArray(contentArray) || contentArray.length === 0) return { lang1: '', lang2: '' };
         
-        const section = contentArray.find(c => c.name && c.name.toLowerCase().replace('-', '') === sectionName.replace('-', ''));
-        if (!section) return { lang1: '', lang2: '' };
+        let primaryBlock = contentArray.find(c => c.lang === lang1Code) || contentArray[0];
+        let secondaryBlock = contentArray.find(c => c.lang === lang2Code) || (contentArray.length > 1 ? contentArray[1] : null);
 
-        const extractText = (textSource, idx) => {
-            if (Array.isArray(textSource)) return textSource[idx] !== undefined ? textSource[idx] : (textSource[0] || '');
-            if (typeof textSource === 'string') return textSource;
+        const findSection = (block, secName) => {
+            if (!block || !Array.isArray(block.lyrics)) return null;
+            return block.lyrics.find(s => s.name && s.name.toLowerCase().replace('-', '') === secName.toLowerCase().replace('-', ''));
+        };
+
+        const extractText = (sec, idx) => {
+            if (!sec) return '';
+            const arr = sec.lyrics_text || sec.lyrics || [];
+            if (Array.isArray(arr)) return arr[idx] !== undefined ? arr[idx] : (arr[0] || '');
+            if (typeof arr === 'string') return arr;
             return '';
         };
 
+        let sec1 = findSection(primaryBlock, sectionName);
+        let sec2 = findSection(secondaryBlock, sectionName);
+
         return {
-            // Strictly using origin_text as requested
-            lang1: extractText(section.origin_text, index),
-            lang2: extractText(section.region_text || section.region, index) 
+            lang1: extractText(sec1, index),
+            lang2: extractText(sec2, index)
         };
     }
 };
@@ -122,20 +131,23 @@ function generate_song_card(data, index) {
                     </div>
                 </div>`;
 
+            // Sequence Palette Buttons
             let paletteButtons = '';
             if (Array.isArray(data.content)) {
-                data.content.forEach(c => {
-                    // Strictly use origin_text to determine array counts
-                    let textSource = c.origin_text; 
-                    if (!textSource) return; 
-                    
-                    let count = Array.isArray(textSource) ? textSource.length : 1;
-                    
-                    for (let i = 0; i < count; i++) {
-                        let tag = SEQUENCE_MAPPER.getShortTag(c.name, i, count);
-                        paletteButtons += `<button type="button" class="btn-palette ${c.name}" data-sec="${tag}" data-id="${data.id}">[${tag}]</button>`;
-                    }
-                });
+                let primaryContent = data.content.find(c => c.lang === data.lang) || data.content[0];
+                if (primaryContent && Array.isArray(primaryContent.lyrics)) {
+                    primaryContent.lyrics.forEach(c => {
+                        let textSource = c.lyrics_text || c.lyrics; 
+                        if (!textSource) return; 
+                        
+                        let count = Array.isArray(textSource) ? textSource.length : 1;
+                        
+                        for (let i = 0; i < count; i++) {
+                            let tag = SEQUENCE_MAPPER.getShortTag(c.name, i, count);
+                            paletteButtons += `<button type="button" class="btn-palette ${c.name}" data-sec="${tag}" data-id="${data.id}">[${tag}]</button>`;
+                        }
+                    });
+                }
             }
 
             // Row 4: Sequence Container
@@ -169,7 +181,7 @@ function generate_song_card(data, index) {
 
             for (let token of tokens) {
                 let parsed = SEQUENCE_MAPPER.parseToken(token);
-                let rawLyrics = SEQUENCE_MAPPER.getLyricText(data.content, parsed.sectionName, parsed.index);
+                let rawLyrics = SEQUENCE_MAPPER.getLyricText(data.content, parsed.sectionName, parsed.index, data.lang, data.lang_2);
                 
                 let formatted_lang1 = rawLyrics.lang1 ? rawLyrics.lang1.split('\n').join('<br />') : '<em>(No lyrics found)</em>';
                 let formatted_lang2 = rawLyrics.lang2 ? rawLyrics.lang2.split('\n').join('<br />') : '';
@@ -232,7 +244,7 @@ $(document).on('click', '.btn-palette', function() {
     if (!songData) return;
     
     let parsed = SEQUENCE_MAPPER.parseToken(tag);
-    let rawLyrics = SEQUENCE_MAPPER.getLyricText(songData.content, parsed.sectionName, parsed.index);
+    let rawLyrics = SEQUENCE_MAPPER.getLyricText(songData.content, parsed.sectionName, parsed.index, songData.lang, songData.lang_2);
     
     let formatted_lang1 = rawLyrics.lang1 ? rawLyrics.lang1.split("\n").join("<br />") : '<em>(No lyrics found)</em>';
     let formatted_lang2 = rawLyrics.lang2 ? rawLyrics.lang2.split("\n").join("<br />") : '';
@@ -253,13 +265,11 @@ $(document).on('click', '.btn-palette', function() {
         </li>
     `);
     
-    let $sequenceContainer = $('#sequence_' + songId);
+    let $sequenceContainer =$('#sequence_' + songId);
 
     $sequenceContainer.append(newBlock);
     
-    checkSequenceEmptyState($sequenceContainer);
-    
-    $(".lyrics").sortable("destroy");
+    checkSequenceEmptyState($sequenceContainer);$(".lyrics").sortable("destroy");
     init();
     if (typeof checkActionButtons === 'function') checkActionButtons();
 });
