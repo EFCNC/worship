@@ -981,7 +981,7 @@ def get_worship_songs(id):
                  'song_key': '', 'sequence': '', 'bible_verse': '', 'lyricist': '', 'book': '', 'copyright': '',
                  'ccli': '', 'lyrics_raw': '', 'content': '', 'video': '', 'score': '', 'date': r[14], 'id': r[21],
                  'transpose': r[16].split(','), 'alt_sequence': '', 'notes': r[18] if r[18] else '',
-                 'alt_lyrics': r[20].split(',') if r[20] else []})
+                 'language_version_order': r[20].split(',') if r[20] else []})
         elif r[22] == 'song':
             songs.append({'type': r[22], 'title': r[0], 'author': r[1] if r[1] else '', 'lang': r[2] if r[2] else '',
                           'lang_2': r[3] if r[3] else '', 'song_key': r[4] if r[4] else '',
@@ -993,7 +993,7 @@ def get_worship_songs(id):
                           'score': r[13].split('||') if r[13] else [],
                           'date': r[14], 'id': r[15], 'transpose': r[16].split(',') if r[16] else [0],
                           'alt_sequence': r[17] if r[17] else '', 'notes': r[18] if r[18] else '',
-                          'abc': r[23].split('||') if r[23] else [], 'alt_lyrics': r[20].split(',') if r[20] else []})
+                          'abc': r[23].split('||') if r[23] else [], 'language_version_order': r[20].split(',') if r[20] else []})
     return songs
 
 
