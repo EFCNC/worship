@@ -96,7 +96,7 @@
         flex-wrap: wrap;
         gap: 8px;
         list-style: none;
-        /* padding: 5px 10px; */
+        padding: 5px 10px;
         margin: 0;
         background: #f8fafc;
         border: 1px solid #ccc;
@@ -373,15 +373,17 @@
 
             <!-- Left Pane -->
             <div class="form-group">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                    <div style="display: flex; align-items: center; gap: 10px; flex-grow: 1;">
-                        <label style="color: #3182ce; display: flex; align-items: center; gap: 5px; margin: 0; white-space: nowrap;">
-                            <span>🔵</span>
-                            <select id="pane1_lang_selector" style="padding: 2px 5px; font-weight: bold; border-radius: 4px; border: 1px solid #ccc; min-width: 90px;"></select>
-                        </label>
-                        <input type="text" id="pane1_title" placeholder="Variant Title (e.g. 10,000 Reasons)" style="flex-grow: 1; padding: 4px 8px; font-size: 0.9rem; border: 1px solid #ccc; border-radius: 4px;" />
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                    <label style="color: #3182ce; display: flex; align-items: center; gap: 5px; margin: 0; white-space: nowrap;">
+                        <span>🔵</span>
+                        <select id="pane1_lang_selector" style="padding: 2px 5px; font-weight: bold; border-radius: 4px; border: 1px solid #ccc; min-width: 90px;"></select>
+                    </label>
+                    <input type="text" id="pane1_title" placeholder="Language Title (e.g. 10,000 Reasons)" style="flex-grow: 1; padding: 4px 8px; font-size: 0.9rem; border: 1px solid #ccc; border-radius: 4px;" />
+                    
+                    <div style="position: relative; flex-shrink: 0;">
+                        <button type="button" class="btn btn-outline btn-add-lang" data-pane="1" style="padding: 2px 8px; font-size: 0.8rem; white-space:nowrap;">+ Add Lang</button>
                     </div>
-                    <button type="button" class="btn btn-outline" style="padding: 2px 8px; font-size: 0.8rem; margin-left: 10px;" id="btn_add_lang_left">+ Add Lang</button>
+                    <button type="button" class="btn-icon-danger btn-remove-lang" data-pane="1" style="padding: 2px 8px;" title="Remove Language"><i class="fa-solid fa-trash"></i></button>
                 </div>
                 <div class="editor-wrapper">
                     <div id="highlights_lang1" class="backdrop"></div>
@@ -391,15 +393,17 @@
 
             <!-- Right Pane -->
             <div class="form-group">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                    <div style="display: flex; align-items: center; gap: 10px; flex-grow: 1;">
-                        <label style="color: #805ad5; display: flex; align-items: center; gap: 5px; margin: 0; white-space: nowrap;">
-                            <span>🟣</span>
-                            <select id="pane2_lang_selector" style="padding: 2px 5px; font-weight: bold; border-radius: 4px; border: 1px solid #ccc; min-width: 90px;"></select>
-                        </label>
-                        <input type="text" id="pane2_title" placeholder="Variant Title (e.g. 萬個理由)" style="flex-grow: 1; padding: 4px 8px; font-size: 0.9rem; border: 1px solid #ccc; border-radius: 4px;" />
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                    <label style="color: #805ad5; display: flex; align-items: center; gap: 5px; margin: 0; white-space: nowrap;">
+                        <span>🟣</span>
+                        <select id="pane2_lang_selector" style="padding: 2px 5px; font-weight: bold; border-radius: 4px; border: 1px solid #ccc; min-width: 90px;"></select>
+                    </label>
+                    <input type="text" id="pane2_title" placeholder="Language Title (e.g. 萬個理由)" style="flex-grow: 1; padding: 4px 8px; font-size: 0.9rem; border: 1px solid #ccc; border-radius: 4px;" />
+                    
+                    <div style="position: relative; flex-shrink: 0;">
+                        <button type="button" class="btn btn-outline btn-add-lang" data-pane="2" style="padding: 2px 8px; font-size: 0.8rem; white-space:nowrap;">+ Add Lang</button>
                     </div>
-                    <button type="button" class="btn btn-outline" style="padding: 2px 8px; font-size: 0.8rem; margin-left: 10px;" id="btn_add_lang_right">+ Add Lang</button>
+                    <button type="button" class="btn-icon-danger btn-remove-lang" data-pane="2" style="padding: 2px 8px;" title="Remove Language"><i class="fa-solid fa-trash"></i></button>
                 </div>
                 <div class="editor-wrapper">
                     <div id="highlights_lang2" class="backdrop"></div>
@@ -947,48 +951,133 @@
         }, 100);
     }
 
-    function handleAddLanguage(btnId) {
-        let paneNum = btnId.includes('left') ? 1 : 2;
-        let newLang = prompt("Enter a new language code (e.g., 'en', 'zh', 'zh-TW', 'en2'):");
-        
-        if (!newLang || newLang.trim() === "") return;
-        newLang = newLang.trim();
-        
-        if (contentState.find(c => c.lang === newLang)) {
-            alert("This language is already loaded.");
-            return;
-        }
-        
+    const AVAILABLE_LANGS = ['en', 'zh', 'zh-TW', 'pinyin'];
+
+    // --- State and UI Logic ---
+    function addLanguageToState(paneNum, newLang) {
         contentState.push({ lang: newLang, title: '', lyrics: [] });
         if (!langPriority.includes(newLang)) {
             langPriority.push(newLang);
         }
-
         renderLangPriorityUI();
         updatePaneDropdowns();
         loadPane(paneNum, newLang);
         updateDisabledLanguages();
     }
 
+    // --- Dropdown Generation Logic ---
+    function openLanguageDropdown(buttonEl, paneNum, event) {
+        event.preventDefault();
+        event.stopPropagation();
+        $('.lang-dropdown').remove(); // Close any open dropdowns
+
+        let existingLangs = contentState.map(c => c.lang);
+        let available = AVAILABLE_LANGS.filter(l => !existingLangs.includes(l));
+
+        if (available.length === 0) {
+            alert("All standard languages are already active.");
+            return;
+        }
+
+        // Create the dropdown menu container
+        let dropdown = $('<div class="lang-dropdown"></div>').css({
+            position: 'absolute',
+            top: '100%',
+            right: '0',
+            marginTop: '5px',
+            background: 'white',
+            border: '1px solid #ccc',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+            borderRadius: '4px',
+            padding: '5px',
+            zIndex: 100,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '2px',
+            minWidth: '100px'
+        });
+
+        // Populate options
+        available.forEach(lang => {
+            let btn = $('<button type="button"></button>')
+                .text(lang)
+                .css({ 
+                    border: 'none', 
+                    background: 'transparent', 
+                    textAlign: 'left', 
+                    padding: '6px 12px', 
+                    cursor: 'pointer', 
+                    borderRadius: '3px',
+                    color: '#333'
+                })
+                .hover(
+                    function() { $(this).css('background', '#f1f5f9'); },
+                    function() { $(this).css('background', 'transparent'); }
+                )
+                .click(function() {
+                    addLanguageToState(paneNum, lang);
+                    dropdown.remove();
+                });
+            dropdown.append(btn);
+        });
+
+        $(buttonEl).parent().append(dropdown);
+    }
+
+    // --- Remove Language Logic ---
+    function removeLanguage(paneNum) {
+        let langToRemove = paneNum === 1 ? activeLang1 : activeLang2;
+
+        if (!langToRemove) return;
+        
+        if (contentState.length <= 1) {
+            alert("You must have at least one language variant.");
+            return;
+        }
+
+        if (confirm(`Are you sure you want to remove the language variant: ${langToRemove}?`)) {
+            contentState = contentState.filter(c => c.lang !== langToRemove);
+            langPriority = langPriority.filter(l => l !== langToRemove);
+            
+            renderLangPriorityUI();
+            updatePaneDropdowns();
+            loadPane(paneNum, contentState[0].lang); 
+            updateDisabledLanguages();
+        }
+    }
+
     // --- Event Listeners ---
     $(document).ready(function() {
         // --- Setup Environment and State ---
         initDialogModes();
-        // Populate the dynamic fields (video and score) and textareas (lyrics)
         populateDynamicFields();
         initContentState();
-        // Update the test baseline to use the new contentState object directly
         originalData.content = JSON.parse(JSON.stringify(contentState));
 
         // --- Visuals/Formatting ---
-        // Initialize and fire up structural helper highlights on primary load
         updateHighlights('lyrics_lang1', 'highlights_lang1');
         updateHighlights('lyrics_lang2', 'highlights_lang2');
         updateSmartChordLabels();
         syncScrollbars();
         syncResizing();
 
-        // --- Dropdown and Language Listners ---
+        // --- Add Language Listener ---
+        $('.btn-add-lang').click(function(e) {
+            openLanguageDropdown(this, $(this).data('pane'), e);
+        });
+
+        // Close dropdown when clicking outside
+        $(document).click(function(e) {
+            if (!$(e.target).closest('.btn-add-lang, .lang-dropdown').length) {$('.lang-dropdown').remove();
+            }
+        });
+
+        // --- Remove Language Logic ---
+        $('.btn-remove-lang').click(function() {
+            removeLanguage($(this).data('pane'));
+        });
+
+        // --- Dropdown and Language Listeners ---
         $('#pane1_lang_selector').change(function() { 
             loadPane(1, $(this).val()); 
             updateDisabledLanguages(); 
@@ -999,18 +1088,13 @@
         });
         updateDisabledLanguages(); 
 
-        $('#btn_add_lang_left, #btn_add_lang_right').click(function() {
-            handleAddLanguage($(this).attr('id'));
-        });
-
         // --- Text and Typing Listeners ---
-        // Sync titles to memory as you type so they save to the JSON
         $('#pane1_title').on('input', function() { syncPaneToState(1); });
         $('#pane2_title').on('input', function() { syncPaneToState(2); });
-        // Watch formatting inputs to update text styling dynamically on modification
+        
         $('#lyrics_lang1').on('input', function() { updateHighlights('lyrics_lang1', 'highlights_lang1'); });
         $('#lyrics_lang2').on('input', function() { updateHighlights('lyrics_lang2', 'highlights_lang2'); });
-        // Focus for smart insert buttons
+        
         $('#lyrics_lang1, #lyrics_lang2').on('focus', function() {
             lastFocusedTextarea = this;
         });
@@ -1027,12 +1111,10 @@
         });
 
         // --- Form Specific Buttons ---
-        // Cancel
         $('#btn_cancel').click(function(e) {
             window.location.href = "/song/list";
         });
 
-        // Form button handler - works when used as standalone page
         $('#btn_save').click(function(e) {
             e.preventDefault();
             performSave();
