@@ -126,10 +126,27 @@ def _slide_identity(slide):
 
 
 def _preserve_slide_order(generated_slides, previous_slides):
-    """Keep the user's prior column order while retaining newly generated slides."""
-    remaining = list(generated_slides)
+    """Preserve service slide placement, but take song order from the arrangement."""
+    previous_slides = previous_slides or []
+    if not previous_slides:
+        return list(generated_slides)
+
+    def arranged_song(slide):
+        # The offering hymn is a template slide, also typed "song", with id -1.
+        return slide.get('type') == 'song' and slide.get('id') not in (None, -1, '-1')
+
+    songs = iter(slide for slide in generated_slides if arranged_song(slide))
+    remaining = [slide for slide in generated_slides if not arranged_song(slide)]
+    song_slots = [i for i, slide in enumerate(previous_slides) if arranged_song(slide)]
     ordered = []
-    for previous in previous_slides or []:
+    for index, previous in enumerate(previous_slides):
+        if arranged_song(previous):
+            song = next(songs, None)
+            if song is not None:
+                ordered.append(song)
+            if index == song_slots[-1]:
+                ordered.extend(songs)
+            continue
         previous_identity = _slide_identity(previous)
         match_index = next((
             index for index, slide in enumerate(remaining)
@@ -138,6 +155,9 @@ def _preserve_slide_order(generated_slides, previous_slides):
         if match_index is not None:
             ordered.append(remaining.pop(match_index))
     ordered.extend(remaining)
+    if not song_slots:
+        # First-time song selection belongs at the template's song position.
+        return list(generated_slides)
     return ordered
 
 
@@ -215,10 +235,7 @@ def create_json(id, worship=None):
 
         order = template["order"]
         temp = []
-        # compare songs in the slides with latest song, remove the one that's not match
-        song_ids = [x['id'] for x in songs]
-        if slides:
-            slides = [x for x in slides if x['id'] in song_ids or x['type'] != 'song']
+        # Generate the selected arrangement afresh; only reuse presentation styles.
         for item in order:
             if item in template:
                 if item == 'song':
