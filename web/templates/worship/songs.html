@@ -42,20 +42,38 @@
 }
 
 /* =========================================
+   Sermon-Notes Textarea
+   ========================================= */
+.sermon-notes-editor {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 2px solid #eee;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.sermon-notes-editor textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-family: inherit;
+    resize: vertical;
+}
+
+
+/* =========================================
    Song Editor Cards & Lists
    ========================================= */
 
-#songs, .lyrics {
+#songs {
     text-align:left;
     list-style-type: none;
     margin: 0;
     padding: 0;
     width: 100%;
-}
-
-/* Override */
-.lyrics {
-    text-align:center;
 }
 
 #songs li, .lyrics li, #song_list li {
@@ -69,26 +87,30 @@
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    padding: 5px;
+    gap: 5px;
+    padding: 0px 5px;
 }
 
 .song-header-row {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
+    align-items: center;
 }
 
-.song-title {
-    margin: 3px;
+/* .song-title {
     border: 1px solid transparent;
-}
+} */
 
 .song-details-row {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 3px 15px;
     flex-wrap: wrap;
+}
+
+.song-details-row select {
+    height: auto;
+    padding: 3px 5px;
 }
 
 .song-notes-row p {
@@ -98,25 +120,147 @@
 .song-notes-row textarea {
     width: 100%;
     box-sizing: border-box;
+    field-sizing: content;
+    min-height: 3lh;
+    resize: none;
+}
+
+.notes-container {
+    width: 100%;
+}
+
+.palette-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    margin-bottom: 5px;
+}
+
+.palette-buttons {
+    display: flex;
+    gap: 5px;
+}
+
+/* Base styling for the new buttons */
+.btn-lang-swap, .btn-palette {
+    padding: 4px 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 0.85em;
+    transition: all 0.2s;
+}
+
+.btn-lang-swap:hover, .btn-palette:hover {
+    background: #e0e0e0;
 }
 
 /* =========================================
    Lyrics & Sequences
    ========================================= */
-.lyric-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    padding: 10px;
-    margin: 10px 0px;
-    border: 1px solid #eee;
-    border-radius: 4px;
+.lyrics {
+    counter-reset: sequence-counter;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-auto-rows: 1fr;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    text-align:center;
+    width: 100%;
 }
 
-.lyric-content { flex-grow: 0.5; text-align: center; padding: 5px; margin: 5px; border-radius: 4px; }
-.lyrics_buttons { display: flex; gap: 8px; flex-shrink: 0; }
+.lyric-item {
+    display: flex; 
+    flex-direction: column;
+    /* justify-content: space-between; */
+    /* align-items: flex-start; */
+    /* padding: 10px;*/
+    margin: 0 !important;
+    box-sizing: border-box;
+    border: 1px solid #eee;
+    border-radius: 4px;
 
-.sequence-container { display: flex; flex-direction: column; align-items: flex-start; }
+    counter-increment: sequence-counter;
+}
+
+/* Tablet: Switch to 2 columns */
+@media (max-width: 900px) {
+    .lyrics {
+        grid-template-columns: repeat(2, 1fr); /* 2 columns for tablets */
+    }
+}
+
+@media (max-width: 600px) {
+    .lyrics {
+        grid-template-columns: 1fr; /* 1 column for phones */
+    }
+}
+
+.lyric-content {
+    flex-grow: 1;
+    text-align: center;
+    padding: 5px;
+    border-radius: 4px;
+    position: relative;
+}
+
+/* Draw the number badge in the top left */
+.lyric-content::before {
+    content: counter(sequence-counter);
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background-color: #4a5568; 
+    color: white;
+    font-size: 0.85em;
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    z-index: 10;
+}
+
+/* Freeze the number on the cloned card while dragging, JS will update if needed */
+.ui-sortable-helper .lyric-content::before {
+    content: attr(data-drag-number) !important;
+}
+
+.lyrics_buttons_container {
+    display: flex;
+    gap: 4px;
+    position: absolute;
+    top: 5px;
+    right: 5px;
+}
+
+.btn-lyric {
+    font-size: 0.75em;
+    padding: 3px 8px;
+    background:rgba(255, 255, 255, 0.4);
+    transition: all 0.2s ease;
+}
+
+.btn-lyric:hover {
+    background:rgba(255, 255, 255, 0.8);
+    color: rgba(0, 0, 0, 0.2);
+}
+
+.sequence-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+}
 .song_sequence_toggle { display: flex; align-items: center; cursor: pointer; gap: 8px; }
 
 /* Sequence Colored Tags */
@@ -124,6 +268,13 @@
 .v, [class~="1"], [class~="2"], [class~="3"], [class~="4"], [class~="5"], [class~="6"], [class~="7"], [class~="8"] { background-color: #D6B588; color: #fff; }
 .chorus, .Chorus, .c { background-color: #556b2f; color: #fff}
 .bridge, .b, .b2, .b3, .b4 { background-color: #003153; color: #fff}
+
+.ui-sortable-placeholder {
+    visibility: visible !important;
+    background: rgba(0, 0, 0, 0.05) !important;
+    border: 2px dashed #ccc !important;
+    border-radius: 4px;
+}
 
 /* =========================================
    Buttons
@@ -259,6 +410,7 @@
     let lyrics_raw = '';
     let worship_data = {{ w|tojson|safe }};
     let worship_id = {{ id|safe }};
+    let worship_notes_temp = worship_data.notes || '';
     let worship = $('#worship');
 
     let hasUnsavedChanges = false;
@@ -274,7 +426,6 @@
     /*  ==================================
         Initialization Stuff
         ================================== */
-    
     // Song Database Setup Stuff
     $(document).ready(function () {
         get_sermon();
@@ -360,15 +511,20 @@
     }, true);
 
     // When Notes are changed
+    $(document).on('input', 'textarea[name="worship_notes"]', function() {
+        worship_notes_temp = $(this).val();
+        checkActionButtons();
+    });
+
     $(document).on('input', 'textarea[name="song_notes"]', function() {
-        index = $(this).attr('index');
+        let index = $(this).data('index');
         songs_temp[index].notes = $(this).val();
         checkActionButtons();
     });
     
-    // ======================
-    // Functions
-    // ======================
+    /* =========================================================
+       Functions
+       ========================================================= */
 
     // Sermon Card Functions:
     function get_sermon() {
@@ -407,15 +563,40 @@
                 <div class="sermon-outline"><strong>Sermon Outline:</strong><br/>${sermon.outline || ''}</div>
             `;
         }).join('');
+        cardHtml += `
+            <div class="sermon-notes-editor">
+                <label for="worship-notes"><strong>Worship Leader's Notes:</strong></label>
+                <textarea id="worship-notes" name="worship_notes" rows="3" placeholder="Add any notes, reminders, 感想, or instructions for the team here...">${escapeHtml(worship_notes_temp)}</textarea>
+            </div>`;
         $('#sermon-data_card').html(cardHtml);
     }
 
+    function escapeHtml(value) {
+        return String(value || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
 
-    // ========================
-    // Action Buttons Stuff
-    // ========================
+
+    /* =========================================================
+       Action Buttons (Save & Reset)
+       ========================================================= */
     $(document).on('click', '.save_btn', function() {
-        save(worship_id);
+        let notesChanged = worship_notes_temp !== (worship_data.notes || '');
+        let songsChanged = songs_have_changes();
+
+        if (notesChanged) {
+            save_worship_notes();
+        }
+        if (songsChanged) {
+            save(worship_id);
+        }
+        if (!notesChanged && !songsChanged) {
+            alert("Nothing was changed!!");
+        }
     });
 
     $(document).on('click', '.reset_btn', function() {
@@ -432,44 +613,61 @@
 
     // Reactive State Management (Show/Hide Save & Reset Buttons)
     function checkActionButtons() {
-        let orderChanged = false;
-        if ($('#songs').data('ui-sortable')) {
-            let currentOrder = $('#songs').sortable('toArray', {attribute: 'name'});
-            let originalOrder = songs.map(item => String(item.id));
-            orderChanged = JSON.stringify(currentOrder) !== JSON.stringify(originalOrder);
-        }
+        let notesChanged = worship_notes_temp !== (worship_data.notes || '');
         
-        let contentChanged = false;
-        
-        // Check if songs were added or removed
-        if (songs.length !== songs_temp.length) {
-            contentChanged = true;
-        } else {
-            // Compare the specific fields that matter to avoid false positives
-            for (let song of songs) {
-                let tempSong = songs_temp.find(s => s.id === song.id);
-                
-                // Force both transposes to be integers so "0", ["0"], and 0 all match perfectly
-                let origTranspose = parseInt(song.transpose) || 0;
-                let tempTranspose = parseInt(tempSong.transpose) || 0;
-
-                if (!tempSong || 
-                    origTranspose !== tempTranspose || 
-                    song.notes != tempSong.notes || 
-                    song.alt_sequence != tempSong.alt_sequence) {
-                    contentChanged = true;
-                    break;
-                }
-            }
-        }
-
-        hasUnsavedChanges = orderChanged || contentChanged;
+        // Use the helper function instead of repeating the loop logic
+        hasUnsavedChanges = songs_have_changes() || notesChanged;
 
         if (hasUnsavedChanges) {
             $('.save_btn, .reset_btn').show();
         } else {
             $('.save_btn, .reset_btn').hide();
         }
+    }
+
+    function songs_have_changes() {
+        let currentOrder = $('#songs').data('ui-sortable')
+            ? $('#songs').sortable('toArray', {attribute: 'name'})
+            : songs.map(item => String(item.id));
+        let originalOrder = songs.map(item => String(item.id));
+
+        if (JSON.stringify(currentOrder) !== JSON.stringify(originalOrder) || songs.length !== songs_temp.length) {
+            return true;
+        }
+
+        return songs.some(function(song) {
+            let tempSong = songs_temp.find(s => s.id === song.id);
+            return !tempSong ||
+                (parseInt(song.transpose) || 0) !== (parseInt(tempSong.transpose) || 0) ||
+                song.notes != tempSong.notes ||
+                song.alt_sequence != tempSong.alt_sequence;
+        });
+    }
+
+    function save_worship_notes() {
+        let sermonData = {
+            date: worship_data.date,
+            notes: worship_notes_temp,
+            sermons: worship_data.sermons || {},
+            display_order: worship_data.display_order || [],
+            is_joint: worship_data.is_joint || 0
+        };
+
+        $.ajax({
+            type: 'post',
+            url: API_URL + 'sermon/' + worship_id,
+            data: JSON.stringify(sermonData),
+            contentType: 'application/json',
+            complete: function(response) {
+                if (response.status === 200) {
+                    worship_data.notes = worship_notes_temp;
+                    checkActionButtons();
+                    alert('Worship Notes Saved!');
+                } else {
+                    alert(response.responseText);
+                }
+            }
+        });
     }
 
     // This function will detect if arrangement has been changed compare to the origin one
@@ -561,6 +759,8 @@
     // Reset all the changes (songs order, lyrics order)
     function reset() {
         songs_temp = JSON.parse(JSON.stringify(songs));
+        worship_notes_temp = worship_data.notes || '';
+        get_sermon();
         $.when( add_song_to_worship(worship)).then(function() {
             init();
             checkActionButtons();
@@ -578,6 +778,24 @@
 
         $(".lyrics").sortable({
             cancel: 'input, textarea, button, select, option',
+            tolerance: "pointer", 
+            helper: "clone",             /* Prevents the grid from collapsing when you pick up an item */
+            forcePlaceholderSize: true,  /* Forces the empty space to stay the exact same size */
+            opacity: 0.8,
+
+            // Set the initial number when picked up
+            start: function(event, ui) {
+                let startIndex = ui.placeholder.prevAll('.lyric-item:not(.ui-sortable-helper)').length + 1;
+                ui.helper.find('.lyric-content').attr('data-drag-number', startIndex);
+            },
+            
+            // Dynamically update the number in hand as it moves across the grid
+            sort: function(event, ui) {
+                // Count how many normal, non-hidden lyric items are currently before the placeholder
+                let currentIndex = ui.placeholder.prevAll('.lyric-item:not(.ui-sortable-helper):visible').length + 1;
+                ui.helper.find('.lyric-content').attr('data-drag-number', currentIndex);
+            },
+
             create: function( event, ui ) {
                 //is_changed($(this).sortable('toArray', {attribute: 'name'}));
                 update_alt($(this).sortable('toArray'));
@@ -612,10 +830,9 @@
         }
     }
 
-    // ======================
-    // Transpose and Key Stuff
-    // ======================
-
+    /* =========================================================
+       Transpose and Key Stuff
+       ========================================================= */
     // When the Key is changed
     $(document).on('change', '.key', function () {
         let transposeVal = keys.indexOf(this.value) - keys.indexOf($(this).attr('init'));
@@ -694,14 +911,13 @@
         });
     }
 
-    /* ======================
-        Song Sequence and Lyrics
-    */
+    /* =========================================================
+       Song Sequence and Lyrics
+       ========================================================= */
     // When lyrics sequence is clicked, open up movable lyrics sections
     $(document).on('click', '.song_sequence_toggle', function(){
-        id = $(this).attr('name');
         $(this).find('.toggle-icon').toggleClass('fa-caret-down fa-caret-right');
-        $("#sequence_"+id).toggle('slow');
+        $(this).next('.sequence-container').toggle('slow');
     });
 
     // When add_sequence_btn for lyrics sequence is clicked
