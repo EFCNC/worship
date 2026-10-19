@@ -192,7 +192,21 @@ h3 {
             { key: 'en', label: 'English', shortLabel: 'EN' }
         ];
 
-        var titleHtml = "<h3>{{ w.date }} 敬拜筆記 (Worship Notes)</h3>";
+        var currentUser = $.cookie("user_name");
+        var editButton = "";
+
+        // Only render the button if a user is logged in
+        if (currentUser != "undefined") {
+            editButton = `
+                <a href='{{ url_for('worship_songs_editor', id=id) }}' title='Song Configurator'>
+                    <i class='fa fa-pencil' style='font-size: 1.2em;'></i>
+                </a>`;
+        }
+
+        var titleHtml = `<div style='display: flex; justify-content: space-between;'>
+                <h3>{{ w.date }} 敬拜筆記 (Worship Notes)</h3>
+                ${editButton}
+                </div>`;
 
         var cardHtml = sermonLangs.filter(function(item) {
             var sermon = sermonVariants[item.key] || {};
