@@ -158,44 +158,67 @@ def _preserve_manual_pages(generated_content, previous_content):
 
 
 def _preserve_slide_order(generated_slides, previous_slides):
-    """Keep the user's prior column order while retaining newly generated slides."""
-    remaining = list(generated_slides)
+    """Keep custom slides and pages while following the selected song order."""
+    previous_slides = previous_slides or []
+    if not previous_slides:
+        return list(generated_slides)
+
+    def arranged_song(slide):
+        # The offering hymn belongs to the template, not the song arrangement.
+        return (slide.get('manual') is not True and slide.get('type') == 'song'
+                and slide.get('id') not in (None, -1, '-1'))
+
+    # Match by identity, not position: reordering songs must not transfer custom
+    # subpages to a different song. Consume matches to support repeated songs.
+    previous_matches = [slide for slide in previous_slides if slide.get('manual') is not True]
+    for slide in generated_slides:
+        match_index = next((i for i, previous in enumerate(previous_matches)
+                            if _slide_identity(previous) == _slide_identity(slide)), None)
+        if match_index is not None:
+            previous = previous_matches.pop(match_index)
+            slide['content'] = _preserve_manual_pages(
+                slide.get('content'), previous.get('content'))
+
+    song_slots = [i for i, slide in enumerate(previous_slides) if arranged_song(slide)]
+    songs = iter(slide for slide in generated_slides if arranged_song(slide))
+    remaining = [slide for slide in generated_slides
+                 if not song_slots or not arranged_song(slide)]
     ordered = []
-    for previous in previous_slides or []:
+    for index, previous in enumerate(previous_slides):
         if previous.get('manual') is True:
             ordered.append(previous)
             continue
-        previous_identity = _slide_identity(previous)
-        match_index = next((
-            index for index, slide in enumerate(remaining)
-            if _slide_identity(slide) == previous_identity
-        ), None)
+        if arranged_song(previous):
+            song = next(songs, None)
+            if song is not None:
+                ordered.append(song)
+            if index == song_slots[-1]:
+                ordered.extend(songs)
+            continue
+        match_index = next((i for i, slide in enumerate(remaining)
+                            if _slide_identity(slide) == _slide_identity(previous)), None)
         if match_index is not None:
-            slide = remaining.pop(match_index)
-            slide['content'] = _preserve_manual_pages(
-                slide.get('content'), previous.get('content'))
-            ordered.append(slide)
+            ordered.append(remaining.pop(match_index))
         elif previous.get('id') in (None, -1, '-1'):
-            # Older custom columns/media did not have an explicit manual flag.
-            # Missing database songs have real IDs and must stay removed.
+            # Preserve older custom columns that predate the manual flag.
             ordered.append(previous)
-    # Insert new columns beside their generated service-order neighbours,
-    # rather than appending them after the benediction. Existing columns keep
-    # their saved order; with no previous songs, the next neighbour is sermon.
+
+    # Place newly generated columns (including first-time song selections) by
+    # service-order neighbours without discarding the saved custom columns.
     for slide in remaining:
-        generated_index = next(index for index, item in enumerate(generated_slides)
-                               if item is slide)
+        generated_index = next(i for i, item in enumerate(generated_slides) if item is slide)
         next_slide = next((item for item in generated_slides[generated_index + 1:]
                            if any(saved is item for saved in ordered)), None)
         if next_slide is not None:
-            insert_at = next(index for index, item in enumerate(ordered) if item is next_slide)
+            insert_at = next(i for i, item in enumerate(ordered) if item is next_slide)
         else:
             previous_slide = next((item for item in reversed(generated_slides[:generated_index])
                                    if any(saved is item for saved in ordered)), None)
-            insert_at = (next(index for index, item in enumerate(ordered) if item is previous_slide) + 1
+            insert_at = (next(i for i, item in enumerate(ordered) if item is previous_slide) + 1
                          if previous_slide is not None else len(ordered))
         ordered.insert(insert_at, slide)
     return ordered
+
 
 
 def create_json(id, worship=None):
@@ -272,6 +295,7 @@ def create_json(id, worship=None):
 
         order = template["order"]
         temp = []
+        # Regenerate the arrangement, preserving styles and manual pages below.
         for item in order:
             if item in template:
                 if item == 'song':
