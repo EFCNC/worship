@@ -730,7 +730,8 @@
                 'sequence': item.alt_sequence,
                 'notes': item.notes,
                 'transpose': [item.transpose.toString()],
-                'scheduled_date': item.date
+                'scheduled_date': item.date,
+                'language_version_order': item.language_version_order
             }));
 
             let url = API_URL + 'worship/' + id + '/edit';
@@ -763,7 +764,7 @@
                         checkActionButtons();
     	            }
         	        else {
-        	            alert(response);
+                        alert(response.responseText || response.statusText);
 				    }
                 },
                 contentType: "application/json",

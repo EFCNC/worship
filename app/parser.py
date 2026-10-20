@@ -52,7 +52,7 @@ def parse_lyrics(content, sequence):
     langs = [x['lang'] for x in parsed_data]
     
     content = lyrics_
-    return content, langs
+    return content
 
 
     # for c in content:

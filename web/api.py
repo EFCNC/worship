@@ -30,8 +30,11 @@ def edit_worship(id):
 
     if request.method == 'POST':
         content = request.get_json()
-        Utils.edit_songset(int(id), content)
-        return '', 200
+        try:
+            Utils.edit_songset(int(id), content)
+            return '', 200
+        except Exception as e:
+            return str(e), 500
     result = Tools.create_json(int(id))
     if result == '':
         return "No song is arranged", 500

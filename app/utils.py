@@ -592,7 +592,8 @@ def get_song_by_id(id):
                 abc.append(s[14])
     if songs:
         r = songs[0]
-        content, langs = Parser.parse_lyrics(r[11], r[5])
+        content = Parser.parse_lyrics(r[11], r[5])
+        langs = [item.get('lang', '') for item in content]
         return {'type': 'song', 'title': r[0], 'author': r[1] if r[1] else '', 'lang': langs,
                 'lang_2': r[3] if r[3] else '', 'song_key': r[4] if r[4] else '', 'sequence': r[5] if r[5] else '',
                 'bible_verse': r[6] if r[6] else '', 'lyricist': r[7] if r[7] else '', 'book': r[8] if r[8] else '',
@@ -779,33 +780,60 @@ def remove_role(date, content):
         return r, 500
     return '', 200
 
-
 def edit_songset(id, content):
     """
-    :param id: worship_id,
-    :param content: dict of column name, value
+    :param id: worship_id
+    :param content: list of song dictionaries
     """
-    dB.run_para('DELETE FROM presentation where worship_id = ?', id)
+    rows = []
 
-    if content:
-        sql = "INSERT INTO presentation(song_id, worship_id, transpose, scheduled_date, sequence, song_order, notes, type, langs) VALUES"
-        for song in content:
-            if song['type'] == 'info':
-                sql += '({}, {}, {}, "{}", "{}", {}, "{}", "{}"),'.format(-1, id, ','.join(song['transpose']),
-                                                                          song['scheduled_date'], song['sequence'],
-                                                                          song['song_order'], song['notes'],
-                                                                          song['type'])
-            else:
-                sql += '({}, {}, {}, "{}", "{}", {}, "{}", "{}", "{}"),'.format(song['song_id'], id,
-                                                                          ','.join(song['transpose']),
-                                                                          song['scheduled_date'], song['sequence'],
-                                                                          song['song_order'], song['notes'],
-                                                                          song['type'], song['langs'])
-        sql = sql[:-1]
-        return dB.run(sql)
+    for song in content or []:
+        transpose = ','.join(str(value) for value in song['transpose'])
 
-    return True
+        if song['type'] == 'info':
+            song_id = -1
+            version = ''
+        else:
+            song_id = song['song_id']
+            version = ','.join(song.get('language_version_order') or [])
 
+        rows.append((
+            song_id,
+            id,
+            transpose,
+            song['scheduled_date'],
+            song['sequence'],
+            song['song_order'],
+            song['notes'],
+            song['type'],
+            version,
+        ))
+
+    connection = dB.open(dB.db_name)
+
+    try:
+        with connection:
+            cursor = connection.cursor()
+
+            cursor.execute(
+                'DELETE FROM presentation WHERE worship_id = ?',
+                (id,)
+            )
+
+            cursor.executemany(
+                '''
+                INSERT INTO presentation (
+                    song_id, worship_id, transpose, scheduled_date,
+                    sequence, song_order, notes, type, version
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ''',
+                rows,
+            )
+
+        return True
+    finally:
+        connection.close()
 
 @dataclass
 class SermonVariant:
