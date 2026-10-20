@@ -102,7 +102,7 @@ def simplify_json(json):
     for slide in slides:
         contents = slide.get('content', [])
         cc = []
-        temp = {key: slide[key] for key in slide.keys() & {'id', 'title', 'notes', 'style', 'author', 'lyricist', 'ccli', 'book', 'copyright', 'key', 'type'}}
+        temp = {key: slide[key] for key in slide.keys() & {'id', 'title', 'notes', 'style', 'author', 'lyricist', 'ccli', 'book', 'copyright', 'key', 'type', 'manual'}}
         if isinstance(contents, list):
             for content in contents:
                 if isinstance(content, dict):
@@ -126,20 +126,100 @@ def _slide_identity(slide):
     return slide_type, 'title', slide.get('title', '')
 
 
+def _preserve_manual_pages(generated_content, previous_content):
+    """Carry custom pages forward while refreshing database-backed content."""
+    if not isinstance(previous_content, list) or generated_content == previous_content:
+        return generated_content
+    if not any(page.get('manual') is True for page in previous_content):
+        return generated_content
+
+    # Information slides start as a single object and become an array when a
+    # subpage is added. Keep the regenerated information as the first page.
+    if isinstance(generated_content, dict):
+        generated_content = [dict(generated_content, name='Information')]
+    pages = list(generated_content)
+    remaining = list(enumerate(pages))
+    additions = {}
+    anchor = -1
+    for previous in previous_content:
+        if previous.get('manual') is True:
+            additions.setdefault(anchor, []).append(previous)
+            continue
+        match = next((pair for pair in remaining
+                      if pair[1].get('name') == previous.get('name')), None)
+        if match is not None:
+            anchor = match[0]
+            remaining.remove(match)
+
+    merged = list(additions.get(-1, []))
+    for index, page in enumerate(pages):
+        merged.append(page)
+        merged.extend(additions.get(index, []))
+    return merged
+
+
 def _preserve_slide_order(generated_slides, previous_slides):
-    """Keep the user's prior column order while retaining newly generated slides."""
-    remaining = list(generated_slides)
+    """Keep custom slides and pages while following the selected song order."""
+    previous_slides = previous_slides or []
+    if not previous_slides:
+        return list(generated_slides)
+
+    def arranged_song(slide):
+        # The offering hymn belongs to the template, not the song arrangement.
+        return (slide.get('manual') is not True and slide.get('type') == 'song'
+                and slide.get('id') not in (None, -1, '-1'))
+
+    # Match by identity, not position: reordering songs must not transfer custom
+    # subpages to a different song. Consume matches to support repeated songs.
+    previous_matches = [slide for slide in previous_slides if slide.get('manual') is not True]
+    for slide in generated_slides:
+        match_index = next((i for i, previous in enumerate(previous_matches)
+                            if _slide_identity(previous) == _slide_identity(slide)), None)
+        if match_index is not None:
+            previous = previous_matches.pop(match_index)
+            slide['content'] = _preserve_manual_pages(
+                slide.get('content'), previous.get('content'))
+
+    song_slots = [i for i, slide in enumerate(previous_slides) if arranged_song(slide)]
+    songs = iter(slide for slide in generated_slides if arranged_song(slide))
+    remaining = [slide for slide in generated_slides
+                 if not song_slots or not arranged_song(slide)]
     ordered = []
-    for previous in previous_slides or []:
-        previous_identity = _slide_identity(previous)
-        match_index = next((
-            index for index, slide in enumerate(remaining)
-            if _slide_identity(slide) == previous_identity
-        ), None)
+    for index, previous in enumerate(previous_slides):
+        if previous.get('manual') is True:
+            ordered.append(previous)
+            continue
+        if arranged_song(previous):
+            song = next(songs, None)
+            if song is not None:
+                ordered.append(song)
+            if index == song_slots[-1]:
+                ordered.extend(songs)
+            continue
+        match_index = next((i for i, slide in enumerate(remaining)
+                            if _slide_identity(slide) == _slide_identity(previous)), None)
         if match_index is not None:
             ordered.append(remaining.pop(match_index))
-    ordered.extend(remaining)
+        elif previous.get('id') in (None, -1, '-1'):
+            # Preserve older custom columns that predate the manual flag.
+            ordered.append(previous)
+
+    # Place newly generated columns (including first-time song selections) by
+    # service-order neighbours without discarding the saved custom columns.
+    for slide in remaining:
+        generated_index = next(i for i, item in enumerate(generated_slides) if item is slide)
+        next_slide = next((item for item in generated_slides[generated_index + 1:]
+                           if any(saved is item for saved in ordered)), None)
+        if next_slide is not None:
+            insert_at = next(i for i, item in enumerate(ordered) if item is next_slide)
+        else:
+            previous_slide = next((item for item in reversed(generated_slides[:generated_index])
+                                   if any(saved is item for saved in ordered)), None)
+            insert_at = (next(i for i, item in enumerate(ordered) if item is previous_slide) + 1
+                         if previous_slide is not None else len(ordered))
+        ordered.insert(insert_at, slide)
     return ordered
+
 
 
 def create_json(id, worship=None):
@@ -157,22 +237,22 @@ def create_json(id, worship=None):
         with open(template_file, "r", encoding="utf-8") as f:
             template = json.loads(f.read())
 
-        slides = get_worship_json(id)
-        if slides:  # if previous slide already saved, use the style from there
+        previous_presentation = get_worship_json(id)
+        slides = previous_presentation
+        if slides:
             slides = slides['slides']
-            if any(x['style'] for x in slides if x['title'] == '報告'):
-                template["announcement"]["style"] = next(x['style'] for x in slides if x['title'] == '報告')
-            if any(x['style'] for x in slides if x['title'] == '肢體交通'):
-                template["caring"]["style"] = next(x['style'] for x in slides if x['title'] == '肢體交通')
-            if any(x['style'] for x in slides if x['title'] == '主日信息'):
-                template["sermon"]["style"] = next(x['style'] for x in slides if x['title'] == '主日信息')
-            if any(x['style'] for x in slides if x['title'] == '前奏'):
-                template["welcome"]["style"] = next(x['style'] for x in slides if x['title'] == '前奏')
-                template["welcome"] = next(x for x in slides if x['title'] == '前奏')
-            if any(x['style'] for x in slides if x['title'] == '祝禱'):
-                template["benediction"] = next(x for x in slides if x['title'] == '祝禱')
-            if any(x['style'] for x in slides if x['title'] == '奉獻歌'):
-                template["offering"] = next(x for x in slides if x['title'] == '奉獻歌')
+            for section, default in template.items():
+                if not isinstance(default, dict):
+                    continue
+                previous = next((slide for slide in slides
+                                 if slide.get('manual') is not True
+                                 and _slide_identity(slide) == _slide_identity(default)), None)
+                if previous is None:
+                    continue
+                if previous.get('style'):
+                    default['style'] = previous['style']
+                if section in ('welcome', 'benediction', 'offering'):
+                    template[section] = previous
 
         sermon = Utils.get_worship(id)
         info = Utils.get_info(id)
@@ -216,10 +296,7 @@ def create_json(id, worship=None):
 
         order = template["order"]
         temp = []
-        # compare songs in the slides with latest song, remove the one that's not match
-        song_ids = [x['id'] for x in songs]
-        if slides:
-            slides = [x for x in slides if x['id'] in song_ids or x['type'] != 'song']
+        # Regenerate the arrangement, preserving styles and manual pages below.
         for item in order:
             if item in template:
                 if item == 'song':
@@ -236,7 +313,10 @@ def create_json(id, worship=None):
                 else:
                     temp.append(template[item])
         temp = _preserve_slide_order(temp, slides)
-        worship_json = {"setting": {"slide_order": order, "assets": []}, "slides": temp}
+        setting = {"slide_order": order, "assets": []}
+        if previous_presentation:
+            setting.update(previous_presentation.get('setting', {}))
+        worship_json = {"setting": setting, "slides": temp}
 
     else:
         worship_date = Utils.get_worship_date(id)[0]
