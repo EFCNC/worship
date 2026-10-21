@@ -421,8 +421,11 @@ def admin_people():
 @app.route("/admin/calendar")
 def admin_calendar():
 	now = datetime.now()
-	year = str(now.year)
-	column, calendar = Utils.get_calendar(year)
+	year = now.year
+	column, calendar = Utils.get_calendar(str(year))
+	# Include the year after
+	column1, calendar1 = Utils.get_calendar(str(year+1))
+	calendar += calendar1
 	return render_template('admin/calendar.html', column=column, calendar=calendar)
 
 @app.route("/admin/report/<id>")

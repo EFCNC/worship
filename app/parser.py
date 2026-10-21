@@ -49,10 +49,9 @@ def parse_lyrics(content, sequence):
             "lyrics": processed_sections
         })
 
-    langs = [x['lang'] for x in parsed_data]
+    #langs = [x['lang'] for x in parsed_data]
     
-    content = lyrics_
-    return content, langs
+    return lyrics_
 
 
     # for c in content:

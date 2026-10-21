@@ -56,6 +56,11 @@ def preview(id):
     slides = Utils.get_worship_songs(id)
     return slides
 
+@api.route("/worship/weeks", methods=["POST"])
+def worship_add():
+    worship = request.get_json()
+    return Tools.add_worship_week(worship['year'])
+
 @api.route("/info/<id>")
 def get_info(id):
     info = Utils.get_info(id)
@@ -119,7 +124,6 @@ def get_song(id):
     '''
     if request.method == "POST":
         song = request.get_json()
-        print(song)
         result = Utils.edit_song(id, song)
         return result
     if request.method == "GET":
