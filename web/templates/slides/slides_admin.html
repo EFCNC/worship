@@ -85,8 +85,9 @@
 
     #brightness_control {
         display: flex;
+        flex-wrap: wrap;
         align-items: center;
-        gap: 12px;
+        gap: 6px 12px;
         min-height: 42px;
         margin-bottom: 8px;
         padding: 4px 0;
@@ -94,10 +95,29 @@
         color: #fff;
     }
 
+    #brightness_control > span {
+        flex: 0 0 100%;
+    }
+
+    .brightness-slider-track {
+        display: flex;
+        align-items: center;
+        flex: 1 1 80px;
+        min-width: 0;
+        min-height: 34px;
+        padding: 0 10px;
+        box-sizing: border-box;
+    }
+
     #brightness_control #slider {
-        flex: 0 0 300px;
-        width: 300px !important;
-        min-width: 300px;
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    .background-actions {
+        flex: 0 0 99px;
+        min-height: 34px;
+        margin-left: auto;
     }
 
     #admin_toast {
@@ -169,6 +189,11 @@
             border-left-color: #f57c00;
         }
 
+        #slide_composer,
+        #slide_composer * {
+            box-sizing: border-box;
+        }
+
         #slide_composer {
             position: fixed;
             inset: 0;
@@ -185,8 +210,8 @@
         }
 
         .slide-composer-card {
-            width: min(900px, 94vw);
-            max-height: 94vh;
+            width: min(900px, 100%);
+            max-height: 100%;
             overflow-y: auto;
             padding: 20px;
             border: 1px solid #5f536d;
@@ -211,6 +236,8 @@
         }
 
         .slide-composer-name input {
+            width: 100%;
+            min-width: 0;
             padding: 10px;
             border: 1px solid #5f536d;
             border-radius: 6px;
@@ -224,7 +251,8 @@
             display: grid;
             grid-template-rows: 1fr 1fr;
             align-items: center;
-            width: 100%;
+            width: min(100%, 80vh);
+            margin-inline: auto;
             aspect-ratio: 16 / 9;
             overflow: hidden;
             border: 2px solid #826fee;
@@ -266,19 +294,22 @@
 
         .slide-composer-inputs {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
             gap: 14px;
             margin-top: 16px;
         }
 
         .slide-composer-inputs label {
             display: grid;
+            min-width: 0;
             gap: 6px;
             font-family: var(--font-family-base);
             font-weight: 600;
         }
 
         .slide-composer-inputs textarea {
+            width: 100%;
+            min-width: 0;
             min-height: 100px;
             resize: vertical;
             padding: 10px;
@@ -429,9 +460,9 @@
             <div id="image_bg">
                 <div id="brightness_control">
                     <span>Brightness:</span>
-                    <div id="slider" style="width:300px;"><div id="custom-handle" class="ui-slider-handle" style="text-align: center; color: white; background-color: #826fee; border:#000; border-width: 10px;"></div></div>
+                    <div class="brightness-slider-track"><div id="slider"><div id="custom-handle" class="ui-slider-handle" style="text-align: center; color: white; background-color: #826fee; border:#000; border-width: 10px;"></div></div></div>
                     <!-- Apply, Apply all and cancel background buttons -->
-                    <div id="edit_btn"><i class="material-icons small disabled" name="one" title="Apply">&#xE876;</i><i class="material-icons small disabled" name="all" title="Apply All">&#xE877;</i><i class="material-icons small disabled" name="cancel" title="Cancel">&#xE5C9;</i></div>
+                    <div class="background-actions"><div id="edit_btn"><i class="material-icons small disabled" name="one" title="Apply">&#xE876;</i><i class="material-icons small disabled" name="all" title="Apply All">&#xE877;</i><i class="material-icons small disabled" name="cancel" title="Cancel">&#xE5C9;</i></div></div>
                 </div>
                 <div id="image_icons"></div>
             </div>
@@ -477,6 +508,8 @@
         mode = 'admin';                 // Set mode to admin
         bg_url = '';
         bg_brightness = 1;
+        background_image_changed = false;
+        background_slide = null;
         a_type = '';
         admin_toast_timer = null;
         slide_composer_state = null;
@@ -538,6 +571,7 @@
         function finish_background_action(message, type) {
             $('#edit_btn').hide();
             a_type = '';
+            background_image_changed = false;
             if (message) {
                 show_admin_toast(message, type);
             }
@@ -546,6 +580,27 @@
         function close_background_panel() {
             $('#edit_btn, #image_bg').hide();
             a_type = '';
+            background_image_changed = false;
+            background_slide = null;
+        }
+
+        function sync_background_panel() {
+            if (!$('#image_bg').is(':visible') || !slides[pos] || background_slide === slides[pos]) {
+                return;
+            }
+            // Discard an unconfirmed preview on the old column before loading
+            // the new column's saved settings. Subpage navigation keeps it.
+            var previousIndex = slides.indexOf(background_slide);
+            if (previousIndex !== -1) {
+                update_current_bg(previousIndex, background_slide.style.background || '',
+                    get_slide_background_brightness(background_slide));
+            }
+            background_slide = slides[pos];
+            bg_url = background_slide.style.background || '';
+            bg_brightness = get_slide_background_brightness(background_slide);
+            set_background_slider(bg_brightness * 10);
+            finish_background_action('', 'cancelled');
+            update_current_bg();
         }
 
         function restore_background_preview(showMessage) {
@@ -608,6 +663,8 @@
             toggle_panel('image_bg');
             if ($('#image_bg').is(":visible")) {
                 a_type = 'bg';
+                background_slide = slides[pos];
+                background_image_changed = false;
                 bg_url = slides[pos].style.background || '';
                 bg_brightness = get_slide_background_brightness(slides[pos]);
                 set_background_slider(bg_brightness * 10);
@@ -695,7 +752,7 @@
         function add_media_slide() {
             link = prompt('Enter the link to insert to current slide');
             if(link) {
-                info = {"alt_sequence": "", "author": "", "style": {"align": "", "background": "", "opacity": 1, "fragment": 4, "color": ""}, "bible": "", "book": "", "ccli": "", "content": {"origin_text": link, "region_text": ""}, "copyright": "", "date": "", "id": -1, "key": "", "lang": "", "lang_2": "", "lyricist": "", "lyrics_raw": "", "notes": "Media", "score": "", "sequence": "", "title": "Media", "transpose": "0", "type": "media", "version": "", "video": ""};
+                info = {"alt_sequence": "", "author": "", "style": {"align": "", "background": "", "opacity": 1, "fragment": 4, "color": ""}, "bible": "", "book": "", "ccli": "", "content": {"origin_text": link, "region_text": ""}, "copyright": "", "date": "", "id": -1, "key": "", "lang": "", "lang_2": "", "lyricist": "", "lyrics_raw": "", "notes": "Media", "score": "", "sequence": "", "title": "Media", "transpose": "0", "type": "media", "manual": true, "version": "", "video": ""};
                 slides.splice(pos+1, 0, info);
                 adding_slide = 0;
                 update_json();
@@ -779,6 +836,7 @@
             var sourceStyle = sourceSlide && sourceSlide.style ? sourceSlide.style : {};
             return {
                 id: -1,
+                manual: true,
                 title: content.name,
                 notes: 'Custom bilingual slide',
                 style: {
@@ -955,6 +1013,8 @@
                     handle.text( ui.value );
                     bg_brightness = ui.value/10;
                     update_current_bg();
+                    a_type = 'bg';
+                    $('#edit_btn').show();
                 }
             });
         });
@@ -1087,23 +1147,23 @@
             set_background_slider(10);
             bg_brightness = 1;
             bg_url = this.title;
+            background_image_changed = true;
             update_current_bg();
             $('#edit_btn').show();
             a_type = 'bg';
         });
 
-        function update_current_bg() {
+        function update_current_bg(horizontalIndex = pos, backgroundUrl = bg_url, brightness = bg_brightness) {
             if (typeof update_matrix_background_preview === 'function') {
-                update_matrix_background_preview(pos, bg_url, bg_brightness);
+                update_matrix_background_preview(horizontalIndex, backgroundUrl, brightness);
             }
-            slide_bg = Reveal.getSlideBackground(pos, order);
+            apply_slide_background_brightness(horizontalIndex, brightness);
+            var slide_bg = Reveal.getSlideBackground(horizontalIndex);
             if (!slide_bg || !slide_bg.children.length) {
                 return;
             }
             var backgroundContent = slide_bg.children[0];
-            backgroundContent.style.opacity = '1';
-            backgroundContent.style.filter = 'brightness(' + bg_brightness + ')';
-            backgroundContent.style.backgroundImage = bg_url ? 'url("' + bg_url + '")' : 'none';
+            backgroundContent.style.backgroundImage = backgroundUrl ? 'url("' + backgroundUrl + '")' : 'none';
         }
 
         function cancel() {
@@ -1120,13 +1180,17 @@
             if (appliedBackground) {
                 if (name == 'all') {
                     for(var i=0;i<slides.length;i++) {
-                        slides[i].style.background = bg_url;
+                        if (background_image_changed) {
+                            slides[i].style.background = bg_url;
+                        }
                         slides[i].style.brightness = bg_brightness;
                         slides[i].style.opacity = 1;
                     }
                 }
                 else {
-                    slides[pos].style.background = bg_url;
+                    if (background_image_changed) {
+                        slides[pos].style.background = bg_url;
+                    }
                     slides[pos].style.brightness = bg_brightness;
                     slides[pos].style.opacity = 1;
                 }

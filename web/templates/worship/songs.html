@@ -504,14 +504,14 @@
     document.addEventListener('touchstart', function(e) {
         const tag = e.target.tagName;
         
-        if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || tag === 'OPTION') {
+        if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || tag === 'OPTION' || e.target.closest('.song-title')) {
             e.stopPropagation();
         }
     }, true);
 
     document.addEventListener('mousedown', function(e) {
         const tag = e.target.tagName;
-        if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || tag === 'OPTION') {
+        if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || tag === 'OPTION' || e.target.closest('.song-title')) {
             e.stopPropagation();
         }
     }, true);
@@ -730,7 +730,8 @@
                 'sequence': item.alt_sequence,
                 'notes': item.notes,
                 'transpose': [item.transpose.toString()],
-                'scheduled_date': item.date
+                'scheduled_date': item.date,
+                'language_version_order': item.language_version_order
             }));
 
             let url = API_URL + 'worship/' + id + '/edit';
@@ -763,7 +764,7 @@
                         checkActionButtons();
     	            }
         	        else {
-        	            alert(response);
+                        alert(response.responseText || response.statusText);
 				    }
                 },
                 contentType: "application/json",
@@ -789,7 +790,7 @@
     // init sortable, triggered after the worship div is loaded
     function init() {
         $("#songs").sortable({
-            cancel: 'input, textarea, button, select, option',
+            cancel: 'input, textarea, button, select, option, .song-title',
             update: function () {
                 checkActionButtons();
             }

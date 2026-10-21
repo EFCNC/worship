@@ -165,6 +165,7 @@ h3 {
     const worshipInfo = {{ w|tojson|safe }};
     const initialTab = '{{ tab|safe }}' || 'view';
     const song_id = worshipData.map(o=> o.id);
+    let isFullSequence = false;
 
     // --- FUNCTIONS ---
 
@@ -192,7 +193,21 @@ h3 {
             { key: 'en', label: 'English', shortLabel: 'EN' }
         ];
 
-        var titleHtml = "<h3>{{ w.date }} 敬拜筆記 (Worship Notes)</h3>";
+        var currentUser = $.cookie("user_name");
+        var editButton = "";
+
+        // Only render the button if a user is logged in
+        if (currentUser != "undefined") {
+            editButton = `
+                <a href='{{ url_for('worship_songs_editor', id=id) }}' title='Song Configurator'>
+                    <i class='fa fa-pencil' style='font-size: 1.2em;'></i>
+                </a>`;
+        }
+
+        var titleHtml = `<div style='display: flex; justify-content: space-between;'>
+                <h3>{{ w.date }} 敬拜筆記 (Worship Notes)</h3>
+                ${editButton}
+                </div>`;
 
         var cardHtml = sermonLangs.filter(function(item) {
             var sermon = sermonVariants[item.key] || {};
@@ -318,16 +333,85 @@ h3 {
         return base;
     }
 
+// --- SEQUENCE PARSING & DEDUPLICATION ---
+    
     /**
-    * Renders the song content according to alt_sequence order and new content JSON structure.
+     * Parses a song's sequence string into ordered section items.
+     * By default, it deduplicates repeating sections while preserving their first occurrence.
+     */
+    function parseSequence(rawSequence, primaryBlock, options = {}) {
+        const { fullSequence = false } = options;
+        let sequenceItems = [];
+        let seenKeys = new Set();
+
+        const findSection = (block, secName) => {
+            if (!block || !Array.isArray(block.lyrics)) return null;
+            let target = secName.toLowerCase().replace('-', '');
+            return block.lyrics.find(s => s.name && s.name.toLowerCase().replace('-', '') === target);
+        };
+
+        let trimmedSeq = (rawSequence || '').trim();
+
+        if (trimmedSeq) {
+            let tokens = trimmedSeq.split(',').map(s => s.trim()).filter(Boolean);
+
+            for (let token of tokens) {
+                let match = token.match(/^([a-zA-Z\-]+)(\d*)$/);
+                let canonicalName = token;
+                let index = 0;
+
+                if (match) {
+                    let prefix = match[1].toLowerCase();
+                    let numStr = match[2];
+                    index = numStr ? Math.max(0, parseInt(numStr, 10) - 1) : 0;
+                    canonicalName = SECTION_PREFIX_MAP[prefix] || prefix;
+                }
+
+                // Deduplication key (e.g. "chorus_0")
+                let itemKey = `${canonicalName.toLowerCase()}_${index}`;
+                if (!fullSequence && seenKeys.has(itemKey)) {
+                    continue; // Skip repetitions by default
+                }
+                seenKeys.add(itemKey);
+
+                let secObj = findSection(primaryBlock, canonicalName);
+                let textArr = secObj ? (secObj.lyrics_text || secObj.lyrics) : null;
+                let totalCount = Array.isArray(textArr) ? textArr.length : 1;
+
+                let label = getSectionDisplayLabel(token, canonicalName, index, totalCount);
+                sequenceItems.push({ name: canonicalName, index: index, label: label });
+            }
+        } else {
+            // Fallback: render each section in order if no sequence was specified
+            if (primaryBlock && Array.isArray(primaryBlock.lyrics)) {
+                for (let sec of primaryBlock.lyrics) {
+                    let textArr = sec.lyrics_text || sec.lyrics || [];
+                    let count = Array.isArray(textArr) ? textArr.length : 1;
+                    for (let i = 0; i < count; i++) {
+                        let label = getSectionDisplayLabel(sec.name, sec.name, i, count);
+                        sequenceItems.push({ name: sec.name, index: i, label: label });
+                    }
+                }
+            }
+        }
+        return sequenceItems;
+    }
+
+    // --- RENDER CONTENT ---
+
+    /**
+    * Renders the song content utilizing the language_version_order array
     */
-    function renderSongContent(song, mode) {
+    function renderSongContent(song, mode, options = {}) {
         if (!song || !Array.isArray(song.content) || song.content.length === 0) return '';
 
-        // Primary language block (matches song.lang or defaults to 1st)
-        let primaryBlock = song.content.find(c => c.lang === song.lang) || song.content[0];
-        // Secondary language block (matches song.lang_2 or defaults to 2nd)
-        let secondaryBlock = song.content.find(c => c.lang === song.lang_2) || (song.content.length > 1 ? song.content[1] : null);
+        // Safely extract languages from the new language_version_order array
+        let langOrders = song.language_version_order || [];
+        let lang1 = langOrders.length > 0 ? langOrders[0] : (song.lang || '');
+        let lang2 = langOrders.length > 1 ? langOrders[1] : (song.lang_2 || '');
+
+        let primaryBlock = song.content.find(c => c.lang === lang1) || song.content[0];
+        let secondaryBlock = song.content.find(c => c.lang === lang2) || (song.content.length > 1 ? song.content[1] : null);
 
         const findSection = (block, secName) => {
             if (!block || !Array.isArray(block.lyrics)) return null;
@@ -346,43 +430,8 @@ h3 {
             return '';
         };
 
-        // Build the ordered sequence of section stanzas to display
-        let sequenceItems = [];
-        let rawSequence = (song.alt_sequence || '').trim();
-
-        if (rawSequence) {
-            let tokens = rawSequence.split(',').map(s => s.trim()).filter(Boolean);
-            for (let token of tokens) {
-                let match = token.match(/^([a-zA-Z\-]+)(\d*)$/);
-                if (match) {
-                    let prefix = match[1].toLowerCase();
-                    let numStr = match[2];
-                    let index = numStr ? Math.max(0, parseInt(numStr, 10) - 1) : 0;
-                    let canonicalName = SECTION_PREFIX_MAP[prefix] || prefix;
-
-                    let secObj = findSection(primaryBlock, canonicalName);
-                    let textArr = secObj ? (secObj.lyrics_text || secObj.lyrics) : null;
-                    let totalCount = Array.isArray(textArr) ? textArr.length : 1;
-
-                    let label = getSectionDisplayLabel(token, canonicalName, index, totalCount);
-                    sequenceItems.push({ name: canonicalName, index: index, label: label });
-                } else {
-                    sequenceItems.push({ name: token, index: 0, label: token });
-                }
-            }
-        } else {
-            // Fallback: render each section in order if no sequence was specified
-            if (primaryBlock && Array.isArray(primaryBlock.lyrics)) {
-                for (let sec of primaryBlock.lyrics) {
-                    let textArr = sec.lyrics_text || sec.lyrics || [];
-                    let count = Array.isArray(textArr) ? textArr.length : 1;
-                    for (let i = 0; i < count; i++) {
-                        let label = getSectionDisplayLabel(sec.name, sec.name, i, count);
-                        sequenceItems.push({ name: sec.name, index: i, label: label });
-                    }
-                }
-            }
-        }
+        // Parse sequence, deduplicating repetitions unless fullSequence is true
+        let sequenceItems = parseSequence(song.alt_sequence, primaryBlock, options);
 
         let contentHtml = '';
         for (let item of sequenceItems) {
@@ -390,8 +439,7 @@ h3 {
 
             switch(mode) {
                 case 'view':
-                    text1 = getSectionData(primaryBlock, item.name, item.index, 'lyrics_text');
-                    if (!text1) text1 = getSectionData(primaryBlock, item.name, item.index, 'lyrics');
+                    text1 = getSectionData(primaryBlock, item.name, item.index, 'lyrics_text') || getSectionData(primaryBlock, item.name, item.index, 'lyrics');
                     if (!text1) continue;
 
                     contentHtml += `<div><span><strong>[${item.label}]</strong></span>`;
@@ -400,12 +448,11 @@ h3 {
                     break;
 
                 case 'chord':
-                    chords = getSectionData(primaryBlock, item.name, item.index, 'lyrics_chord');
-                    if (!chords) chords = getSectionData(primaryBlock, item.name, item.index, 'lyrics');
+                    chords = getSectionData(primaryBlock, item.name, item.index, 'lyrics_chord') || getSectionData(primaryBlock, item.name, item.index, 'lyrics');
                     if (!chords) continue;
 
                     if (song.transpose && song.transpose !== '0') {
-                        let key_change = parseInt(song.transpose);
+                        let key_change = parseInt(song.transpose, 10);
                         chords = chords.replace(/(data-chord=")([^"]+)/g, (match, g1, g2) => {
                             return g1 + transposeChord(g2, key_change);
                         });
@@ -417,8 +464,7 @@ h3 {
                     break;
 
                 case 'bi':
-                    text1 = getSectionData(primaryBlock, item.name, item.index, 'lyrics_text');
-                    if (!text1) text1 = getSectionData(primaryBlock, item.name, item.index, 'lyrics');
+                    text1 = getSectionData(primaryBlock, item.name, item.index, 'lyrics_text') || getSectionData(primaryBlock, item.name, item.index, 'lyrics');
                     text2 = secondaryBlock ? (getSectionData(secondaryBlock, item.name, item.index, 'lyrics_text') || getSectionData(secondaryBlock, item.name, item.index, 'lyrics')) : '';
 
                     if (!text1 && !text2) continue;
@@ -484,10 +530,17 @@ h3 {
     * Loads the tab based on the button that was clicked (view, chord, bi, video) and updates the content accordingly.
     */
     function loadTab(mode) {
-        // Update button highlights
-        document.querySelectorAll('.toggle-btn').forEach(btn => btn.classList.remove('on'));
         const activeBtn = document.querySelector(`.toggle-btn.${mode}`);
-        if (activeBtn) activeBtn.classList.add('on');
+
+        // Toggle full sequence if clicking the currently active tab (excluding video)
+        if (activeBtn && activeBtn.classList.contains('on') && mode !== 'video') {
+            isFullSequence = !isFullSequence;
+        } else {
+            // Reset to default (deduplicated) when switching to a new tab
+            isFullSequence = false;
+            document.querySelectorAll('.toggle-btn').forEach(btn => btn.classList.remove('on'));
+            if (activeBtn) activeBtn.classList.add('on');
+        }
 
         let finalHtml = '';
 
@@ -509,18 +562,25 @@ h3 {
                     finalHtml += `</div>`;
                 }
             } else {
-                let currentKey = transposeChord(item.song_key, parseInt(item.transpose));
+                let langOrders = item.language_version_order || [];
+                let lang1 = langOrders.length > 0 ? langOrders[0] : (item.lang || '');
+                let lang2 = langOrders.length > 1 ? langOrders[1] : (item.lang_2 || '');
+
+                let currentKey = transposeChord(item.song_key, parseInt(item.transpose || 0));
+                // Visually indicate when the full sequence is active
+                let sequenceDisplay = isFullSequence ? `[${item.alt_sequence || ''}] (Full)` : `[${item.alt_sequence || ''}]`;
+
                 let header = `
                     <div class="songs">
                         <div class="reference">
                             ${item.title} (${currentKey})
-                            ${getLangTag(item.lang)} ${getLangTag(item.lang_2)} 
-                            [${item.alt_sequence}]
+                            ${getLangTag(lang1)} ${getLangTag(lang2)} 
+                            ${sequenceDisplay}
                             ${getMediaLinksHtml(item)}
                         </div>
                         <div class="song_container">
-                            <div class="song_block">${renderSongContent(item, mode)}</div>
-                            <div class="notes">${item.notes.replace(/\n/g, '<br/>')}</div>
+                            <div class="song_block">${renderSongContent(item, mode, { fullSequence: isFullSequence })}</div>
+                            <div class="notes">${(item.notes || '').replace(/\n/g, '<br/>')}</div>
                         </div>
                     </div><br/>`;
                 finalHtml += header;
