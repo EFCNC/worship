@@ -314,9 +314,10 @@ def add_calendar(date):
     sql = sql[:-1]
     dB.run(sql)
     now = datetime.now()
-    year = str(now.year)
-    return get_calendar(year)
-
+    year = now.year
+    col, cal = get_calendar(str(year))
+    col1, cal1 = get_calendar(str(year+1))
+    return col, cal+cal1
 
 def update_calendar(id, date, name):
     sql = 'select * from calendar where date = ? and item_id = ?'
@@ -513,7 +514,7 @@ def get_songs(ids=None):
             # Initialize arrays safely on creation
             songs.append({
                 'type': 'song', 'title': r[0], 'author': r[1] if r[1] else '',
-                'lang': r[2] if r[2] else '', 'lang_2': r[3] if r[3] else '',
+                'lang': r[2].split(','), 'lang_2': r[3] if r[3] else '',
                 'key': r[4] if r[4] else '', 'sequence': r[5] if r[5] else '',
                 'bible': r[6] if r[6] else '', 'lyricist': r[7] if r[7] else '',
                 'book': r[8] if r[8] else '', 'copyright': r[9] if r[9] else '',
@@ -592,8 +593,8 @@ def get_song_by_id(id):
                 abc.append(s[14])
     if songs:
         r = songs[0]
-        content, langs = Parser.parse_lyrics(r[11], r[5])
-        return {'type': 'song', 'title': r[0], 'author': r[1] if r[1] else '', 'lang': langs,
+        content = Parser.parse_lyrics(r[11], r[5])
+        return {'type': 'song', 'title': r[0], 'author': r[1] if r[1] else '', 'lang': r[2].split(','),
                 'lang_2': r[3] if r[3] else '', 'song_key': r[4] if r[4] else '', 'sequence': r[5] if r[5] else '',
                 'bible_verse': r[6] if r[6] else '', 'lyricist': r[7] if r[7] else '', 'book': r[8] if r[8] else '',
                 'copyright': r[9] if r[9] else '', 'ccli': r[10] if r[10] else '', 'lyrics_raw': r[11],
@@ -682,7 +683,8 @@ def edit_song(id, content):
     values = []
     for c in songs_columns:
         sql += ' {} = ?,'.format(c["name"])
-        values.append(json.dumps(c["value"]))
+        v = ','.join(c["value"])
+        values.append(v)
     sql = sql[:-1]
     sql += ' where song_id = ?'
     if values:
@@ -962,6 +964,12 @@ def get_worship_date(id):
     r = dB.run_para(sql, id)[0]
     return r
 
+def get_worship_dates(year=None):
+    sql = "select scheduled_date from worship"
+    if year:
+        sql += " where strftime('%Y', scheduled_date)  = '{}'".format(year)
+    r = dB.run(sql)
+    return [x[0] for x in r]
 
 def get_worship_id(date):
     sql = "select worship_id from worship where scheduled_date = ?"
@@ -977,13 +985,13 @@ def get_worship_songs(id):
     for r in result:
         if r[22] == 'info':
             songs.append(
-                {'type': r[22], 'title': r[19] if r[19] else r[18][0:10], 'author': '', 'lang': '', 'lang_2': '',
+                {'type': r[22], 'title': r[19] if r[19] else r[18][0:10], 'author': '', 'lang': [], 'lang_2': '',
                  'song_key': '', 'sequence': '', 'bible_verse': '', 'lyricist': '', 'book': '', 'copyright': '',
                  'ccli': '', 'lyrics_raw': '', 'content': '', 'video': '', 'score': '', 'date': r[14], 'id': r[21],
                  'transpose': r[16].split(','), 'alt_sequence': '', 'notes': r[18] if r[18] else '',
                  'language_version_order': r[20].split(',') if r[20] else []})
         elif r[22] == 'song':
-            songs.append({'type': r[22], 'title': r[0], 'author': r[1] if r[1] else '', 'lang': r[2] if r[2] else '',
+            songs.append({'type': r[22], 'title': r[0], 'author': r[1] if r[1] else '', 'lang': r[2].split(','),
                           'lang_2': r[3] if r[3] else '', 'song_key': r[4] if r[4] else '',
                           'sequence': r[5] if r[5] else '', 'bible_verse': r[6] if r[6] else '',
                           'lyricist': r[7] if r[7] else '', 'book': r[8] if r[8] else '',
