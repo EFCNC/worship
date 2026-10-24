@@ -22,11 +22,35 @@ span.chunk:before {
     font-size: 0.65em;
     content:attr(data-chord);
     position:absolute;
-    top:-2em;
+    top:-1.5em;
 }
 
 .song_chord {
     line-height: 200%;
+}
+
+.song.bilingual {
+    text-align: center;
+}
+
+.bilingual-line-pair {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    align-items: start;
+    line-height: 2;
+}
+
+.bilingual-line-pair > div {
+    min-width: 0;
+}
+
+.bilingual-line-pair .chunk::before {
+    top: -1.5em;
+}
+
+.bilingual-line-pair.single-language {
+    grid-template-columns: minmax(0, 1fr);
 }
 
 .song_container {
@@ -72,7 +96,8 @@ span.chunk:before {
 }
 
 /* Toggle buttons */
-.view  { --btn-color: #04AA6D; }
+.sequence  { --btn-color: #04AA6D; }
+.generic  { --btn-color: #04AA6D; }
 .chord { --btn-color: #008CBA; }
 .bi    { --btn-color: #555555; }
 .video { --btn-color: #800000; }
@@ -134,15 +159,15 @@ h3 {
     
     <!-- Container of worship songs -->
     <div class="action_btn_container">
-        <button class="toggle-btn view" onclick="loadTab('view')">View</button>
-        <button class="toggle-btn chord" onclick="loadTab('chord')">Chord</button>
-        <button class="toggle-btn bi" onclick="loadTab('bi')">Bilingual</button>
-        <button class="toggle-btn video" onclick="loadTab('video')">Youtube</button>
+        <button class="toggle-btn sequence" onclick="toggleFullSequence()" type="button" aria-pressed="false">Full Sequence</button>
+        <button class="toggle-btn chord" onclick="toggleChords()" type="button" aria-pressed="false">Chords</button>
+        <button class="toggle-btn bi" onclick="toggleBilingual()" type="button" aria-pressed="false">Bilingual</button>
+        <button class="toggle-btn video" onclick="toggleVideoView()" type="button" aria-pressed="false">Youtube</button>
         <a href="{{ url_for('get_weekly_chords', id=id) }}">
-            <button class="toggle-btn view">All Chords</button>
+            <button class="toggle-btn generic">All Chords</button>
         </a>
         <a href="{{ url_for('get_weekly_sheets', id=id) }}">
-            <button class="toggle-btn view">All Sheets</button>
+            <button class="toggle-btn generic">All Sheets</button>
         </a>
 
         
@@ -165,6 +190,10 @@ h3 {
     const worshipInfo = {{ w|tojson|safe }};
     const initialTab = '{{ tab|safe }}' || 'view';
     const song_id = worshipData.map(o=> o.id);
+    let isFullSequence = false;
+    let showChords = initialTab === 'chord';
+    let showBilingual = initialTab === 'bi';
+    let isVideoView = initialTab === 'video';
 
     // --- FUNCTIONS ---
 
@@ -298,41 +327,85 @@ h3 {
         return lang ? `<span class="${config.class}" title="${config.title}">${config.label}</span>` : "";
     }
     
+    // --- RENDER CONTENT ---
+
     /**
-    * Renders the song content based on the selected mode (view, chord, bi).
+    * Renders the song content utilizing the language_version_order array
     */
-    function renderSongContent(song, mode) {
-        let contentHtml = '';
-        let seenSections = new Set();
-        for (let section of song.content) {
-            if (seenSections.has(section.name)) continue; // Skip duplicate sections
-            seenSections.add(section.name);
+    function renderSongContent(song) {
+        if (!song || !Array.isArray(song.content) || song.content.length === 0) return '';
 
-            contentHtml += `<div><span>${section.name}</span>`;
-            
-            switch(mode){
-                case 'view':
-                    contentHtml += `<div class="song">${section.origin_text.replace(/\n/g, '<br/>')}</div>`;
-                    break;
+        // Safely extract languages from the new language_version_order array
+        let langOrders = song.language_version_order || [];
+        let lang1 = langOrders.length > 0 ? langOrders[0] : (song.lang || '');
+        let lang2 = langOrders.length > 1 ? langOrders[1] : (song.lang_2 || '');
 
-                case 'chord':
-                    let chords = section.origin_chord.replace(/\n/g, '<br/>');
-                    if(song.transpose != '0') {
-                        let key_change = parseInt(song.transpose);
-                        chords = chords.replace(/(data-chord=")([^"]+)/g, (match, g1, g2) => {return g1+transposeChord(g2, key_change);});
-                    }
-                    contentHtml += `<div class="song_chord">${chords}</div>`;
-                    break;
+        let primaryBlock = song.content.find(c => c.lang === lang1) || song.content[0];
+        let secondaryBlock = song.content.find(c => c.lang === lang2) || (song.content.length > 1 ? song.content[1] : null);
 
-                case 'bi':
-                    contentHtml += `
-                        <div class="song">
-                            <div class="origin">${section.origin_text.replace(/\n/g, '<br/>')}</div>
-                            <div class="region">${section.region}</div>
-                        </div>`;
-                    break;
+        const findSection = (block, secName) => {
+            if (!block || !Array.isArray(block.lyrics)) return null;
+            let target = secName.toLowerCase().replace('-', '');
+            return block.lyrics.find(s => s.name && s.name.toLowerCase().replace('-', '') === target);
+        };
+
+        const getSectionData = (block, secName, index, field) => {
+            let sec = findSection(block, secName);
+            if (!sec) return '';
+            let arr = sec[field] || sec.lyrics_text || sec.lyrics || [];
+            if (Array.isArray(arr)) {
+                return arr[index] !== undefined ? arr[index] : (arr[0] || '');
             }
-            contentHtml += '</div><br/>';
+            if (typeof arr === 'string') return arr;
+            return '';
+        };
+
+        // Parse sequence, deduplicating repetitions unless fullSequence is true
+        let sequenceItems = SongSequence.parseSequence(song.alt_sequence, primaryBlock, {
+            fullSequence: isFullSequence
+        });
+
+        let contentHtml = '';
+        for (let item of sequenceItems) {
+            let originText = getSectionData(primaryBlock, item.name, item.index, 'lyrics_text') ||
+                getSectionData(primaryBlock, item.name, item.index, 'lyrics');
+            let regionText = secondaryBlock ? (
+                getSectionData(secondaryBlock, item.name, item.index, 'lyrics_text') ||
+                getSectionData(secondaryBlock, item.name, item.index, 'lyrics')
+            ) : '';
+
+            if (!originText && !regionText) continue;
+
+            let originContent = originText;
+            if (showChords) {
+                originContent = getSectionData(primaryBlock, item.name, item.index, 'lyrics_chord') || originText;
+                if (song.transpose && song.transpose !== '0') {
+                    const keyChange = parseInt(song.transpose, 10);
+                    originContent = originContent.replace(/(data-chord=")([^"]+)/g, (match, prefix, chord) => {
+                        return prefix + transposeChord(chord, keyChange);
+                    });
+                }
+            }
+
+            contentHtml += `<div><span><strong>[${item.label}]</strong></span>`;
+            if (showBilingual) {
+                const originLines = originContent.split(/\r?\n/);
+                const regionLines = regionText.split(/\r?\n/);
+                const lineCount = Math.max(originLines.length, regionLines.length);
+                contentHtml += '<div class="song bilingual">';
+                for (let lineIndex = 0; lineIndex < lineCount; lineIndex++) {
+                    const singleLanguageClass = regionText ? '' : ' single-language';
+                    contentHtml += `<div class="bilingual-line-pair${singleLanguageClass}">
+                        <div class="origin">${originLines[lineIndex] || ''}</div>
+                        <div class="region">${regionLines[lineIndex] || ''}</div>
+                    </div>`;
+                }
+                contentHtml += '</div>';
+            } else {
+                const songClass = showChords ? 'song_chord' : 'song';
+                contentHtml += `<div class="${songClass}">${originContent.replace(/\r?\n/g, '<br/>')}</div>`;
+            }
+            contentHtml += `</div><br/>`;
         }
         return contentHtml;
     }
@@ -382,24 +455,54 @@ h3 {
         return html ? `<span class="media-icons-wrapper">${html}</span>` : '';
     }
 
-    /**
-    * Loads the tab based on the button that was clicked (view, chord, bi, video) and updates the content accordingly.
-    */
-    function loadTab(mode) {
-        // Update button highlights
-        document.querySelectorAll('.toggle-btn').forEach(btn => btn.classList.remove('on'));
-        const activeBtn = document.querySelector(`.toggle-btn.${mode}`);
-        if (activeBtn) activeBtn.classList.add('on');
+    function updateViewToggles() {
+        const states = {
+            sequence: isFullSequence,
+            chord: showChords,
+            bi: showBilingual,
+            video: isVideoView
+        };
+        for (const [name, enabled] of Object.entries(states)) {
+            const button = document.querySelector(`.toggle-btn.${name}`);
+            button.classList.toggle('on', enabled);
+            button.setAttribute('aria-pressed', String(enabled));
+        }
+    }
 
+    function toggleFullSequence() {
+        isFullSequence = !isFullSequence;
+        isVideoView = false;
+        renderWorship();
+    }
+
+    function toggleChords() {
+        showChords = !showChords;
+        isVideoView = false;
+        renderWorship();
+    }
+
+    function toggleBilingual() {
+        showBilingual = !showBilingual;
+        isVideoView = false;
+        renderWorship();
+    }
+
+    function toggleVideoView() {
+        isVideoView = !isVideoView;
+        renderWorship();
+    }
+
+    function renderWorship() {
+        updateViewToggles();
         let finalHtml = '';
 
-        for (item of worshipData) {
+        for (const item of worshipData) {
             if (item.type === 'info') {
                 finalHtml += `<div class="info">${item.notes.replace(/\n/g, '<br/>')}</div>`;
                 continue;
             }
 
-            if (mode === 'video') {
+            if (isVideoView) {
                 if (item.video && item.video.length > 0) {
                     finalHtml += `<div style="text-align: center; margin-bottom: 15px; font-weight: bold; font-size: 1.2em;">${item.title}</div>`;
                     
@@ -411,18 +514,24 @@ h3 {
                     finalHtml += `</div>`;
                 }
             } else {
-                let currentKey = transposeChord(item.song_key, parseInt(item.transpose));
+                let langOrders = item.language_version_order || [];
+                let lang1 = langOrders.length > 0 ? langOrders[0] : (item.lang || '');
+                let lang2 = langOrders.length > 1 ? langOrders[1] : (item.lang_2 || '');
+
+                let currentKey = transposeChord(item.song_key, parseInt(item.transpose || 0));
+                let sequenceDisplay = isFullSequence ? `[${item.alt_sequence || ''}] (Full)` : `[${item.alt_sequence || ''}]`;
+
                 let header = `
                     <div class="songs">
                         <div class="reference">
                             ${item.title} (${currentKey})
-                            ${getLangTag(item.lang)} ${getLangTag(item.lang_2)} 
-                            [${item.alt_sequence}]
+                            ${getLangTag(lang1)} ${getLangTag(lang2)} 
+                            ${sequenceDisplay}
                             ${getMediaLinksHtml(item)}
                         </div>
                         <div class="song_container">
-                            <div class="song_block">${renderSongContent(item, mode)}</div>
-                            <div class="notes">${item.notes.replace(/\n/g, '<br/>')}</div>
+                            <div class="song_block">${renderSongContent(item)}</div>
+                            <div class="notes">${(item.notes || '').replace(/\n/g, '<br/>')}</div>
                         </div>
                     </div><br/>`;
                 finalHtml += header;
@@ -449,8 +558,8 @@ h3 {
 
         get_sermon();
 
-        // Load initial view
-        loadTab(initialTab);
+        // Load the default lyrics view or a directly requested view.
+        renderWorship();
     };
 </script>
 {% endblock %}
