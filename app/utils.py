@@ -314,9 +314,10 @@ def add_calendar(date):
     sql = sql[:-1]
     dB.run(sql)
     now = datetime.now()
-    year = str(now.year)
-    return get_calendar(year)
-
+    year = now.year
+    col, cal = get_calendar(str(year))
+    col1, cal1 = get_calendar(str(year+1))
+    return col, cal+cal1
 
 def update_calendar(id, date, name):
     sql = 'select * from calendar where date = ? and item_id = ?'
@@ -513,7 +514,7 @@ def get_songs(ids=None):
             # Initialize arrays safely on creation
             songs.append({
                 'type': 'song', 'title': r[0], 'author': r[1] if r[1] else '',
-                'lang': r[2] if r[2] else '', 'lang_2': r[3] if r[3] else '',
+                'lang': r[2].split(','), 'lang_2': r[3] if r[3] else '',
                 'key': r[4] if r[4] else '', 'sequence': r[5] if r[5] else '',
                 'bible': r[6] if r[6] else '', 'lyricist': r[7] if r[7] else '',
                 'book': r[8] if r[8] else '', 'copyright': r[9] if r[9] else '',
@@ -596,8 +597,7 @@ def get_song_by_id(id):
     if songs:
         r = songs[0]
         content = Parser.parse_lyrics(r[11], r[5])
-        langs = [item.get('lang', '') for item in content]
-        return {'type': 'song', 'title': r[0], 'author': r[1] if r[1] else '', 'lang': langs,
+        return {'type': 'song', 'title': r[0], 'author': r[1] if r[1] else '', 'lang': r[2].split(','),
                 'lang_2': r[3] if r[3] else '', 'song_key': r[4] if r[4] else '', 'sequence': r[5] if r[5] else '',
                 'bible_verse': r[6] if r[6] else '', 'lyricist': r[7] if r[7] else '', 'book': r[8] if r[8] else '',
                 'copyright': r[9] if r[9] else '', 'ccli': r[10] if r[10] else '', 'lyrics_raw': r[11],
@@ -686,7 +686,8 @@ def edit_song(id, content):
     values = []
     for c in songs_columns:
         sql += ' {} = ?,'.format(c["name"])
-        values.append(json.dumps(c["value"]))
+        v = ','.join(c["value"])
+        values.append(v)
     sql = sql[:-1]
     sql += ' where song_id = ?'
     if values:
@@ -783,60 +784,33 @@ def remove_role(date, content):
         return r, 500
     return '', 200
 
+
 def edit_songset(id, content):
     """
-    :param id: worship_id
-    :param content: list of song dictionaries
+    :param id: worship_id,
+    :param content: dict of column name, value
     """
-    rows = []
+    dB.run_para('DELETE FROM presentation where worship_id = ?', id)
 
-    for song in content or []:
-        transpose = ','.join(str(value) for value in song['transpose'])
+    if content:
+        sql = "INSERT INTO presentation(song_id, worship_id, transpose, scheduled_date, sequence, song_order, notes, type, langs) VALUES"
+        for song in content:
+            if song['type'] == 'info':
+                sql += '({}, {}, {}, "{}", "{}", {}, "{}", "{}"),'.format(-1, id, ','.join(song['transpose']),
+                                                                          song['scheduled_date'], song['sequence'],
+                                                                          song['song_order'], song['notes'],
+                                                                          song['type'])
+            else:
+                sql += '({}, {}, {}, "{}", "{}", {}, "{}", "{}", "{}"),'.format(song['song_id'], id,
+                                                                          ','.join(song['transpose']),
+                                                                          song['scheduled_date'], song['sequence'],
+                                                                          song['song_order'], song['notes'],
+                                                                          song['type'], song['langs'])
+        sql = sql[:-1]
+        return dB.run(sql)
 
-        if song['type'] == 'info':
-            song_id = -1
-            version = ''
-        else:
-            song_id = song['song_id']
-            version = ','.join(song.get('language_version_order') or [])
+    return True
 
-        rows.append((
-            song_id,
-            id,
-            transpose,
-            song['scheduled_date'],
-            song['sequence'],
-            song['song_order'],
-            song['notes'],
-            song['type'],
-            version,
-        ))
-
-    connection = dB.open(dB.db_name)
-
-    try:
-        with connection:
-            cursor = connection.cursor()
-
-            cursor.execute(
-                'DELETE FROM presentation WHERE worship_id = ?',
-                (id,)
-            )
-
-            cursor.executemany(
-                '''
-                INSERT INTO presentation (
-                    song_id, worship_id, transpose, scheduled_date,
-                    sequence, song_order, notes, type, version
-                )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-                ''',
-                rows,
-            )
-
-        return True
-    finally:
-        connection.close()
 
 @dataclass
 class SermonVariant:
@@ -993,6 +967,12 @@ def get_worship_date(id):
     r = dB.run_para(sql, id)[0]
     return r
 
+def get_worship_dates(year=None):
+    sql = "select scheduled_date from worship"
+    if year:
+        sql += " where strftime('%Y', scheduled_date)  = '{}'".format(year)
+    r = dB.run(sql)
+    return [x[0] for x in r]
 
 def get_worship_id(date):
     sql = "select worship_id from worship where scheduled_date = ?"
@@ -1008,13 +988,13 @@ def get_worship_songs(id):
     for r in result:
         if r[22] == 'info':
             songs.append(
-                {'type': r[22], 'title': r[19] if r[19] else r[18][0:10], 'author': '', 'lang': '', 'lang_2': '',
+                {'type': r[22], 'title': r[19] if r[19] else r[18][0:10], 'author': '', 'lang': [], 'lang_2': '',
                  'song_key': '', 'sequence': '', 'bible_verse': '', 'lyricist': '', 'book': '', 'copyright': '',
                  'ccli': '', 'lyrics_raw': '', 'content': '', 'video': '', 'score': '', 'date': r[14], 'id': r[21],
                  'transpose': r[16].split(','), 'alt_sequence': '', 'notes': r[18] if r[18] else '',
                  'language_version_order': r[20].split(',') if r[20] else []})
         elif r[22] == 'song':
-            songs.append({'type': r[22], 'title': r[0], 'author': r[1] if r[1] else '', 'lang': r[2] if r[2] else '',
+            songs.append({'type': r[22], 'title': r[0], 'author': r[1] if r[1] else '', 'lang': r[2].split(','),
                           'lang_2': r[3] if r[3] else '', 'song_key': r[4] if r[4] else '',
                           'sequence': r[5] if r[5] else '', 'bible_verse': r[6] if r[6] else '',
                           'lyricist': r[7] if r[7] else '', 'book': r[8] if r[8] else '',

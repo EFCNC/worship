@@ -60,6 +60,27 @@ def get_background_files(name=None):
             bgs += temp
         return bgs
 
+def add_worship_week(year):
+    '''
+    :param year - year to be inserted
+    '''
+    sql = "SELECT scheduled_date FROM worship where strftime('%Y', scheduled_date)  = '{}'".format(year)
+    worship_dates = dB.run(sql)
+    worship_dates = [x[0] for x in worship_dates]
+    sundays = allsundays(2027)[1]
+    sundays = [x for x in sundays if x not in worship_dates]
+    if sundays:
+        sql = "insert into worship (scheduled_date) values"
+        for sunday in sundays:
+            sql += "('{}'),".format(sunday)
+        sql = sql[:-1]
+        try:
+            dB.run(sql)
+            return "Weeks created {}".format(sundays), 200
+        except Exception as e:
+            return e, 400
+    return "Weeks already in {}, No week to created. \n\n{}".format(year, worship_dates), 400
+
 def get_worship_json(id):
     '''
     return worship json data, create one
@@ -433,18 +454,20 @@ def zip_file(path):
         print(e)
     return zip_file_name
 
-def allsundays():
+def allsundays(year=None):
     now = datetime.now()
     coming_sunday = (now + timedelta(days=6-now.weekday())).strftime("%Y-%m-%d")
-    year = now.year
+    if not year:
+        year = now.year
     d = date(year, 1, 1)
-    d += timedelta(days = 6 - d.weekday())  # First Sunday
+    d += timedelta(days=6 - d.weekday())  # First Sunday
     sundays = []
     sundays.append(d.strftime("%Y-%m-%d"))
-    while d.year == year:
-        d += timedelta(days = 7)
-        if d.year == year:
-            sundays.append(d.strftime("%Y-%m-%d"))
+    while True:
+        d += timedelta(days=7)
+        if d.year > year+1:
+            break
+        sundays.append(d.strftime("%Y-%m-%d"))
 
     # return the coming sunday as well as all sundays
     return [coming_sunday, sundays]
