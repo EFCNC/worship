@@ -96,13 +96,53 @@
         flex-wrap: wrap;
         gap: 8px;
         list-style: none;
-        padding: 5px 10px;
+        box-sizing: border-box;
+        min-height: 39px;
+        padding: 4px 10px;
         margin: 0;
         background: #f8fafc;
         border: 1px solid #ccc;
         border-radius: 4px;
-        min-height: 38px;
         align-items: center;
+    }
+
+    .pane-toolbar {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 8px;
+    }
+
+    .pane-toolbar select {
+        box-sizing: border-box;
+        height: 29px;
+        min-width: 90px;
+        padding: 2px 5px;
+        border-radius: 4px;
+        font-weight: bold;
+    }
+
+    .pane-toolbar .pane-title {
+        box-sizing: border-box;
+        height: 29px;
+        flex: 1 1 180px;
+        min-width: 0;
+        padding: 4px 8px;
+        font-size: 0.9rem;
+    }
+
+    .pane-toolbar .btn-add-lang {
+        box-sizing: border-box;
+        height: 29px;
+        padding: 2px 8px;
+        font-size: 0.8rem;
+        white-space: nowrap;
+    }
+
+    .pane-add-language {
+        position: relative;
+        flex: 0 0 auto;
     }
 
     .lang-priority-item {
@@ -113,6 +153,7 @@
         cursor: grab;
         font-weight: bold;
         font-size: 0.85rem;
+        line-height: 19px;
         display: flex;
         align-items: center;
         gap: 6px;
@@ -135,6 +176,21 @@
     .lyrics-split-container .form-group {
         flex: 1;
         min-width: 0; /* Prevents flex items from overflowing */
+    }
+
+    @media (max-width: 640px) {
+        .language-priority-row {
+            flex-direction: column;
+        }
+
+        .language-priority-row > .form-group {
+            width: 100%;
+            flex: 0 1 auto !important;
+        }
+
+        .lyrics-split-container {
+            flex-direction: column;
+        }
     }
 
     /* Keeps both layers perfectly bound and clips any stray text bleed */
@@ -221,6 +277,10 @@
         border: 1px solid #eee;
     }
 
+    #chord_tags {
+        margin-bottom: 18px;
+    }
+
     .tag-container .sequence, .tag-container .chord {
         display: inline-block;
         padding: 4px 10px;
@@ -233,7 +293,161 @@
         background: white;
     }
 
-    .tag-container .sequence:hover, .tag-container .chord:hover {
+    .sequence-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 6px;
+    }
+
+    .tag-container .sequence-choice {
+        padding: 4px 10px;
+        border: 2px solid #333;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: bold;
+        background: white;
+        color: #333;
+    }
+
+    .arrangement-container > label,
+    .arrangement-available-label {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 6px;
+    }
+
+    .arrangement-input-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 12px;
+    }
+
+    .arrangement-input {
+        flex: 1;
+        min-width: 0;
+        margin-bottom: 0;
+    }
+
+    .arrangement-toggle,
+    .sequence-language-toggle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        min-height: 36px;
+        padding: 6px 10px;
+        border: 1px solid #cbd5e1;
+        border-radius: 4px;
+        background: #fff;
+        color: #334155;
+        cursor: pointer;
+    }
+
+    .arrangement-toggle {
+        flex: 0 0 38px;
+    }
+
+    .sequence-language-toggle {
+        white-space: nowrap;
+    }
+
+    .arrangement-tools[hidden] {
+        display: none;
+    }
+
+    .arrangement-available-header {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 10px;
+    }
+
+    .arrangement-available-header .arrangement-available-label {
+        margin-bottom: 0;
+    }
+
+    .sequence-preview {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 8px;
+        list-style: none;
+        margin: 10px 0 0;
+        padding: 0;
+    }
+
+    .sequence-preview-item {
+        min-width: 0;
+        padding: 8px;
+        border: 1px solid #cbd5e1;
+        border-radius: 4px;
+        background: #fff;
+    }
+
+    .sequence-preview-header {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin: -4px -4px 6px;
+        padding: 4px 10px;
+        cursor: grab;
+        border-radius: 4px;
+    }
+
+    .sequence-preview-header:hover {
+        background-color: #e2e8f0;
+    }
+
+    .sequence-preview-header:active {
+        cursor: grabbing;
+    }
+
+    .sequence-preview-header strong {
+        flex: 1;
+    }
+
+    .sequence-remove {
+        border: 0;
+        padding: 3px 5px;
+        background: transparent;
+        color: #475569;
+        cursor: inherit;
+    }
+
+    .sequence-remove {
+        cursor: pointer;
+    }
+
+    .sequence-preview-language {
+        margin-top: 5px;
+        color: #475569;
+        font-size: 0.8rem;
+        font-weight: bold;
+    }
+
+    .sequence-preview-lyrics {
+        text-align: center;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+    }
+
+    .sequence-preview-placeholder {
+        min-height: 60px;
+        border: 2px dashed #94a3b8;
+        border-radius: 4px;
+        background: #f1f5f9;
+    }
+
+    .sequence-preview-empty {
+        grid-column: 1 / -1;
+        padding: 12px;
+        color: #64748b;
+        text-align: center;
+    }
+
+    .tag-container .sequence:hover, .tag-container .sequence-choice:hover, .tag-container .chord:hover {
         background: #333;
         color: #fff;
     }
@@ -291,7 +505,12 @@
     .btn-outline:hover { background: #cbd5e1; }
 
     .btn-icon-danger { background: none; border: none; color: #dc3545; padding: 0.5rem; cursor: pointer; transition: 0.2s ease; }
-    .btn-icon-danger:hover { background-color: #ffe6e6; border-radius: 4px; }
+    .btn-icon-danger:hover {
+        background-color: #ee8686;
+        border-radius: 4px;
+        color: #fff;
+        transform: none;
+    }
 </style>
 {% endblock %}
 
@@ -324,9 +543,9 @@
             </div>
         </div>
 
-        <div class="form-row">
+        <div class="form-row language-priority-row">
             <div class="form-group" style="flex: 2;">
-                <label>Language Order Priority (drag items to reorder)</label>
+                <label>Language Order Priority</label>
                 <ul id="lang_priority_list" class="lang-priority-list"></ul>
             </div>
 
@@ -336,10 +555,24 @@
             </div>
         </div>
 
-        <div class="form-row">
-            <div class="form-group" style="flex: 100%;">
-                <label>Arrangement Sequence</label>
-                <input name="sequence" type="text" value="{{ content.sequence }}" placeholder="e.g. Intro, V1, PC, C, V2, C, B, Tag, Outro" style="font-family: monospace; letter-spacing: 0.5px;"/>
+        <div class="tag-container arrangement-container">
+            <label for="song_sequence_input">Arrangement Sequence</label>
+            <div class="arrangement-input-row">
+                <button id="arrangement_toggle" class="arrangement-toggle" type="button" aria-expanded="false" aria-controls="arrangement_tools" aria-label="Expand visual arranger" title="Expand visual arranger">
+                    <i class="fa-solid fa-chevron-down"></i>
+                </button>
+                <input id="song_sequence_input" class="arrangement-input" name="sequence" type="text" value="{{ content.sequence }}" placeholder="e.g. Intro, V1, PC, C, V2, C, B, Tag, Outro" style="font-family: monospace; letter-spacing: 0.5px;"/>
+            </div>
+            <div id="arrangement_tools" class="arrangement-tools" hidden>
+                <div class="arrangement-available-header">
+                    <label class="arrangement-available-label">Available Sections</label>
+                    <button id="sequence_language_toggle" class="sequence-language-toggle" type="button" aria-label="Cycle preview language" title="Cycle preview language">
+                        <i class="fa-solid fa-language"></i>
+                        <span id="sequence_preview_language"></span>
+                    </button>
+                </div>
+                <div id="sequence_buttons" class="sequence-buttons"></div>
+                <ol id="sequence_preview" class="sequence-preview" aria-label="Arrangement sequence preview"></ol>
             </div>
         </div>
 
@@ -373,15 +606,15 @@
 
             <!-- Left Pane -->
             <div class="form-group">
-                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                <div class="pane-toolbar">
                     <label style="color: #3182ce; display: flex; align-items: center; gap: 5px; margin: 0; white-space: nowrap;">
                         <span>🔵</span>
-                        <select id="pane1_lang_selector" style="padding: 2px 5px; font-weight: bold; border-radius: 4px; border: 1px solid #ccc; min-width: 90px;"></select>
+                        <select id="pane1_lang_selector"></select>
                     </label>
-                    <input type="text" id="pane1_title" placeholder="Language Title (e.g. 10,000 Reasons)" style="flex-grow: 1; padding: 4px 8px; font-size: 0.9rem; border: 1px solid #ccc; border-radius: 4px;" />
+                    <input type="text" id="pane1_title" class="pane-title" placeholder="Language Title (e.g. 10,000 Reasons)" />
                     
-                    <div style="position: relative; flex-shrink: 0;">
-                        <button type="button" class="btn btn-outline btn-add-lang" data-pane="1" style="padding: 2px 8px; font-size: 0.8rem; white-space:nowrap;">+ Add Lang</button>
+                    <div class="pane-add-language">
+                        <button type="button" class="btn btn-outline btn-add-lang" data-pane="1">+ Add Lang</button>
                     </div>
                     <button type="button" class="btn-icon-danger btn-remove-lang" data-pane="1" style="padding: 2px 8px;" title="Remove Language"><i class="fa-solid fa-trash"></i></button>
                 </div>
@@ -393,15 +626,15 @@
 
             <!-- Right Pane -->
             <div class="form-group">
-                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                <div class="pane-toolbar">
                     <label style="color: #805ad5; display: flex; align-items: center; gap: 5px; margin: 0; white-space: nowrap;">
                         <span>🟣</span>
-                        <select id="pane2_lang_selector" style="padding: 2px 5px; font-weight: bold; border-radius: 4px; border: 1px solid #ccc; min-width: 90px;"></select>
+                        <select id="pane2_lang_selector"></select>
                     </label>
-                    <input type="text" id="pane2_title" placeholder="Language Title (e.g. 萬個理由)" style="flex-grow: 1; padding: 4px 8px; font-size: 0.9rem; border: 1px solid #ccc; border-radius: 4px;" />
+                    <input type="text" id="pane2_title" class="pane-title" placeholder="Language Title (e.g. 萬個理由)" />
                     
-                    <div style="position: relative; flex-shrink: 0;">
-                        <button type="button" class="btn btn-outline btn-add-lang" data-pane="2" style="padding: 2px 8px; font-size: 0.8rem; white-space:nowrap;">+ Add Lang</button>
+                    <div class="pane-add-language">
+                        <button type="button" class="btn btn-outline btn-add-lang" data-pane="2">+ Add Lang</button>
                     </div>
                     <button type="button" class="btn-icon-danger btn-remove-lang" data-pane="2" style="padding: 2px 8px;" title="Remove Language"><i class="fa-solid fa-trash"></i></button>
                 </div>
@@ -631,6 +864,8 @@
         // Trigger visual markup render recalculation immediately after insertion
         const targetBackdropId = txtarea.id === 'lyrics_lang1' ? 'highlights_lang1' : 'highlights_lang2';
         updateHighlights(txtarea.id, targetBackdropId);
+        syncPaneToState(txtarea.id === 'lyrics_lang1' ? 1 : 2);
+        renderSequenceButtons();
     }
     
     // --- In-Memory State ---
@@ -638,6 +873,7 @@
     let langPriority = [];
     let activeLang1 = '';
     let activeLang2 = '';
+    let sequencePreviewLanguage = '';
 
     // Converts JSON array [{name: "verse", lyrics: ["..."]}] back to textarea format
     function renderLyricsToText(langObj) {
@@ -774,6 +1010,152 @@
         $(`#lyrics_lang${paneNum}`).val(data ? renderLyricsToText(data) : '');
         
         updateHighlights(`lyrics_lang${paneNum}`, `highlights_lang${paneNum}`);
+        renderSequenceButtons();
+    }
+
+    function getSequenceOptions() {
+        const sections = new Map();
+
+        contentState.forEach(language => {
+            (language.lyrics || []).forEach(section => {
+                const sectionName = section.name || '';
+                const normalizedName = sectionName.toLowerCase().replace(/-/g, '');
+                if (!normalizedName) return;
+
+                if (!sections.has(normalizedName)) {
+                    sections.set(normalizedName, { name: sectionName, indices: new Set(), count: 0 });
+                }
+
+                const entry = sections.get(normalizedName);
+                (Array.isArray(section.lyrics) ? section.lyrics : []).forEach((text, index) => {
+                    if (typeof text === 'string' && text.trim()) {
+                        entry.indices.add(index);
+                        entry.count = Math.max(entry.count, index + 1);
+                    }
+                });
+            });
+        });
+
+        const options = [];
+        sections.forEach((section, normalizedName) => {
+            [...section.indices].sort((a, b) => a - b).forEach(index => {
+                let token = SEQUENCE_MAPPER.getShortTag(section.name, index, section.count);
+                if (SEQUENCE_MAPPER.parseToken(token).sectionName !== normalizedName) {
+                    token = `${normalizedName}${section.count > 1 ? index + 1 : ''}`;
+                }
+                options.push({ token, label: SEQUENCE_MAPPER.parseToken(token).displayHeader });
+            });
+        });
+
+        return options;
+    }
+
+    function renderSequenceButtons() {
+        const container = document.getElementById('sequence_buttons');
+        if (!container) return;
+
+        container.replaceChildren();
+        getSequenceOptions().forEach(({ token, label }) => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'sequence-choice';
+            button.dataset.token = token;
+            button.textContent = label;
+            button.title = token;
+            container.appendChild(button);
+        });
+        updateSequenceLanguageControl();
+        renderSequencePreview();
+    }
+
+    function getSequenceLanguages() {
+        return [...new Set(contentState.map(language => language.lang).filter(Boolean))];
+    }
+
+    function updateSequenceLanguageControl() {
+        const languages = getSequenceLanguages();
+        if (!languages.includes(sequencePreviewLanguage)) {
+            sequencePreviewLanguage = languages[0] || '';
+        }
+
+        const button = document.getElementById('sequence_language_toggle');
+        const label = document.getElementById('sequence_preview_language');
+        if (!button || !label) return;
+
+        label.textContent = sequencePreviewLanguage ? `Lyrics: ${sequencePreviewLanguage}` : 'No languages';
+        button.disabled = languages.length < 2;
+        button.title = languages.length > 1 ? 'Show the next language' : 'Only one language available';
+        button.setAttribute('aria-label', languages.length > 1 ? `Show lyrics in the next language after ${sequencePreviewLanguage}` : `Lyrics language: ${sequencePreviewLanguage || 'none'}`);
+    }
+
+    function getSequenceTokens() {
+        return document.querySelector('input[name="sequence"]').value
+            .split(',').map(token => token.trim()).filter(Boolean);
+    }
+
+    function renderSequencePreview() {
+        const container = document.getElementById('sequence_preview');
+        if (!container) return;
+
+        container.replaceChildren();
+        const tokens = getSequenceTokens();
+        if (tokens.length === 0) {
+            const emptyState = document.createElement('li');
+            emptyState.className = 'sequence-preview-empty';
+            emptyState.textContent = 'No sections arranged yet.';
+            container.appendChild(emptyState);
+        }
+
+        tokens.forEach(token => {
+            const parsed = SEQUENCE_MAPPER.parseToken(token);
+            const item = document.createElement('li');
+            item.className = 'sequence-preview-item';
+            item.dataset.token = token;
+
+            const header = document.createElement('div');
+            header.className = 'sequence-preview-header';
+
+            const title = document.createElement('strong');
+            title.textContent = parsed.displayHeader;
+
+            const removeButton = document.createElement('button');
+            removeButton.type = 'button';
+            removeButton.className = 'btn-icon-danger sequence-remove';
+            removeButton.title = 'Remove section';
+            removeButton.setAttribute('aria-label', `Remove ${parsed.displayHeader}`);
+            removeButton.innerHTML = '<i class="fa-solid fa-trash"></i>';
+
+            header.append(title, removeButton);
+            item.appendChild(header);
+
+            const language = contentState.find(block => block.lang === sequencePreviewLanguage);
+            const section = SEQUENCE_MAPPER.findSection(language, parsed.sectionName);
+            const text = section?.lyrics?.[parsed.index];
+            if (typeof text === 'string' && text.trim()) {
+                const languageBlock = document.createElement('div');
+                const lyrics = document.createElement('div');
+                lyrics.className = 'sequence-preview-lyrics';
+                lyrics.textContent = text.replace(/\[[^\]]+\]/g, '').trim();
+
+                languageBlock.appendChild(lyrics);
+                item.appendChild(languageBlock);
+            } else {
+                const missingLyrics = document.createElement('em');
+                missingLyrics.textContent = `No lyrics in ${sequencePreviewLanguage || 'this language'}.`;
+                item.appendChild(missingLyrics);
+            }
+
+            container.appendChild(item);
+        });
+
+        if ($(container).data('ui-sortable')) $(container).sortable('refresh');
+    }
+
+    function updateSequenceFromPreview() {
+        const tokens = $('#sequence_preview .sequence-preview-item').map(function() {
+            return this.dataset.token;
+        }).get();
+        document.querySelector('input[name="sequence"]').value = tokens.join(', ');
     }
 
     function initContentState() {
@@ -1060,6 +1442,37 @@
         updateSmartChordLabels();
         syncScrollbars();
         syncResizing();
+        $('#sequence_preview').sortable({
+            items: '> .sequence-preview-item',
+            handle: '.sequence-preview-header',
+            cancel: 'input, textarea, select, option, .sequence-remove',
+            placeholder: 'sequence-preview-placeholder',
+            forcePlaceholderSize: true,
+            tolerance: 'pointer',
+            update: updateSequenceFromPreview
+        });
+        renderSequencePreview();
+
+        $('#arrangement_toggle').on('click', function() {
+            const tools = document.getElementById('arrangement_tools');
+            const expanded = this.getAttribute('aria-expanded') === 'true';
+            tools.hidden = expanded;
+            this.setAttribute('aria-expanded', String(!expanded));
+            this.setAttribute('aria-label', expanded ? 'Expand visual arranger' : 'Collapse visual arranger');
+            this.title = expanded ? 'Expand visual arranger' : 'Collapse visual arranger';
+            $(this).find('i').toggleClass('fa-chevron-up fa-chevron-down');
+            if (!expanded) $('#sequence_preview').sortable('refresh');
+        });
+
+        $('#sequence_language_toggle').on('click', function() {
+            const languages = getSequenceLanguages();
+            if (languages.length < 2) return;
+
+            const currentIndex = languages.indexOf(sequencePreviewLanguage);
+            sequencePreviewLanguage = languages[(currentIndex + 1) % languages.length];
+            updateSequenceLanguageControl();
+            renderSequencePreview();
+        });
 
         // --- Add Language Listener ---
         $('.btn-add-lang').click(function(e) {
@@ -1092,8 +1505,16 @@
         $('#pane1_title').on('input', function() { syncPaneToState(1); });
         $('#pane2_title').on('input', function() { syncPaneToState(2); });
         
-        $('#lyrics_lang1').on('input', function() { updateHighlights('lyrics_lang1', 'highlights_lang1'); });
-        $('#lyrics_lang2').on('input', function() { updateHighlights('lyrics_lang2', 'highlights_lang2'); });
+        $('#lyrics_lang1').on('input', function() {
+            updateHighlights('lyrics_lang1', 'highlights_lang1');
+            syncPaneToState(1);
+            renderSequenceButtons();
+        });
+        $('#lyrics_lang2').on('input', function() {
+            updateHighlights('lyrics_lang2', 'highlights_lang2');
+            syncPaneToState(2);
+            renderSequenceButtons();
+        });
         
         $('#lyrics_lang1, #lyrics_lang2').on('focus', function() {
             lastFocusedTextarea = this;
@@ -1108,6 +1529,23 @@
 
         $('.sequence').click(function() {
             insertAtCursor($(this).data('tag'), true);
+        });
+
+        $('#sequence_buttons').on('click', '.sequence-choice', function() {
+            const sequenceInput = document.querySelector('input[name="sequence"]');
+            const tokens = getSequenceTokens();
+            tokens.push(this.dataset.token);
+            sequenceInput.value = tokens.join(', ');
+            renderSequencePreview();
+            sequenceInput.focus();
+            sequenceInput.setSelectionRange(sequenceInput.value.length, sequenceInput.value.length);
+        });
+
+        $('input[name="sequence"]').on('input', renderSequencePreview);
+        $('#sequence_preview').on('click', '.sequence-remove', function() {
+            $(this).closest('.sequence-preview-item').remove();
+            updateSequenceFromPreview();
+            renderSequencePreview();
         });
 
         // --- Form Specific Buttons ---

@@ -686,7 +686,11 @@ def edit_song(id, content):
     values = []
     for c in songs_columns:
         sql += ' {} = ?,'.format(c["name"])
-        v = ','.join(c["value"])
+        v = c["value"]
+        if c["name"] == 'lang':
+            v = ','.join(v)
+        elif c["name"] == 'content':
+            v = json.dumps(v, ensure_ascii=False)
         values.append(v)
     sql = sql[:-1]
     sql += ' where song_id = ?'

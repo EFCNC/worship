@@ -220,10 +220,22 @@ function validate_form(data) {
         return false;
     }
 
-    // Lyrics cannot be empty (now checking array length)
-    if (!data.content || (Array.isArray(data.content) && data.content.length === 0)) {
+    if (!Array.isArray(data.content) || data.content.length === 0) {
         alert("Are there... lyrics? The editor seems empty.");
         return false;
+    }
+
+    for (const token of data.sequence.split(',').map(value => value.trim()).filter(Boolean)) {
+        const { sectionName, index } = SEQUENCE_MAPPER.parseToken(token);
+        const hasLyrics = data.content.some(language => {
+            const section = SEQUENCE_MAPPER.findSection(language, sectionName);
+            return section?.lyrics?.[index]?.trim();
+        });
+
+        if (!hasLyrics) {
+            alert(`No lyrics found for "${token}" in either language.`);
+            return false;
+        }
     }
 
     return true;
