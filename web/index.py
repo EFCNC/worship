@@ -169,6 +169,7 @@ def get_weekly_chords(id):
 			chord_data['transpose_amount'] = int(t_val[0])
 		else:
 			chord_data['transpose_amount'] = 0
+		chord_data['language_version_order'] = weekly_data.get('language_version_order', []) if weekly_data else []
 
 	return render_template('/worship/chords.html', chords=chords)
 

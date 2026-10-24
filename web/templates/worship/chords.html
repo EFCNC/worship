@@ -13,7 +13,7 @@
     font-size: 0.65em;
     content: attr(data-chord);
     position: absolute;
-    top: -2em;
+    top: -1.8em;
   }
 
   #sheet {
@@ -21,6 +21,17 @@
     line-height: 200%;
     width: 100%;
   }
+
+    .bilingual-section {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+        align-items: start;
+    }
+
+    .bilingual-section > div {
+        min-width: 0;
+    }
 
   /* Flexbox Layout Styles */
   #container {
@@ -40,6 +51,10 @@
     flex-wrap: wrap;
   }
 
+    #control_panel_container button[aria-pressed="true"] {
+        background-color: #087f68;
+    }
+
   /* Center the dropdown text */
   #transpose_select {
     text-align-last:center;
@@ -54,6 +69,8 @@
   
   <div id="control_panel_container">
     <div id="transpose_select_container" style="display: flex; align-items: center; gap: 5px;"></div>
+        <button id="sequence_toggle" type="button">Show Full Sequence</button>
+        <button id="bilingual_toggle" type="button" aria-pressed="false">Bilingual</button>
   </div>
   
   <div style="text-align:center" id="sheet"></div>
@@ -68,6 +85,8 @@
 
     const chords = {{ chords|safe }};
     let index = 0;
+    let isFullSequence = false;
+    let isBilingual = false;
 
     // --- FUNCTIONS ---
     function transposeChord(chord, diff) {
@@ -98,7 +117,6 @@
 
     function load_sheet(ii, targetKey) {
         const data = chords[ii];
-        const seenNames = [];
         
         // Determine if we should use sharps or flats based on the original key
         const activeKeys = sharp.indexOf(data.key) >= 0 ? sharp : flat;
@@ -142,20 +160,54 @@
             transpose = activeKeys.indexOf(currentKey) - activeKeys.indexOf(data.key);
         }
 
-        // Render sheet content
+        // Render chord sections in the song's configured sequence.
+        const languageOrder = data.language_version_order || [];
+        const primaryLanguage = languageOrder[0] || data.lang;
+        const secondaryLanguage = languageOrder[1] || '';
+        const primaryBlock = data.content.find(block => block.lang === primaryLanguage) || data.content[0];
+        const secondaryBlock = data.content.find(block => block.lang === secondaryLanguage) ||
+            data.content.find(block => block !== primaryBlock) || null;
+        const sequenceItems = SongSequence.parseSequence(data.alt_sequence, primaryBlock, {
+            fullSequence: isFullSequence
+        });
         let sheetHtml = '';
-        for (let i = 0; i < data.content.length; i++) {
-            if (seenNames.indexOf(data.content[i].name) < 0) {
-                let chordStr = data.content[i].origin_chord;
-                
-                if (transpose !== 0) {
-                    chordStr = chordStr.replace(/(data-chord=")([^"]+)/g, (match, g1, g2) => {
-                        return g1 + transposeChord(g2, transpose);
-                    });
+        for (const item of sequenceItems) {
+            const section = SongSequence.findSection(primaryBlock, item.name);
+            const secondarySection = SongSequence.findSection(secondaryBlock, item.name);
+            const chordLines = section && (section.lyrics_chord || section.lyrics);
+            const primaryTextLines = section && (section.lyrics_text || section.lyrics);
+            const secondaryTextLines = secondarySection && (secondarySection.lyrics_text || secondarySection.lyrics);
+            let chordStr = '';
+            if (Array.isArray(chordLines)) {
+                chordStr = chordLines[item.index] !== undefined ? chordLines[item.index] : (chordLines[0] || '');
+            } else if (typeof chordLines === 'string') {
+                chordStr = chordLines;
+            }
+            if (!chordStr) continue;
+
+            if (transpose !== 0) {
+                chordStr = chordStr.replace(/(data-chord=")([^"]+)/g, (match, prefix, chord) => {
+                    return prefix + transposeChord(chord, transpose);
+                });
+            }
+
+            if (isBilingual) {
+                const primaryText = Array.isArray(primaryTextLines) ? (primaryTextLines[item.index] || '') : (primaryTextLines || '');
+                const secondaryText = Array.isArray(secondaryTextLines) ? (secondaryTextLines[item.index] || '') : (secondaryTextLines || '');
+                const chordRows = chordStr.split(/\r?\n/);
+                const primaryRows = primaryText.split(/\r?\n/);
+                const secondaryRows = secondaryText.split(/\r?\n/);
+                const rowCount = Math.max(chordRows.length, primaryRows.length, secondaryRows.length);
+                let sectionHtml = `<div class="block"><strong>[${item.label}]</strong>`;
+                for (let rowIndex = 0; rowIndex < rowCount; rowIndex++) {
+                    const chordRow = chordRows[rowIndex] || primaryRows[rowIndex] || '';
+                    const secondaryRow = secondaryRows[rowIndex] || '';
+                    sectionHtml += `<div class="bilingual-section"><div>${chordRow}</div><div>${secondaryRow}</div></div>`;
                 }
-                
-                sheetHtml += `<div class="block">${data.content[i].name}<br/>${chordStr}</div>`;
-                seenNames.push(data.content[i].name);
+                sheetHtml += sectionHtml + '</div>';
+            } else {
+                chordStr = chordStr.replace(/\r?\n/g, '<br/>');
+                sheetHtml += `<div class="block"><strong>[${item.label}]</strong><br/>${chordStr}</div>`;
             }
         }
         
@@ -197,6 +249,19 @@
         let selected_key = $(this).val();
         chords[index].saved_key_name = selected_key;
         load_sheet(index, selected_key);
+    });
+
+    $(document).on('click', '#sequence_toggle', function() {
+        isFullSequence = !isFullSequence;
+        $(this).text(isFullSequence ? 'Hide Repeated Sections' : 'Show Full Sequence');
+        $(this).attr('aria-pressed', String(isFullSequence));
+        load_sheet(index);
+    });
+
+    $(document).on('click', '#bilingual_toggle', function() {
+        isBilingual = !isBilingual;
+        $(this).attr('aria-pressed', String(isBilingual)).toggleClass('on', isBilingual);
+        load_sheet(index);
     });
 
     // -1 Transpose Button

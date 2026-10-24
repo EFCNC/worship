@@ -565,7 +565,10 @@ def get_song_chords(ids):
     result = dB.run_para(sql, ids)
     chords = []
     for r in result:
-        chords.append({'id': r[0], 'title': r[1], 'content': Parser.parse_lyrics(r[2], r[3]), 'key': r[4]})
+        chords.append({
+            'id': r[0], 'title': r[1], 'content': Parser.parse_lyrics(r[2], r[3]),
+            'key': r[4], 'alt_sequence': r[3] or '', 'lang': r[5] or ''
+        })
     if ids:
         # Sort the results based on the index of the ID in the original 'ids' list
         string_ids = [str(i) for i in ids]
