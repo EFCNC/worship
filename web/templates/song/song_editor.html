@@ -1170,26 +1170,13 @@
             }))
         }));
 
-        if (Array.isArray(originalData.lang) && originalData.lang.length > 0) {
-            langPriority = [...originalData.lang];
-        } else {
-            langPriority = contentState.map(c => c.lang);
-        }
-
-        contentState.forEach(c => {
-            if (!langPriority.includes(c.lang)) langPriority.push(c.lang);
-        });
-
-        if (langPriority.length === 0) {
-            langPriority = ['en'];
-            contentState.push({ lang: 'en', lyrics: [] });
-        }
+        langPriority = [...originalData.lang];
 
         renderLangPriorityUI();
         updatePaneDropdowns();
 
-        let pLang = langPriority[0] || contentState[0].lang;
-        let sLang = langPriority[1] || (contentState[1] ? contentState[1].lang : pLang);
+        let pLang = langPriority[0];
+        let sLang = langPriority[1] || pLang;
         
         loadPane(1, pLang);
         loadPane(2, sLang);

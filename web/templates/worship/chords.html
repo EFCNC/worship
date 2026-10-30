@@ -161,8 +161,8 @@
         }
 
         // Render chord sections in the song's configured sequence.
-        const languageOrder = data.language_version_order || [];
-        const primaryLanguage = languageOrder[0] || data.lang;
+        const languageOrder = Array.isArray(data.lang) ? data.lang : [];
+        const primaryLanguage = languageOrder[0] || '';
         const secondaryLanguage = languageOrder[1] || '';
         const primaryBlock = data.content.find(block => block.lang === primaryLanguage) || data.content[0];
         const secondaryBlock = data.content.find(block => block.lang === secondaryLanguage) ||

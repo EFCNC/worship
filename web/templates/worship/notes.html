@@ -326,19 +326,23 @@ h3 {
         const config = tags[lang] || { class: 'others', label: 'na', title: 'N/A' };
         return lang ? `<span class="${config.class}" title="${config.title}">${config.label}</span>` : "";
     }
-    
+
+    function getSongLanguageOrder(song) {
+        return Array.isArray(song.lang) ? song.lang : [];
+    }
+
     // --- RENDER CONTENT ---
 
     /**
-    * Renders the song content utilizing the language_version_order array
+    * Renders the song content using the song's default language order
     */
     function renderSongContent(song) {
         if (!song || !Array.isArray(song.content) || song.content.length === 0) return '';
 
-        // Safely extract languages from the new language_version_order array
-        let langOrders = song.language_version_order || [];
-        let lang1 = langOrders.length > 0 ? langOrders[0] : (song.lang || '');
-        let lang2 = langOrders.length > 1 ? langOrders[1] : (song.lang_2 || '');
+        // Use the first two languages for the language badges and lyric columns.
+        let langOrders = getSongLanguageOrder(song);
+        let lang1 = langOrders[0] || '';
+        let lang2 = langOrders[1] || '';
 
         let primaryBlock = song.content.find(c => c.lang === lang1) || song.content[0];
         let secondaryBlock = song.content.find(c => c.lang === lang2) || (song.content.length > 1 ? song.content[1] : null);
@@ -514,9 +518,9 @@ h3 {
                     finalHtml += `</div>`;
                 }
             } else {
-                let langOrders = item.language_version_order || [];
-                let lang1 = langOrders.length > 0 ? langOrders[0] : (item.lang || '');
-                let lang2 = langOrders.length > 1 ? langOrders[1] : (item.lang_2 || '');
+                let langOrders = getSongLanguageOrder(item);
+                let lang1 = langOrders[0] || '';
+                let lang2 = langOrders[1] || '';
 
                 let currentKey = transposeChord(item.song_key, parseInt(item.transpose || 0));
                 let sequenceDisplay = isFullSequence ? `[${item.alt_sequence || ''}] (Full)` : `[${item.alt_sequence || ''}]`;

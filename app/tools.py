@@ -488,18 +488,39 @@ def match_bible_books(book):
     else:
         return full_name.index((book.upper()))
 
+def merge_song_languages(lang, lang_2):
+    languages = []
+    for value in (lang, lang_2):
+        for language in (value or '').split(','):
+            language = language.strip()
+            if language and language not in languages:
+                languages.append(language)
+    return ','.join(languages)
+
+def migrate_song_languages():
+    connection = dB.open(dB.db_name)
+    try:
+        with connection:
+            cursor = connection.cursor()
+            rows = cursor.execute('select song_id, lang, lang_2 from songs').fetchall()
+            updates = [(merge_song_languages(lang, lang_2), song_id)
+                       for song_id, lang, lang_2 in rows]
+            cursor.executemany('update songs set lang=? where song_id=?', updates)
+        return len(rows)
+    finally:
+        connection.close()
+
 def update_table(old):
     #sql = "alter table presentation add langs TEXT"
     #result = dB.run(sql)
     for r in old:
         print('update {} with sequence {}'.format(r['id'], r['sequence']))
-        sql = "update songs set content=?, sequence=? where song_id=?"
-        dB.run_para(sql, [str(r['content']), r['sequence'], r['id']])
-        lang_txt = r['lang']
-        if r['lang_2']:
-            lang_txt += ',{}'.format(r['lang_2'])
-        sql = 'update presentation set version="{}" where song_id=?'.format(lang_txt)
-        dB.run_para(sql, r['id'])
+        lang_txt = merge_song_languages(r['lang'], r['lang_2'])
+
+        sql = "update songs set content=?, sequence=?, lang=? where song_id=?"
+        dB.run_para(sql, [str(r['content']), r['sequence'], lang_txt, r['id']])
+        sql = 'update presentation set version=? where song_id=?'
+        dB.run_para(sql, [lang_txt, r['id']])
 
 def update_sequence():
     sql = "select song_id, worship_id, sequence from presentation"

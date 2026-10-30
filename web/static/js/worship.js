@@ -15,6 +15,50 @@ function move_top(tag) {
 
 const SEQUENCE_MAPPER = SongSequence;
 
+function get_language_version_order(data) {
+    const languages = get_language_codes(data.lang);
+    const weeklyOrder = get_language_codes(data.language_version_order);
+    const order = weeklyOrder.length
+        ? weeklyOrder.filter(lang => languages.includes(lang))
+        : languages.slice(0, 2);
+    return order;
+}
+
+function get_language_codes(languages) {
+    const values = Array.isArray(languages)
+        ? languages
+        : (typeof languages === 'string' ? languages.split(',') : []);
+    return [...new Set(values.map(lang => String(lang).trim()).filter(Boolean))];
+}
+
+function language_tags(languages) {
+    return get_language_codes(languages).map(lang_tag).join(' ');
+}
+
+function render_song_sequence_language(song, language) {
+    const $sequence = $('#sequence_' + song.id);
+    if (!$sequence.length || !language) return;
+
+    $sequence.children('.lyric-item').each(function() {
+        const token = this.id.slice(('song-' + song.id + '_').length);
+        const parsed = SEQUENCE_MAPPER.parseToken(token);
+        const rawLyrics = SEQUENCE_MAPPER.getLyricText(
+            song.content,
+            parsed.sectionName,
+            parsed.index,
+            language,
+            ''
+        );
+        const lyrics = rawLyrics.lang1
+            ? rawLyrics.lang1.split('\n').join('<br />')
+            : '<em>(No lyrics found)</em>';
+        $(this).find('.text-lang1').html(lyrics).show();
+        $(this).find('.text-lang2').hide();
+    });
+
+    $sequence.attr('data-current-language', language);
+}
+
 // Helper function to build a single song <li>
 function generate_song_card(data, index) {
     var list = document.createElement('li');
@@ -23,13 +67,34 @@ function generate_song_card(data, index) {
 
     if (data.type == 'song') {
         var activeSequence = data.alt_sequence || '';
+        var languageOrder = get_language_version_order(data);
+        var primaryLanguage = languageOrder[0] || '';
+        var secondaryLanguage = languageOrder[1] || '';
+        var songLanguageOrder = get_language_codes(data.lang);
+        var songPrimaryLanguage = songLanguageOrder[0] || '';
+        var songLanguageTags = language_tags(songLanguageOrder);
+        var unusedLanguages = songLanguageOrder.filter(lang => !languageOrder.includes(lang));
+        var activeLanguageItems = languageOrder.map((lang, index) => `
+            <li class="language-priority-item" data-lang="${lang}">
+                <span class="language-priority-handle" title="Drag to change priority"><i class="fa-solid fa-grip-lines"></i></span>
+                <span class="language-priority-name">${lang}<small>(#${index + 1})</small></span>
+                <button type="button" class="language-priority-move" title="Move to unused languages" aria-label="Remove ${lang} from priority"><i class="fa-solid fa-arrow-right"></i><span>Remove</span></button>
+            </li>
+        `).join('');
+        var unusedLanguageItems = unusedLanguages.map(lang => `
+            <li class="language-priority-item" data-lang="${lang}">
+                <span class="language-priority-handle" title="Drag to change priority"><i class="fa-solid fa-grip-lines"></i></span>
+                <span class="language-priority-name">${lang}</span>
+                <button type="button" class="language-priority-move" title="Add ${lang} to current languages" aria-label="Add ${lang} to current languages"><i class="fa-solid fa-arrow-left"></i><span>Add</span></button>
+            </li>
+        `).join('');
 
         var html = '<div class="song-content-wrapper">';
 
             // Row 1: Title, Metadata, Delete Button
             html += '<div class="song-header-row">';
-            html += '<span class="song-title" name="' + data.id + '" lang="' + data.lang + '">';
-            html += '<b>' + data.title + '</b>&nbsp;' + lang_tag(data.lang) + '&nbsp;' + lang_tag(data.lang_2) + ' Author: ' + data.author;
+            html += '<span class="song-title" name="' + data.id + '" lang="' + songPrimaryLanguage + '">';
+            html += '<b>' + data.title + '</b>&nbsp;' + songLanguageTags + ' Author: ' + data.author;
             html += ' <button type="button" class="edit_btn icon-button" title="Edit Song"><i class="fa fa-edit"></i></button>';                
             html += '</span>';
             
@@ -46,6 +111,25 @@ function generate_song_card(data, index) {
             html += get_links(data.video, data.score, data.abc, data.id);
             html += '</div>';
 
+            html += `
+                <div class="language-priority-widget" data-song-id="${data.id}">
+                    <button type="button" class="language-priority-toggle" aria-expanded="false">
+                        <i class="fa-solid fa-caret-right"></i>
+                        <span>Languages</span>
+                        <small>${languageOrder.join(', ')}</small>
+                    </button>
+                    <div class="language-priority-panel" style="display: none;">
+                        <div class="language-priority-box">
+                            <strong>Current Languages</strong>
+                            <ul class="language-priority-list language-priority-active" data-empty="No current languages">${activeLanguageItems}</ul>
+                        </div>
+                        <div class="language-priority-box">
+                            <strong>Unused Languages</strong>
+                            <ul class="language-priority-list" data-empty="No unused languages">${unusedLanguageItems}</ul>
+                        </div>
+                    </div>
+                </div>`;
+
             // Row 3: Notes
             html += `
                 <div class="song-notes-row">
@@ -58,7 +142,7 @@ function generate_song_card(data, index) {
             // Sequence Palette Buttons
             let paletteButtons = '';
             if (Array.isArray(data.content)) {
-                let primaryContent = data.content.find(c => c.lang === data.lang) || data.content[0];
+                let primaryContent = data.content.find(c => c.lang === primaryLanguage) || data.content[0];
                 if (primaryContent && Array.isArray(primaryContent.lyrics)) {
                     primaryContent.lyrics.forEach(c => {
                         let textSource = c.lyrics_text || c.lyrics; 
@@ -86,7 +170,7 @@ function generate_song_card(data, index) {
                         <div class="palette-container">
                             <label style="margin: 0; font-weight: bold;">Quick Add / Tools:</label>
                             <div class="palette-buttons">
-                                <button type="button" class="btn-lang-swap" title="Swap Language" data-id="${data.id}"><i class="fa-solid fa-language"></i></button>
+                                <button type="button" class="btn-lang-swap" title="Swap Language" data-id="${data.id}"${languageOrder.length > 1 ? '' : ' style="display: none;"'}><i class="fa-solid fa-language"></i></button>
                                 ${paletteButtons}
                             </div>
                         </div>
@@ -99,13 +183,14 @@ function generate_song_card(data, index) {
             var ul = document.createElement('ul');
             ul.setAttribute('id', 'sequence_' + data.id);
             ul.setAttribute('class', 'lyrics');
+            ul.setAttribute('data-current-language', primaryLanguage);
 
             // Parse alt_sequence tokens into items
             let tokens = activeSequence.split(',').map(s => s.trim()).filter(Boolean);
 
             for (let token of tokens) {
                 let parsed = SEQUENCE_MAPPER.parseToken(token);
-                let rawLyrics = SEQUENCE_MAPPER.getLyricText(data.content, parsed.sectionName, parsed.index, data.lang, data.lang_2);
+                let rawLyrics = SEQUENCE_MAPPER.getLyricText(data.content, parsed.sectionName, parsed.index, primaryLanguage, secondaryLanguage);
                 
                 let formatted_lang1 = rawLyrics.lang1 ? rawLyrics.lang1.split('\n').join('<br />') : '<em>(No lyrics found)</em>';
                 let formatted_lang2 = rawLyrics.lang2 ? rawLyrics.lang2.split('\n').join('<br />') : '';
@@ -144,19 +229,17 @@ function generate_song_card(data, index) {
 // --- Language Swap Button Handler ---
 $(document).on('click', '.btn-lang-swap', function() {
     let id = $(this).data('id');
-    let $sequenceContainer = $('#sequence_' + id);
-    
-    let $lang1 = $sequenceContainer.find('.text-lang1');
-    let $lang2 = $sequenceContainer.find('.text-lang2');
-    
-    // Check which language is currently visible and toggle all parts
-    if ($lang1.first().is(':visible')) {
-        $lang1.hide();
-        $lang2.show();
-    } else {
-        $lang2.hide();
-        $lang1.show();
-    }
+    let song = songs_temp.find(item => item.id == id);
+    if (!song) return;
+
+    const languageOrder = get_language_version_order(song);
+    if (languageOrder.length < 2) return;
+
+    const $sequence = $('#sequence_' + id);
+    const currentLanguage = $sequence.attr('data-current-language');
+    const currentIndex = languageOrder.indexOf(currentLanguage);
+    const nextLanguage = languageOrder[(currentIndex + 1) % languageOrder.length];
+    render_song_sequence_language(song, nextLanguage);
 });
 
 // --- Quick Add Palette Button Handler ---
@@ -168,13 +251,12 @@ $(document).on('click', '.btn-palette', function() {
     if (!songData) return;
     
     let parsed = SEQUENCE_MAPPER.parseToken(tag);
-    let rawLyrics = SEQUENCE_MAPPER.getLyricText(songData.content, parsed.sectionName, parsed.index, songData.lang, songData.lang_2);
+    let languageOrder = get_language_version_order(songData);
+    let $sequenceContainer = $('#sequence_' + songId);
+    let currentLanguage = $sequenceContainer.attr('data-current-language') || languageOrder[0] || '';
+    let rawLyrics = SEQUENCE_MAPPER.getLyricText(songData.content, parsed.sectionName, parsed.index, currentLanguage, '');
     
     let formatted_lang1 = rawLyrics.lang1 ? rawLyrics.lang1.split("\n").join("<br />") : '<em>(No lyrics found)</em>';
-    let formatted_lang2 = rawLyrics.lang2 ? rawLyrics.lang2.split("\n").join("<br />") : '';
-    
-    let isLang2Active = $('#sequence_' + songId).find('.text-lang2').first().is(':visible');
-
     let newBlock = $(`
         <li class="ui-state-default lyric-item" id="song-${songId}_${tag}">
             <div name="lyrics_parts" class="lyric-content ${tag} ${parsed.sectionName}">
@@ -183,14 +265,12 @@ $(document).on('click', '.btn-palette', function() {
                     <button type="button" class="btn-lyric btn-lyric-remove remove_sequence_btn" title="Remove Section"><i class="fa-solid fa-trash"></i></button>
                 </div>
                 <strong>[${parsed.displayHeader}]</strong><br/>
-                <div class="text-lang1" style="display:${isLang2Active ? 'none' : 'block'};">${formatted_lang1}</div>
-                <div class="text-lang2" style="display:${isLang2Active ? 'block' : 'none'};">${formatted_lang2}</div>
+                <div class="text-lang1">${formatted_lang1}</div>
+                <div class="text-lang2" style="display:none;"></div>
             </div>
         </li>
     `);
     
-    let $sequenceContainer =$('#sequence_' + songId);
-
     $sequenceContainer.append(newBlock);
     
     checkSequenceEmptyState($sequenceContainer);$(".lyrics").sortable("destroy");
@@ -405,6 +485,7 @@ function render_song(id, db, lang, num) {
                                         updated_song_data.notes = old_song.notes;
                                         updated_song_data.alt_sequence = old_song.alt_sequence;
                                         updated_song_data.date = old_song.date;
+                                        updated_song_data.language_version_order = old_song.language_version_order || get_language_version_order(updated_song_data);
 
                                         // Update songs_temp
                                         songs_temp[songIndex] = updated_song_data;
@@ -465,6 +546,7 @@ function render_song(id, db, lang, num) {
                             get_song(result).done(function(data) {
                                 console.log('song_data', data);
                                 data['date'] = worship_data.date;
+                                data.language_version_order = get_language_version_order(data);
                                 songs_temp.push(data);
                                 
                                 $.when( add_song_to_worship(worship) ).then(function() {

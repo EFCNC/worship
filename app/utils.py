@@ -794,26 +794,43 @@ def edit_songset(id, content):
     :param id: worship_id,
     :param content: dict of column name, value
     """
-    dB.run_para('DELETE FROM presentation where worship_id = ?', id)
+    rows = []
+    for song in content or []:
+        transpose = song.get('transpose', '')
 
-    if content:
-        sql = "INSERT INTO presentation(song_id, worship_id, transpose, scheduled_date, sequence, song_order, notes, type, langs) VALUES"
-        for song in content:
-            if song['type'] == 'info':
-                sql += '({}, {}, {}, "{}", "{}", {}, "{}", "{}"),'.format(-1, id, ','.join(song['transpose']),
-                                                                          song['scheduled_date'], song['sequence'],
-                                                                          song['song_order'], song['notes'],
-                                                                          song['type'])
-            else:
-                sql += '({}, {}, {}, "{}", "{}", {}, "{}", "{}", "{}"),'.format(song['song_id'], id,
-                                                                          ','.join(song['transpose']),
-                                                                          song['scheduled_date'], song['sequence'],
-                                                                          song['song_order'], song['notes'],
-                                                                          song['type'], song['langs'])
-        sql = sql[:-1]
-        return dB.run(sql)
+        if song.get('type') == 'info':
+            song_id = -1
+            language_order = ''
+        else:
+            song_id = song.get('song_id', song.get('id', -1))
+            language_order = song.get('language_version_order', [])
+            language_order = ','.join(str(lang) for lang in language_order)
 
-    return True
+        rows.append((
+            song_id,
+            id,
+            transpose,
+            song.get('scheduled_date', ''),
+            song.get('sequence', ''),
+            song.get('song_order', 0),
+            song.get('notes', ''),
+            song.get('type', ''),
+            language_order,
+        ))
+
+    connection = dB.open(dB.db_name)
+    try:
+        with connection:
+            cursor = connection.cursor()
+            cursor.execute('DELETE FROM presentation WHERE worship_id = ?', (id,))
+            cursor.executemany(
+                'INSERT INTO presentation(song_id, worship_id, transpose, scheduled_date, sequence, song_order, notes, type, version) '
+                'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                rows,
+            )
+        return True
+    finally:
+        connection.close()
 
 
 @dataclass
@@ -1008,7 +1025,8 @@ def get_worship_songs(id):
                           'score': r[13].split('||') if r[13] else [],
                           'date': r[14], 'id': r[15], 'transpose': r[16].split(',') if r[16] else [0],
                           'alt_sequence': r[17] if r[17] else '', 'notes': r[18] if r[18] else '',
-                          'abc': r[23].split('||') if r[23] else [], 'language_version_order': r[20].split(',') if r[20] else []})
+                          'abc': r[23].split('||') if r[23] else [],
+                          'language_version_order': r[20].split(',') if r[20] else []})
     return songs
 
 
