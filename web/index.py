@@ -169,6 +169,7 @@ def get_weekly_chords(id):
 			chord_data['transpose_amount'] = int(t_val[0])
 		else:
 			chord_data['transpose_amount'] = 0
+		chord_data['language_version_order'] = weekly_data.get('language_version_order', []) if weekly_data else []
 
 	return render_template('/worship/chords.html', chords=chords)
 
@@ -421,8 +422,11 @@ def admin_people():
 @app.route("/admin/calendar")
 def admin_calendar():
 	now = datetime.now()
-	year = str(now.year)
-	column, calendar = Utils.get_calendar(year)
+	year = now.year
+	column, calendar = Utils.get_calendar(str(year))
+	# Include the year after
+	column1, calendar1 = Utils.get_calendar(str(year+1))
+	calendar += calendar1
 	return render_template('admin/calendar.html', column=column, calendar=calendar)
 
 @app.route("/admin/report/<id>")

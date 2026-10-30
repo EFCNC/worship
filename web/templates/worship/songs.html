@@ -113,6 +113,141 @@
     padding: 3px 5px;
 }
 
+.language-priority-widget {
+    width: 100%;
+}
+
+.song_sequence_toggle,
+.language-priority-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    min-height: 32px;
+    box-sizing: border-box;
+    padding: 4px 10px 4px 2px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    background: transparent;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.song_sequence_toggle:hover,
+.song_sequence_toggle:focus-visible,
+.language-priority-toggle:hover,
+.language-priority-toggle:focus-visible {
+    border-color: #d7dadd;
+    background: #f1f3f4;
+    color: inherit;
+    transform: none;
+}
+
+.language-priority-toggle small {
+    color: #666;
+    font-weight: normal;
+}
+.language-priority-panel {
+    display: flex;
+    gap: 12px;
+    padding: 8px 0 4px 24px;
+}
+
+.language-priority-box {
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+.language-priority-box > strong {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.language-priority-list {
+    box-sizing: border-box;
+    min-height: 42px;
+    max-height: 180px;
+    overflow-y: auto;
+    margin: 0;
+    padding: 4px;
+    list-style: none;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background: #f8fafc;
+}
+
+.language-priority-list:empty::before {
+    content: attr(data-empty);
+    display: block;
+    padding: 8px;
+    color: #777;
+    font-style: italic;
+}
+
+.language-priority-list:not(.language-priority-active) .language-priority-handle {
+    visibility: hidden;
+}
+
+.language-priority-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 32px;
+    margin: 2px 0;
+    padding: 2px 4px;
+    border: 1px solid #d5d9dd;
+    border-radius: 3px;
+    background: #fff;
+}
+
+.language-priority-handle {
+    color: #777;
+    cursor: grab;
+}
+
+.language-priority-name {
+    flex: 1;
+    min-width: 0;
+}
+
+.language-priority-name small {
+    margin-left: 6px;
+    color: #666;
+}
+
+.language-priority-move {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 7px;
+    border: 1px solid #cbd1d6;
+    border-radius: 3px;
+    background: #f5f6f7;
+    color: #333;
+    cursor: pointer;
+    font-size: 0.8rem;
+    white-space: nowrap;
+}
+
+.language-priority-move:hover {
+    background: #e8ecef;
+}
+
+.language-priority-placeholder {
+    min-height: 32px;
+    border: 1px dashed #999;
+    background: #eef1f3;
+}
+
+@media (max-width: 600px) {
+    .language-priority-panel {
+        flex-direction: column;
+        padding-left: 0;
+    }
+}
+
 .song-notes-row p {
     margin: 0;
 }
@@ -261,13 +396,17 @@
     align-items: flex-start;
     width: 100%;
 }
-.song_sequence_toggle { display: flex; align-items: center; cursor: pointer; gap: 8px; }
-
 /* Sequence Colored Tags */
-.p { background-color: #f78787; color: #fff}
-.v, [class~="1"], [class~="2"], [class~="3"], [class~="4"], [class~="5"], [class~="6"], [class~="7"], [class~="8"] { background-color: #D6B588; color: #fff; }
-.chorus, .Chorus, .c { background-color: #556b2f; color: #fff}
-.bridge, .b, .b2, .b3, .b4 { background-color: #003153; color: #fff}
+.verse { background-color: #D6B588; color: #fff; }
+.chorus { background-color: #556b2f; color: #fff}
+.bridge { background-color: #003153; color: #fff}
+.prechorus { background-color: #f78787; color: #fff}
+.postchorus { background-color: #f78787; color: #fff}
+.tag { background-color: #37a584; color: #fff}
+.vamp { background-color: #37a584; color: #fff}
+.intro {background-color: #000; color: #fff}
+.outro {background-color: #000; color: #fff}
+.interlude {background-color: #319eb1; color: #fff}
 
 .ui-sortable-placeholder {
     visibility: visible !important;
@@ -406,6 +545,9 @@
     ================================== */
     // Store worship set into object
     let songs = {{ songs|tojson|safe }};
+    songs.forEach(song => {
+        if (song.type === 'song') song.language_version_order = get_language_version_order(song);
+    });
     let songs_temp = JSON.parse(JSON.stringify(songs));
     let lyrics_raw = '';
     let worship_data = {{ w|tojson|safe }};
@@ -442,7 +584,7 @@
                             <button type="button" class="icon-button insert_btn" title="Add Song"><i class="fa-solid fa-plus"></i></button>
                             <span class="song_title"><b>${s.title}</b></span>
                             <span class="keynote">${s.key}</span>
-                            ${lang_tag(s.lang)} ${lang_tag(s.lang_2)} ${get_links(s.video, s.score, s.abc, s.id)}
+                            ${language_tags(s.lang)} ${get_links(s.video, s.score, s.abc, s.id)}
                         </div>`;
                 }
             $('#left_content').append(my_pinned_songs);
@@ -459,7 +601,7 @@
                                 <button type="button" class="icon-button insert_btn" title="Add Song"><i class="fa-solid fa-plus"></i></button>
                                 <span class="song_title"><b>${s1.title}</b></span>
                                 <span class="keynote">${s1.key}</span>
-                                ${lang_tag(s1.lang)} ${lang_tag(s1.lang_2)} ${get_links(s1.video, s1.score, s1.abc, s1.id)}
+                                ${language_tags(s1.lang)} ${get_links(s1.video, s1.score, s1.abc, s1.id)}
                             </div>`;
                     }
                 }
@@ -475,7 +617,7 @@
                         <button type="button" class="icon-button insert_btn" title="Add Song"><i class="fa-solid fa-plus"></i></button>
                         <span class="song_title"><b>${s.title}</b></span>
                         <span class="keynote">${s.key}</span>
-                        ${lang_tag(s.lang)} ${lang_tag(s.lang_2)} ${get_links(s.video, s.score, s.abc, s.id)}
+                        ${language_tags(s.lang)} ${get_links(s.video, s.score, s.abc, s.id)}
                     </div>`;
             }
             $('#left_content').append(my_new_songs);
@@ -640,9 +782,83 @@
             return !tempSong ||
                 (parseInt(song.transpose) || 0) !== (parseInt(tempSong.transpose) || 0) ||
                 song.notes != tempSong.notes ||
-                song.alt_sequence != tempSong.alt_sequence;
+                song.alt_sequence != tempSong.alt_sequence ||
+                JSON.stringify(song.language_version_order || []) !== JSON.stringify(tempSong.language_version_order || []);
         });
     }
+
+    function checkSequenceEmptyState($container) {
+        let hasItems = $container.children('.lyric-item').not('.empty-sequence-state').length > 0;
+        
+        if (!hasItems) {
+            if ($container.children('.empty-sequence-state').length === 0) {
+                $container.append('<li class="empty-sequence-state" style="grid-column: 1 / -1; padding: 20px; text-align: center; color: #666; font-style: italic; background: #f5f5f5; border: 1px dashed #ccc; border-radius: 5px; list-style: none;">No sequence added yet! Click a quick add button to start.</li>');
+            }
+        } else {
+            $container.children('.empty-sequence-state').remove();
+        }
+    }
+
+    function syncLanguagePriority($widget) {
+        const $activeList = $widget.find('.language-priority-active');
+        const order = $activeList.children('[data-lang]').map(function() {
+            return $(this).data('lang');
+        }).get();
+        const songId = String($widget.data('song-id'));
+        const song = songs_temp.find(item => String(item.id) === songId);
+        if (song) {
+            song.language_version_order = order;
+            const $sequence = $('#sequence_' + songId);
+            const currentLanguage = $sequence.attr('data-current-language');
+            const displayLanguage = order.includes(currentLanguage) ? currentLanguage : order[0];
+            render_song_sequence_language(song, displayLanguage);
+            $('#songs li[name="' + songId + '"] .btn-lang-swap').toggle(order.length > 1);
+        }
+
+        $activeList.children('.language-priority-item').each(function(index) {
+            $(this).find('.language-priority-name small').text('(#' + (index + 1) + ')');
+        });
+        $widget.find('.language-priority-toggle small').text(order.join(', '));
+        checkActionButtons();
+    }
+
+    const ACCORDION_TOGGLE_DURATION = 400;
+
+    $(document).on('click', '.language-priority-toggle', function() {
+        let $trigger = $(this);
+        let isOpen = $trigger.attr('aria-expanded') === 'true';
+        $trigger.attr('aria-expanded', !isOpen)
+            .find('i').toggleClass('fa-caret-right fa-caret-down');
+        $trigger.next('.language-priority-panel').toggle(ACCORDION_TOGGLE_DURATION);
+    });
+
+    $(document).on('click', '.language-priority-move', function() {
+        const $item = $(this).closest('.language-priority-item');
+        const $widget = $(this).closest('.language-priority-widget');
+        const $source = $item.parent();
+        const $activeList = $widget.find('.language-priority-active');
+
+        if ($source.is($activeList) && $activeList.children().length === 1) return;
+
+        const $target = $source.is($activeList)
+            ? $widget.find('.language-priority-list').not($activeList)
+            : $activeList;
+        const isActive = $target.is($activeList);
+        const lang = String($item.data('lang'));
+        const moveIcon = isActive ? 'fa-arrow-right' : 'fa-arrow-left';
+        const moveLabel = isActive ? 'Remove' : 'Add';
+        const moveTitle = isActive ? `Remove ${lang} from current languages` : `Add ${lang} to current languages`;
+        const priority = isActive ? `<small></small>` : '';
+        $item.find('.language-priority-name').html(lang + priority);
+        $item.find('.language-priority-move')
+            .attr('title', moveTitle)
+            .attr('aria-label', moveTitle)
+            .find('i').attr('class', 'fa-solid ' + moveIcon)
+            .end()
+            .find('span').text(moveLabel);
+        $target.append($item);
+        syncLanguagePriority($widget);
+    });
 
     function save_worship_notes() {
         let sermonData = {
@@ -672,15 +888,16 @@
 
     // This function will detect if arrangement has been changed compare to the origin one
     function is_changed(order) {
-        temp = []
-        content = []
+        let temp = []
+        let content = []
         if (JSON.stringify(songs) !== JSON.stringify(songs_temp)) {
             console.log('content changed');
             content = JSON.parse(JSON.stringify(songs_temp));
         }
         if(JSON.stringify(order) != JSON.stringify(songs.map(item=>String(item.id)))) {
             console.log('order changed')
-            for (id of order) {
+            for (let id of order) {
+                let entry;
                 if (content.length>0) {
                     entry = content.find(o => o.id == id)
                 }
@@ -710,8 +927,9 @@
                 'song_id': item.id,
                 'sequence': item.alt_sequence,
                 'notes': item.notes,
-                'transpose': [item.transpose.toString()],
-                'scheduled_date': item.date
+                'transpose': item.transpose.toString(),
+                'scheduled_date': item.date,
+                'language_version_order': item.language_version_order
             }));
 
             let url = API_URL + 'worship/' + id + '/edit';
@@ -744,7 +962,7 @@
                         checkActionButtons();
     	            }
         	        else {
-        	            alert(response);
+                        alert(response.responseText || response.statusText);
 				    }
                 },
                 contentType: "application/json",
@@ -770,9 +988,20 @@
     // init sortable, triggered after the worship div is loaded
     function init() {
         $("#songs").sortable({
-            cancel: 'input, textarea, button, select, option, .song-title',
+            cancel: 'input, textarea, button, select, option, .song-title, .language-priority-widget, .language-priority-widget *',
             update: function () {
                 checkActionButtons();
+            }
+        });
+
+        $('.language-priority-active').sortable({
+            axis: 'y',
+            cursor: 'grabbing',
+            handle: '.language-priority-handle',
+            placeholder: 'language-priority-placeholder',
+            forcePlaceholderSize: true,
+            update: function() {
+                syncLanguagePriority($(this).closest('.language-priority-widget'));
             }
         });
 
@@ -798,11 +1027,11 @@
 
             create: function( event, ui ) {
                 //is_changed($(this).sortable('toArray', {attribute: 'name'}));
-                update_alt($(this).sortable('toArray'));
+                update_alt($(this).sortable('toArray'), $(this).attr('id'));
             },
             update: function(event, ui) {
                 //is_changed($(this).sortable('toArray', {attribute: 'name'}));
-                update_alt($(this).sortable('toArray'));
+                update_alt($(this).sortable('toArray'), $(this).attr('id'));
                 checkActionButtons();
             }
         });
@@ -853,8 +1082,9 @@
     function parse_chord(chord, diff) {
 	    diff = Number(diff);
 	    chord = chord.split('/');
-        new_chord = []
-        for(c in chord) {
+        let new_chord = []
+        for(let c in chord) {
+            let pos;
     	    if(chord[c][1] == 'b' || chord[c][1] == '#') {
               	pos = keys.indexOf(chord[c].substring(0,2))+diff
               	if(pos>= keys.length) {
@@ -916,8 +1146,11 @@
        ========================================================= */
     // When lyrics sequence is clicked, open up movable lyrics sections
     $(document).on('click', '.song_sequence_toggle', function(){
-        $(this).find('.toggle-icon').toggleClass('fa-caret-down fa-caret-right');
-        $(this).next('.sequence-container').toggle('slow');
+        let $toggle = $(this);
+        let isOpen = $toggle.hasClass('is-open');
+        $toggle.toggleClass('is-open', !isOpen)
+            .find('.toggle-icon').toggleClass('fa-caret-down fa-caret-right');
+        $toggle.next('.sequence-container').toggle(ACCORDION_TOGGLE_DURATION);
     });
 
     // When add_sequence_btn for lyrics sequence is clicked
@@ -934,28 +1167,36 @@
 
     // When remove_sequence_btn is clicked
     $(document).on('click', '.remove_sequence_btn', function () {
+        let $container = $(this).closest('.lyrics');
         $(this).closest('li').remove();
+
+        checkSequenceEmptyState($container);
 
         $(".lyrics").sortable( "destroy" );
         init();
         checkActionButtons();
     });
    
-    // update alt sequence which will be saved onto song_set table
-    function update_alt(alt) {
-        ids = []
+    function update_alt(alt, listId) {
+        let ids = [];
         $.each(alt, function() {
-            temp = this.split('_');
-            base = temp[0];
-            ids.push(temp[1])
+            // Exclude the empty state placeholder if picked up by sortable
+            if (this && this !== 'empty-sequence-state') {
+                let temp = this.split('_');
+                if (temp.length > 1) ids.push(temp[1]);
+            }
         });
-        id = base.split('-')[1]
-        ids = ids.join(',')
-        $('#'+base+'_alt').html(ids);
-        for (song of songs_temp) {
-            if (song.id == id) {
-               song.alt_sequence = ids;
-                break;
+        
+        // Extract song ID from the ul id (e.g., "sequence_123" -> "123")
+        let songId = listId.split('_')[1];
+        let sequenceStr = ids.join(',');
+        
+        $('#song-' + songId + '_alt').html(sequenceStr);
+        
+        for (let song of songs_temp) {
+            if (song.id == songId) {
+            song.alt_sequence = sequenceStr;
+            break;
             }
         }
     }
@@ -1017,7 +1258,7 @@
                     <div class="sidebar-song-item">
                         <button type="button" lang="${data['left'][i]['lang']}" db="${data['left'][i]['db']}" songid="${data['left'][i]['id']}" class="icon-button insert_btn" title="Import Song"><i class="fa-solid fa-cloud-arrow-down"></i></button>
                         <span class="song_title"><b>${highlight_keyword(keyword, data['left'][i]['title'])}</b></span> 
-                        ${lang_tag(data['left'][i]['lang'])}
+                        ${language_tags(data['left'][i]['lang'])}
                     </div>`;
             }
 
@@ -1029,7 +1270,7 @@
                         <button type="button" class="icon-button insert_btn" title="Add Song"><i class="fa-solid fa-plus"></i></button>
                         <span class="song_title"><b>${highlight_keyword(keyword, data['right'][i]['title'])}</b></span> 
                         <span class="keynote">${data['right'][i]['key']}</span> 
-                        ${lang_tag(data['right'][i]['lang'])} ${lang_tag(data['right'][i]['lang_2'])}
+                        ${language_tags(data['right'][i]['lang'])}
                         ${get_links(data['right'][i]['video'], data['right'][i]['score'], data['right'][i]['abc'], data['right'][i]['id'])}
                     </div>`;
             }
@@ -1102,6 +1343,7 @@
                     return false;
                 }
                 data['date'] = worship_data.date;
+                data.language_version_order = get_language_version_order(data);
                 songs_temp.push(data);
                 
                 $.when(add_song_to_worship(worship)).then(function() {
