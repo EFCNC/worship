@@ -176,6 +176,55 @@
             min-height: 0;
         }
 
+        .section-navigation {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr) minmax(0, 1fr);
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            min-height: 48px;
+            margin-bottom: 10px;
+        }
+
+        .section-neighbor {
+            min-width: 0;
+            color: #888;
+            font-size: 0.8rem;
+        }
+
+        .section-neighbor.next {
+            text-align: right;
+            opacity: 1;
+        }
+
+        .section-direction {
+            display: block;
+            margin-bottom: 2px;
+            color: #666;
+            font-size: 0.65rem;
+            text-transform: uppercase;
+        }
+
+        .section-neighbor-title {
+            display: block;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .section-current {
+            min-width: 0;
+            text-align: center;
+        }
+
+        .section-current-title {
+            margin: 0;
+            color: #00ffcc;
+            font-size: 1.15rem;
+            font-weight: 600;
+            overflow-wrap: anywhere;
+        }
+
         .reveal-wrapper {
             width: 100%;
             max-width: 90vw;
@@ -302,6 +351,22 @@
 
             .main-content {
                 grid-row: 1;
+                display: grid;
+                grid-template-rows: auto minmax(0, 1fr) auto;
+                align-items: center;
+                justify-items: center;
+            }
+
+            .reveal-wrapper {
+                width: auto;
+                height: auto;
+                max-width: 90vw;
+                max-height: 100%;
+            }
+
+            #slide_notes {
+                margin-top: 8px;
+                min-height: 24px;
             }
 
             .lead-sidebar {
@@ -345,6 +410,21 @@
         }
 
         @media (max-width: 600px) {
+            .section-navigation {
+                grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr) minmax(0, 1fr);
+                gap: 6px;
+                min-height: 42px;
+                margin-bottom: 6px;
+            }
+
+            .section-neighbor {
+                font-size: 0.7rem;
+            }
+
+            .section-current-title {
+                font-size: 1rem;
+            }
+
             .lead_container {
                 grid-template-rows: minmax(0, 1fr) 170px;
                 padding: 8px;
@@ -368,6 +448,19 @@
 
         <!-- Main Slide View -->
         <div class="main-content">
+            <div class="section-navigation" aria-live="polite">
+                <div class="section-neighbor previous">
+                    <span class="section-direction">Previous</span>
+                    <span class="section-neighbor-title" id="previous-section-title"></span>
+                </div>
+                <div class="section-current">
+                    <h1 class="section-current-title" id="current-section-title"></h1>
+                </div>
+                <div class="section-neighbor next">
+                    <span class="section-direction">Next</span>
+                    <span class="section-neighbor-title" id="next-section-title"></span>
+                </div>
+            </div>
             <div class="reveal-wrapper">
                 <div class="reveal">
                     <div class="slides"></div>
@@ -417,9 +510,54 @@
     var focus_div = null;
     slide_refreshed = false;
 
-    if (typeof device !== 'undefined' && device === 'mobile') {
-        $('body').html('<div class="reveal"><div class="slides"></div></div>');
+    function update_section_navigation() {
+        if (!slides.length) { return; }
+
+        var previousTitle = document.getElementById('previous-section-title');
+        var currentTitle = document.getElementById('current-section-title');
+        var nextTitle = document.getElementById('next-section-title');
+        if (!previousTitle || !currentTitle || !nextTitle) { return; }
+
+        var currentIndex = Math.max(0, Math.min(Number(pos) || 0, slides.length - 1));
+        var previousIndex = (currentIndex - 1 + slides.length) % slides.length;
+        var nextIndex = (currentIndex + 1) % slides.length;
+        var title = function(index) {
+            return slides[index].title || 'Untitled section';
+        };
+
+        previousTitle.textContent = title(previousIndex);
+        currentTitle.textContent = title(currentIndex);
+        nextTitle.textContent = title(nextIndex);
     }
+
+    function fit_reveal_wrapper() {
+        var mainContent = document.querySelector('.main-content');
+        var revealWrapper = document.querySelector('.reveal-wrapper');
+        if (!mainContent || !revealWrapper) { return; }
+
+        if (!window.matchMedia('(max-width: 1100px)').matches) {
+            revealWrapper.style.removeProperty('width');
+            revealWrapper.style.removeProperty('height');
+            return;
+        }
+
+        var navigation = document.querySelector('.section-navigation');
+        var notes = document.getElementById('slide_notes');
+        var navigationMargin = parseFloat(window.getComputedStyle(navigation).marginBottom) || 0;
+        var notesStyle = window.getComputedStyle(notes);
+        var notesMargin = (parseFloat(notesStyle.marginTop) || 0) + (parseFloat(notesStyle.marginBottom) || 0);
+        var availableHeight = mainContent.clientHeight - navigation.offsetHeight - navigationMargin - notes.offsetHeight - notesMargin;
+        var availableWidth = Math.min(mainContent.clientWidth, window.innerWidth * 0.9);
+        var height = Math.max(0, Math.min(availableHeight, availableWidth * 9 / 16));
+
+        revealWrapper.style.width = (height * 16 / 9) + 'px';
+        revealWrapper.style.height = height + 'px';
+    }
+
+    document.addEventListener('presentation:slides-loaded', function() {
+        update_section_navigation();
+        window.requestAnimationFrame(fit_reveal_wrapper);
+    });
 
     function scroll_preview_to_current() {
         var currentElement = document.querySelector('.preview-wrapper[data-order="' + order + '"]');
@@ -491,6 +629,7 @@
         });
 
         load_slides();
+        fit_reveal_wrapper();
     });
 
     $(document).on('click', '.preview-wrapper', function () {
@@ -519,7 +658,10 @@
     });
 
     window.addEventListener('resize', function() {
-        window.requestAnimationFrame(scroll_preview_to_current);
+        window.requestAnimationFrame(function() {
+            scroll_preview_to_current();
+            fit_reveal_wrapper();
+        });
     });
 
     $(document).on('click', '.admin-btn', function() {
@@ -545,17 +687,22 @@
         apply_background_brightness();
         Reveal.slide(pos, order);
         change_slide();
+        window.requestAnimationFrame(fit_reveal_wrapper);
     });
 
     Reveal.on('slidechanged', (event) => {
         if(slide_refreshed) {
+            update_section_navigation();
             slide_refreshed = false;
+            window.requestAnimationFrame(fit_reveal_wrapper);
             return true;
         }
 
         pos = event.indexh;
         order = event.indexv;
+        update_section_navigation();
         change_slide();
+        window.requestAnimationFrame(fit_reveal_wrapper);
 
         console.log("slide changed, emit changes to server", pos, order);
         socket.emit('control', {'type': 'pos', 'value': [pos, order], 'from': 'lead'});
