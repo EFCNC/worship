@@ -18,6 +18,20 @@
             <span>Lead</span>
         </a>
 
+        <!-- EXPERIMENTAL LEAD START: Remove this card when promoting the experimental controller. -->
+        <a href="/slides/lead-experimental" class="menu-card">
+            <i class="fa-solid fa-flask"></i>
+            <span>Lead (Experimental)</span>
+        </a>
+        <!-- EXPERIMENTAL LEAD END -->
+
+        <!-- SLIDE RESET START: Remove this control and its handler if reset access is removed. -->
+        <button type="button" class="menu-card" id="reset-slides">
+            <i class="fa-solid fa-rotate"></i>
+            <span>Reset</span>
+        </button>
+        <!-- SLIDE RESET END -->
+
         <a href="/slides/view" class="menu-card">
             <i class="fa-solid fa-eye"></i>
             <span>View</span>
@@ -41,4 +55,23 @@
 {% endblock %}
 
 {% block extra_js %}
+    <!-- SLIDE RESET HANDLER START -->
+    <script>
+        document.getElementById('reset-slides').addEventListener('click', async function() {
+            if (!window.confirm('Reset slide data and release all controller locks? Connected displays may need to reload.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/slides/admin1');
+                if (!response.ok) {
+                    throw new Error('Reset request failed.');
+                }
+                window.location.reload();
+            } catch (error) {
+                window.alert(error.message);
+            }
+        });
+    </script>
+    <!-- SLIDE RESET HANDLER END -->
 {% endblock %}
