@@ -632,13 +632,16 @@
         fit_reveal_wrapper();
     });
 
-    $(document).on('click', '.preview-wrapper', function () {
-        var id = $(this).attr('id');
-        if (id) {
-            order = id;
-            Reveal.slide(pos, order);
-            show_data(pos);
-        }
+    $(document).on('click', '.preview-wrapper', function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        var slideOrder = Number($(this).attr('data-order'));
+        if (!Number.isInteger(slideOrder) || slideOrder < 0) { return; }
+
+        order = slideOrder;
+        Reveal.slide(pos, slideOrder);
+        show_data(pos);
     });
 
     function activate_sidebar_tab(tab) {
