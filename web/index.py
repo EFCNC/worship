@@ -360,7 +360,12 @@ def slides():
 
 @app.route("/slides/<mode>")
 def slides_viewer(mode=None):
-	__update_client_mode(mode)
+	# EXPERIMENTAL LEAD START: Share the production Lead client lock and socket mode.
+	if mode == 'lead-experimental':
+		__update_client_mode('lead')
+	else:
+		__update_client_mode(mode)
+	# EXPERIMENTAL LEAD END
 	if not mode:
 		return render_template('slides/slides.html', presentation=slides_data, mode='')
 	if not slides_data['data']:
@@ -371,11 +376,16 @@ def slides_viewer(mode=None):
 			return "<script>alert('Only one Admin mode can be connected, please use different mode.');window.location.replace('../slides');</script>"
 		else:
 			return render_template('slides/slides_admin.html', presentation=slides_data, mode=mode)
-	elif mode == 'lead':
+	elif mode in ('lead', 'lead-experimental'):
 		if len(client['lead']) > 0:
 			__update_client_mode('')
 			return "<script>alert('Only one Lead mode can be connected, please use different mode.');window.location.replace('../slides');</script>"
-		return render_template('slides/slides_lead.html', presentation=slides_data, mode=mode)
+		# EXPERIMENTAL LEAD START: Remove this template selection when promoting the new controller.
+		lead_template = 'slides/slides_lead.html'
+		if mode == 'lead-experimental':
+			lead_template = 'slides/slides_lead_experimental.html'
+		# EXPERIMENTAL LEAD END
+		return render_template(lead_template, presentation=slides_data, mode='lead')
 	elif mode == 'view':
 		__update_client_mode('')
 		return render_template('slides/slides_view.html', presentation=slides_data, mode=mode)

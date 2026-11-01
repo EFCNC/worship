@@ -51,6 +51,7 @@ Used for presentation and live display modes.
 | `slides/slides_admin.html` | `/slides/admin` | Admin presentation control. |
 | `slides/slides_lead.html` | `/slides/lead` | Leader presentation control. |
 | `slides/slides_view.html` | `/slides/view` | Viewer/display mode.
+| `slides/slides_lead_experimental.html` | `/slides/lead-experimental` | Experimental leader presentation control; shares the production Lead session lock. |
 | `slides/slides_musician.html` | `/slides/musician` | Musician focused view (if used). |
 
 ### Song templates
