@@ -141,3 +141,78 @@ span.chunk:before {
 .info.region, .song.region {
     color: #ffd800;
 }
+
+html #top-left,
+html #top-right,
+html #bottom-left,
+html #bottom-right {
+    transition: opacity 200ms ease;
+}
+
+.reveal .slides {
+    transition: opacity 200ms ease;
+}
+
+.reveal .controls,
+.reveal .progress,
+.reveal .slide-number {
+    transition: opacity 200ms ease;
+}
+
+body.presentation-background-only #top-left,
+body.presentation-background-only #top-right,
+body.presentation-background-only #bottom-left,
+body.presentation-background-only #bottom-right,
+body.presentation-background-only .reveal .controls,
+body.presentation-background-only .reveal .progress,
+body.presentation-background-only .reveal .slide-number {
+    opacity: 0 !important;
+    pointer-events: none;
+}
+
+body.lead-controller.presentation-background-only .reveal .controls,
+body.lead-controller.presentation-background-only .reveal .progress,
+body.lead-controller.presentation-background-only .reveal .slide-number {
+    opacity: 1 !important;
+    pointer-events: auto;
+}
+
+body.presentation-background-only .reveal .slides {
+    opacity: 0.25 !important;
+}
+
+.presentation-blank-banner {
+    position: absolute;
+    top: 18px;
+    left: 50%;
+    z-index: 20;
+    color: #ff3838;
+    font-size: 1.1rem;
+    font-weight: 800;
+    text-align: center;
+    text-shadow: 0 1px 5px #000;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(-50%);
+    transition: opacity 200ms ease, visibility 0s linear 200ms;
+    pointer-events: none;
+}
+
+body.presentation-background-only .presentation-blank-banner {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 200ms ease;
+}
+
+.admin-btn[aria-pressed="true"] {
+    border-color: #00ffcc;
+    background: #173331;
+    color: #00ffcc;
+}
+
+@media (max-width: 600px) {
+    .presentation-blank-banner {
+        font-size: 0.85rem;
+    }
+}
