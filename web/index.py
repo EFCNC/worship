@@ -78,7 +78,7 @@ def sync_live_mode():
 def handle_control(data):
 	print('Received message:', data)
 	if (data.get('type') == 'display_mode' and
-			data.get('value') not in ('normal', 'blank')):
+			data.get('value') not in ('normal', 'blank', 'blackout')):
 		return
 	# Edit Mode keeps Admin navigation local. Live Mode marks its position
 	# updates explicitly so those events can move both Lead and View.
@@ -397,7 +397,7 @@ def slides_viewer(mode=None):
 		# EXPERIMENTAL LEAD END
 		return render_template(lead_template, presentation=slides_data, mode='lead')
 	elif mode == 'view':
-		__update_client_mode('')
+		__update_client_mode('view')
 		return render_template('slides/slides_view.html', presentation=slides_data, mode=mode)
 	elif mode == 'sheets':
 		__update_client_mode('')
@@ -490,6 +490,9 @@ def __update_client(mode, id):
 				client[mode].append(id)
 		elif mode == 'lead':
 			if len(client[mode]) == 0:
+				client[mode].append(id)
+		elif mode in ('view', 'musician'):
+			if id not in client[mode]:
 				client[mode].append(id)
 
 def __update_client_mode(name):

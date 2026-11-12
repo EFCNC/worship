@@ -586,7 +586,8 @@
                     <div class="section-list" id="section-list"></div>
                 </details>
                 <div class="control-panel">
-                    <button class="admin-btn" data-action="blank">Blank</button>
+                    <button class="admin-btn" type="button" data-action="blank" aria-pressed="false">Blank</button>
+                    <button class="admin-btn" type="button" data-action="blackout" aria-pressed="false">Blackout</button>
                     <button class="admin-btn" data-action="alert">Alert</button>
                     <button class="admin-btn" data-action="reload">Reload</button>
                     <button class="admin-btn" data-action="sync">Sync</button>
@@ -824,14 +825,19 @@
         var actionType = $(this).data('action');
         console.log("Admin action triggered:", actionType);
 
-        if (actionType === 'blank') {
-            var displayMode = presentationDisplayMode === 'blank' ? 'normal' : 'blank';
+        if (actionType === 'blank' || actionType === 'blackout') {
+            var requestedMode = actionType;
+            var displayMode = presentationDisplayMode === requestedMode ? 'normal' : requestedMode;
             apply_presentation_display_mode(displayMode);
             socket.emit('control', {
                 'type': 'display_mode',
                 'value': displayMode,
                 'from': 'lead'
             });
+        } else if (actionType === 'reload') {
+            save_slides();
+        } else if (actionType === 'sync') {
+            socket.emit('sync_live_mode');
         } else {
             socket.emit('control', {
                 'type': 'admin_command',
@@ -840,7 +846,7 @@
             });
         }
 
-        if (actionType !== 'blank') {
+        if (actionType !== 'blank' && actionType !== 'blackout') {
             var btn = $(this);
             var originalText = btn.text();
             btn.text('Sent!');
