@@ -154,6 +154,8 @@ header#header button {
     pointer-events: none;
 }
 
+body.presentation-background-only #admin_broadcast_banner { top: 52px; }
+
 /* ---- 4. Sidebar --------------------------------------------------------- */
 .admin_container .menu {
     grid-column: 2;
@@ -202,8 +204,33 @@ header#header button {
 
 .sidebar-panel[hidden] { display: none; }
 
+#tools-panel,
 #controls-panel,
 #sequence-panel { overflow: hidden; }
+
+.admin-quick-controls {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-content: start;
+    gap: 10px;
+}
+
+.admin-control-btn {
+    min-height: 56px;
+    padding: 12px 8px;
+    border: 2px solid #333;
+    border-radius: 6px;
+    background: #1a1a1a;
+    color: #ccc;
+    font: 600 12px var(--font-family-base);
+    text-transform: uppercase;
+}
+
+.admin-control-btn:hover {
+    border-color: #008080;
+    background: #333;
+    color: #fff;
+}
 
 #admin_sidebar_content {
     flex: 1 1 auto;
@@ -821,6 +848,7 @@ header#header button {
         <div class="slide-viewport">
             <div class="reveal">
                 <div class="slides"></div>
+                <div class="presentation-blank-banner" role="status" aria-live="polite">!!! SLIDES ARE CURRENTLY BLANKED !!!</div>
                 <div id="admin_broadcast_banner" role="status" aria-live="polite" hidden></div>
             </div>
             <div id="slide_matrix" class="slide-matrix" aria-label="General slide view" hidden>
@@ -830,10 +858,11 @@ header#header button {
     </div>
     <aside class="menu">
         <div class="sidebar-tabs" role="tablist" aria-label="Admin controls">
-            <button class="sidebar-tab" id="controls-tab" type="button" role="tab" aria-selected="true" aria-controls="controls-panel" tabindex="0">Controls</button>
+            <button class="sidebar-tab" id="tools-tab" type="button" role="tab" aria-selected="true" aria-controls="tools-panel" tabindex="0">Tools</button>
             <button class="sidebar-tab" id="sequence-tab" type="button" role="tab" aria-selected="false" aria-controls="sequence-panel" tabindex="-1">Sequence</button>
+            <button class="sidebar-tab" id="controls-tab" type="button" role="tab" aria-selected="false" aria-controls="controls-panel" tabindex="-1">Controls</button>
         </div>
-        <section class="sidebar-panel" id="controls-panel" role="tabpanel" aria-labelledby="controls-tab">
+        <section class="sidebar-panel" id="tools-panel" role="tabpanel" aria-labelledby="tools-tab">
             <div id="admin_sidebar_content">
                 <div id="control_panel">
                     <i name="0" id="save" class="material-icons small" title="Refresh Slide">&#xE5D5;</i>
@@ -877,6 +906,14 @@ header#header button {
         </section>
         <section class="sidebar-panel" id="sequence-panel" role="tabpanel" aria-labelledby="sequence-tab" hidden>
             <div class="preview" aria-label="Slide sequence"></div>
+        </section>
+        <section class="sidebar-panel" id="controls-panel" role="tabpanel" aria-labelledby="controls-tab" hidden>
+            <div class="admin-quick-controls">
+                <button class="admin-btn admin-control-btn" type="button" data-action="blank" aria-pressed="false">Blank</button>
+                <button class="admin-btn admin-control-btn" type="button" data-action="blackout" aria-pressed="false">Blackout</button>
+                <button class="admin-btn admin-control-btn" type="button" data-action="reload">Reload</button>
+                <button class="admin-btn admin-control-btn" type="button" data-action="sync">Sync</button>
+            </div>
         </section>
         <div id="admin_toast" role="status" aria-live="polite"></div>
         <div id="admin_mode_switch" role="group" aria-label="Admin navigation mode">
@@ -1049,12 +1086,14 @@ function update_admin_section_navigation() {
 /* ---- 4. Sidebar: tabs, sequence preview, panels ------------------------- */
 
 function select_admin_tab(tabName) {
-    var isSequence = tabName === 'sequence';
+    if (['tools', 'sequence', 'controls'].indexOf(tabName) === -1) {
+        tabName = 'tools';
+    }
     $('.sidebar-tab').attr({ 'aria-selected': 'false', tabindex: '-1' });
-    $(isSequence ? '#sequence-tab' : '#controls-tab').attr({ 'aria-selected': 'true', tabindex: '0' });
-    $('#sequence-panel').prop('hidden', !isSequence);
-    $('#controls-panel').prop('hidden', isSequence);
-    if (isSequence) {
+    $('#' + tabName + '-tab').attr({ 'aria-selected': 'true', tabindex: '0' });
+    $('.sidebar-panel').prop('hidden', true);
+    $('#' + tabName + '-panel').prop('hidden', false);
+    if (tabName === 'sequence') {
         update_admin_sequence_preview();
     }
 }
@@ -1734,7 +1773,31 @@ $(document).on('keydown', '#bible_query', function(event) {
 });
 
 $(document).on('click', '.sidebar-tab', function() {
-    select_admin_tab($(this).attr('id') === 'sequence-tab' ? 'sequence' : 'controls');
+    select_admin_tab($(this).attr('id').replace(/-tab$/, ''));
+});
+
+$(document).on('click', '.admin-control-btn', function() {
+    var actionType = $(this).data('action');
+    if (actionType === 'blank' || actionType === 'blackout') {
+        var requestedMode = actionType === 'blank' ? 'blank' : 'blackout';
+        var displayMode = presentationDisplayMode === requestedMode ? 'normal' : requestedMode;
+        apply_presentation_display_mode(displayMode);
+        socket.emit('control', {
+            'type': 'display_mode',
+            'value': displayMode,
+            'from': 'admin'
+        });
+    } else if (actionType === 'reload') {
+        save_slides();
+    } else if (actionType === 'sync') {
+        socket.emit('sync_live_mode');
+    } else {
+        socket.emit('control', {
+            'type': 'admin_command',
+            'action': actionType,
+            'from': 'admin'
+        });
+    }
 });
 
 $(document).on('click', '.admin-preview-wrapper', function() {
@@ -1807,7 +1870,7 @@ $(document).ready(function() {
         margin: 0.04
     });
 
-    select_admin_tab('controls');
+    select_admin_tab('tools');
     update_admin_section_navigation();
 
     // Brightness slider (0-10)

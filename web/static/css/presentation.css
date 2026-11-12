@@ -181,6 +181,18 @@ body.presentation-background-only .reveal .slides {
     opacity: 0.25 !important;
 }
 
+body.presentation-view.presentation-blackout .reveal {
+    background-color: #000 !important;
+}
+
+body.presentation-view.presentation-background-only .reveal .slides {
+    opacity: 0 !important;
+}
+
+body.presentation-view.presentation-blackout .reveal .backgrounds {
+    opacity: 0 !important;
+}
+
 .presentation-blank-banner {
     position: absolute;
     top: 18px;

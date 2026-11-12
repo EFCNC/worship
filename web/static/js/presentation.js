@@ -140,24 +140,30 @@
     }
 
     function apply_presentation_display_mode(displayMode) {
-        if (mode !== 'lead' && mode !== 'view') { return; }
+        if (mode !== 'lead' && mode !== 'admin' && mode !== 'view') { return; }
 
-        presentationDisplayMode = displayMode === 'blank' ? 'blank' : 'normal';
+        presentationDisplayMode = ['blank', 'blackout'].includes(displayMode) ? displayMode : 'normal';
         if (presentation && typeof presentation === 'object') {
             presentation.display_mode = presentationDisplayMode;
         }
 
-        var blank = presentationDisplayMode === 'blank';
+        var blank = presentationDisplayMode !== 'normal';
         var blankButton = document.querySelector('[data-action="blank"]');
         if (blankButton) {
-            blankButton.setAttribute('aria-pressed', String(blank));
+            blankButton.setAttribute('aria-pressed', String(presentationDisplayMode === 'blank'));
+        }
+        var blackoutButton = document.querySelector('[data-action="blackout"]');
+        if (blackoutButton) {
+            blackoutButton.setAttribute('aria-pressed', String(presentationDisplayMode === 'blackout'));
         }
 
         document.body.classList.toggle('presentation-background-only', blank);
+        document.body.classList.toggle('presentation-blackout', presentationDisplayMode === 'blackout');
+        document.body.classList.toggle('presentation-view', mode === 'view');
     }
 
     document.addEventListener('presentation:slides-loaded', function() {
-        if (mode === 'lead' || mode === 'view') {
+        if (mode === 'lead' || mode === 'admin' || mode === 'view') {
             apply_presentation_display_mode(presentation && presentation.display_mode);
         }
     });
