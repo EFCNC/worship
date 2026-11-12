@@ -8,6 +8,7 @@
     <script src="/static/js/worship.js"></script>
     <script src="/static/js/presentation.js"></script>
     <link href="/static/css/presentation.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/static/vendor/jquery/jquery-ui.css">
     <link rel="stylesheet" href="/static/vendor/reveal/reset.css">
     <link rel="stylesheet" href="/static/vendor/reveal/reveal.css">
@@ -197,12 +198,15 @@
         }
 
         .admin-btn {
+            display: grid;
+            grid-template-columns: 24px minmax(0, 1fr);
+            align-items: center;
             background-color: #1a1a1a;
             color: #ccc;
             border: 2px solid #333;
             border-radius: 8px;
             padding: 18px 8px;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             text-transform: uppercase;
             font-weight: bold;
             letter-spacing: 0;
@@ -223,6 +227,19 @@
             background-color: #004040;
             border-color: #00ffcc;
             color: #00ffcc;
+        }
+
+        .control-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.15em;
+        }
+
+        .control-label {
+            grid-column: 2;
+            min-width: 0;
+            text-align: center;
         }
 
         /* --- Main Presentation Area --- */
@@ -476,7 +493,7 @@
 
             .admin-btn {
                 padding: 12px 6px;
-                font-size: 0.75rem;
+                font-size: 0.7rem;
             }
 
             .preview {
@@ -534,7 +551,7 @@
 
             .admin-btn {
                 padding: 8px 4px;
-                font-size: 0.7rem;
+                font-size: 0.65rem;
             }
         }
     </style>
@@ -586,11 +603,11 @@
                     <div class="section-list" id="section-list"></div>
                 </details>
                 <div class="control-panel">
-                    <button class="admin-btn" type="button" data-action="blank" aria-pressed="false">Blank</button>
-                    <button class="admin-btn" type="button" data-action="blackout" aria-pressed="false">Blackout</button>
-                    <button class="admin-btn" data-action="alert">Alert</button>
-                    <button class="admin-btn" data-action="reload">Reload</button>
-                    <button class="admin-btn" data-action="sync">Sync</button>
+                    <button class="admin-btn" type="button" data-action="blank" aria-pressed="false"><span class="control-icon" aria-hidden="true"></span><span class="control-label">Blank</span></button>
+                    <button class="admin-btn" type="button" data-action="blackout" aria-pressed="false"><span class="control-icon" aria-hidden="true"></span><span class="control-label">Blackout</span></button>
+                    <button class="admin-btn" type="button" data-action="fullscreen" aria-pressed="false"><span class="control-icon" aria-hidden="true"><i class="fa-solid fa-expand"></i></span><span class="control-label">Fullscreen</span></button>
+                    <button class="admin-btn" type="button" data-action="reload"><span class="control-icon" aria-hidden="true"><i class="fa-solid fa-cloud-arrow-down"></i></span><span class="control-label">Reload</span></button>
+                    <button class="admin-btn" type="button" data-action="sync"><span class="control-icon" aria-hidden="true"><i class="fa-solid fa-rotate"></i></span><span class="control-label">Sync</span></button>
                 </div>
             </section>
         </aside>
@@ -821,11 +838,29 @@
         });
     });
 
+    function update_fullscreen_button() {
+        var fullscreenButton = document.querySelector('[data-action="fullscreen"]');
+        if (fullscreenButton) {
+            fullscreenButton.setAttribute('aria-pressed', String(Boolean(document.fullscreenElement)));
+        }
+    }
+
+    document.addEventListener('fullscreenchange', update_fullscreen_button);
+
     $(document).on('click', '.admin-btn', function() {
         var actionType = $(this).data('action');
         console.log("Admin action triggered:", actionType);
 
-        if (actionType === 'blank' || actionType === 'blackout') {
+        if (actionType === 'fullscreen') {
+            if (document.fullscreenElement) {
+                document.exitFullscreen();
+            } else if (document.fullscreenEnabled) {
+                document.documentElement.requestFullscreen().catch(function(error) {
+                    console.warn('Fullscreen request was denied:', error);
+                });
+            }
+            return;
+        } else if (actionType === 'blank' || actionType === 'blackout') {
             var requestedMode = actionType;
             var displayMode = presentationDisplayMode === requestedMode ? 'normal' : requestedMode;
             apply_presentation_display_mode(displayMode);
