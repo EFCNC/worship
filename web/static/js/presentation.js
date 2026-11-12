@@ -105,8 +105,7 @@
             success: function(data) {
                 alert('Slides Refreshed');
                 socket.emit('reload');
-                window.location.href = document.querySelector('.admin_container_experimental') ?
-                    '/slides/admin-experimental' : '/slides/admin';
+                window.location.reload();   // same admin page, whichever route it is served from
             },
             fail: function(data) {
                 alert(data);
@@ -262,7 +261,7 @@
         $('#slide_notes').html(slides[pos].notes);
         for(var i=0;i<slides.length;i++) {
             data = slides[i];
-            bg_url = data.style.background;
+            let bg_url = data.style.background;
             let section = document.createElement('section');
             if (bg_url) {
                 section.setAttribute('data-background-image', bg_url);

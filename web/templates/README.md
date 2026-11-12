@@ -49,6 +49,7 @@ Used for presentation and live display modes.
 | --- | --- | --- |
 | `slides/slides.html` | `/slides` | Slides dashboard. |
 | `slides/slides_admin.html` | `/slides/admin` | Admin presentation control. |
+| `slides/slides_admin_experimental.html` | `/slides/admin-experimental` | Experimental Admin layout; shares the production Admin session lock. |
 | `slides/slides_lead.html` | `/slides/lead` | Leader presentation control. |
 | `slides/slides_view.html` | `/slides/view` | Viewer/display mode.
 | `slides/slides_lead_experimental.html` | `/slides/lead-experimental` | Experimental leader presentation control; shares the production Lead session lock. |
