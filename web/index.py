@@ -31,7 +31,7 @@ def add_cache_headers(response):
         response.headers['Cache-Control'] = 'public, max-age=2592000, immutable'
     return response
 
-slides_data = {'pos': [0, 0, 0], 'data': [], 'setting': {'slide_order': ["promote", "welcome", "announcement", "song", "sermon", "offering", "caring", "benediction"], 'assets': []}, 'msg': '', 'dynamic': '', 'key': 0, 'background': [], 'id': 0, 'assets': []}
+slides_data = {'pos': [0, 0, 0], 'data': [], 'setting': {'slide_order': ["promote", "welcome", "announcement", "song", "sermon", "offering", "caring", "benediction"], 'assets': []}, 'msg': '', 'dynamic': '', 'key': 0, 'background': [], 'id': 0, 'assets': [], 'display_mode': 'normal'}
 client = {'admin': [], 'lead': [], 'musician': [], 'view': []}
 client_mode = ''
 
@@ -77,6 +77,9 @@ def sync_live_mode():
 @socketio.on('control')
 def handle_control(data):
 	print('Received message:', data)
+	if (data.get('type') == 'display_mode' and
+			data.get('value') not in ('normal', 'blank')):
+		return
 	# Edit Mode keeps Admin navigation local. Live Mode marks its position
 	# updates explicitly so those events can move both Lead and View.
 	if (data.get('type') == 'pos' and data.get('from') == 'admin' and
@@ -94,6 +97,8 @@ def handle_control(data):
 	response['control_type'] = data['type']
 	response['target_mode'] = data.get('mode', '')
 	response['live_sync'] = bool(data.get('live_sync'))
+	if data['type'] == 'display_mode':
+		response['value'] = slides_data['display_mode']
 	emit('response', response, broadcast=True)
 
 @socketio.on('msg')
@@ -363,6 +368,8 @@ def slides_viewer(mode=None):
 	# EXPERIMENTAL LEAD START: Share the production Lead client lock and socket mode.
 	if mode == 'lead-experimental':
 		__update_client_mode('lead')
+	elif mode == 'admin-experimental':
+		__update_client_mode('admin')
 	else:
 		__update_client_mode(mode)
 	# EXPERIMENTAL LEAD END
@@ -370,12 +377,15 @@ def slides_viewer(mode=None):
 		return render_template('slides/slides.html', presentation=slides_data, mode='')
 	if not slides_data['data']:
 		__get_slide_json()
-	if mode == 'admin':
+	if mode in ('admin', 'admin-experimental'):
 		if len(client['admin']) > 0:
 			__update_client_mode('')
 			return "<script>alert('Only one Admin mode can be connected, please use different mode.');window.location.replace('../slides');</script>"
 		else:
-			return render_template('slides/slides_admin.html', presentation=slides_data, mode=mode)
+			admin_template = 'slides/slides_admin.html'
+			if mode == 'admin-experimental':
+				admin_template = 'slides/slides_admin_experimental.html'
+			return render_template(admin_template, presentation=slides_data, mode='admin')
 	elif mode in ('lead', 'lead-experimental'):
 		if len(client['lead']) > 0:
 			__update_client_mode('')
@@ -470,7 +480,7 @@ def __get_sundays():
 
 def _init_slide():
 	global slides_data
-	slides_data = {'pos': [0, 0], 'data': [], 'setting': {'slide_order': ["promote", "welcome", "announcement", "song", "sermon", "offering", "caring", "benediction"], 'assets': []}, 'msg': '', 'dynamic': '', 'key': 0, 'background': [], 'id': 0, 'assets': []}
+	slides_data = {'pos': [0, 0], 'data': [], 'setting': {'slide_order': ["promote", "welcome", "announcement", "song", "sermon", "offering", "caring", "benediction"], 'assets': []}, 'msg': '', 'dynamic': '', 'key': 0, 'background': [], 'id': 0, 'assets': [], 'display_mode': 'normal'}
 
 def __update_client(mode, id):
 	if mode:

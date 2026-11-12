@@ -232,3 +232,295 @@ function get_chinese_bible(name, callback){
         })
         .catch(err => console.error("HelloAO API Error:", err));
 }
+
+/* ==========================================================================
+   Structured lookups — used by the admin "Bible slide" builder
+
+   get_bible() above shows a dialog with formatted HTML. The functions below
+   return per-verse data in BOTH languages instead, and reject with an Error
+   whose message is safe to show to the user.
+
+     lookup_bilingual_passage('John 3:16-17')      // or '約翰福音 3:16-17'
+       -> Promise<{ title: { zh, en }, chapter, verses: [{ number, zh, en }] }>
+
+   Limits: one chapter per lookup (no "John 3:16-4:2").
+   Needs:  fetch, DOMParser, and the global ESV_API_KEY (same as get_english_bible).
+   ========================================================================== */
+
+var BIBLE_MAX_VERSES = 176;   // longest chapter (Psalm 119); guards against "1-99999"
+
+// English book names, same order as book_name. Used to build ESV queries from Chinese input.
+(function () {
+    var english = [
+        'Genesis', 'Exodus', 'Leviticus', 'Numbers', 'Deuteronomy', 'Joshua', 'Judges', 'Ruth',
+        '1 Samuel', '2 Samuel', '1 Kings', '2 Kings', '1 Chronicles', '2 Chronicles', 'Ezra', 'Nehemiah',
+        'Esther', 'Job', 'Psalms', 'Proverbs', 'Ecclesiastes', 'Song of Solomon', 'Isaiah', 'Jeremiah',
+        'Lamentations', 'Ezekiel', 'Daniel', 'Hosea', 'Joel', 'Amos', 'Obadiah', 'Jonah', 'Micah', 'Nahum',
+        'Habakkuk', 'Zephaniah', 'Haggai', 'Zechariah', 'Malachi',
+        'Matthew', 'Mark', 'Luke', 'John', 'Acts', 'Romans', '1 Corinthians', '2 Corinthians', 'Galatians',
+        'Ephesians', 'Philippians', 'Colossians', '1 Thessalonians', '2 Thessalonians', '1 Timothy', '2 Timothy',
+        'Titus', 'Philemon', 'Hebrews', 'James', '1 Peter', '2 Peter', '1 John', '2 John', '3 John', 'Jude', 'Revelation'
+    ];
+    book_name.forEach(function (book, index) {
+        book.en = english[index];
+    });
+}());
+
+function bible_fetch(url, options, serviceName) {
+    return fetch(url, options).catch(function () {
+        throw new Error('Could not reach the ' + serviceName + ' service. Check your connection.');
+    }).then(function (response) {
+        if (!response.ok) {
+            throw new Error(serviceName + ' request failed (' + response.status + ').');
+        }
+        return response.json();
+    });
+}
+
+// "16-17,19" -> [16, 17, 19]
+function parse_verse_list(text) {
+    var seen = {};
+    var list = [];
+    text.split(/[,，]/).forEach(function (part) {
+        part = part.trim();
+        if (!part) {
+            return;
+        }
+        var match = part.match(/^(\d+)\s*(?:[-–—]\s*(\d+))?$/);
+        if (!match) {
+            throw new Error('Could not read the verses "' + part + '".');
+        }
+        var from = parseInt(match[1], 10);
+        var to = match[2] ? parseInt(match[2], 10) : from;
+        if (to < from || to - from >= BIBLE_MAX_VERSES) {
+            throw new Error('Invalid verse range "' + part + '".');
+        }
+        for (var n = from; n <= to; n++) {
+            if (!seen[n]) {
+                seen[n] = true;
+                list.push(n);
+            }
+        }
+    });
+    return list.sort(function (a, b) { return a - b; });
+}
+
+// [16, 17, 19] -> "16-17,19"
+function format_verse_ranges(numbers) {
+    var parts = [];
+    var start = null;
+    var previous = null;
+    function close() {
+        parts.push(start === previous ? String(start) : start + '-' + previous);
+    }
+    numbers.forEach(function (n) {
+        if (start === null) {
+            start = previous = n;
+        }
+        else if (n === previous + 1) {
+            previous = n;
+        }
+        else {
+            close();
+            start = previous = n;
+        }
+    });
+    if (start !== null) {
+        close();
+    }
+    return parts.join(',');
+}
+
+// Same grammar as get_chinese_bible(): 約翰福音 3:16-17,19  /  約 3  /  約翰福音
+// -> { book, chapter, verses: [ints] | null (whole chapter) }
+function parse_chinese_reference(input) {
+    var match = input.trim().match(/^(\d?\s*[\u4e00-\u9fa5]+)\s*(?:(\d+)(?:[:：]\s*(.*))?)?$/);
+    if (!match) {
+        throw new Error('Could not read that reference. Try 約翰福音 3:16-17 or John 3:16-17.');
+    }
+    var bookText = match[1].trim();
+    var book = book_name.find(function (obj) {
+        return obj.name === bookText || obj.s_name === bookText;
+    });
+    if (!book) {
+        throw new Error('Unknown book "' + bookText + '".');
+    }
+    var verses = match[3] && match[3].trim() ? parse_verse_list(match[3]) : null;
+    return { book: book, chapter: parseInt(match[2] || '1', 10), verses: verses && verses.length ? verses : null };
+}
+
+function esv_query_for(ref) {
+    return ref.book.en + ' ' + ref.chapter + (ref.verses ? ':' + format_verse_ranges(ref.verses) : '');
+}
+
+// ESV "parsed" ranges are BBCCCVVV integers, e.g. John 3:16 = 43003016. Book number = index in book_name + 1.
+function decode_esv_verse(id) {
+    return { book: Math.floor(id / 1000000), chapter: Math.floor(id / 1000) % 1000, verse: id % 1000 };
+}
+
+function reference_from_esv(data) {
+    if (!data.parsed || !data.parsed.length) {
+        throw new Error('Could not read that reference.');
+    }
+    var bookNumber = null;
+    var chapter = null;
+    var seen = {};
+    var verses = [];
+    data.parsed.forEach(function (range) {
+        var from = decode_esv_verse(range[0]);
+        var to = decode_esv_verse(range[1]);
+        var sameChapter = from.book === to.book && from.chapter === to.chapter &&
+            (bookNumber === null || (bookNumber === from.book && chapter === from.chapter));
+        if (!sameChapter) {
+            throw new Error('Please choose verses from a single chapter.');
+        }
+        bookNumber = from.book;
+        chapter = from.chapter;
+        for (var n = from.verse; n <= to.verse; n++) {
+            if (!seen[n]) {
+                seen[n] = true;
+                verses.push(n);
+            }
+        }
+    });
+    var book = book_name[bookNumber - 1];
+    if (!book) {
+        throw new Error('Could not read that reference.');
+    }
+    return { book: book, chapter: chapter, verses: verses.sort(function (a, b) { return a - b; }) };
+}
+
+// ESV passage HTML -> { verseNumber: "plain text" }. Verse markers are <b class="verse-num|chapter-num" id="v43003016-1">.
+function parse_esv_verses(html) {
+    var doc = new DOMParser().parseFromString(html, 'text/html');
+    var verses = {};
+    var current = null;
+    var skip = '.verse-num, .chapter-num, h2, h3, h4, .footnote, .extra_text';
+    var walker = doc.createTreeWalker(doc.body, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT);
+    var node;
+
+    function verse_from_marker(element) {
+        var fromId = /^v(\d{8})/.exec(element.id || '');
+        if (fromId) {
+            return parseInt(fromId[1], 10) % 1000;
+        }
+        var fromText = /(\d+)\s*$/.exec(element.textContent.replace(/\u00a0/g, ' ').trim());
+        return fromText ? parseInt(fromText[1], 10) : null;
+    }
+
+    while ((node = walker.nextNode())) {
+        if (node.nodeType === Node.ELEMENT_NODE) {
+            if (node.matches('.verse-num, .chapter-num')) {
+                current = verse_from_marker(node);
+                if (current !== null && !(current in verses)) {
+                    verses[current] = '';
+                }
+            }
+            else if (current !== null && node.matches('p, br, .line')) {
+                verses[current] += ' ';
+            }
+        }
+        else if (current !== null && !node.parentElement.closest(skip)) {
+            verses[current] += node.nodeValue;
+        }
+    }
+    Object.keys(verses).forEach(function (key) {
+        verses[key] = verses[key].replace(/\s+/g, ' ').trim();
+    });
+    return verses;
+}
+
+function fetch_esv_passage(query) {
+    if (typeof ESV_API_KEY === 'undefined' || !ESV_API_KEY) {
+        return Promise.reject(new Error('The ESV API key is not configured on this page.'));
+    }
+    var url = 'https://api.esv.org/v3/passage/html/?q=' + encodeURIComponent(query) +
+        '&include-passage-references=false&include-footnotes=false&include-short-copyright=false' +
+        '&include-audio-link=false&include-headings=false';
+    return bible_fetch(url, { headers: { 'Authorization': 'Token ' + ESV_API_KEY } }, 'ESV').then(function (data) {
+        if (!data.passages || !data.passages.length) {
+            throw new Error('English passage not found: ' + query);
+        }
+        return { canonical: data.canonical, parsed: data.parsed, verses: parse_esv_verses(data.passages.join('')) };
+    });
+}
+
+// -> { verseNumber: "text" } for one chapter of the Chinese Union Version
+function fetch_chinese_verses(ref) {
+    var url = 'https://bible.helloao.org/api/cmn_cuv/' + ref.book.id + '/' + ref.chapter + '.json';
+    return bible_fetch(url, undefined, 'Chinese Bible').then(function (chapter) {
+        var verses = {};
+        ((chapter.chapter && chapter.chapter.content) || []).forEach(function (item) {
+            if (!item.number) {
+                return;
+            }
+            var first = parseInt(String(item.number).split('-')[0], 10);   // merged verses arrive as "16-17"
+            var text = extractText(item).trim();
+            if (text && !isNaN(first)) {
+                verses[first] = text;
+            }
+        });
+        return verses;
+    });
+}
+
+function combine_bible_passage(ref, english, chinese) {
+    var numbers = ref.verses;
+    if (!numbers) {   // whole chapter typed in Chinese: use whatever either language returned
+        var all = {};
+        Object.keys(chinese).concat(Object.keys(english.verses)).forEach(function (key) {
+            all[key] = true;
+        });
+        numbers = Object.keys(all).map(Number).sort(function (a, b) { return a - b; });
+    }
+    var verses = numbers.map(function (n) {
+        return { number: n, zh: chinese[n] || '', en: english.verses[n] || '' };
+    }).filter(function (verse) {
+        return verse.zh || verse.en;
+    });
+    if (!verses.length) {
+        throw new Error('No verses found for that reference.');
+    }
+    return {
+        title: {
+            zh: ref.book.name + ' ' + ref.chapter + (ref.verses ? ':' + format_verse_ranges(ref.verses) : ''),
+            en: english.canonical || esv_query_for(ref)
+        },
+        chapter: ref.chapter,
+        verses: verses
+    };
+}
+
+function lookup_bilingual_passage(input) {
+    input = (input || '').trim();
+    if (!input) {
+        return Promise.reject(new Error('Enter a verse reference.'));
+    }
+    var ref;
+    var english;
+    var chineseRequest;
+
+    if (/[a-zA-Z]/.test(input)) {
+        // English input: ESV parses the reference for us, then we fetch the same verses in Chinese.
+        chineseRequest = fetch_esv_passage(input).then(function (data) {
+            english = data;
+            ref = reference_from_esv(data);
+            return fetch_chinese_verses(ref);
+        });
+    }
+    else {
+        try {
+            ref = parse_chinese_reference(input);
+        }
+        catch (error) {
+            return Promise.reject(error);
+        }
+        chineseRequest = Promise.all([fetch_esv_passage(esv_query_for(ref)), fetch_chinese_verses(ref)]).then(function (results) {
+            english = results[0];
+            return results[1];
+        });
+    }
+    return chineseRequest.then(function (chinese) {
+        return combine_bible_passage(ref, english, chinese);
+    });
+}

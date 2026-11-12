@@ -137,6 +137,65 @@
             gap: 10px;
         }
 
+        .section-picker {
+            margin-bottom: 12px;
+            border: 1px solid #333;
+            border-radius: 6px;
+            background: #171717;
+        }
+
+        .section-picker summary {
+            padding: 12px;
+            color: #ccc;
+            cursor: pointer;
+            font-weight: 600;
+            list-style: none;
+        }
+
+        .section-picker summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .section-picker summary::after {
+            float: right;
+            content: "+";
+        }
+
+        .section-picker[open] summary::after {
+            content: "-";
+        }
+
+        .section-list {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr);
+            gap: 6px;
+            max-height: 45vh;
+            overflow-y: auto;
+            padding: 0 8px 8px;
+        }
+
+        .section-option {
+            padding: 10px;
+            border: 1px solid #333;
+            border-radius: 4px;
+            background: #202020;
+            color: #ccc;
+            text-align: left;
+        }
+
+        .section-option:hover {
+            border-color: #008080;
+            background: #292929;
+            color: #00ffcc;
+        }
+
+        .section-option[aria-current="true"] {
+            border-color: #00ffcc;
+            background: #173331;
+            color: #00ffcc;
+            font-weight: 600;
+        }
+
         .admin-btn {
             background-color: #1a1a1a;
             color: #ccc;
@@ -171,7 +230,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start;
             min-width: 0;
             min-height: 0;
         }
@@ -243,12 +302,22 @@
 
         #slide_notes {
             margin: 20px auto 0 auto;
-            width: 75%;
+            width: 100%;
+            max-width: 90vw;
+            box-sizing: border-box;
+            max-height: 15vh;
+            overflow-y: auto;
             color: #fff;
             word-wrap: break-word;
+            white-space: pre-wrap;
             text-align: center;
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             min-height: 30px;
+        }
+
+        #slide_notes * {
+            font-size: inherit !important;
+            font-family: inherit !important;
         }
 
         .preview {
@@ -260,6 +329,25 @@
             min-height: 0;
             padding-right: 10px;
             position: relative;
+        }
+
+        .preview,
+        #slide_notes {
+            scrollbar-color: #999 #111;
+            scrollbar-width: thin;
+        }
+
+        .preview::-webkit-scrollbar,
+        #slide_notes::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        .preview::-webkit-scrollbar-thumb,
+        #slide_notes::-webkit-scrollbar-thumb {
+            border: 2px solid #111;
+            border-radius: 4px;
+            background: #999;
         }
 
         .preview-wrapper {
@@ -382,6 +470,10 @@
                 gap: 8px;
             }
 
+            .section-list {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+
             .admin-btn {
                 padding: 12px 6px;
                 font-size: 0.75rem;
@@ -436,6 +528,10 @@
                 gap: 6px;
             }
 
+            .section-list {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
             .admin-btn {
                 padding: 8px 4px;
                 font-size: 0.7rem;
@@ -443,7 +539,7 @@
         }
     </style>
 </head>
-<body>
+<body class="lead-controller">
     <div class="lead_container">
 
         <!-- Main Slide View -->
@@ -464,6 +560,7 @@
             <div class="reveal-wrapper">
                 <div class="reveal">
                     <div class="slides"></div>
+                    <div class="presentation-blank-banner" role="status" aria-live="polite">!!! SLIDES ARE CURRENTLY BLANKED !!!</div>
                 </div>
             </div>
             <div id="slide_notes"></div>
@@ -484,9 +581,12 @@
                 <div class="preview"></div>
             </section>
             <section class="sidebar-panel" id="controls-panel" role="tabpanel" aria-labelledby="controls-tab" hidden>
+                <details class="section-picker" id="section-picker">
+                    <summary>Sections</summary>
+                    <div class="section-list" id="section-list"></div>
+                </details>
                 <div class="control-panel">
                     <button class="admin-btn" data-action="blank">Blank</button>
-                    <button class="admin-btn" data-action="logo">Logo</button>
                     <button class="admin-btn" data-action="alert">Alert</button>
                     <button class="admin-btn" data-action="reload">Reload</button>
                     <button class="admin-btn" data-action="sync">Sync</button>
@@ -509,6 +609,12 @@
 
     var focus_div = null;
     slide_refreshed = false;
+    var sectionVerticalOrders = {};
+    var sectionResetTimers = {};
+    var sectionResetDelay = 7000;
+    var activeSectionIndex = Number(pos) || 0;
+    var activeVerticalIndex = Number(order) || 0;
+    sectionVerticalOrders[activeSectionIndex] = activeVerticalIndex;
 
     function update_section_navigation() {
         if (!slides.length) { return; }
@@ -519,15 +625,38 @@
         if (!previousTitle || !currentTitle || !nextTitle) { return; }
 
         var currentIndex = Math.max(0, Math.min(Number(pos) || 0, slides.length - 1));
-        var previousIndex = (currentIndex - 1 + slides.length) % slides.length;
-        var nextIndex = (currentIndex + 1) % slides.length;
+        document.querySelectorAll('.section-option').forEach(function(button) {
+            if (Number(button.dataset.section) === currentIndex) {
+                button.setAttribute('aria-current', 'true');
+            } else {
+                button.removeAttribute('aria-current');
+            }
+        });
         var title = function(index) {
             return slides[index].title || 'Untitled section';
         };
 
-        previousTitle.textContent = title(previousIndex);
+        previousTitle.textContent = currentIndex > 0 ? title(currentIndex - 1) : 'Start';
         currentTitle.textContent = title(currentIndex);
-        nextTitle.textContent = title(nextIndex);
+        nextTitle.textContent = currentIndex < slides.length - 1 ? title(currentIndex + 1) : 'End';
+    }
+
+    function load_section_picker() {
+        var sectionList = document.getElementById('section-list');
+        if (!sectionList) { return; }
+
+        sectionList.replaceChildren();
+        slides.forEach(function(section, index) {
+            var button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'section-option';
+            button.dataset.section = index;
+            button.textContent = section.title || 'Untitled section';
+            if (index === Number(pos)) {
+                button.setAttribute('aria-current', 'true');
+            }
+            sectionList.appendChild(button);
+        });
     }
 
     function fit_reveal_wrapper() {
@@ -555,6 +684,7 @@
     }
 
     document.addEventListener('presentation:slides-loaded', function() {
+        load_section_picker();
         update_section_navigation();
         window.requestAnimationFrame(fit_reveal_wrapper);
     });
@@ -575,8 +705,9 @@
     function load_preview() {
         var slide_preview = '';
         var horizontalSlide = Reveal.getSlide(pos, 0);
-        var previousName = null;
-        var sameNameCount = 0;
+        var previewSlides = [];
+        var groupCounts = Object.create(null);
+        var groupIndexes = Object.create(null);
 
         if(!horizontalSlide) {
             $('.preview').empty();
@@ -589,23 +720,29 @@
             if(i > 0 && r === Reveal.getSlide(pos, i - 1)) { break; }
 
             var sectionName = $(r).children().attr('name');
-            if (sectionName) {
-                sameNameCount = sectionName === previousName ? sameNameCount + 1 : 1;
-                previousName = sectionName;
-            } else {
-                previousName = null;
-                sameNameCount = 0;
+            var sourceOrder = r.getAttribute('order');
+            var groupKey = sectionName ? JSON.stringify([sectionName, sourceOrder]) : null;
+            previewSlides.push({ slide: r, name: sectionName, groupKey: groupKey });
+            if (groupKey) {
+                groupCounts[groupKey] = (groupCounts[groupKey] || 0) + 1;
             }
-            var temp_name = sectionName ? sectionName + '.' + sameNameCount : "Slide " + (i + 1);
-            var isPresent = r.classList.contains('present') ? 'present' : '';
+        }
 
-            var miniContent = '<div class="reveal mini-reveal-wrapper"><div class="slides">' + r.outerHTML + '</div></div>';
+        previewSlides.forEach(function(previewSlide, index) {
+            var temp_name = previewSlide.name || "Slide " + (index + 1);
+            if (previewSlide.groupKey && groupCounts[previewSlide.groupKey] > 1) {
+                groupIndexes[previewSlide.groupKey] = (groupIndexes[previewSlide.groupKey] || 0) + 1;
+                temp_name += '.' + groupIndexes[previewSlide.groupKey];
+            }
+            var isPresent = previewSlide.slide.classList.contains('present') ? 'present' : '';
 
-            slide_preview += '<div class="preview-wrapper ' + isPresent + '" id="slide-preview-' + i + '" data-order="' + i + '">' +
+            var miniContent = '<div class="reveal mini-reveal-wrapper"><div class="slides">' + previewSlide.slide.outerHTML + '</div></div>';
+
+            slide_preview += '<div class="preview-wrapper ' + isPresent + '" id="slide-preview-' + index + '" data-order="' + index + '">' +
                                 '<div class="preview_name">' + temp_name + '</div>' +
                                 '<div class="inner">' + miniContent + '</div>' +
                              '</div>';
-        }
+        });
 
         $('.preview').html(slide_preview);
 
@@ -619,7 +756,7 @@
     $(document).ready(function() {
         Reveal.initialize({
             embedded: true,
-            loop: true,
+            loop: false,
             hash: false,
             slideNumber: true,
             progress: true,
@@ -642,6 +779,22 @@
         order = slideOrder;
         Reveal.slide(pos, slideOrder);
         show_data(pos);
+    });
+
+    $(document).on('click', '.section-option', function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        var sectionIndex = Number($(this).attr('data-section'));
+        if (!Number.isInteger(sectionIndex) || sectionIndex < 0 || sectionIndex >= slides.length) { return; }
+
+        sectionVerticalOrders[sectionIndex] = 0;
+        if (sectionResetTimers[sectionIndex]) {
+            clearTimeout(sectionResetTimers[sectionIndex]);
+            delete sectionResetTimers[sectionIndex];
+        }
+
+        Reveal.slide(sectionIndex, 0);
     });
 
     function activate_sidebar_tab(tab) {
@@ -671,18 +824,30 @@
         var actionType = $(this).data('action');
         console.log("Admin action triggered:", actionType);
 
-        socket.emit('control', {
-            'type': 'admin_command',
-            'action': actionType,
-            'from': 'lead'
-        });
+        if (actionType === 'blank') {
+            var displayMode = presentationDisplayMode === 'blank' ? 'normal' : 'blank';
+            apply_presentation_display_mode(displayMode);
+            socket.emit('control', {
+                'type': 'display_mode',
+                'value': displayMode,
+                'from': 'lead'
+            });
+        } else {
+            socket.emit('control', {
+                'type': 'admin_command',
+                'action': actionType,
+                'from': 'lead'
+            });
+        }
 
-        var btn = $(this);
-        var originalText = btn.text();
-        btn.text('Sent!');
-        setTimeout(function() {
-            btn.text(originalText);
-        }, 1000);
+        if (actionType !== 'blank') {
+            var btn = $(this);
+            var originalText = btn.text();
+            btn.text('Sent!');
+            setTimeout(function() {
+                btn.text(originalText);
+            }, 1000);
+        }
     });
 
     Reveal.on('ready', (event) => {
@@ -694,15 +859,57 @@
     });
 
     Reveal.on('slidechanged', (event) => {
+        var nextSectionIndex = event.indexh;
+        var nextVerticalIndex = Number.isInteger(event.indexv) ? event.indexv : 0;
+
         if(slide_refreshed) {
+            pos = nextSectionIndex;
+            order = nextVerticalIndex;
+            activeSectionIndex = pos;
+            activeVerticalIndex = order;
+            sectionVerticalOrders[pos] = order;
+            if (sectionResetTimers[pos]) {
+                clearTimeout(sectionResetTimers[pos]);
+                delete sectionResetTimers[pos];
+            }
             update_section_navigation();
             slide_refreshed = false;
             window.requestAnimationFrame(fit_reveal_wrapper);
             return true;
         }
 
-        pos = event.indexh;
-        order = event.indexv;
+        if (nextSectionIndex !== activeSectionIndex) {
+            var departedSectionIndex = activeSectionIndex;
+            sectionVerticalOrders[departedSectionIndex] = activeVerticalIndex;
+            if (sectionResetTimers[departedSectionIndex]) {
+                clearTimeout(sectionResetTimers[departedSectionIndex]);
+            }
+            sectionResetTimers[departedSectionIndex] = window.setTimeout(function() {
+                sectionVerticalOrders[departedSectionIndex] = 0;
+                delete sectionResetTimers[departedSectionIndex];
+            }, sectionResetDelay);
+
+            if (sectionResetTimers[nextSectionIndex]) {
+                clearTimeout(sectionResetTimers[nextSectionIndex]);
+                delete sectionResetTimers[nextSectionIndex];
+            }
+
+            var rememberedOrder = Number.isInteger(sectionVerticalOrders[nextSectionIndex]) ? sectionVerticalOrders[nextSectionIndex] : 0;
+            if (nextVerticalIndex !== rememberedOrder) {
+                pos = nextSectionIndex;
+                order = rememberedOrder;
+                activeSectionIndex = pos;
+                activeVerticalIndex = order;
+                Reveal.slide(pos, order);
+                return;
+            }
+        }
+
+        pos = nextSectionIndex;
+        order = nextVerticalIndex;
+        activeSectionIndex = pos;
+        activeVerticalIndex = order;
+        sectionVerticalOrders[pos] = order;
         update_section_navigation();
         change_slide();
         window.requestAnimationFrame(fit_reveal_wrapper);

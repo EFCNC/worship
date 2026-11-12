@@ -20,6 +20,7 @@
     let w_id;
     let adding_slide = 0;
     let slide_refreshed = false;
+    let presentationDisplayMode = 'normal';
 
     // Socket Server url
     let socket_url = window.location.host;
@@ -104,7 +105,7 @@
             success: function(data) {
                 alert('Slides Refreshed');
                 socket.emit('reload');
-                window.location.href = '/slides/admin';
+                window.location.reload();   // same admin page, whichever route it is served from
             },
             fail: function(data) {
                 alert(data);
@@ -137,6 +138,29 @@
         b_right = b_right.filter(n => n)
         $('#bottom-right').html(b_right.join(' / '));
     }
+
+    function apply_presentation_display_mode(displayMode) {
+        if (mode !== 'lead' && mode !== 'view') { return; }
+
+        presentationDisplayMode = displayMode === 'blank' ? 'blank' : 'normal';
+        if (presentation && typeof presentation === 'object') {
+            presentation.display_mode = presentationDisplayMode;
+        }
+
+        var blank = presentationDisplayMode === 'blank';
+        var blankButton = document.querySelector('[data-action="blank"]');
+        if (blankButton) {
+            blankButton.setAttribute('aria-pressed', String(blank));
+        }
+
+        document.body.classList.toggle('presentation-background-only', blank);
+    }
+
+    document.addEventListener('presentation:slides-loaded', function() {
+        if (mode === 'lead' || mode === 'view') {
+            apply_presentation_display_mode(presentation && presentation.display_mode);
+        }
+    });
 
     function show_msg() {
         if (msg != '') {
@@ -237,7 +261,7 @@
         $('#slide_notes').html(slides[pos].notes);
         for(var i=0;i<slides.length;i++) {
             data = slides[i];
-            bg_url = data.style.background;
+            let bg_url = data.style.background;
             let section = document.createElement('section');
             if (bg_url) {
                 section.setAttribute('data-background-image', bg_url);
@@ -414,9 +438,14 @@
         apply_background_brightness();
         Reveal.slide(pos, order);
         change_slide();
+        apply_presentation_display_mode(presentation.display_mode);
     });
 
     socket.on('response', function (data) {
+        if (data.control_type === 'display_mode') {
+            apply_presentation_display_mode(data.value);
+            return;
+        }
         if (data.control_type === 'msg') {
             msg = data.msg;
             if (!data.target_mode || data.target_mode === mode) {
