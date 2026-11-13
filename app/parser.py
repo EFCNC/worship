@@ -25,6 +25,31 @@ def parse_lyrics_for_import(content):
         print(e)
         return [content, '']
 
+
+def parse_lyrics1(content, langs, sequence):
+    parsed_data = json.loads(content)
+    langs = langs.split(',')
+    lyrics_ = []
+
+    sequence = sequence.split(',')
+    sections = {'v': 'verse', 'p': 'pre-chorus', 'c': 'chorus', 'b': 'bridge', 't': 'tag', 'i': 'intro', 'o': 'outro', 'f': 'finish'}
+    for s in sequence:
+        section = re.findall('(\w)(\d)?', s)
+        # Find sequence name and order
+        if section[0]:
+            temp = {}
+            name = section[0][0]
+            i = int(section[0][1])-1 if section[0][1] else 0
+            # Add section based on name and order by language
+            temp["name"] = '{}{}'.format(sections[name], section[0][1])
+            for lang in langs:
+                temp_lang = next(x['lyrics'] for x in parsed_data if x['lang'] == lang)
+                temp_lang = next((x['lyrics'] for x in temp_lang if x['name'] == sections[name]), None)
+                temp[lang] = re.sub(r'(\[[^]]+\])', '', temp_lang[i]) if i < len(temp_lang) else ''
+        lyrics_.append(temp)
+
+    return lyrics_
+
 def parse_lyrics(content, sequence):
     parsed_data = json.loads(content)
     lyrics_ = []
@@ -51,29 +76,6 @@ def parse_lyrics(content, sequence):
 
 
     return lyrics_
-
-
-    # for c in content:
-    #     for l in c["lyrics"]:
-    #         if l['lang'] == lang:
-    #             origin = [re.sub('(^\\n)|(\\n$)', '', x) for x in l['content']]
-    #         else:
-    #             region = [re.sub('(^\\n)|(\\n$)', '', x) for x in l['content']]
-    #     temp = dict(name=c['name'], origin=origin, region=region, origin_text=[re.sub('(\[[^]]+\])', '', x) for x in origin], origin_chord=parse_chord(origin), region_text=[re.sub('(\[[^]]+\])', '', x) for x in region])
-    #     lyrics_.append(temp)
-    # return lyrics_
-    # sections = ['verse', 'pre-chorus', 'chorus', 'bridge', 'tag', 'vamp', 'intro', 'outro', 'finish']
-    # for name in sections:
-    #     if name in lyrics['origin']:
-    #         origin = [re.sub('\r?\n', '<br/>', x) for x in lyrics['origin'][name]]
-    #         region = ''
-    #         if lyrics['region']:
-    #             region = [re.sub('\r?\n', '<br/>', x) for x in lyrics['region'][0][name]]
-    #         temp = dict(name=name, origin=origin, region=region, origin_text=[re.sub('(\[[^]]+\])', '', x) for x in origin], origin_chord=parse_chord(origin), region_text=[re.sub('(\[[^]]+\])', '', x) for x in region])
-    #         lyrics_.append(temp)
-    # #sequence = sequence.split(',')
-    # #sequence = [next((y for y in lyrics_ if y['name'].lower() == x.lower()), '') for x in sequence]
-    # return lyrics_
 
 def parse_chord(content):
     # chunk approach

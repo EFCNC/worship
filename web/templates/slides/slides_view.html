@@ -45,6 +45,7 @@
         presentation = {{ presentation|tojson }};
         slides = presentation['data'];
         mode = '{{ mode|safe }}';
+        lang = '{{ lang }}';
 
         const initialPosition = new URLSearchParams(window.location.search);
         const requestedHorizontal = Number(initialPosition.get('h'));
@@ -65,7 +66,7 @@
 			progress: false,
 			controls: false
 		});
-        load_slides();
+        load_slides(lang);
     });
 
     Reveal.on('ready', (event) => {

@@ -361,6 +361,7 @@ def slides():
 
 @app.route("/slides/<mode>")
 def slides_viewer(mode=None):
+	lang = request.args.get('lang', '')
 	__update_client_mode(mode)
 	if not mode:
 		return render_template('slides/slides.html', presentation=slides_data, mode='')
@@ -379,7 +380,7 @@ def slides_viewer(mode=None):
 		return render_template('slides/slides_lead.html', presentation=slides_data, mode=mode)
 	elif mode == 'view':
 		__update_client_mode('')
-		return render_template('slides/slides_view.html', presentation=slides_data, mode=mode)
+		return render_template('slides/slides_view.html', presentation=slides_data, mode=mode, lang=lang)
 	elif mode == 'sheets':
 		__update_client_mode('')
 		coming_sunday = __get_sundays()["sunday"]
@@ -480,10 +481,13 @@ def __update_client_mode(name):
 	global client_mode
 	client_mode = name
 
-def __get_slide_json():
+def __get_slide_json(name=None):
 	coming_sunday = __get_sundays()["sunday"]
 	id = Utils.get_worship_id(coming_sunday)[0]
-	slides = Tools.get_worship_json(id)
+	if name:
+		slides = Tools.get_worship_json1(name)
+	else:
+		slides = Tools.get_worship_json(id)
 	global slides_data
 	if not slides:
 		Tools.create_json(id)

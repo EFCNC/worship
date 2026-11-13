@@ -123,16 +123,8 @@ def simplify_json(json):
     for slide in slides:
         contents = slide.get('content', [])
         cc = []
-        temp = {key: slide[key] for key in slide.keys() & {'id', 'title', 'notes', 'style', 'author', 'lyricist', 'ccli', 'book', 'copyright', 'key', 'type', 'manual'}}
-        if isinstance(contents, list):
-            for content in contents:
-                if isinstance(content, dict):
-                    cc.append({key: content[key] for key in content.keys() & {'name', 'origin_text', 'region_text', 'manual'}})
-                else:
-                    cc.append({'origin_text': content})
-            temp['content'] = cc
-        else:
-            temp['content'] = contents
+        temp = {key: slide[key] for key in slide.keys() & {'id', 'lang', 'title', 'notes', 'style', 'author', 'lyricist', 'ccli', 'book', 'copyright', 'key', 'type', 'manual'}}
+        temp['content'] = contents
         simple.append(temp)
     json['slides'] = simple
     return json
@@ -241,12 +233,10 @@ def _preserve_slide_order(generated_slides, previous_slides):
         ordered.insert(insert_at, slide)
     return ordered
 
-
-
 def create_json(id, worship=None):
     root = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'files')
     if not worship:
-        songs = Utils.get_worship_songs(id)
+        songs = Utils.get_worship_songs1(id)
         if not songs:
             songs = []
             worship_date = Utils.get_worship_date(id)[0]
