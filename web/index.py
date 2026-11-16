@@ -257,7 +257,7 @@ def get_song_sheet(ids=None):
 	'''
 	if not ids:
 		sheets = Utils.get_song_sheet()
-		sheets = [x for x in sheets if x["abc"] != '']
+		sheets = [x for x in sheets if x["abc"]]
 		return render_template('sheet.html', sheets=sheets)
 
 	keys_1 = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
