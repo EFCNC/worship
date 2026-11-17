@@ -279,7 +279,7 @@
 
     function get_score(song) {
         if (!song.score.length && !song.abc.length) return '';
-        return `<a href="/worship/sheets/${encodeURIComponent(song.id)}" target="_blank" rel="noopener" ` +
+        return `<a href="/worship/sheets/${encodeURIComponent(song.id)}" rel="noopener" ` +
                `aria-label="Sheet music for ${escapeHtml(song.title || '')}">` +
                `<i class="fa fa-file-text-o icon-lg" aria-hidden="true"></i></a>`;
     }
