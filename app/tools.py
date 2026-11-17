@@ -706,6 +706,9 @@ def get_lyrics_json(p, content, lang, title, lang_2=None):
     return temp
 
 def convert_songs(p=0):
+    sql = 'update songs set lang_2 = "zh-pinyin" where lang_2 = "zh-pingyin"'
+    result = dB.run(sql)
+
     sql = "select s.title, s.author, s.lang, s.lang_2, s.song_key, s.sequence, s.bible_verse, s.lyricist, s.book, s.copyright, s.ccli, s.content, s.song_id as id from songs s order by s.song_id"
     result = dB.run(sql)
     songs = []
