@@ -747,7 +747,14 @@
         }
 
         previewSlides.forEach(function(previewSlide, index) {
+            console.log(previewSlide.groupKey, groupCounts[previewSlide.groupKey]);
+
             var temp_name = previewSlide.name || "Slide " + (index + 1);
+
+            if (previewSlide.name) {
+                temp_name = previewSlide.name.replace(/(\D+)(\d.*)/, '$1 $2');
+            }
+
             if (previewSlide.groupKey && groupCounts[previewSlide.groupKey] > 1) {
                 groupIndexes[previewSlide.groupKey] = (groupIndexes[previewSlide.groupKey] || 0) + 1;
                 temp_name += '.' + groupIndexes[previewSlide.groupKey];
