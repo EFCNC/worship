@@ -7,383 +7,432 @@
 <link href="/static/vendor/datatables/datatables.min.css" rel="stylesheet">
 <style>
 #dialog {
-    padding:5px;
+    padding: 5px;
     line-height: 200%;
 }
 
-.title:hover {
+.lyrics-language-control {
+    margin-bottom: 4px;
+}
+
+#dialog .lyrics-language {
+    height: 1.75em;
+    padding: 0 4px;
+    vertical-align: middle;
+}
+
+/* ---------- Filters ---------- */
+#filters {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 12px;
+}
+
+.filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+/* Labels wrap the checkbox, so the whole text is tappable on mobile */
+.filter-row label {
+    display: inline-flex;
+    align-items: center;
     cursor: pointer;
 }
 
-/* Language tags */
-.lang_en    { --lang-color: #009698; }
-.lang_zh    { --lang-color: #8b0000; }
-.lang_zhTW  { --lang-color: #556b2f; }
-.lang_zhpingyin { --lang-color: #856088; }
+/* ---------- Table ---------- */
+.table-wrap {
+    overflow-x: auto;   /* safety net so the page itself never scrolls sideways */
+}
 
-.lang_en, .lang_zh, .lang_zhTW, .lang_zhpingyin {
+/* Edit + pin icons: hidden until the row is hovered (desktop),
+   always visible on touch devices (no hover available). */
+.row-actions {
+    margin-left: 6px;
+    white-space: nowrap;
+    visibility: hidden;
+}
+
+.row-actions a,
+.row-actions .pin {
+    display: inline-block;
+    padding: 4px 4px;           /* bigger tap target */
+    font-size: 16px;
+    color: inherit;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+#songs tbody tr:hover .row-actions,
+.row-actions:focus-within {
+    visibility: visible;
+}
+
+/* A pinned heart stays visible even when the row isn't hovered */
+.row-actions .pin.pinned {
+    visibility: visible;
+}
+
+@media (hover: none) {
+    .row-actions { visibility: visible; }
+}
+
+.icon-lg {
+    font-size: 24px;
+    margin-right: 6px;
+}
+
+@media (max-width: 600px) {
+    #songs td, #songs th { padding: 6px 4px; }
+}
+
+/* Language tags */
+.lang_en        { --lang-color: #009698; }
+.lang_zh        { --lang-color: #8b0000; }
+.lang_zhTW      { --lang-color: #556b2f; }
+.lang_zhpingyin { --lang-color: #856088; }
+.lang_others    { --lang-color: #666666; }
+
+.lang_tag {
     border-radius: 50px 20px;
     color: #fff;
     border: 4px solid var(--lang-color);
     background-color: var(--lang-color);
+    margin-right: 2px;
 }
 </style>
 {% endblock %}
 
 {% block content %}
 <div id="filters">
-    <div id="lang"></div>
-    <div id="key"></div>
+    <div id="lang" class="filter-row"></div>
+    <div id="key" class="filter-row"></div>
 </div>
-    <!-- Container for songs -->
-<table id="songs" class="display" width="100%">
-    <thead>
-        <tr>
-            <th>Title</th>
-            <th>Key</th>
-            <th>Book</th>
-            <th>Lang</th>
-            <th>Lang2</th>
-            <th>Score</th>
-            <th>Video</th>
-        </tr>
-    </thead>
-    <tfoot>
-        <tr>
-            <th>Title</th>
-            <th>Key</th>
-            <th>Book</th>
-            <th>Lang</th>
-            <th>Lang2</th>
-            <th>Score</th>
-            <th>Video</th>
-        </tr>
-    </tfoot>
-</table>
+
+<div class="table-wrap">
+    <table id="songs" class="display" width="100%">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Lyrics</th>
+                <th>Key</th>
+                <th>Book</th>
+                <th>Lang</th>
+                <th>Score</th>
+                <th>Video</th>
+            </tr>
+        </thead>
+        <tfoot>
+            <tr>
+                <th>Title</th>
+                <th>Lyrics</th>
+                <th>Key</th>
+                <th>Book</th>
+                <th>Lang</th>
+                <th>Score</th>
+                <th>Video</th>
+            </tr>
+        </tfoot>
+    </table>
+</div>
 <div id="dialog"></div>
 {% endblock %}
 
 {% block extra_js %}
 <script src="/static/vendor/datatables/datatables.js"></script>
 <script>
-    let songs = {{ songs|safe }};
-    let langs = [];
-    let keys = [];
-    let keys1 = [];
-    let clicked = '';
-    let $my_dialog;
+    const songs = {{ songs|safe }};
 
-    /*  This code looks quite complex for getting all the keys...
-        The main use is only to make sure the keys exist in the songs...
-        The sorting also needs to be fixed (sort only works for #, not b)...
-        Just using a predefined list of keys might be easier..
-    */
-    
-    // Option 1: Old Code
-    // for (let song of songs) {
-    //     if (!keys.includes(song.key)) {
-    //         keys.push(song.key);
-    //     }
-    //     if (!langs.includes(song.lang)) {
-    //         langs.push(song.lang);
-    //     }
-    //     if (!langs.includes(song.lang_2)) {
-    //         langs.push(song.lang_2);
-    //     }
-    // }
-    // langs.sort();
-    // keys.sort();
-    // keys1 = keys.includes('A')? keys.splice(keys.indexOf('A'),1):keys1;
-    // keys1 = keys.includes('Ab')?keys1.concat(keys.splice(keys.indexOf('Ab'),1)):keys1;
-    // keys1 = keys.includes('B')?keys1.concat(keys.splice(keys.indexOf('B'),1)):keys1;
-    // keys1 = keys.includes('Bb')?keys1.concat(keys.splice(keys.indexOf('Bb'),1)):keys1;
-    // keys1.sort();
-    // keys = keys.concat(keys1);
-
-    // Option 2: Fast, not Dynamic
-    keys = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
-    langs = ['en', 'zh', 'zh-TW', 'zh-pingyin'];
-    // Option 3, Dynamic but with Set, requires sorting still
-    // let keySet = new Set();
-    // for (let song of songs) {
-    //     keySet.add(song.key);
-    // }
-    // keys = Array.from(keySet);
-    // keys.sort();
-
-    div = 'Key: ';
-    for (key of keys) {
-        div += '<input class="keys" type="checkbox" checked value="' + key + '">' + key + '</input>';
+    // Normalize once so the rest of the code never has to null-check.
+    // song.lang is now an array of any length (including empty).
+    for (const song of songs) {
+        song.lang = Array.isArray(song.lang) ? song.lang : (song.lang ? [song.lang] : []);
+        song.lang = [...new Set(song.lang.map(lang => String(lang).trim()).filter(Boolean))];
+        song.score = Array.isArray(song.score) ? song.score : (song.score ? [song.score] : []);
+        song.video = Array.isArray(song.video) ? song.video : (song.video ? [song.video] : []);
+        song.abc = Array.isArray(song.abc) ? song.abc : (song.abc ? [song.abc] : []);
     }
-    div += '<input class="all_keys" type="checkbox" checked>All</input>';
-    $('#key').html(div);
 
-    div = 'Language: ';
-    for (lang of langs) {
-        if (lang != '') {
-            div += '<input class="langs" type="checkbox" checked value="' + lang + '">' + lang_tag(lang) + '</input>';
-        }
+    const LANG_TAGS = {
+        'en': { cls: 'lang_en', text: 'en', title: 'English' },
+        'zh': { cls: 'lang_zh', text: 'zh', title: 'Chinese' },
+        'zh-TW': { cls: 'lang_zhTW', text: 'tw', title: 'Taiwanese' },
+        'zh-pingyin': { cls: 'lang_zhpingyin', text: 'zh', title: 'Zh PingYin' }
+    };
+
+    function escapeHtml(value) {
+        return String(value).replace(/[&<>"']/g, character => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;'
+        })[character]);
     }
-    $('#lang').html(div);
-    
 
+    function lang_tag(language) {
+        const tag = LANG_TAGS[language] || {
+            cls: 'lang_others',
+            text: language,
+            title: language
+        };
+        return `<span class="lang_tag ${tag.cls}" title="${escapeHtml(tag.title)}">${escapeHtml(tag.text)}</span>`;
+    }
 
-    let table = new DataTable('#songs', {
-        data: songs,
-		columns: [
-		    {
-		        data: null, className: 'title',
-		        render: (data, type, row) => show_lyrics(data, row)
-		    },
-		    { data: 'key' },
-		    { data: 'book' },
-		    {
-		        data: null,
-		        render: (data, type, row) => lang_tag(data.lang, row)
-		    },
-		    {
-		        data: null,
-		        render: (data, type, row) => lang_tag(data.lang_2, row)
-		    },
-		    {
-		        data: null,
-		        render: (data, type, row) => get_score(data, row)
-		    },
-		    {
-		        data: null,
-		        render: (data, type, row) => get_video(data.video, row)
-		    }
-		],
-		"lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
-		"pageLength": 25
+    /* =====================================================================
+       Filters
+       Key order is fixed (musical order). Any key found in the data that
+       isn't in the list (e.g. 'F#', 'Am') is appended so it can never be
+       silently filtered out.
+       Languages come from the data: known ones first (in LANG_TAGS order),
+       then anything else alphabetically.
+       ===================================================================== */
+    const KEY_ORDER = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
+    const extraKeys = [...new Set(songs.map(song => song.key))]
+        .filter(key => key && !KEY_ORDER.includes(key))
+        .sort();
+    const keys = KEY_ORDER.concat(extraKeys);
+
+    const knownLanguages = Object.keys(LANG_TAGS);
+    const languagesInSongs = new Set(songs.flatMap(song => song.lang));
+    const langs = [
+        ...knownLanguages.filter(language => languagesInSongs.has(language)),
+        ...[...languagesInSongs].filter(language => !knownLanguages.includes(language)).sort()
+    ];
+
+    // Current selection. Updated only when a checkbox changes, so the
+    // per-row filter below is just a cheap Set lookup.
+    let selectedKeys = new Set(keys);
+    let selectedLangs = new Set(langs);
+
+    $('#key').html(
+        'Key: ' +
+        keys.map(key => `<label><input class="keys" type="checkbox" checked value="${escapeHtml(key)}">${escapeHtml(key)}</label>`).join('') +
+        '<label><input class="all_keys" type="checkbox" checked>All</label>'
+    );
+    $('#lang').html(
+        'Language: ' +
+        langs.map(language => `<label><input class="langs" type="checkbox" checked value="${escapeHtml(language)}">${lang_tag(language)}</label>`).join('')
+    );
+
+    function readChecked(selector) {
+        return new Set($(selector + ':checked').map((index, element) => element.value).get());
+    }
+
+        $('#key').on('change', '.keys', function() {
+        selectedKeys = readChecked('.keys');
+        $('.all_keys').prop('checked', selectedKeys.size === keys.length);
+        table.draw();
     });
 
-    function set_cookies(id, action) {
-        if($.cookie('pinned')) {
-            let cookies = $.cookie('pinned').split(',');
-            let c = cookies.indexOf(id);
-            if(c < 0) {
-            console.log('not found', action, action == 'pin it')
-                if (action == 'pin it') {
-                    cookies.push(parseInt(id));
-                    $.cookie('pinned', cookies.toString(), { path: '/' }, { expires: 365 });
-                    $('#pin_'+id).attr('title', 'pinned');
-                    $('#pin_'+id).html('&#xf004;');
-                }
-            }
-            else {
-                cookies.pop(c);
-                $.cookie('pinned', cookies.toString(), { path: '/' }, { expires: 365 });
-                $('#pin_'+id).attr('title', 'pin it');
-                $('#pin_'+id).html('&#xf08a;');
-            }
-        }
-        else {
-            $.cookie('pinned', parseInt(id), { path: '/' }, { expires: 365 });
-            $('#pin_'+id).attr('title', 'pinned');
-            $('#pin_'+id).html('&#xf004;');
-        }
+    $('#key').on('change', '.all_keys', function() {
+        $('.keys').prop('checked', this.checked);
+        selectedKeys = readChecked('.keys');
+        table.draw();
+    });
+
+    $('#lang').on('change', '.langs', function() {
+        selectedLangs = readChecked('.langs');
+        table.draw();
+    });
+
+    // One filter for both key and language. Runs on every table.draw().
+    // Uses the raw song data rather than the rendered HTML.
+    // A song with no key / no languages is never hidden by that filter,
+    // (it has nothing to match against), only by "nothing selected".
+    $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
+        if (settings.nTable.id !== 'songs') return true;
+        if (selectedKeys.size === 0 || selectedLangs.size === 0) return false;
+
+        const song = songs[dataIndex];
+        const keyMatches = !song.key || selectedKeys.has(song.key);
+        const languageMatches = song.lang.length === 0 || song.lang.some(language => selectedLangs.has(language));
+        return keyMatches && languageMatches;
+    });
+
+    const pinnedIds = new Set(
+        ($.cookie('pinned') || '').split(',').filter(id => id !== '' && id !== 'NaN')
+    );
+
+    function savePinned() {
+        $.cookie('pinned', [...pinnedIds].join(','), { path: '/', expires: 365 });
     }
 
-    function pinned(id) {
-        if($.cookie('pinned')) {
-            cookies = $.cookie('pinned').split(',');
-            if(cookies.indexOf(id.toString()) < 0) {
-                return ' title="pin it">&#xf08a;';
-            }
-            return ' title="pinned">&#xf004;';
-        }
-        return ' title="pin it">&#xf08a;';
+    /* =====================================================================
+       Cell renderers
+       DataTables calls render() for display, sort, filter and type
+       detection. Only 'display' needs HTML; everything else gets plain
+       text so sorting and searching are fast and accurate.
+       ===================================================================== */
+
+    function title_cell(song) {
+        const pinned = pinnedIds.has(String(song.id));
+        return `${escapeHtml(song.title || '')}` +
+               `<span class="row-actions">` +
+                   `<a href="/song/${song.id}/edit" title="Edit Song"><i class="fa fa-pencil-square-o"></i></a>` +
+                   `<i class="fa ${pinned ? 'fa-heart pinned' : 'fa-heart-o'} pin" data-id="${escapeHtml(song.id)}" ` +
+                      `title="${pinned ? 'pinned' : 'pin it'}"></i>` +
+               `</span>`;
     }
 
-    function show_lyrics(data) {
-        let editLink = '<a href="/song/' + data.id + '/edit" style="text-decoration:none; color:inherit;">' +
-                    '<i style="display:none; font-size:14px" class="fa" title="Edit Song">&#xf044;</i>' +
-                    '</a>';
-                    
-        html = '<span song_id="' + data.id + '">' + data.title + '</span>&nbsp;' + 
-            editLink + 
-            '&nbsp;<i style="display:none; font-size:14px" class="fa" id="pin_' + data.id + '"' + pinned(data.id) + '</i>';
-        return html;
-    }
-
-    function get_score(data) {
-        html = '';
-        for (s of data.score) {
-            html += `<a href="${s}" target="new">
-                    <i style="font-size:24px" class="fa" title="Sheet Music">&#xf0f6;</i>
-                    </a>&nbsp;`;
-        }
-        if (data.abc) {
-            html += `<a href="../worship/sheets/${data.id}" target="new">
-                    <i style="font-size:24px" class="fa" title="Interacted Sheet Music">&#xf1c7;</i>
-                    </a>`;
-        }
-        return html;
+    function get_score(song) {
+        if (!song.score.length && !song.abc.length) return '';
+        return `<a href="/worship/sheets/${encodeURIComponent(song.id)}" target="_blank" rel="noopener" ` +
+               `aria-label="Sheet music for ${escapeHtml(song.title || '')}">` +
+               `<i class="fa fa-file-text-o icon-lg" aria-hidden="true"></i></a>`;
     }
 
     function get_video(links) {
-        html = '';
-        for (v of links) {
-            html += `<a href="${v}" target="new">
-                    <i class="fa fa-play-circle" style="font-size:24px" title="Youtube Video"></i>
-                    </a>`;
-        }
-        return html;
+        return links.map(url =>
+            `<a href="${escapeHtml(url)}" target="_blank" rel="noopener"><i class="fa fa-play-circle icon-lg" title="Youtube Video"></i></a>`
+        ).join('');
     }
 
-    function lang_tag(lang) {
-        if(lang == '') { return ''; }
-        tags = {'en': '<span class="lang_en" title="English">en</span>', 
-                'zh': '<span class="lang_zh" title="Chinese">zh</span>', 
-                'zh-TW': '<span class="lang_zhTW" title="Taiwanese">tw</span>', 
-                'zh-pingyin': '<span class="lang_zhpingyin" title="Zh PingYin">zh</span>', 
-                'others': '<span class="others">na</span>'
-                }
-        if (lang in tags) {
-            return tags[lang];
-        }
-        return tags['others'];
-    }
-
-    function show(title, content) {
-        $("#dialog").html(content).dialog({ title: title}).dialog("open");
-    }
-
-    $(document).ready(function() {
-	    $my_dialog = $("#dialog").dialog({
-  		    autoOpen: false,
-  		    position: {
-  		        my:"center", at:"center", of:window
-  		    },
-  		    hide: { effect: "fade", duration: 800 },
-  		    show: { effect: "fade", duration: 800 },
-  		    width: 'auto',
-  		    buttons: [
-  		        {
-                    text: 'OK',
-                    click: function() {
-                        if(clicked == '') {
-                            $( this ).dialog( "close" );
-                        }
-                        temp = data_changed($("#song_form").serializeArray());
-                        if(temp) {
-                            submit_song('/API/song/' + id + '/edit', JSON.stringify(temp))
-                                $( this ).dialog( "close" );
-                        }
-                        else {
-                            $( this ).dialog( "close" );
-                        }
-                    }
-                }
-            ]
-            //modal: true
-	    });
-    });
-
-    $(document).on('mouseover', '.title', function() {
-        $(this).find('i').show();
-    });
-
-    $(document).on('mouseout', '.title', function() {
-        $(this).find('i').hide();
-    });
-
-    function capitalizeFirstLetter(str) {
-        return str[0].toUpperCase() + str.slice(1);
-    }
-
-    $(document).on('click', '.title span', function() {
-        song_id = $(this).attr('song_id');
-        content = songs.filter(obj=>{return obj.id == song_id}).map(obj=>obj.content);
-        tabs = [];
-        tab_div = '<div class="lyrics"><ul>';
-        lyrics = '';
-        n = 1;
-        console.log(content)
-        for (l of content[0]) {
-            /*if(tabs.indexOf(l.name) >= 0) {
-                continue;
-            }*/
-            for(var i=0;i<l.origin_text.length;i++) {
-                name = l.name
-                if(l.origin_text.length > 1) {
-                    name = name + ' ' + (i+1);
-                }
-                tabs.push(capitalizeFirstLetter(name));
-                lyrics += '<div id="tabs-' + n + '">';
-                lyrics += l.origin_text[i] + '<br/>' + l.region_text[i] + '</div>';
-                n++;
+    /* =====================================================================
+       Table
+       ===================================================================== */
+    const table = new DataTable('#songs', {
+        data: songs,
+        columns: [
+            {
+                data: 'title', className: 'title',
+                render: (title, type, song) => type === 'display' ? title_cell(song) : title
+            },
+            {
+                data: null, className: 'lyrics', orderable: false, searchable: false,
+                render: (data, type, song) => type === 'display'
+                    ? `<a href="#lyrics" class="lyrics-trigger" aria-label="View lyrics for ${escapeHtml(song.title || '')}" title="View lyrics">` +
+                      `<i class="fa-solid fa-book-open" aria-hidden="true"></i></a>`
+                    : ''
+            },
+            { data: 'key', defaultContent: '' },
+            { data: 'book', defaultContent: '' },
+            {
+                data: 'lang',
+                render: (languages, type) => type === 'display'
+                    ? languages.map(lang_tag).join('')
+                    : languages.join(' ')
+            },
+            {
+                data: null, orderable: false, searchable: false,
+                render: (data, type, song) => type === 'display' ? get_score(song) : ''
+            },
+            {
+                data: null, orderable: false, searchable: false,
+                render: (data, type, song) => type === 'display' ? get_video(song.video) : ''
             }
-            //n++;
-        }
-        console.log(tabs)
-        for (var i=0;i<tabs.length;i++) {
-            tab_div += '<li><a href="#tabs-'+ (i+1) + '">' + tabs[i] + '</a></li>';
-        }
-        tab_div += '</ul>' + lyrics + '</div>';
-        title = $(this).text();
-        $my_dialog.html(tab_div);
-        $('.lyrics').tabs();
-        $my_dialog.dialog({ title: title}).dialog('open');
-        clicked = '';
+        ],
+        lengthMenu: [[10, 25, 50, -1], [10, 25, 50, 'All']],
+        pageLength: 25
     });
 
-    $(document).on('click', '.title i', function(e) {
-        // If it's a heart icon
-        // Not sure how this code works... not sure what the heart is rn
-        if (!$(this).attr('name')) {
-            var id = this.id.split('_')[1];
-            set_cookies(id, $(this).attr('title'));
+    // Small screens hide the Book Column
+    const mobileQuery = window.matchMedia('(max-width: 600px)');
+    function apply_mobile_layout() {
+        table.column(3).visible(!mobileQuery.matches);
+    }
+    apply_mobile_layout();
+    mobileQuery.addEventListener('change', apply_mobile_layout);
+    
+    /* =====================================================================
+       Lyrics dialog
+       ===================================================================== */
+    const $dialog = $('#dialog').dialog({
+        autoOpen: false,
+        width: 'auto',
+        maxWidth: Math.floor(window.innerWidth * 0.95),
+        maxHeight: Math.floor(window.innerHeight * 0.85),
+        show: { effect: 'fade', duration: 200 },
+        hide: { effect: 'fade', duration: 200 },
+        buttons: [{ text: 'OK', click() { $(this).dialog('close'); } }]
+    });
+
+    function capitalizeFirstLetter(value) {
+        return value ? value[0].toUpperCase() + value.slice(1) : '';
+    }
+
+    function render_lyrics(song, language) {
+        const block = song.content.find(item => item.lang === language);
+        const sections = block && Array.isArray(block.lyrics) ? block.lyrics : [];
+        let tabList = '';
+        let panels = '';
+        let tabIndex = 1;
+
+        for (const section of sections) {
+            const textLines = section.lyrics_text;
+            const lines = Array.isArray(textLines) && textLines.length
+                ? textLines
+                : (section.lyrics || textLines || []);
+            const lyrics = Array.isArray(lines) ? lines : (typeof lines === 'string' ? [lines] : []);
+
+            lyrics.forEach((text, index) => {
+                const name = lyrics.length > 1 ? `${section.name} ${index + 1}` : section.name;
+                const panelId = `lyrics-tab-${tabIndex}`;
+                const formattedText = escapeHtml(text).replace(/\r?\n/g, '<br/>');
+                tabList += `<li><a href="#${panelId}">${escapeHtml(capitalizeFirstLetter(name || ''))}</a></li>`;
+                panels += `<div id="${panelId}">${formattedText}</div>`;
+                tabIndex++;
+            });
         }
-    });
 
-    $('.all_keys').click(function() {
-        var checked = this.checked;
-        $('.keys').each(function() {
-            this.checked = checked;
-        });
-        if(checked) {
-            table.column(1).search((d) => keys.includes(d)).draw();
+        const $content = $dialog.find('#lyrics-content');
+        if (!tabList) {
+            $content.html('<p>No lyrics are available for this language.</p>');
+            return;
         }
-        else {
-            table.column(1).search((d) => d==-1).draw();
+
+        $content.html(`<div class="lyrics"><ul>${tabList}</ul>${panels}</div>`);
+        $content.find('.lyrics').tabs();
+    }
+
+    function show_lyrics(song) {
+        const content = Array.isArray(song.content) ? song.content : [];
+        const languages = song.lang.filter(language => content.some(block => block.lang === language));
+        const languageOptions = languages.map(language =>
+            `<option value="${escapeHtml(language)}">${escapeHtml(language)}</option>`
+        ).join('');
+        const languageSelector = languages.length > 1
+            ? `<label>Language: <select class="lyrics-language">${languageOptions}</select></label>`
+            : (languages.length === 1 ? `<span>Language: ${escapeHtml(languages[0])}</span>` : '');
+        const languageControl = languages.length
+            ? `<div class="lyrics-language-control">${languageSelector}</div>`
+            : '';
+
+        $dialog.html(`${languageControl}<div id="lyrics-content"></div>`);
+        if (languages.length) {
+            render_lyrics(song, languages[0]);
+        } else {
+            $dialog.find('#lyrics-content').html('<p>No lyrics are available.</p>');
         }
+        $dialog.dialog({ title: song.title }).dialog('open');
+    }
+
+    /* =====================================================================
+       Row events (delegated, so they survive pagination / redraws)
+       ===================================================================== */
+    $('#songs tbody').on('click', '.lyrics-trigger', function(event) {
+        event.preventDefault();
+        show_lyrics(table.row(this.closest('tr')).data());
     });
 
-    $('.keys').click(function() {
-        var temp = [];
-        $('.keys').each(function() {
-            if(this.checked) {
-                temp.push(this.value);
-            }
-        });
-        table.column(1).search((d) => temp.includes(d)).draw();
+    $dialog.on('change', '.lyrics-language', function() {
+        const song = songs.find(item => item.title === $dialog.dialog('option', 'title'));
+        if (song) render_lyrics(song, this.value);
     });
 
-    /* Language Filter */
-    // Use raw data values, not table.column(#).search() which only searches HTML values
-    // Ran every time table.draw is ran
-    $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
-        let checkedLangs = [];
-        $('.langs').each(function() { 
-            if(this.checked){
-                checkedLangs.push(this.value);
-            }
-        });
-        if(checkedLangs.length === 0) return false; // hide all if none selected
+    $('#songs tbody').on('click', '.pin', function() {
+        const id = String(this.dataset.id);
+        const nowPinned = !pinnedIds.has(id);
+        if (nowPinned) pinnedIds.add(id);
+        else pinnedIds.delete(id);
+        savePinned();
 
-        // row.lang and row.lang_2 are the raw language codes
-        let row = songs[dataIndex];
-
-        // If return is true, keep the row. If return is false, hide the row.
-        // In this case, If Lang1 or Lang2 are checked, then keep it.
-        return checkedLangs.includes(row.lang) || checkedLangs.includes(row.lang_2);
-    });
-
-    // Redraw table on checkbox click
-    $('.langs').click(function() {
-        table.draw();
+        $(this)
+            .toggleClass('fa-heart pinned', nowPinned)
+            .toggleClass('fa-heart-o', !nowPinned)
+            .attr('title', nowPinned ? 'pinned' : 'pin it');
     });
 </script>
 {% endblock %}
