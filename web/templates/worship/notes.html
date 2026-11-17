@@ -321,7 +321,7 @@ h3 {
             'en': {class:"lang_en", title: "English", label: "en"},
             'zh': {class:"lang_zh", title: "Chinese", label: "zh"},
             'zh-TW': {class:"lang_zhTW", title: "Taiwanese", label: "tw"},
-            'zh-pingyin': {class:"lang_zhpingyin", title: "Zh PingYin", label: "zh"}            
+            'zh-pinyin': {class:"lang_zhpinyin", title: "Zh PinYin", label: "zh"}
         }
         const config = tags[lang] || { class: 'others', label: 'na', title: 'N/A' };
         return lang ? `<span class="${config.class}" title="${config.title}">${config.label}</span>` : "";
