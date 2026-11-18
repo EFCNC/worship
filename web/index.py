@@ -334,9 +334,7 @@ def edit_song(id): # Renamed for clarity
             content["bible"] = ''
     else:
         content = Utils.get_song_by_id(id)
-        # add key lyrics to be used by song_editor
-        content["lyrics"] = content["lyrics_raw"] 
-        
+
     return render_template('song/song_editor.html', content=content)
 
 
