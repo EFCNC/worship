@@ -294,12 +294,19 @@ function add_song_to_worship(worship_list) {
 
 // Validate form values
 function validate_form(data) {
-    // Sequence cannot be empty
-    if (!data.sequence || data.sequence.trim() === '') {
-        alert("Sequence needs a value!");
+    // Title cannot be empty
+    if (!data.title || data.title.trim() === '') {
+        alert("Title cannot be blank!");
         return false;
     }
 
+    // Sequence cannot be empty
+    if (!data.sequence || data.sequence.trim() === '') {
+        alert("Sequence cannot be blank!");
+        return false;
+    }
+
+    // Content must be an array with at least one item
     if (!Array.isArray(data.content) || data.content.length === 0) {
         alert("Are there... lyrics? The editor seems empty.");
         return false;

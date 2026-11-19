@@ -954,7 +954,7 @@
 
     // Keep dropdowns matching memory
     function updatePaneDropdowns() {
-        let optionsHtml = '';
+        let optionsHtml = '<option value=""></option>';
         contentState.forEach(item => {
             optionsHtml += `<option value="${item.lang}">${item.lang}</option>`;
         });
@@ -1172,16 +1172,11 @@
         }));
 
         langPriority = Array.isArray(originalData.lang) ? [...originalData.lang] : [];
-        if (langPriority.length === 0 && Number(originalData.id) === -1) {
-            const defaultLanguage = 'en';
-            contentState.push({ lang: defaultLanguage, version: '', title: '', lyrics: [] });
-            langPriority.push(defaultLanguage);
-        }
 
         renderLangPriorityUI();
         updatePaneDropdowns();
 
-        let pLang = langPriority[0];
+        let pLang = langPriority[0] || '';
         let sLang = langPriority[1] || '';
         
         loadPane(1, pLang);
