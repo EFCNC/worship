@@ -1400,10 +1400,10 @@
 
         if (!langToRemove) return;
         
-        if (contentState.length <= 1) {
-            alert("You must have at least one language variant.");
-            return;
-        }
+        // if (contentState.length <= 1) {
+        //     alert("You must have at least one language variant.");
+        //     return;
+        // }
 
         if (confirm(`Are you sure you want to remove the language variant: ${langToRemove}?`)) {
             contentState = contentState.filter(c => c.lang !== langToRemove);
@@ -1411,7 +1411,7 @@
             
             renderLangPriorityUI();
             updatePaneDropdowns();
-            loadPane(paneNum, contentState[0].lang); 
+            loadPane(paneNum, contentState[0] ? contentState[0].lang : '');
             updateDisabledLanguages();
         }
     }
