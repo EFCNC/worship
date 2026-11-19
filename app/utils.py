@@ -131,7 +131,6 @@ def search_song_efcnc(keyword):
         'id': x[0],
         'title': x[1],
         'lang': x[2] if x[2] else '',
-        'lang_2': x[3] if x[3] else '',
         'key': x[4] if x[4] else '',
         'video': x[5].split(';;;') if x[5] else [],
         'score': x[6].split(';;;') if x[6] else [],
@@ -476,7 +475,6 @@ def get_songs_para(days, count=None):
                 'id': r[2],
                 'title': r[1],
                 'lang': r[3].split(','),
-                'lang_2': r[4] if r[4] else '',
                 'key': r[5],
                 'video': r[6].split(';;;') if r[6] else [],
                 'score': r[7].split(';;;') if r[7] else [],
@@ -1030,7 +1028,7 @@ def get_worship_songs1(id):
     for r in result:
         if r[21] == 'info':
             songs.append(
-            {'type': r[21], 'title': r[18] if r[18] else r[17][0:10], 'author': '', 'lang': [], 'lang_2': '',
+            {'type': r[21], 'title': r[18] if r[18] else r[17][0:10], 'author': '', 'lang': [],
                  'song_key': '', 'sequence': '', 'bible_verse': '', 'lyricist': '', 'book': '', 'copyright': '',
                  'ccli': '', 'content': '', 'video': '', 'score': '', 'date': r[13], 'id': r[20],
                  'transpose': r[15].split(','), 'alt_sequence': '', 'notes': r[17] if r[17] else '',
@@ -1057,7 +1055,7 @@ def get_worship_songs(id):
     for r in result:
         if r[22] == 'info':
             songs.append(
-                {'type': r[21], 'title': r[18] if r[18] else r[17][0:10], 'author': '', 'lang': [], 'lang_2': '',
+                {'type': r[21], 'title': r[18] if r[18] else r[17][0:10], 'author': '', 'lang': [],
                  'song_key': '', 'sequence': '', 'bible_verse': '', 'lyricist': '', 'book': '', 'copyright': '',
                  'ccli': '', 'content': '', 'video': '', 'score': '', 'date': r[13], 'id': r[20],
                  'transpose': r[15].split(','), 'alt_sequence': '', 'notes': r[17] if r[17] else '',

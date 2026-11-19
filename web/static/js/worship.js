@@ -575,7 +575,7 @@ function render_song(id, db, lang, num) {
 // Return language span tag to use different css
 function lang_tag(lang) {
     if(lang == '') { return ''; }
-    tags = {'en': '<span class="lang_en" title="English">en</span>', 'zh': '<span class="lang_zh" title="Chinese">zh</span>', 'zh-TW': '<span class="lang_zhTW" title="Taiwanese">tw</span>', 'zh-pingyin': '<span class="lang_zhpingyin" title="Zh PingYin">zh</span>', 'others': '<span class="others">na</span>'}
+    tags = {'en': '<span class="lang_en" title="English">en</span>', 'zh': '<span class="lang_zh" title="Chinese">zh</span>', 'zh-TW': '<span class="lang_zhTW" title="Taiwanese">tw</span>', 'zh-pinyin': '<span class="lang_zhpinyin" title="Zh PinYin">zh</span>', 'others': '<span class="others">na</span>'}
     if (lang in tags) {
         return tags[lang];
     }

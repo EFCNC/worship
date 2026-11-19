@@ -63,9 +63,9 @@
 .lang_en    { --lang-color: #009698; }
 .lang_zh    { --lang-color: #8b0000; }
 .lang_zhTW  { --lang-color: #556b2f; }
-.lang_zhpingyin { --lang-color: #856088; }
+.lang_zhpinyin { --lang-color: #856088; }
 
-.lang_en, .lang_zh, .lang_zhTW, .lang_zhpingyin {
+.lang_en, .lang_zh, .lang_zhTW, .lang_zhpinyin {
     border-radius: 50px 20px;
     color: #fff;
     border: 4px solid var(--lang-color);
