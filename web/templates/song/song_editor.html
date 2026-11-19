@@ -683,6 +683,7 @@
 
 {% block extra_js %}
 <script>
+(() => {
     var originalData = {{ content | tojson | safe }};
     console.log("1. Original Data from Server (Raw Snapshot):", JSON.parse(JSON.stringify(originalData)));
 
@@ -1170,13 +1171,18 @@
             }))
         }));
 
-        langPriority = [...originalData.lang];
+        langPriority = Array.isArray(originalData.lang) ? [...originalData.lang] : [];
+        if (langPriority.length === 0 && Number(originalData.id) === -1) {
+            const defaultLanguage = 'en';
+            contentState.push({ lang: defaultLanguage, version: '', title: '', lyrics: [] });
+            langPriority.push(defaultLanguage);
+        }
 
         renderLangPriorityUI();
         updatePaneDropdowns();
 
         let pLang = langPriority[0];
-        let sLang = langPriority[1] || pLang;
+        let sLang = langPriority[1] || '';
         
         loadPane(1, pLang);
         loadPane(2, sLang);
@@ -1613,5 +1619,11 @@
             });
         }
     }
+
+    window.getCurrentState = getCurrentState;
+    window.addDynamicInput = addDynamicInput;
+    window.addDynamicTextarea = addDynamicTextarea;
+    window.deleteSong = deleteSong;
+})();
 </script>
 {% endblock %}
