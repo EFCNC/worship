@@ -490,7 +490,7 @@ def get_songs_para(days, count=None):
 
 
 def get_songs(ids=None):
-    sql = "select s.title, s.author, s.lang, s.lang_2, s.song_key, s.sequence, s.bible_verse, s.lyricist, s.book, s.copyright, s.ccli, s.content, m.link, m.m_type, m.abc, s.song_id as id from songs s left join media m on s.song_id = m.song_id"
+    sql = "select s.title, s.author, s.lang, s.song_key, s.sequence, s.bible_verse, s.lyricist, s.book, s.copyright, s.ccli, s.content, m.link, m.m_type, m.abc, s.song_id as id from songs s left join media m on s.song_id = m.song_id"
     if ids:
         ids = ids.split(',')
         sql += ' where s.song_id in ({ids}) order by s.song_id'.format(ids=','.join(['?'] * len(ids)))
@@ -504,27 +504,27 @@ def get_songs(ids=None):
         temp = next((x for x in songs if x['title'] == r[0]), None)
         if temp:
             # Append subsequent media entries if the song object already exists
-            if r[13] == 'video' and r[12]:
-                temp['video'].append(r[12])
-            elif r[13] == 'score' and r[12]:
-                temp['score'].append(r[12])
-            elif r[13] == 'abc' and r[14]:
-                temp['abc'].append(r[14])
+            if r[12] == 'video' and r[11]:
+                temp['video'].append(r[11])
+            elif r[12] == 'score' and r[11]:
+                temp['score'].append(r[11])
+            elif r[12] == 'abc' and r[13]:
+                temp['abc'].append(r[13])
         else:
             # Initialize arrays safely on creation
             songs.append({
                 'type': 'song', 'title': r[0], 'author': r[1] if r[1] else '',
-                'lang': r[2].split(','), 'lang_2': r[3] if r[3] else '',
-                'key': r[4] if r[4] else '', 'sequence': r[5] if r[5] else '',
-                'bible': r[6] if r[6] else '', 'lyricist': r[7] if r[7] else '',
-                'book': r[8] if r[8] else '', 'copyright': r[9] if r[9] else '',
-                'ccli': r[10] if r[10] else '', 'lyrics_raw': r[11],
-                'content': Parser.parse_lyrics(r[11], r[5]),
-                'video': [r[12]] if r[13] == 'video' and r[12] else [],
-                'score': [r[12]] if r[13] == 'score' and r[12] else [],
-                'abc': [r[14]] if r[13] == 'abc' and r[14] else [],
-                'id': r[15], 'notes': '', 'transpose': ['0'],
-                'alt_sequence': r[5] if r[5] else ''
+                'lang': r[2].split(','),
+                'key': r[3] if r[3] else '', 'sequence': r[4] if r[4] else '',
+                'bible': r[5] if r[5] else '', 'lyricist': r[6] if r[6] else '',
+                'book': r[7] if r[7] else '', 'copyright': r[8] if r[8] else '',
+                'ccli': r[9] if r[9] else '',
+                'content': Parser.parse_lyrics(r[10], r[4]),
+                'video': [r[11]] if r[12] == 'video' and r[11] else [],
+                'score': [r[11]] if r[12] == 'score' and r[11] else [],
+                'abc': [r[13]] if r[12] == 'abc' and r[13] else [],
+                'id': r[14], 'notes': '', 'transpose': ['0'],
+                'alt_sequence': r[4] if r[4] else ''
             })
     return songs
 
@@ -594,30 +594,30 @@ def get_song_chords(ids):
 
 
 def get_song_by_id(id):
-    sql = "select s.title, s.author, s.lang, s.lang_2, s.song_key, s.sequence, s.bible_verse, s.lyricist, s.book, s.copyright, s.ccli, s.content, m.link, m.m_type, m.abc, s.song_id as id from songs s left join media m on s.song_id = m.song_id where s.song_id = ?"
+    sql = "select s.title, s.author, s.lang, s.song_key, s.sequence, s.bible_verse, s.lyricist, s.book, s.copyright, s.ccli, s.content, m.link, m.m_type, m.abc, s.song_id as id from songs s left join media m on s.song_id = m.song_id where s.song_id = ?"
     songs = dB.run_para(sql, id)
     video = []
     score = []
     abc = []
     for s in songs:
-        if s[13] == 'video':
-            if s[12]:
-                video.append(s[12])
-        elif s[13] == 'score':
-            if s[12]:
-                score.append(s[12])
-        elif s[13] == 'abc':
-            if s[14]:
-                abc.append(s[14])
+        if s[12] == 'video':
+            if s[11]:
+                video.append(s[11])
+        elif s[12] == 'score':
+            if s[11]:
+                score.append(s[11])
+        elif s[12] == 'abc':
+            if s[13]:
+                abc.append(s[13])
     if songs:
         r = songs[0]
-        content = Parser.parse_lyrics(r[11], r[5])
+        content = Parser.parse_lyrics(r[10], r[4])
         return {'type': 'song', 'title': r[0], 'author': r[1] if r[1] else '', 'lang': r[2].split(','),
-                'lang_2': r[3] if r[3] else '', 'song_key': r[4] if r[4] else '', 'sequence': r[5] if r[5] else '',
-                'bible_verse': r[6] if r[6] else '', 'lyricist': r[7] if r[7] else '', 'book': r[8] if r[8] else '',
-                'copyright': r[9] if r[9] else '', 'ccli': r[10] if r[10] else '', 'lyrics_raw': r[11],
+                'song_key': r[3] if r[3] else '', 'sequence': r[4] if r[4] else '',
+                'bible_verse': r[5] if r[5] else '', 'lyricist': r[6] if r[6] else '', 'book': r[7] if r[7] else '',
+                'copyright': r[8] if r[8] else '', 'ccli': r[9] if r[9] else '',
                 'content': content, 'video': video, 'score': score, 'abc': abc,
-                'id': r[15], 'notes': '', 'transpose': ['0'], 'alt_sequence': r[5] if r[5] else ''}
+                'id': r[14], 'transpose': ['0']}
     return None
 
 
@@ -662,7 +662,14 @@ def add_song(content):
     for i in range(len(content)):
         sql += '?,'
     sql = sql[:-1] + ")"
-    values = [x['value'].replace("'", "''") if isinstance(x['value'], str) else x['value'] for x in content]
+    values = []
+    for field in content:
+        value = field['value']
+        if field['name'] == 'lang' and isinstance(value, list):
+            value = ','.join(value)
+        elif field['name'] == 'content' and not isinstance(value, str):
+            value = json.dumps(value, ensure_ascii=False)
+        values.append(value.replace("'", "''") if isinstance(value, str) else value)
     song_id = dB.insert(sql, values)
     if not song_id:
         return None
@@ -1016,59 +1023,57 @@ def get_worship_id(date):
     return r
 
 def get_worship_songs1(id):
-    sql = "select s.title, s.author, s.lang, s.lang_2, s.song_key, s.sequence, s.bible_verse, s.lyricist, s.book, s.copyright, s.ccli, s.content, (select group_concat(link, '||') from media m where m.song_id=s.song_id and m_type='video') as video, (select group_concat(link, '||') from media m where m.song_id=s.song_id and m_type='score') as score, w.scheduled_date as date, se.song_id as id, se.transpose as transpose, se.sequence alt_sequence, se.notes as notes, se.bible, se.version, se.rowid, se.type, (select group_concat(abc, '||') from media m where m.song_id=s.song_id and m_type='abc') as abc from presentation se left join songs s on s.song_id = se.song_id  inner join worship w on w.scheduled_date = se.scheduled_date where se.worship_id = ? order by se.song_order"
+    sql = "select s.title, s.author, s.lang, s.song_key, s.sequence, s.bible_verse, s.lyricist, s.book, s.copyright, s.ccli, s.content, (select group_concat(link, '||') from media m where m.song_id=s.song_id and m_type='video') as video, (select group_concat(link, '||') from media m where m.song_id=s.song_id and m_type='score') as score, w.scheduled_date as date, se.song_id as id, se.transpose as transpose, se.sequence alt_sequence, se.notes as notes, se.bible, se.version, se.rowid, se.type, (select group_concat(abc, ';;;') from media m where m.song_id=s.song_id and m_type='abc') as abc from presentation se left join songs s on s.song_id = se.song_id  inner join worship w on w.scheduled_date = se.scheduled_date where se.worship_id = ? order by se.song_order"
     result = dB.run_para(sql, id)
     songs = []
 
     for r in result:
-        if r[22] == 'info':
+        if r[21] == 'info':
             songs.append(
-                {'type': r[22], 'title': r[19] if r[19] else r[18][0:10], 'author': '', 'lang': [], 'lang_2': '',
+            {'type': r[21], 'title': r[18] if r[18] else r[17][0:10], 'author': '', 'lang': [], 'lang_2': '',
                  'song_key': '', 'sequence': '', 'bible_verse': '', 'lyricist': '', 'book': '', 'copyright': '',
-                 'ccli': '', 'lyrics_raw': '', 'content': '', 'video': '', 'score': '', 'date': r[14], 'id': r[21],
-                 'transpose': r[16].split(','), 'alt_sequence': '', 'notes': r[18] if r[18] else '',
-                 'language_version_order': r[20].split(',') if r[20] else []})
-        elif r[22] == 'song':
-            songs.append({'type': r[22], 'title': r[0], 'author': r[1] if r[1] else '', 'lang': r[2].split(','),
-                          'lang_2': r[3] if r[3] else '', 'song_key': r[4] if r[4] else '',
-                          'sequence': r[5] if r[5] else '', 'bible_verse': r[6] if r[6] else '',
-                          'lyricist': r[7] if r[7] else '', 'book': r[8] if r[8] else '',
-                          'copyright': r[9] if r[9] else '', 'ccli': r[10] if r[10] else '', 'lyrics_raw': r[11],
-                          'content': Parser.parse_lyrics1(r[11], r[2], r[17]),
-                          'video': r[12].split('||') if r[12] else [],
-                          'score': r[13].split('||') if r[13] else [],
-                          'date': r[14], 'id': r[15], 'transpose': r[16].split(',') if r[16] else [0],
-                          'alt_sequence': r[17] if r[17] else '', 'notes': r[18] if r[18] else '',
-                          'abc': r[23].split('||') if r[23] else [],
-                          'language_version_order': r[20].split(',') if r[20] else []})
+                 'ccli': '', 'content': '', 'video': '', 'score': '', 'date': r[13], 'id': r[20],
+                 'transpose': r[15].split(','), 'alt_sequence': '', 'notes': r[17] if r[17] else '',
+                 'language_version_order': r[19].split(',') if r[19] else []})
+        elif r[21] == 'song':
+            songs.append({'type': r[21], 'title': r[0], 'author': r[1] if r[1] else '', 'lang': r[2].split(','),
+                          'song_key': r[3] if r[3] else '', 'sequence': r[4] if r[4] else '',
+                          'bible_verse': r[5] if r[5] else '', 'lyricist': r[6] if r[6] else '',
+                          'book': r[7] if r[7] else '', 'copyright': r[8] if r[8] else '',
+                          'ccli': r[9] if r[9] else '', 'content': Parser.parse_lyrics1(r[10], r[2], r[16]),
+                          'video': r[11].split('||') if r[11] else [],
+                          'score': r[12].split('||') if r[12] else [],
+                          'date': r[13], 'id': r[14], 'transpose': r[15].split(',') if r[15] else [0],
+                          'alt_sequence': r[16] if r[16] else '', 'notes': r[17] if r[17] else '',
+                          'abc': r[22].split(';;;') if r[22] else [],
+                          'language_version_order': r[19].split(',') if r[19] else []})
     return songs
 
 def get_worship_songs(id):
-    sql = "select s.title, s.author, s.lang, s.lang_2, s.song_key, s.sequence, s.bible_verse, s.lyricist, s.book, s.copyright, s.ccli, s.content, (select group_concat(link, '||') from media m where m.song_id=s.song_id and m_type='video') as video, (select group_concat(link, '||') from media m where m.song_id=s.song_id and m_type='score') as score, w.scheduled_date as date, se.song_id as id, se.transpose as transpose, se.sequence alt_sequence, se.notes as notes, se.bible, se.version, se.rowid, se.type, (select group_concat(abc, '||') from media m where m.song_id=s.song_id and m_type='abc') as abc from presentation se left join songs s on s.song_id = se.song_id  inner join worship w on w.scheduled_date = se.scheduled_date where se.worship_id = ? order by se.song_order"
+    sql = "select s.title, s.author, s.lang, s.song_key, s.sequence, s.bible_verse, s.lyricist, s.book, s.copyright, s.ccli, s.content, (select group_concat(link, '||') from media m where m.song_id=s.song_id and m_type='video') as video, (select group_concat(link, '||') from media m where m.song_id=s.song_id and m_type='score') as score, w.scheduled_date as date, se.song_id as id, se.transpose as transpose, se.sequence alt_sequence, se.notes as notes, se.bible, se.version, se.rowid, se.type, (select group_concat(abc, ';;;') from media m where m.song_id=s.song_id and m_type='abc') as abc from presentation se left join songs s on s.song_id = se.song_id  inner join worship w on w.scheduled_date = se.scheduled_date where se.worship_id = ? order by se.song_order"
     result = dB.run_para(sql, id)
     songs = []
 
     for r in result:
         if r[22] == 'info':
             songs.append(
-                {'type': r[22], 'title': r[19] if r[19] else r[18][0:10], 'author': '', 'lang': [], 'lang_2': '',
+                {'type': r[21], 'title': r[18] if r[18] else r[17][0:10], 'author': '', 'lang': [], 'lang_2': '',
                  'song_key': '', 'sequence': '', 'bible_verse': '', 'lyricist': '', 'book': '', 'copyright': '',
-                 'ccli': '', 'lyrics_raw': '', 'content': '', 'video': '', 'score': '', 'date': r[14], 'id': r[21],
-                 'transpose': r[16].split(','), 'alt_sequence': '', 'notes': r[18] if r[18] else '',
-                 'language_version_order': r[20].split(',') if r[20] else []})
-        elif r[22] == 'song':
-            songs.append({'type': r[22], 'title': r[0], 'author': r[1] if r[1] else '', 'lang': r[2].split(','),
-                          'lang_2': r[3] if r[3] else '', 'song_key': r[4] if r[4] else '',
-                          'sequence': r[5] if r[5] else '', 'bible_verse': r[6] if r[6] else '',
-                          'lyricist': r[7] if r[7] else '', 'book': r[8] if r[8] else '',
-                          'copyright': r[9] if r[9] else '', 'ccli': r[10] if r[10] else '', 'lyrics_raw': r[11],
-                          'content': Parser.parse_lyrics(r[11], r[17]),
-                          'video': r[12].split('||') if r[12] else [],
-                          'score': r[13].split('||') if r[13] else [],
-                          'date': r[14], 'id': r[15], 'transpose': r[16].split(',') if r[16] else [0],
-                          'alt_sequence': r[17] if r[17] else '', 'notes': r[18] if r[18] else '',
-                          'abc': r[23].split('||') if r[23] else [],
-                          'language_version_order': r[20].split(',') if r[20] else []})
+                 'ccli': '', 'content': '', 'video': '', 'score': '', 'date': r[13], 'id': r[20],
+                 'transpose': r[15].split(','), 'alt_sequence': '', 'notes': r[17] if r[17] else '',
+                 'language_version_order': r[19].split(',') if r[19] else []})
+        elif r[21] == 'song':
+            songs.append({'type': r[21], 'title': r[0], 'author': r[1] if r[1] else '', 'lang': r[2].split(','),
+                          'song_key': r[3] if r[3] else '', 'sequence': r[4] if r[4] else '',
+                          'bible_verse': r[5] if r[5] else '', 'lyricist': r[6] if r[6] else '',
+                          'book': r[7] if r[7] else '', 'copyright': r[8] if r[8] else '',
+                          'ccli': r[9] if r[9] else '', 'content': Parser.parse_lyrics(r[10], r[16]),
+                          'video': r[11].split('||') if r[11] else [],
+                          'score': r[12].split('||') if r[12] else [],
+                          'date': r[13], 'id': r[14], 'transpose': r[15].split(',') if r[15] else [0],
+                          'alt_sequence': r[16] if r[16] else '', 'notes': r[17] if r[17] else '',
+                          'abc': r[22].split(';;;') if r[22] else [],
+                          'language_version_order': r[19].split(',') if r[19] else []})
     return songs
 
 
