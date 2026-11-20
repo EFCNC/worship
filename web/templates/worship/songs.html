@@ -734,7 +734,16 @@
             save_worship_notes();
         }
         if (songsChanged) {
-            save(worship_id);
+            let is_sequence_empty = songs_temp.some(function(song) {
+                return !song.alt_sequence || song.alt_sequence.trim() === '';
+            });
+            if (is_sequence_empty) {
+                if (!alert("Some songs have empty sequences. Please make sure you have added sequences for all songs before saving!")) {
+                    return;
+                }
+            } else {
+                save(worship_id);
+            }
         }
         if (!notesChanged && !songsChanged) {
             alert("Nothing was changed!!");
@@ -1337,13 +1346,16 @@
         // When songs in current dB is clicked, add it to panel
         else {
             get_song(id).done(function(data) {
-                if(songs_temp.find(o => o.title === data.title)) {
-                    alert('"' + data.title + '"is already in the set!');
-                    stopLoading();
-                    return false;
-                }
+                // Removing the duplicate check to allow adding the same song multiple times
+                // if(songs_temp.find(o => o.title === data.title)) {
+                //     alert('"' + data.title + '"is already in the set!');
+                //     stopLoading();
+                //     return false;
+                // }
+
                 data['date'] = worship_data.date;
                 data.language_version_order = get_language_version_order(data);
+                data.alt_sequence = data.sequence;
                 songs_temp.push(data);
                 
                 $.when(add_song_to_worship(worship)).then(function() {
