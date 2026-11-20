@@ -95,7 +95,8 @@
         $('#loading').show();
         var last_row = table.row( ':last' ).data();
         let d = new Date(last_row[0].replace('-', '/'));
-        var nextWeek = new Date(d.getTime() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString('en-CA');
+        d.setDate(d.getDate() + 7)
+        var nextWeek = d.toLocaleDateString('en-CA');
         url = API_URL + 'calendar/0';
         $.ajax({
             type: "put",

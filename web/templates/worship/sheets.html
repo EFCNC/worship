@@ -39,6 +39,66 @@
   display: flex;
   gap: 2px;
 }
+
+/* Unfilled by default, filled when active or hovered */
+.type_btn{
+  --btn-color: #04AA6D;
+  background-color: white;
+  color: black;
+  border: 2px solid var(--btn-color);
+}
+
+.type_btn.on,
+.type_btn:hover{
+  background-color: var(--btn-color);
+  color: white;
+}
+
+.type_group{
+  position: relative;
+}
+
+.variant_menu{
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 100%;
+  z-index: 100;
+  background: Canvas;
+  color: CanvasText;
+  border: 1px solid #999;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+}
+
+.variant_item{
+  display: block;
+  width: 100%;
+  text-align: left;
+  white-space: nowrap;
+  padding: 6px 12px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.variant_item{ font-weight: normal; }
+.variant_item.selected{ font-weight: bold; }
+
+/* global.css button:hover turns text white and nudges the button up; undo for menu items */
+.variant_item:hover{
+  background: rgba(128,128,128,0.25);
+  color: inherit;
+  transform: none;
+}
+
+.type_group.open .variant_menu{ display: block; }
+
+/* On PC, hovering the button opens the menu */
+@media (hover: hover){
+  .type_group:hover .variant_menu{ display: block; }
+}
 </style>
 {% endblock %}
 
@@ -48,6 +108,9 @@
 
   <div id="control_panel_container">
     <div id="sheet_btns_container"></div>
+    <a id="open_external" href="#" target="_blank" rel="noopener" style="display:none;">
+      <button type="button" class="type_btn">Open Externally <i class="fa-solid fa-up-right-from-square"></i></button>
+    </a>
     <div id="tempo_container" style="display:none;">
       Tempo: <input id="tempo_input" size="5"/>
     </div>
@@ -70,6 +133,22 @@
   let abc_data;
   let data;
   let keys;
+
+  function current_abc() {
+    return sheets[index].abc[sheets[index].abc_index || 0];
+  }
+  function current_sheet() {
+    return sheets[index].sheet[sheets[index].sheet_index || 0];
+  }
+
+  // Make the embedded sheet fill the rest of the screen
+  function fit_sheet_height() {
+    let frame = $('#sheet_link');
+    if (!frame.length || !frame.is(':visible')) return;
+    let h = window.innerHeight - frame.offset().top - 20;
+    frame.css('height', Math.max(h, 400) + 'px');
+  }
+  $(window).on('resize', fit_sheet_height);
   const keys_1 = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
   const keys_2 = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
   
@@ -94,6 +173,25 @@
     });
   });
 
+  $(document).on('click', '.variant_item', function() {
+    // Switch to another interactive / normal sheet of the same song
+    let type = $(this).data('type');
+    sheets[index][type + '_index'] = parseInt($(this).data('index'));
+    $('.type_group').removeClass('open');
+    if (type == 'abc') {
+      // Saved key belongs to the previous abc, so start fresh
+      delete sheets[index].saved_key_name;
+      delete sheets[index].saved_key_index;
+    }
+    load_sheet(type);
+  });
+
+  $(document).on('click', function(e) {
+    if (!$(e.target).closest('.type_group').length) {
+      $('.type_group').removeClass('open');
+    }
+  });
+
   $(document).on('change', '#transpose_select', function() {
     // Reload abc sheet with key_index changed
     let selected_key = $(this).val();
@@ -103,26 +201,29 @@
     sheets[index].saved_key_name = selected_key;
     sheets[index].saved_key_index = key_index;
 
-    ABCJS.renderAbc("abc", data.abc, {visualTranspose: key_index, responsive: "resize"});
+    ABCJS.renderAbc("abc", current_abc(), {visualTranspose: key_index, responsive: "resize"});
   });
 
   function load_sheet(type, k_index) {
     data = sheets[index];
 
     data.saved_type = type;
+    mark_selected();
 
-    $('#abc_data').val(data.abc);
+    let abc_text = current_abc();
+    $('#abc_data').val(abc_text);
 
     if (type == 'abc') {
       $("#sheet").hide();
+      $('#open_external').hide();
 
       let current_key_index = data.saved_key_index !== undefined ? data.saved_key_index : (data.transpose_amount || 0);
 
-      let parsed_abc = ABCJS.parseOnly(data.abc);
+      let parsed_abc = ABCJS.parseOnly(abc_text);
       root = parsed_abc[0].getKeySignature().root;
 
       // Load abc data
-      $.when(ABCJS.renderAbc("abc", data.abc, {visualTranspose: current_key_index, responsive: "resize"})).then(function(abc) {
+      $.when(ABCJS.renderAbc("abc", abc_text, {visualTranspose: current_key_index, responsive: "resize"})).then(function(abc) {
         abc_data = abc[0];
         $("#abc").show();
         $("#tempo_container").show();
@@ -163,17 +264,59 @@
     }
     else if (type == 'sheet') {
       let temp = "";
-      if(['bmp', 'jpg', 'png', 'gif'].some(char => data.sheet.endsWith(char))) {
-        temp = '<img src="' + data.sheet + '" style="max-width: 100%;max-height: 100vh;margin: auto;"/>';
+      let sheet_url = current_sheet();
+      if(['bmp', 'jpg', 'png', 'gif'].some(char => sheet_url.endsWith(char))) {
+        temp = '<img src="' + sheet_url + '" style="max-width: 100%;max-height: 100%;margin: auto;"/>';
       }
       else {
-        temp = '<iframe id="sheet_link" src="' + data.sheet + '"></iframe>';
+        temp = '<iframe id="sheet_link" src="' + sheet_url + '"></iframe>';
       }
         $("#abc").hide();
         $("#tempo_container").hide();
         $('#transpose_select_container').hide();
         $('#sheet').html(temp);
         $('#sheet').show();
+        $('#open_external').attr('href', sheet_url).show();
+        fit_sheet_height();
+    }
+  }
+
+  // Mark the active button (filled) and the one sheet being viewed (bold), across both menus
+  function mark_selected() {
+    let type = sheets[index].saved_type;
+    $('#sheet_btns_container .type_btn').removeClass('on').attr('aria-pressed', 'false');
+    $('#sheet_btns_container .type_btn[name="' + type + '"]').addClass('on').attr('aria-pressed', 'true');
+    $('.variant_item').removeClass('selected');
+    let i = sheets[index][type + '_index'] || 0;
+    $('.variant_item[data-type="' + type + '"][data-index="' + i + '"]').addClass('selected');
+  }
+
+  // Button; when there is more than one to choose from it also holds a dropdown menu
+  function type_button(type, label, list) {
+    let multi = list.length > 1;
+    let html = '<div class="type_group"><button class="type_btn" name="' + type + '" onclick="type_click(this)">' + label + (multi ? ' &#9662;' : '') + '</button>';
+    if (multi) {
+      html += '<div class="variant_menu">';
+      for (let i = 0; i < list.length; i++) {
+        html += '<button class="variant_item" data-type="' + type + '" data-index="' + i + '">' + label + ' ' + (i + 1) + '</button>';
+      }
+      html += '</div>';
+    }
+    return html + '</div>';
+  }
+
+  function type_click(btn) {
+    let group = $(btn).closest('.type_group');
+    if (!group.find('.variant_menu').length) {
+      // Only one sheet of this type, so the button itself switches to it
+      load_sheet(btn.name);
+      return;
+    }
+    // Several sheets: the button never switches view, it only opens the menu.
+    // Touch screens have no hover, so tapping toggles it.
+    if (!window.matchMedia('(hover: hover)').matches) {
+      $('.type_group').not(group).removeClass('open');
+      group.toggleClass('open');
     }
   }
 
@@ -181,15 +324,15 @@
     data = sheets[n];
     let html = '';
     
-    if(data.abc) {
-      html += '<button class="type_btn" name="abc" onclick="load_sheet(this.name)">Interact Sheet</button>';
+    if(data.abc.length) {
+      html += type_button('abc', 'Interact Sheet', data.abc);
     }
-    if(data.sheet) {
-      html += '<button class="type_btn" name="sheet" onclick="load_sheet(this.name)">Normal Sheet</button>';
+    if(data.sheet.length) {
+      html += type_button('sheet', 'Normal Sheet', data.sheet);
     }
     $('#sheet_btns_container').html(html);
     
-    let type_to_load = data.saved_type || (data.abc ? 'abc' : 'sheet');
+    let type_to_load = data.saved_type || (data.abc.length ? 'abc' : 'sheet');
     
     load_sheet(type_to_load);
   }

@@ -1,6 +1,7 @@
 #coding: utf-8
 import sys
 import os.path
+import re
 from datetime import datetime
 
 # Add the project root directory to sys.path
@@ -174,6 +175,7 @@ def get_weekly_chords(id):
 			chord_data['transpose_amount'] = int(t_val[0])
 		else:
 			chord_data['transpose_amount'] = 0
+		chord_data['language_version_order'] = weekly_data.get('language_version_order', []) if weekly_data else []
 
 	return render_template('/worship/chords.html', chords=chords)
 
@@ -256,7 +258,7 @@ def get_song_sheet(ids=None):
 	'''
 	if not ids:
 		sheets = Utils.get_song_sheet()
-		sheets = [x for x in sheets if x["abc"] != '']
+		sheets = [x for x in sheets if x["abc"]]
 		return render_template('sheet.html', sheets=sheets)
 
 	keys_1 = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
@@ -313,30 +315,67 @@ def get_song_sheet(ids=None):
 
 @app.route("/song/<id>/edit") # Changed path
 def edit_song(id): # Renamed for clarity
-    '''
-    :param id: song_id
-    :return: song_editor.html
-    '''
+	'''
+	:param id: song_id
+	:return: song_editor.html
+	'''
 
-    # Handle creating a new song
-    if id == '-1':
-        return render_template('song/song_editor.html', content={'id': -1})
-    
-    db = request.args.get('db', 'worship.db')
-    lang = request.args.get('lang', None)
-    
-    if db != 'worship.db':
-        content = Utils.get_song_by_id_(id, db)
-        if "lang" not in content:
-            content["lang"] = lang
-        if "bible" not in content:
-            content["bible"] = ''
-    else:
-        content = Utils.get_song_by_id(id)
-        # add key lyrics to be used by song_editor
-        content["lyrics"] = content["lyrics_raw"] 
-        
-    return render_template('song/song_editor.html', content=content)
+	# Handle creating a new song
+	if id == '-1':
+		return render_template('song/song_editor.html', content={'id': -1})
+
+	db = request.args.get('db', 'worship.db')
+	lang = request.args.get('lang', None)
+
+	if db != 'worship.db':
+		content = Utils.get_song_by_id_(id, db)
+		imported_lang = content.get("lang") or lang or ''
+		content["lang"] = [imported_lang] if imported_lang else []
+		if "bible" not in content:
+			content["bible"] = ''
+
+		sections = {}
+		section_aliases = {'v': 'verse', 'c': 'chorus', 'b': 'bridge', 'p': 'pre-chorus',
+						   't': 'tag', 'i': 'intro', 'o': 'outro'}
+		lyrics = content.get('lyrics') or ''
+		for match in re.finditer(r'<([^<>/]+)>(.*?)</\1>', lyrics, re.IGNORECASE | re.DOTALL):
+			raw_name = match.group(1).strip().lower()
+			numbered_verse = re.fullmatch(r'(?:verse\s*)?(\d+)', raw_name)
+			name = 'verse' if numbered_verse else section_aliases.get(raw_name, raw_name.replace(' ', '-'))
+			section = sections.get(name)
+			if section is None:
+				section = {'name': name, 'lyrics': []}
+				sections[name] = section
+			section['lyrics'].append(match.group(2).strip())
+
+		if not sections and lyrics.strip():
+			sections['verse'] = {'name': 'verse', 'lyrics': [lyrics.strip()]}
+
+		content['content'] = [{
+			'lang': imported_lang,
+			'version': '',
+			'title': content.get('title', ''),
+			'lyrics': list(sections.values())
+		}]
+
+		sequence = content.get('sequence') or ''
+		if sequence:
+			tokens = []
+			for token in sequence.split(','):
+				token = token.strip().lower()
+				numbered_verse = re.fullmatch(r'(?:verse\s*)?(\d+)', token)
+				if numbered_verse:
+					token = 'v' + numbered_verse.group(1)
+				elif token in section_aliases:
+					token = section_aliases[token]
+				tokens.append(token)
+			content['sequence'] = ', '.join(tokens)
+		elif sections:
+			content['sequence'] = ', '.join(section_aliases.get(name, name) for name in sections)
+	else:
+		content = Utils.get_song_by_id(id)
+
+	return render_template('song/song_editor.html', content=content)
 
 
 @app.route("/assets")
@@ -365,6 +404,7 @@ def slides():
 
 @app.route("/slides/<mode>")
 def slides_viewer(mode=None):
+	lang = request.args.get('lang', '')
 	# EXPERIMENTAL LEAD START: Share the production Lead client lock and socket mode.
 	if mode == 'lead-experimental':
 		__update_client_mode('lead')
@@ -397,7 +437,7 @@ def slides_viewer(mode=None):
 		# EXPERIMENTAL LEAD END
 		return render_template(lead_template, presentation=slides_data, mode='lead')
 	elif mode == 'view':
-		__update_client_mode('view')
+		__update_client_mode('')
 		return render_template('slides/slides_view.html', presentation=slides_data, mode=mode)
 	elif mode == 'sheets':
 		__update_client_mode('')
@@ -441,8 +481,11 @@ def admin_people():
 @app.route("/admin/calendar")
 def admin_calendar():
 	now = datetime.now()
-	year = str(now.year)
-	column, calendar = Utils.get_calendar(year)
+	year = now.year
+	column, calendar = Utils.get_calendar(str(year))
+	# Include the year after
+	column1, calendar1 = Utils.get_calendar(str(year+1))
+	calendar += calendar1
 	return render_template('admin/calendar.html', column=column, calendar=calendar)
 
 @app.route("/admin/report/<id>")
@@ -499,10 +542,13 @@ def __update_client_mode(name):
 	global client_mode
 	client_mode = name
 
-def __get_slide_json():
+def __get_slide_json(name=None):
 	coming_sunday = __get_sundays()["sunday"]
 	id = Utils.get_worship_id(coming_sunday)[0]
-	slides = Tools.get_worship_json(id)
+	if name:
+		slides = Tools.get_worship_json1(name)
+	else:
+		slides = Tools.get_worship_json(id)
 	global slides_data
 	if not slides:
 		Tools.create_json(id)
