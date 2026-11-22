@@ -123,7 +123,7 @@ def simplify_json(json):
     for slide in slides:
         contents = slide.get('content', [])
         cc = []
-        temp = {key: slide[key] for key in slide.keys() & {'id', 'lang', 'title', 'notes', 'style', 'author', 'lyricist', 'ccli', 'book', 'copyright', 'key', 'type', 'manual'}}
+        temp = {key: slide[key] for key in slide.keys() & {'id', 'lang', 'language_version_order', 'title', 'notes', 'style', 'author', 'lyricist', 'ccli', 'book', 'copyright', 'key', 'type', 'manual'}}
         temp['content'] = contents
         simple.append(temp)
     json['slides'] = simple
@@ -357,6 +357,7 @@ def create_json(id, worship=None):
         if previous_presentation:
             setting.update(previous_presentation.get('setting', {}))
         worship_json = {"setting": setting, "slides": temp}
+        worship_json = language_version_order_parser(worship_json)
 
     else:
         worship_date = Utils.get_worship_date(id)[0]
@@ -367,7 +368,6 @@ def create_json(id, worship=None):
         os.makedirs(path, exist_ok=True)
 
     json_file = os.path.join(path, '{}_{}.json'.format(worship_date, id))
-    worship_json = language_version_order_parser(worship_json)
     # simplify json data
     worship_json = simplify_json(worship_json)
     with open(json_file, "w", encoding="utf-8") as f:

@@ -196,6 +196,34 @@
         return grid;
     }
 
+    function create_song_view(languages, name) {
+        let grid = document.createElement('div');
+        grid.setAttribute('name', name);
+        const languageClasses = ['origin', 'region', 'language-third'];
+        languages.forEach(function(language, index) {
+            let lyrics = document.createElement('div');
+            lyrics.setAttribute('class', 'song ' + languageClasses[index % languageClasses.length]);
+            lyrics.setAttribute('data-language', language.code);
+            if (mode == 'admin') {
+                lyrics.setAttribute('contentEditable', 'true');
+            }
+            lyrics.innerHTML = language.html;
+            grid.append(lyrics);
+        });
+        return grid;
+    }
+
+    function get_song_lyrics(content, language) {
+        if (typeof language !== 'string' || !language) {
+            return '';
+        }
+        if (typeof content[language] === 'string') {
+            return content[language];
+        }
+        let baseLanguage = language.split('-')[0];
+        return typeof content[baseLanguage] === 'string' ? content[baseLanguage] : '';
+    }
+
     // Helper function to safely extract lines from either a list or raw text
     function parseContent(htmlString) {
         if (!htmlString) return { isList: false, lines: [] };
@@ -353,8 +381,6 @@
 		    else if (data.type == 'song') {
 			    for(var j=0;j<data.content.length;j++) {
 			        s_name = data.content[j].name;
-			        origin_ = [];
-			        region_ = [];
 			        if (data.content[j].manual === true) {
 			            let sub_section = document.createElement('section');
                         sub_section.classList.add('top-align');
@@ -362,60 +388,41 @@
                         sub_section.setAttribute('order', j);
                         section.append(sub_section);
 			        }
-			        else if (fragment > 0) {
-        			    if (lang&&lang!=undefined) {
-			                if(data.content[j][lang]) {
-			                    origin_ = data.content[j][lang].split(/\n/).filter(n => n);
+			        else {
+			            let selectedLanguages = lang
+			                ? [lang]
+			                : (Array.isArray(data.lang) ? data.lang : []);
+			            let languageLines = selectedLanguages.map(function(language) {
+			                return {
+			                    code: language,
+			                    lines: get_song_lyrics(data.content[j], language)
+			                        .split(/\n/)
+			                        .filter(line => line)
+			                };
+			            });
+			            let maxLines = languageLines.reduce(
+			                (max, language) => Math.max(max, language.lines.length), 0);
+			            let linesPerPage = fragment > 0 ? fragment : Math.max(maxLines, 1);
+			            let pageCount = maxLines ? Math.ceil(maxLines / linesPerPage) : 0;
+
+			            for (let page = 0; page < pageCount; page++) {
+			                let languageContent = languageLines.map(function(language) {
+			                    return {
+			                        code: language.code,
+			                        html: language.lines
+			                            .slice(page * linesPerPage, (page + 1) * linesPerPage)
+			                            .join('<br/>')
+			                    };
+			                });
+			                let sub_section = document.createElement('section');
+			                if (fragment > 0) {
+			                    sub_section.classList.add('top-align');
 			                }
-			                else {
-			                    lang_flag = lang.split('-')[0]
-			                    if(data.content[j][lang_flag]) {
-			                        origin_ = data.content[j][lang_flag].split(/\n/).filter(n => n);
-			                    }
-			                    else {
-			                        origin_ = [];
-			                    }
-			                }
-        			        region_ = [];
-		        	    }
-			            else {
-					let primaryLanguage = data.lang && data.lang[0];
-					if (primaryLanguage && data.content[j][primaryLanguage]) {
-						origin_ = data.content[j][primaryLanguage].split(/\n/).filter(n => n);
-					}
-					if (data.lang && data.lang.length >= 2) {
-			                    // roll back with lang variant, zh-TW-> zh
-			                    lang_flag = data.lang[1];
-			                    if(data.content[j][lang_flag]) {
-			                        region_ = data.content[j][lang_flag].split(/\n/).filter(n => n);
-			                    }
-			                    else {
-			                        lang_flag = data.lang[1].split('-')[0]
-			                        if(data.content[j][lang_flag]) {
-    			                        region_ = data.content[j][lang_flag].split(/\n/).filter(n => n);
-	    		                    }
-	    		                    else {
-	    		                        region_ = [];
-	    		                    }
-			                    }
-			                }
-			            }
-			            while(origin_.length>0) {
-			                o_fragment = origin_.splice(0, fragment).join('<br/>')
-			                r_fragment = region_.splice(0, fragment).join('<br/>')
-				            let sub_section = document.createElement('section');
-                            sub_section.classList.add('top-align');
-				            sub_section.append(create_view(data.type, o_fragment, r_fragment, s_name));
-      			            sub_section.setAttribute('order', j);
-      			            section.append(sub_section);
+			                sub_section.append(create_song_view(languageContent, s_name));
+			                sub_section.setAttribute('order', j);
+			                section.append(sub_section);
 			            }
 			        }
-			        else {
-				        let sub_section = document.createElement('section');
-				        sub_section.append(create_view(data.type, data.content[j].origin_text, data.content[j].region_text, s_name));
-      			        sub_section.setAttribute('order', j);
-  			            section.append(sub_section);
-    			    }
 			    }
 		    }
 		    else if (data.type == 'media') {
