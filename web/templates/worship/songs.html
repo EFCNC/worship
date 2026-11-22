@@ -17,7 +17,8 @@
 
 /* Override */
 #song_list {
-    flex-direction: row;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .empty-state {
@@ -445,7 +446,7 @@
 /* =========================================
    Sidebar / Search Results
    ========================================= */
-#song_list > div { width: 50%; margin: 5px; text-align: left; font-size: 14px; }
+#song_list > div { margin: 5px; text-align: left; font-size: 14px; }
 
 .sidebar-section-title { font-size: 16px; font-weight: 600; padding: 5px; margin-top: 15px; border-bottom: 2px solid #eee; }
 
@@ -462,6 +463,35 @@
     transition: background-color 0.2s ease;
 }
 .sidebar-song-item:hover { background-color: #f9f9f9; }
+
+/* Title takes the leftover space, which pushes key / language / links to the right edge */
+.sidebar-song-item .song_title { flex: 1; min-width: 0; }
+
+/* song_list headers: plain column labels on desktop, real tabs on mobile */
+.song-tab {
+    margin: 5px 5px 0;
+    padding: 8px 4px;
+    border: none;
+    border-bottom: 2px solid #eee;
+    border-radius: 0;
+    background: none;
+    color: inherit;
+    font-weight: 600;
+    pointer-events: none;
+}
+.song-tab:hover { background: none; transform: none; }
+
+#middle_content:empty::before, #right_content:empty::before { content: "No songs to show."; display: block; padding: 20px; color: #666; font-style: italic; text-align: center; }
+
+@media (max-width: 768px) {
+    .song-tab { pointer-events: auto; cursor: pointer; }
+    .song-tab.active { border-bottom-color: #28a745; }
+
+    #song_list > div { display: none; margin: 5px 0; }
+    #song_list[data-tab="left"] #left_content,
+    #song_list[data-tab="middle"] #middle_content,
+    #song_list[data-tab="right"] #right_content { display: block; grid-column: 1 / -1; }
+}
 
 .insert_btn { color: #28a745 !important; font-size: 1.1em; cursor: pointer; transition: transform 0.1s ease; }
 .insert_btn:hover { transform: scale(1.2) !important; }
@@ -527,7 +557,10 @@
     <button class="reset_btn" style="display: none;">Reset</button>
 </div>
 
-<div id="song_list" class="app-card">
+<div id="song_list" class="app-card" data-tab="left">
+    <button type="button" class="song-tab active" data-tab="left">Quick Add</button>
+    <button type="button" class="song-tab" data-tab="middle">Available</button>
+    <button type="button" class="song-tab" data-tab="right">Import</button>
     <div id="left_content"></div>
     <div id="middle_content"></div>
     <div id="right_content"></div>
@@ -1261,7 +1294,7 @@
         $.when( $.ajax( url ) ).then(function( data, textStatus, jqXHR ) {
 
             // Left Panel (Database Import)
-            let left = '<div class="sidebar-section-title"><h3>Import from another Database</h3></div>';
+            let left = '';
             for(let i=0; i<data['left'].length; i++) {
                 left += `
                     <div class="sidebar-song-item">
@@ -1272,7 +1305,7 @@
             }
 
             // Right Panel (Available Songs)
-            let right = '<div class="sidebar-section-title"><h3>Available Songs</h3></div>';
+            let right = '';
             for(let i=0; i<data['right'].length; i++) {
                 right += `
                     <div songid="${data['right'][i]['id']}" class="sidebar-song-item">
@@ -1287,8 +1320,19 @@
             $("#right_content").html(left);
             $("#middle_content").html(right);
             $("#song_list").show();
+            showSongTab('middle');
             $('html,body').animate({scrollTop: $("#song_list").offset().top - headerOffset}, 'slow');
         });
+    });
+
+    // Mobile tabs: CSS shows only the column matching data-tab
+    function showSongTab(tab) {
+        $('#song_list').attr('data-tab', tab);
+        $('.song-tab').removeClass('active').filter('[data-tab="' + tab + '"]').addClass('active');
+    }
+
+    $(document).on('click', '.song-tab', function() {
+        showSongTab($(this).data('tab'));
     });
 
     // Add this helper function outside your click handler
