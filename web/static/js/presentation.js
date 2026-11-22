@@ -353,6 +353,8 @@
 		    else if (data.type == 'song') {
 			    for(var j=0;j<data.content.length;j++) {
 			        s_name = data.content[j].name;
+			        origin_ = [];
+			        region_ = [];
 			        if (data.content[j].manual === true) {
 			            let sub_section = document.createElement('section');
                         sub_section.classList.add('top-align');
@@ -377,8 +379,11 @@
         			        region_ = [];
 		        	    }
 			            else {
-			                origin_ = data.content[j][data.lang[0]].split(/\n/).filter(n => n);
-			                if (data.lang.length >= 2) {
+					let primaryLanguage = data.lang && data.lang[0];
+					if (primaryLanguage && data.content[j][primaryLanguage]) {
+						origin_ = data.content[j][primaryLanguage].split(/\n/).filter(n => n);
+					}
+					if (data.lang && data.lang.length >= 2) {
 			                    // roll back with lang variant, zh-TW-> zh
 			                    lang_flag = data.lang[1];
 			                    if(data.content[j][lang_flag]) {

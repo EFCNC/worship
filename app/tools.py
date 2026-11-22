@@ -129,6 +129,35 @@ def simplify_json(json):
     json['slides'] = simple
     return json
 
+def language_version_order_parser(presentation):
+    for slide in presentation.get('slides', []):
+        if slide.get('type') != 'song':
+            continue
+
+        languages = slide.get('lang', [])
+        if not isinstance(languages, list):
+            continue
+        languages = list(dict.fromkeys(
+            str(language).strip() for language in languages
+            if language is not None and str(language).strip()
+        ))
+
+        language_version_order = slide.get('language_version_order', [])
+        if isinstance(language_version_order, str):
+            language_version_order = language_version_order.split(',')
+        if not isinstance(language_version_order, list):
+            language_version_order = []
+        language_version_order = list(dict.fromkeys(
+            str(language).strip() for language in language_version_order
+            if language is not None and str(language).strip()
+        ))
+
+        selected_languages = [
+            language for language in language_version_order if language in languages
+        ]
+        slide['lang'] = selected_languages or languages[:2]
+
+    return presentation
 
 def _slide_identity(slide):
     """Return a repeatable identity for matching regenerated presentation slides."""
@@ -338,6 +367,7 @@ def create_json(id, worship=None):
         os.makedirs(path, exist_ok=True)
 
     json_file = os.path.join(path, '{}_{}.json'.format(worship_date, id))
+    worship_json = language_version_order_parser(worship_json)
     # simplify json data
     worship_json = simplify_json(worship_json)
     with open(json_file, "w", encoding="utf-8") as f:
