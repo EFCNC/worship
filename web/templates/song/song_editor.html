@@ -1406,12 +1406,22 @@
         // }
 
         if (confirm(`Are you sure you want to remove the language variant: ${langToRemove}?`)) {
+            const removedIndex = contentState.findIndex(c => c.lang === langToRemove);
+            const otherPaneLang = paneNum === 1 ? activeLang2 : activeLang1;
             contentState = contentState.filter(c => c.lang !== langToRemove);
             langPriority = langPriority.filter(l => l !== langToRemove);
+
+            const orderedRemaining = removedIndex >= 0
+                ? [
+                    ...contentState.slice(removedIndex),
+                    ...contentState.slice(0, removedIndex)
+                  ]
+                : contentState;
+            const nextLang = orderedRemaining.find(c => c.lang && c.lang !== otherPaneLang)?.lang || '';
             
             renderLangPriorityUI();
             updatePaneDropdowns();
-            loadPane(paneNum, contentState[0] ? contentState[0].lang : '');
+            loadPane(paneNum, nextLang);
             updateDisabledLanguages();
         }
     }
