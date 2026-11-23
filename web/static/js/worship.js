@@ -8,6 +8,9 @@ if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(naviga
 // functions for rendering UI
 function move_top(tag) {
     scrollTo = $('div[' + tag + ']');
+    if (!scrollTo.length) {
+        return;
+    }
     $('html, body').animate({
         scrollTop:$(scrollTo).offset().top - 80
     }, 'slow');

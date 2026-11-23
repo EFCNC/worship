@@ -131,11 +131,37 @@ def profile():
 @app.route("/worship", endpoint="worship_home_base")
 @app.route("/worship/edit", endpoint="worship_home_edit")
 def worship_home():
-	sundays = Tools.allsundays()
+	all_worship_dates = Utils.get_worship_dates()
+	available_years = sorted({
+		int(date[:4])
+		for date in all_worship_dates
+		if date and len(date) >= 4 and date[:4].isdigit()
+	})
+	current_year = datetime.now().year
+	requested_year = request.args.get('year', type=int)
+
+	if requested_year in available_years:
+		selected_year = requested_year
+	elif current_year in available_years:
+		selected_year = current_year
+	elif available_years:
+		selected_year = available_years[-1]
+	else:
+		selected_year = current_year
+
+	sundays = Tools.allsundays(selected_year)
+	sundays[1][:] = [date for date in sundays[1] if date.startswith(str(selected_year))]
 	worship = Utils.worship_list()
 	worship = [{'date': x, 'worship': next((y for y in worship if y['date'] == x), -1)} for x in sundays[1]]
 	is_edit_route = request.path.rstrip('/').endswith('/worship/edit')
-	return render_template('worship/worship.html', worship=worship, sundays=sundays, is_edit_route=is_edit_route)
+	return render_template(
+		'worship/worship.html',
+		worship=worship,
+		sundays=sundays,
+		is_edit_route=is_edit_route,
+		selected_year=selected_year,
+		available_years=available_years,
+	)
 
 @app.route("/worship/<id>")
 @app.route("/worship/<id>/<tab>")

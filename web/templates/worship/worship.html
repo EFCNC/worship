@@ -71,6 +71,48 @@
         flex-direction: column;
     }
 
+    .year-navigation {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 12px;
+        margin: 8px 0 2px;
+        font-size: 20px;
+        font-weight: bold;
+    }
+
+    .year-navigation a,
+    .year-navigation span {
+        color: inherit;
+        text-decoration: none;
+    }
+
+    .year-navigation .disabled {
+        color: #aaa;
+        pointer-events: none;
+        cursor: not-allowed;
+    }
+
+    .card-sermon-edit {
+        position: absolute;
+        top: 8px;
+        left: 8px;
+        z-index: 2;
+        width: 28px;
+        height: 28px;
+        padding: 0 !important;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.8) !important;
+        color: #556B2F !important;
+    }
+
+    .card-sermon-edit:hover {
+        background: #fff !important;
+        color: #556B2F !important;
+    }
+
     .card-back {
         background-color: #009688;
         color: #fff;
@@ -334,11 +376,35 @@
 {% endblock %}
 
 {% block content %}
+<div class="year-navigation" aria-label="Worship year navigation">
+    {% set year_index = available_years.index(selected_year) if selected_year in available_years else -1 %}
+    {% if year_index > 0 %}
+        <a href="{{ request.path }}?year={{ available_years[year_index - 1] }}" aria-label="Previous year">&#9664;</a>
+    {% else %}
+        <span class="disabled" aria-hidden="true">&#9664;</span>
+    {% endif %}
+    <span>{{ selected_year }}</span>
+    {% if year_index >= 0 and year_index < available_years|length - 1 %}
+        <a href="{{ request.path }}?year={{ available_years[year_index + 1] }}" aria-label="Next year">&#9654;</a>
+    {% else %}
+        <span class="disabled" aria-hidden="true">&#9654;</span>
+    {% endif %}
+</div>
 <div class="worship_container">
     {% for w in worship %}
         <div class="worship-card">
             <div class="card-inner" date="{{ w.date }}">
                 <div class="card-front">
+                    {% if w.worship %}
+                        <button type="button"
+                                class="card-sermon-edit"
+                                id="sermon_btn"
+                                name="{{ w.worship.worship_id }}"
+                                title="Edit Sermon"
+                                aria-label="Edit Sermon">
+                            <i class="fas fa-pencil-alt" aria-hidden="true"></i>
+                        </button>
+                    {% endif %}
                     <h3>{{ w.date }}</h3>
                     {% if w.worship %}
                         {% set sermon_order = w.worship.display_order or ['zh', 'en'] %}
@@ -389,16 +455,17 @@
                             {% endfor %}
                         </div>
                         <div class="overlay_btns">
-                            <a href="{{ url_for('admin_info') }}">Info</a>
-                            <button id="sermon_btn" name="{{ w.worship.worship_id }}">Edit</button>
-                            <a href="{{ url_for('worship_songs_editor', id=w.worship.worship_id) }}">Songs</a>
+                            <!-- <button id="sermon_btn" name="{{ w.worship.worship_id }}">Edit Sermon</button> -->
+                            <button id="team_btn" name="{{ w.worship.worship_id }}">Edit Team</button>
+                            <a href="{{ url_for('worship_songs_editor', id=w.worship.worship_id) }}">Edit Songs</a>
                             <a href="{{ url_for('worship_notes', id=w.worship.worship_id) }}">Notes</a>
-                            <button id="team_btn" name="{{ w.worship.worship_id }}">Team</button>
+                            <a href="{{ url_for('get_weekly_chords', id=w.worship.worship_id) }}">Chords</a>
+                            <a href="{{ url_for('get_weekly_sheets', id=w.worship.worship_id) }}">Sheets</a>
                         </div>
                     {% else %}
                         <div class="overlay_btns">
-                            <a href="{{ url_for('worship_songs_editor', id=w.worship.worship_id) }}">Songs</a>
-                            <button id="team_btn" name="{{ w.worship.worship_id }}">Team</button>
+                            <a href="{{ url_for('worship_songs_editor', id=w.worship.worship_id) }}">Edit Songs</a>
+                            <button id="team_btn" name="{{ w.worship.worship_id }}">Edit Team</button>
                         </div>
                     {% endif %}
                 </div>
@@ -1051,14 +1118,14 @@
             }
 
             // Flip back all other cards
-            $('.worship-card').not(this).removeClass("is-flipped");
+            // $('.worship-card').not(this).removeClass("is-flipped");
 
             $(this).toggleClass("is-flipped");
         });
 
-        $(".overlay_btns button").on('click', function () {
+        $(".overlay_btns button, .card-sermon-edit").on('click', function () {
             const id = $(this).attr('name');
-            const date = $(this).parent().parent().parent().attr('date');
+            const date = $(this).closest('.card-inner').attr('date');
 
             if(!id) {
                 $("#popup").html();
