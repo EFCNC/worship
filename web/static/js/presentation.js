@@ -26,6 +26,45 @@
     let socket_url = window.location.host;
     let socket = io.connect(socket_url);
 
+    const gamepad_directions = [
+        { button: 12, action: 'up' },
+        { button: 13, action: 'down' },
+        { button: 14, action: 'left' },
+        { button: 15, action: 'right' }
+    ];
+    let gamepad_buttons_pressed = new Set();
+
+    function poll_gamepad_navigation() {
+        if (typeof navigator.getGamepads === 'function' &&
+                window.Reveal && typeof Reveal.isReady === 'function' && Reveal.isReady()) {
+            const currentlyPressed = new Set();
+            for (const gamepad of navigator.getGamepads()) {
+                if (!gamepad) {
+                    continue;
+                }
+                for (const direction of gamepad_directions) {
+                    const button = gamepad.buttons[direction.button];
+                    if (!button || !button.pressed) {
+                        continue;
+                    }
+                    const buttonId = gamepad.index + ':' + direction.button;
+                    currentlyPressed.add(buttonId);
+                    if (!gamepad_buttons_pressed.has(buttonId)) {
+                        Reveal[direction.action]();
+                    }
+                }
+            }
+            gamepad_buttons_pressed = currentlyPressed;
+        } else {
+            gamepad_buttons_pressed.clear();
+        }
+        window.requestAnimationFrame(poll_gamepad_navigation);
+    }
+
+    $(document).ready(function() {
+        window.requestAnimationFrame(poll_gamepad_navigation);
+    });
+
     // init sharp and flat keys to be assigned to keys
     let sharp = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
     let flat = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"];
