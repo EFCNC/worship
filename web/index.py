@@ -568,13 +568,10 @@ def __update_client_mode(name):
 	global client_mode
 	client_mode = name
 
-def __get_slide_json(name=None):
+def __get_slide_json():
 	coming_sunday = __get_sundays()["sunday"]
 	id = Utils.get_worship_id(coming_sunday)[0]
-	if name:
-		slides = Tools.get_worship_json1(name)
-	else:
-		slides = Tools.get_worship_json(id)
+	slides = Tools.get_worship_json(id)
 	global slides_data
 	if not slides:
 		Tools.create_json(id)
