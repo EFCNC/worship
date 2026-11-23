@@ -1017,6 +1017,7 @@
                     $('#edit_btn').show();
                 }
             });
+        socket.emit('reload');
         });
 
         $(document).on('input', '#slide_composer_origin, #slide_composer_region', function() {
