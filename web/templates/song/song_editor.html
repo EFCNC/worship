@@ -270,45 +270,33 @@
     /* =========================================
         Chords/Tags and Sequence
     ========================================= */
-    .tag-container { background: #f9f9f9;
+    .tag-container { 
+        background: #f9f9f9;
         padding: 10px;
         border-radius: 4px;
         margin-bottom: 10px;
         border: 1px solid #eee;
     }
 
-    #chord_tags {
-        margin-bottom: 18px;
-    }
-
-    .tag-container .sequence, .tag-container .chord {
+    .tag-container .sequence, .tag-container .chord, .tag-container .sequence-choice {
         display: inline-block;
-        padding: 4px 10px;
+        padding: 2px 10px;
         border: 2px solid #333;
         border-radius: 4px;
-        margin: 3px;
+        margin: 2px;
         cursor: pointer;
         font-weight: bold;
         transition: all 0.2s;
         background: white;
+        color: #333;
     }
 
-    .sequence-buttons {
+    /* .sequence-buttons {
         display: flex;
         flex-wrap: wrap;
         gap: 6px;
         margin-top: 6px;
-    }
-
-    .tag-container .sequence-choice {
-        padding: 4px 10px;
-        border: 2px solid #333;
-        border-radius: 4px;
-        cursor: pointer;
-        font-weight: bold;
-        background: white;
-        color: #333;
-    }
+    } */
 
     .arrangement-container > label,
     .arrangement-available-label {
@@ -555,29 +543,10 @@
             </div>
         </div>
 
-        <div class="tag-container arrangement-container">
-            <label for="song_sequence_input">Arrangement Sequence</label>
-            <div class="arrangement-input-row">
-                <button id="arrangement_toggle" class="arrangement-toggle" type="button" aria-expanded="false" aria-controls="arrangement_tools" aria-label="Expand visual arranger" title="Expand visual arranger">
-                    <i class="fa-solid fa-chevron-down"></i>
-                </button>
-                <input id="song_sequence_input" class="arrangement-input" name="sequence" type="text" value="{{ content.sequence }}" placeholder="e.g. Intro, V1, PC, C, V2, C, B, Tag, Outro" style="font-family: monospace; letter-spacing: 0.5px;"/>
-            </div>
-            <div id="arrangement_tools" class="arrangement-tools" hidden>
-                <div class="arrangement-available-header">
-                    <label class="arrangement-available-label">Available Sections</label>
-                    <button id="sequence_language_toggle" class="sequence-language-toggle" type="button" aria-label="Cycle preview language" title="Cycle preview language">
-                        <i class="fa-solid fa-language"></i>
-                        <span id="sequence_preview_language"></span>
-                    </button>
-                </div>
-                <div id="sequence_buttons" class="sequence-buttons"></div>
-                <ol id="sequence_preview" class="sequence-preview" aria-label="Arrangement sequence preview"></ol>
-            </div>
-        </div>
+        
 
         <div class="tag-container">
-            <label>Structure Helpers (Click to insert):</label><br/>
+            <label>Structure Helpers:</label><br/>
             <span class="sequence" data-tag="verse">Verse</span>
             <span class="sequence" data-tag="pre-chorus">Pre-Chorus</span>
             <span class="sequence" data-tag="chorus">Chorus</span>
@@ -589,10 +558,9 @@
             <span class="sequence" data-tag="tag">Tag</span>
             <span class="sequence" data-tag="intro">Intro</span>
             <span class="sequence" data-tag="outro">Outro</span>
-        </div>
-
-        <div class="tag-container" id="chord_tags">
-            <label>Smart Chords (Updates with Key):</label><br/>
+            <br>
+            <br>
+            <label>Smart Chords:</label><br/>
             <span class="chord" data-num="1">I</span>
             <span class="chord" data-num="2">ii</span>
             <span class="chord" data-num="3">iii</span>
@@ -644,6 +612,28 @@
                 </div>
             </div>
 
+        </div>
+
+        <br>
+        <div class="tag-container arrangement-container">
+            <label for="song_sequence_input">Sequence Arrangement</label>
+            <div class="arrangement-input-row">
+                <button id="arrangement_toggle" class="arrangement-toggle" type="button" aria-expanded="false" aria-controls="arrangement_tools" aria-label="Expand visual arranger" title="Expand visual arranger">
+                    <i class="fa-solid fa-chevron-down"></i>
+                </button>
+                <input id="song_sequence_input" class="arrangement-input" name="sequence" type="text" value="{{ content.sequence }}" placeholder="e.g. Intro, V1, PC, C, V2, C, B, Tag, Outro" style="font-family: monospace; letter-spacing: 0.5px;"/>
+            </div>
+            <div id="arrangement_tools" class="arrangement-tools" hidden>
+                <div class="arrangement-available-header">
+                    <label class="arrangement-available-label">Available Sections</label>
+                    <button id="sequence_language_toggle" class="sequence-language-toggle" type="button" aria-label="Cycle preview language" title="Cycle preview language">
+                        <i class="fa-solid fa-language"></i>
+                        <span id="sequence_preview_language"></span>
+                    </button>
+                </div>
+                <div id="sequence_buttons" class="sequence-buttons"></div>
+                <ol id="sequence_preview" class="sequence-preview" aria-label="Arrangement sequence preview"></ol>
+            </div>
         </div>
 
         <div class="form-row" style="margin-top:15px;">
@@ -855,7 +845,7 @@
 
         let textToInsert = isPaired 
             ? `[${tag}]\n${sel}` 
-            : `[${tag}] `;
+            : `[${tag}]`;
 
         if (!document.execCommand('insertText', false, textToInsert)) {
             const value = txtarea.value;
