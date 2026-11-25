@@ -32,7 +32,7 @@ def parse_lyrics1(content, langs, sequence):
     lyrics_ = []
 
     sequence = sequence.split(',')
-    sections = {'v': 'verse', 'p': 'pre-chorus', 'c': 'chorus', 'b': 'bridge', 't': 'tag', 'i': 'intro', 'o': 'outro', 'f': 'finish'}
+    sections = {'v': 'verse', 'pre': 'prechorus', 'c': 'chorus', 'b': 'bridge', 'tag': 'tag', 'in': 'intro', 'out': 'outro', 'post': 'postchorus', 'vamp': 'vamp', 'inter': 'interlude', 'inst': 'instrumental'}
     for s in sequence:
         section = re.findall('(\w)(\d)?', s)
         # Find sequence name and order

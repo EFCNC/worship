@@ -265,7 +265,7 @@ def _preserve_slide_order(generated_slides, previous_slides):
 def create_json(id, worship=None):
     root = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'files')
     if not worship:
-        songs = Utils.get_worship_songs1(id)
+        songs = Utils.get_worship_songs(id, True)
         if not songs:
             songs = []
             worship_date = Utils.get_worship_date(id)[0]
