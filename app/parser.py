@@ -26,7 +26,7 @@ def parse_lyrics_for_import(content):
         return [content, '']
 
 
-def parse_lyrics1(content, langs, sequence):
+def parse_lyrics_for_slides(content, langs, sequence):
     parsed_data = json.loads(content)
     langs = langs.split(',')
     lyrics_ = []
