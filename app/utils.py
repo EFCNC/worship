@@ -1035,7 +1035,7 @@ def get_worship_songs(id, slides=None):
                  'language_version_order': r[19].split(',') if r[19] else []})
         elif r[21] == 'song':
             if slides:
-                content = Parser.parse_lyrics(r[10], r[2], r[16])
+                content = Parser.parse_lyrics_for_slides(r[10], r[2], r[16])
             else:
                 content = Parser.parse_lyrics(r[10], r[16])
             songs.append({'type': r[21], 'title': r[0], 'author': r[1] if r[1] else '', 'lang': r[2].split(','),
