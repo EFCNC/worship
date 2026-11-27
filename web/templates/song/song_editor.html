@@ -285,18 +285,56 @@
         border-radius: 4px;
         margin: 2px;
         cursor: pointer;
+        font: inherit;
         font-weight: bold;
         transition: all 0.2s;
         background: white;
         color: #333;
     }
 
-    /* .sequence-buttons {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 6px;
-        margin-top: 6px;
-    } */
+    /* Space between "Structure Helpers" and "Smart Chords":
+       applies only to a .tag-group that directly follows another .tag-group */
+    .tag-group + .tag-group {
+        margin-top: 12px;
+    }
+
+    /* Little (i) icon; the help text pops up on hover or tap/focus */
+    .info-bubble {
+        position: relative;
+        display: inline-block;
+        margin-left: 4px;
+        color: #94a3b8;
+    }
+
+    .info-bubble-text {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        z-index: 10;
+        width: 280px;
+        max-width: 80vw;
+        padding: 8px 10px;
+        background: #fff;
+        border: 1px solid #cbd5e1;
+        border-radius: 4px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        color: #64748b;
+        font-size: 0.8rem;
+        font-weight: normal;
+        line-height: 1.4;
+    }
+
+    .info-bubble-text code {
+        padding: 0 3px;
+        border-radius: 3px;
+        background: #f1f5f9;
+    }
+
+    .info-bubble:hover .info-bubble-text,
+    .info-bubble:focus .info-bubble-text {
+        display: block;
+    }
 
     .arrangement-container > label,
     .arrangement-available-label {
@@ -341,10 +379,6 @@
         white-space: nowrap;
     }
 
-    .arrangement-tools[hidden] {
-        display: none;
-    }
-
     .arrangement-available-header {
         display: flex;
         align-items: center;
@@ -358,9 +392,15 @@
     }
 
     .sequence-preview {
+        --gap: 8px;
+        --max-cols: 4;
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: 8px;
+        /* Column min width = the larger of 220px or "1/max-cols of the row" (minus 1px
+           so rounding can't drop us to 3 columns). That caps the row at 4 columns.
+           Change auto-fit to auto-fill if a short row should keep quarter-width blocks. */
+        grid-template-columns: repeat(auto-fit, minmax(
+            max(220px, calc((100% - (var(--max-cols) - 1) * var(--gap)) / var(--max-cols) - 1px)), 1fr));
+        gap: var(--gap);
         list-style: none;
         margin: 10px 0 0;
         padding: 0;
@@ -368,17 +408,30 @@
 
     .sequence-preview-item {
         min-width: 0;
-        padding: 8px;
+        padding: 0 8px 8px;
         border: 1px solid #cbd5e1;
         border-radius: 4px;
         background: #fff;
+    }
+
+    /* Grey bar across the top of each block showing its position (1, 2, 3...) */
+    .sequence-preview-position {
+        margin: 0 -8px;
+        padding: 1px 0;
+        background: #f1f5f9;
+        border-bottom: 1px solid #e2e8f0;
+        border-radius: 3px 3px 0 0;
+        color: #64748b;
+        font-size: 0.75rem;
+        font-weight: bold;
+        text-align: center;
     }
 
     .sequence-preview-header {
         display: flex;
         align-items: center;
         gap: 6px;
-        margin: -4px -4px 6px;
+        margin: 4px -4px 6px;
         padding: 4px 10px;
         cursor: grab;
         border-radius: 4px;
@@ -396,23 +449,9 @@
         flex: 1;
     }
 
-    .sequence-remove {
-        border: 0;
-        padding: 3px 5px;
-        background: transparent;
-        color: #475569;
-        cursor: inherit;
-    }
+    .sequence-preview-header .sequence-remove {
+        padding: 3px 10px;
 
-    .sequence-remove {
-        cursor: pointer;
-    }
-
-    .sequence-preview-language {
-        margin-top: 5px;
-        color: #475569;
-        font-size: 0.8rem;
-        font-weight: bold;
     }
 
     .sequence-preview-lyrics {
@@ -546,28 +585,45 @@
         
 
         <div class="tag-container">
-            <label>Structure Helpers:</label><br/>
-            <span class="sequence" data-tag="verse">Verse</span>
-            <span class="sequence" data-tag="pre-chorus">Pre-Chorus</span>
-            <span class="sequence" data-tag="chorus">Chorus</span>
-            <span class="sequence" data-tag="post-chorus">Post-Chorus</span>
-            <span class="sequence" data-tag="bridge">Bridge</span>
-            <span class="sequence" data-tag="interlude">Interlude</span>
-            <span class="sequence" data-tag="instrumental">Instrumental</span>
-            <span class="sequence" data-tag="vamp">Vamp</span>
-            <span class="sequence" data-tag="tag">Tag</span>
-            <span class="sequence" data-tag="intro">Intro</span>
-            <span class="sequence" data-tag="outro">Outro</span>
-            <br>
-            <br>
-            <label>Smart Chords:</label><br/>
-            <span class="chord" data-num="1">I</span>
-            <span class="chord" data-num="2">ii</span>
-            <span class="chord" data-num="3">iii</span>
-            <span class="chord" data-num="4">IV</span>
-            <span class="chord" data-num="5">V</span>
-            <span class="chord" data-num="6">VI</span>
-            <span class="chord" data-num="7">VII</span>
+            <div class="tag-group">
+                <label>Structure Helpers:</label>
+                <span class="info-bubble" tabindex="0" role="note" aria-label="Typing tips">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <span class="info-bubble-text">
+                        Click to insert, or type it yourself on its own line:
+                        <code>[verse]</code>, or <code>[verse 1]</code>, <code>[verse 2]</code> for several.
+                    </span>
+                </span><br/>
+                <span class="sequence" data-tag="verse">Verse</span>
+                <span class="sequence" data-tag="pre-chorus">Pre-Chorus</span>
+                <span class="sequence" data-tag="chorus">Chorus</span>
+                <span class="sequence" data-tag="post-chorus">Post-Chorus</span>
+                <span class="sequence" data-tag="bridge">Bridge</span>
+                <span class="sequence" data-tag="interlude">Interlude</span>
+                <span class="sequence" data-tag="instrumental">Instrumental</span>
+                <span class="sequence" data-tag="vamp">Vamp</span>
+                <span class="sequence" data-tag="tag">Tag</span>
+                <span class="sequence" data-tag="intro">Intro</span>
+                <span class="sequence" data-tag="outro">Outro</span>
+            </div>
+
+            <div class="tag-group">
+                <label>Smart Chords:</label>
+                <span class="info-bubble" tabindex="0" role="note" aria-label="Typing tips">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <span class="info-bubble-text">
+                        Chords go inline with the lyrics:<br>
+                        <code>[G]Amazing gr[G7]ace</code>
+                    </span>
+                </span><br>
+                <span class="chord" data-num="1">I</span>
+                <span class="chord" data-num="2">ii</span>
+                <span class="chord" data-num="3">iii</span>
+                <span class="chord" data-num="4">IV</span>
+                <span class="chord" data-num="5">V</span>
+                <span class="chord" data-num="6">VI</span>
+                <span class="chord" data-num="7">VII</span>
+            </div>
         </div>
 
         <div class="lyrics-split-container">
@@ -1116,8 +1172,11 @@
             removeButton.setAttribute('aria-label', `Remove ${parsed.displayHeader}`);
             removeButton.innerHTML = '<i class="fa-solid fa-trash"></i>';
 
+            const position = document.createElement('div');
+            position.className = 'sequence-preview-position';
+
             header.append(title, removeButton);
-            item.appendChild(header);
+            item.append(position, header);
 
             const language = contentState.find(block => block.lang === sequencePreviewLanguage);
             const section = SEQUENCE_MAPPER.findSection(language, parsed.sectionName);
@@ -1139,7 +1198,15 @@
             container.appendChild(item);
         });
 
+        renumberSequencePreview();
         if ($(container).data('ui-sortable')) $(container).sortable('refresh');
+    }
+
+    // Dragging reorders blocks without re-rendering, so numbers are refreshed in place
+    function renumberSequencePreview() {
+        $('#sequence_preview .sequence-preview-position').each((index, el) => {
+            el.textContent = index + 1;
+        });
     }
 
     function updateSequenceFromPreview() {
@@ -1147,6 +1214,7 @@
             return this.dataset.token;
         }).get();
         document.querySelector('input[name="sequence"]').value = tokens.join(', ');
+        renumberSequencePreview();
     }
 
     function initContentState() {
