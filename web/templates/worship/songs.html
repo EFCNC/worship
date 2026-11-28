@@ -17,7 +17,8 @@
 
 /* Override */
 #song_list {
-    flex-direction: row;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .empty-state {
@@ -111,6 +112,141 @@
 .song-details-row select {
     height: auto;
     padding: 3px 5px;
+}
+
+.language-priority-widget {
+    width: 100%;
+}
+
+.song_sequence_toggle,
+.language-priority-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    min-height: 32px;
+    box-sizing: border-box;
+    padding: 4px 10px 4px 2px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    background: transparent;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.song_sequence_toggle:hover,
+.song_sequence_toggle:focus-visible,
+.language-priority-toggle:hover,
+.language-priority-toggle:focus-visible {
+    border-color: #d7dadd;
+    background: #f1f3f4;
+    color: inherit;
+    transform: none;
+}
+
+.language-priority-toggle small {
+    color: #666;
+    font-weight: normal;
+}
+.language-priority-panel {
+    display: flex;
+    gap: 12px;
+    padding: 8px 0 4px 24px;
+}
+
+.language-priority-box {
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+.language-priority-box > strong {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.language-priority-list {
+    box-sizing: border-box;
+    min-height: 42px;
+    max-height: 180px;
+    overflow-y: auto;
+    margin: 0;
+    padding: 4px;
+    list-style: none;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background: #f8fafc;
+}
+
+.language-priority-list:empty::before {
+    content: attr(data-empty);
+    display: block;
+    padding: 8px;
+    color: #777;
+    font-style: italic;
+}
+
+.language-priority-list:not(.language-priority-active) .language-priority-handle {
+    visibility: hidden;
+}
+
+.language-priority-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 32px;
+    margin: 2px 0;
+    padding: 2px 4px;
+    border: 1px solid #d5d9dd;
+    border-radius: 3px;
+    background: #fff;
+}
+
+.language-priority-handle {
+    color: #777;
+    cursor: grab;
+}
+
+.language-priority-name {
+    flex: 1;
+    min-width: 0;
+}
+
+.language-priority-name small {
+    margin-left: 6px;
+    color: #666;
+}
+
+.language-priority-move {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 7px;
+    border: 1px solid #cbd1d6;
+    border-radius: 3px;
+    background: #f5f6f7;
+    color: #333;
+    cursor: pointer;
+    font-size: 0.8rem;
+    white-space: nowrap;
+}
+
+.language-priority-move:hover {
+    background: #e8ecef;
+}
+
+.language-priority-placeholder {
+    min-height: 32px;
+    border: 1px dashed #999;
+    background: #eef1f3;
+}
+
+@media (max-width: 600px) {
+    .language-priority-panel {
+        flex-direction: column;
+        padding-left: 0;
+    }
 }
 
 .song-notes-row p {
@@ -261,13 +397,17 @@
     align-items: flex-start;
     width: 100%;
 }
-.song_sequence_toggle { display: flex; align-items: center; cursor: pointer; gap: 8px; }
-
 /* Sequence Colored Tags */
-.p { background-color: #f78787; color: #fff}
-.v, [class~="1"], [class~="2"], [class~="3"], [class~="4"], [class~="5"], [class~="6"], [class~="7"], [class~="8"] { background-color: #D6B588; color: #fff; }
-.chorus, .Chorus, .c { background-color: #556b2f; color: #fff}
-.bridge, .b, .b2, .b3, .b4 { background-color: #003153; color: #fff}
+.verse { background-color: #D6B588; color: #fff; }
+.chorus { background-color: #556b2f; color: #fff}
+.bridge { background-color: #003153; color: #fff}
+.prechorus { background-color: #f78787; color: #fff}
+.postchorus { background-color: #f78787; color: #fff}
+.tag { background-color: #37a584; color: #fff}
+.vamp { background-color: #37a584; color: #fff}
+.intro {background-color: #000; color: #fff}
+.outro {background-color: #000; color: #fff}
+.interlude {background-color: #319eb1; color: #fff}
 
 .ui-sortable-placeholder {
     visibility: visible !important;
@@ -306,7 +446,7 @@
 /* =========================================
    Sidebar / Search Results
    ========================================= */
-#song_list > div { width: 50%; margin: 5px; text-align: left; font-size: 14px; }
+#song_list > div { margin: 5px; text-align: left; font-size: 14px; }
 
 .sidebar-section-title { font-size: 16px; font-weight: 600; padding: 5px; margin-top: 15px; border-bottom: 2px solid #eee; }
 
@@ -323,6 +463,35 @@
     transition: background-color 0.2s ease;
 }
 .sidebar-song-item:hover { background-color: #f9f9f9; }
+
+/* Title takes the leftover space, which pushes key / language / links to the right edge */
+.sidebar-song-item .song_title { flex: 1; min-width: 0; }
+
+/* song_list headers: plain column labels on desktop, real tabs on mobile */
+.song-tab {
+    margin: 5px 5px 0;
+    padding: 8px 4px;
+    border: none;
+    border-bottom: 2px solid #eee;
+    border-radius: 0;
+    background: none;
+    color: inherit;
+    font-weight: 600;
+    pointer-events: none;
+}
+.song-tab:hover { background: none; transform: none; }
+
+#middle_content:empty::before, #right_content:empty::before { content: "No songs to show."; display: block; padding: 20px; color: #666; font-style: italic; text-align: center; }
+
+@media (max-width: 768px) {
+    .song-tab { pointer-events: auto; cursor: pointer; }
+    .song-tab.active { border-bottom-color: #28a745; }
+
+    #song_list > div { display: none; margin: 5px 0; }
+    #song_list[data-tab="left"] #left_content,
+    #song_list[data-tab="middle"] #middle_content,
+    #song_list[data-tab="right"] #right_content { display: block; grid-column: 1 / -1; }
+}
 
 .insert_btn { color: #28a745 !important; font-size: 1.1em; cursor: pointer; transition: transform 0.1s ease; }
 .insert_btn:hover { transform: scale(1.2) !important; }
@@ -388,7 +557,10 @@
     <button class="reset_btn" style="display: none;">Reset</button>
 </div>
 
-<div id="song_list" class="app-card">
+<div id="song_list" class="app-card" data-tab="left">
+    <button type="button" class="song-tab active" data-tab="left">Quick Add</button>
+    <button type="button" class="song-tab" data-tab="middle">Available</button>
+    <button type="button" class="song-tab" data-tab="right">Import</button>
     <div id="left_content"></div>
     <div id="middle_content"></div>
     <div id="right_content"></div>
@@ -406,6 +578,11 @@
     ================================== */
     // Store worship set into object
     let songs = {{ songs|tojson|safe }};
+    let nextSongCardId = 0;
+    songs.forEach(song => {
+        song._cardId = nextSongCardId++;
+        if (song.type === 'song') song.language_version_order = get_language_version_order(song);
+    });
     let songs_temp = JSON.parse(JSON.stringify(songs));
     let lyrics_raw = '';
     let worship_data = {{ w|tojson|safe }};
@@ -442,7 +619,7 @@
                             <button type="button" class="icon-button insert_btn" title="Add Song"><i class="fa-solid fa-plus"></i></button>
                             <span class="song_title"><b>${s.title}</b></span>
                             <span class="keynote">${s.key}</span>
-                            ${lang_tag(s.lang)} ${lang_tag(s.lang_2)} ${get_links(s.video, s.score, s.abc, s.id)}
+                            ${language_tags(s.lang)} ${get_links(s.video, s.score, s.abc, s.id)}
                         </div>`;
                 }
             $('#left_content').append(my_pinned_songs);
@@ -459,7 +636,7 @@
                                 <button type="button" class="icon-button insert_btn" title="Add Song"><i class="fa-solid fa-plus"></i></button>
                                 <span class="song_title"><b>${s1.title}</b></span>
                                 <span class="keynote">${s1.key}</span>
-                                ${lang_tag(s1.lang)} ${lang_tag(s1.lang_2)} ${get_links(s1.video, s1.score, s1.abc, s1.id)}
+                                ${language_tags(s1.lang)} ${get_links(s1.video, s1.score, s1.abc, s1.id)}
                             </div>`;
                     }
                 }
@@ -475,7 +652,7 @@
                         <button type="button" class="icon-button insert_btn" title="Add Song"><i class="fa-solid fa-plus"></i></button>
                         <span class="song_title"><b>${s.title}</b></span>
                         <span class="keynote">${s.key}</span>
-                        ${lang_tag(s.lang)} ${lang_tag(s.lang_2)} ${get_links(s.video, s.score, s.abc, s.id)}
+                        ${language_tags(s.lang)} ${get_links(s.video, s.score, s.abc, s.id)}
                     </div>`;
             }
             $('#left_content').append(my_new_songs);
@@ -517,8 +694,9 @@
     });
 
     $(document).on('input', 'textarea[name="song_notes"]', function() {
-        let index = $(this).data('index');
-        songs_temp[index].notes = $(this).val();
+        let cardId = $(this).data('card-id');
+        let song = songs_temp.find(item => item._cardId == cardId);
+        if (song) song.notes = $(this).val();
         checkActionButtons();
     });
     
@@ -592,7 +770,16 @@
             save_worship_notes();
         }
         if (songsChanged) {
-            save(worship_id);
+            let is_sequence_empty = songs_temp.some(function(song) {
+                return !song.alt_sequence || song.alt_sequence.trim() === '';
+            });
+            if (is_sequence_empty) {
+                if (!alert("Some songs have empty sequences. Please make sure you have added sequences for all songs before saving!")) {
+                    return;
+                }
+            } else {
+                save(worship_id);
+            }
         }
         if (!notesChanged && !songsChanged) {
             alert("Nothing was changed!!");
@@ -627,22 +814,96 @@
 
     function songs_have_changes() {
         let currentOrder = $('#songs').data('ui-sortable')
-            ? $('#songs').sortable('toArray', {attribute: 'name'})
-            : songs.map(item => String(item.id));
-        let originalOrder = songs.map(item => String(item.id));
+            ? $('#songs').sortable('toArray', {attribute: 'data-card-id'})
+            : songs.map(item => String(item._cardId));
+        let originalOrder = songs.map(item => String(item._cardId));
 
         if (JSON.stringify(currentOrder) !== JSON.stringify(originalOrder) || songs.length !== songs_temp.length) {
             return true;
         }
 
         return songs.some(function(song) {
-            let tempSong = songs_temp.find(s => s.id === song.id);
+            let tempSong = songs_temp.find(s => s._cardId === song._cardId);
             return !tempSong ||
                 (parseInt(song.transpose) || 0) !== (parseInt(tempSong.transpose) || 0) ||
                 song.notes != tempSong.notes ||
-                song.alt_sequence != tempSong.alt_sequence;
+                song.alt_sequence != tempSong.alt_sequence ||
+                JSON.stringify(song.language_version_order || []) !== JSON.stringify(tempSong.language_version_order || []);
         });
     }
+
+    function checkSequenceEmptyState($container) {
+        let hasItems = $container.children('.lyric-item').not('.empty-sequence-state').length > 0;
+        
+        if (!hasItems) {
+            if ($container.children('.empty-sequence-state').length === 0) {
+                $container.append('<li class="empty-sequence-state" style="grid-column: 1 / -1; padding: 20px; text-align: center; color: #666; font-style: italic; background: #f5f5f5; border: 1px dashed #ccc; border-radius: 5px; list-style: none;">No sequence added yet! Click a quick add button to start.</li>');
+            }
+        } else {
+            $container.children('.empty-sequence-state').remove();
+        }
+    }
+
+    function syncLanguagePriority($widget) {
+        const $activeList = $widget.find('.language-priority-active');
+        const order = $activeList.children('[data-lang]').map(function() {
+            return $(this).data('lang');
+        }).get();
+        const cardId = String($widget.data('card-id'));
+        const song = songs_temp.find(item => String(item._cardId) === cardId);
+        if (song) {
+            song.language_version_order = order;
+            const $sequence = $('#sequence_' + cardId);
+            const currentLanguage = $sequence.attr('data-current-language');
+            const displayLanguage = order.includes(currentLanguage) ? currentLanguage : order[0];
+            render_song_sequence_language(song, displayLanguage);
+            $('#songs li[data-card-id="' + cardId + '"] .btn-lang-swap').toggle(order.length > 1);
+        }
+
+        $activeList.children('.language-priority-item').each(function(index) {
+            $(this).find('.language-priority-name small').text('(#' + (index + 1) + ')');
+        });
+        $widget.find('.language-priority-toggle small').text(order.join(', '));
+        checkActionButtons();
+    }
+
+    const ACCORDION_TOGGLE_DURATION = 400;
+
+    $(document).on('click', '.language-priority-toggle', function() {
+        let $trigger = $(this);
+        let isOpen = $trigger.attr('aria-expanded') === 'true';
+        $trigger.attr('aria-expanded', !isOpen)
+            .find('i').toggleClass('fa-caret-right fa-caret-down');
+        $trigger.next('.language-priority-panel').toggle(ACCORDION_TOGGLE_DURATION);
+    });
+
+    $(document).on('click', '.language-priority-move', function() {
+        const $item = $(this).closest('.language-priority-item');
+        const $widget = $(this).closest('.language-priority-widget');
+        const $source = $item.parent();
+        const $activeList = $widget.find('.language-priority-active');
+
+        if ($source.is($activeList) && $activeList.children().length === 1) return;
+
+        const $target = $source.is($activeList)
+            ? $widget.find('.language-priority-list').not($activeList)
+            : $activeList;
+        const isActive = $target.is($activeList);
+        const lang = String($item.data('lang'));
+        const moveIcon = isActive ? 'fa-arrow-right' : 'fa-arrow-left';
+        const moveLabel = isActive ? 'Remove' : 'Add';
+        const moveTitle = isActive ? `Remove ${lang} from current languages` : `Add ${lang} to current languages`;
+        const priority = isActive ? `<small></small>` : '';
+        $item.find('.language-priority-name').html(lang + priority);
+        $item.find('.language-priority-move')
+            .attr('title', moveTitle)
+            .attr('aria-label', moveTitle)
+            .find('i').attr('class', 'fa-solid ' + moveIcon)
+            .end()
+            .find('span').text(moveLabel);
+        $target.append($item);
+        syncLanguagePriority($widget);
+    });
 
     function save_worship_notes() {
         let sermonData = {
@@ -672,20 +933,21 @@
 
     // This function will detect if arrangement has been changed compare to the origin one
     function is_changed(order) {
-        temp = []
-        content = []
+        let temp = []
+        let content = []
         if (JSON.stringify(songs) !== JSON.stringify(songs_temp)) {
             console.log('content changed');
             content = JSON.parse(JSON.stringify(songs_temp));
         }
-        if(JSON.stringify(order) != JSON.stringify(songs.map(item=>String(item.id)))) {
+        if(JSON.stringify(order) != JSON.stringify(songs.map(item=>String(item._cardId)))) {
             console.log('order changed')
-            for (id of order) {
+            for (let cardId of order) {
+                let entry;
                 if (content.length>0) {
-                    entry = content.find(o => o.id == id)
+                    entry = content.find(o => o._cardId == cardId)
                 }
                 else {
-                    entry = songs_temp.find(o => o.id == id)
+                    entry = songs_temp.find(o => o._cardId == cardId)
                 }
                 temp.push(entry)
             }
@@ -702,7 +964,7 @@
         Leaving the if else just in case
     */
     function save(id) {
-        let temp = is_changed($('#songs').sortable('toArray', {attribute: 'name'}), $('#lyrics').sortable('toArray', {attribute: 'name'}))
+        let temp = is_changed($('#songs').sortable('toArray', {attribute: 'data-card-id'}), $('#lyrics').sortable('toArray', {attribute: 'name'}))
         if (temp) {
             let changed = temp.map((item, i)=> ({
                 'song_order': i+1,
@@ -710,8 +972,9 @@
                 'song_id': item.id,
                 'sequence': item.alt_sequence,
                 'notes': item.notes,
-                'transpose': [item.transpose.toString()],
-                'scheduled_date': item.date
+                'transpose': item.transpose.toString(),
+                'scheduled_date': item.date,
+                'language_version_order': item.language_version_order
             }));
 
             let url = API_URL + 'worship/' + id + '/edit';
@@ -727,11 +990,11 @@
             	        alert("Worship Arrangement Saved!");
 
                         // Rebuild the 'songs' baseline to match the newly saved state!
-                        let newOrder = $('#songs').sortable('toArray', {attribute: 'name'});
+                        let newOrder = $('#songs').sortable('toArray', {attribute: 'data-card-id'});
                         let newBaseline = [];
                         
-                        for (let currentId of newOrder) {
-                            let songData = songs_temp.find(s => s.id == currentId);
+                        for (let cardId of newOrder) {
+                            let songData = songs_temp.find(s => s._cardId == cardId);
                             if (songData) {
                                 newBaseline.push(songData);
                             }
@@ -744,7 +1007,7 @@
                         checkActionButtons();
     	            }
         	        else {
-        	            alert(response);
+                        alert(response.responseText || response.statusText);
 				    }
                 },
                 contentType: "application/json",
@@ -770,9 +1033,20 @@
     // init sortable, triggered after the worship div is loaded
     function init() {
         $("#songs").sortable({
-            cancel: 'input, textarea, button, select, option, .song-title',
+            cancel: 'input, textarea, button, select, option, .song-title, .language-priority-widget, .language-priority-widget *',
             update: function () {
                 checkActionButtons();
+            }
+        });
+
+        $('.language-priority-active').sortable({
+            axis: 'y',
+            cursor: 'grabbing',
+            handle: '.language-priority-handle',
+            placeholder: 'language-priority-placeholder',
+            forcePlaceholderSize: true,
+            update: function() {
+                syncLanguagePriority($(this).closest('.language-priority-widget'));
             }
         });
 
@@ -798,11 +1072,11 @@
 
             create: function( event, ui ) {
                 //is_changed($(this).sortable('toArray', {attribute: 'name'}));
-                update_alt($(this).sortable('toArray'));
+                update_alt($(this).sortable('toArray'), $(this).attr('id'));
             },
             update: function(event, ui) {
                 //is_changed($(this).sortable('toArray', {attribute: 'name'}));
-                update_alt($(this).sortable('toArray'));
+                update_alt($(this).sortable('toArray'), $(this).attr('id'));
                 checkActionButtons();
             }
         });
@@ -836,12 +1110,12 @@
     // When the Key is changed
     $(document).on('change', '.key', function () {
         let transposeVal = keys.indexOf(this.value) - keys.indexOf($(this).attr('init'));
-        let id = $(this).closest('li').attr('name');
+        let cardId = $(this).closest('li').attr('data-card-id');
         
         $(this).attr('name', transposeVal); 
         
         for (let song of songs_temp) {
-            if (song.id == id) {
+            if (song._cardId == cardId) {
                 song.transpose = transposeVal;
                 break;
             }
@@ -853,8 +1127,9 @@
     function parse_chord(chord, diff) {
 	    diff = Number(diff);
 	    chord = chord.split('/');
-        new_chord = []
-        for(c in chord) {
+        let new_chord = []
+        for(let c in chord) {
+            let pos;
     	    if(chord[c][1] == 'b' || chord[c][1] == '#') {
               	pos = keys.indexOf(chord[c].substring(0,2))+diff
               	if(pos>= keys.length) {
@@ -916,8 +1191,11 @@
        ========================================================= */
     // When lyrics sequence is clicked, open up movable lyrics sections
     $(document).on('click', '.song_sequence_toggle', function(){
-        $(this).find('.toggle-icon').toggleClass('fa-caret-down fa-caret-right');
-        $(this).next('.sequence-container').toggle('slow');
+        let $toggle = $(this);
+        let isOpen = $toggle.hasClass('is-open');
+        $toggle.toggleClass('is-open', !isOpen)
+            .find('.toggle-icon').toggleClass('fa-caret-down fa-caret-right');
+        $toggle.next('.sequence-container').toggle(ACCORDION_TOGGLE_DURATION);
     });
 
     // When add_sequence_btn for lyrics sequence is clicked
@@ -934,28 +1212,36 @@
 
     // When remove_sequence_btn is clicked
     $(document).on('click', '.remove_sequence_btn', function () {
+        let $container = $(this).closest('.lyrics');
         $(this).closest('li').remove();
+
+        checkSequenceEmptyState($container);
 
         $(".lyrics").sortable( "destroy" );
         init();
         checkActionButtons();
     });
    
-    // update alt sequence which will be saved onto song_set table
-    function update_alt(alt) {
-        ids = []
+    function update_alt(alt, listId) {
+        let ids = [];
         $.each(alt, function() {
-            temp = this.split('_');
-            base = temp[0];
-            ids.push(temp[1])
+            // Exclude the empty state placeholder if picked up by sortable
+            if (this && this !== 'empty-sequence-state') {
+                let temp = this.split('_');
+                if (temp.length > 1) ids.push(temp[1]);
+            }
         });
-        id = base.split('-')[1]
-        ids = ids.join(',')
-        $('#'+base+'_alt').html(ids);
-        for (song of songs_temp) {
-            if (song.id == id) {
-               song.alt_sequence = ids;
-                break;
+        
+        // Extract the card ID from the ul id (e.g., "sequence_123" -> "123")
+        let cardId = listId.slice('sequence_'.length);
+        let sequenceStr = ids.join(',');
+        
+        $('#song-' + cardId + '_alt').html(sequenceStr);
+        
+        for (let song of songs_temp) {
+            if (song._cardId == cardId) {
+            song.alt_sequence = sequenceStr;
+            break;
             }
         }
     }
@@ -978,9 +1264,9 @@
     
     // Remove song from song set, when click save song_set table will be updated
     $(document).on('click', '.remove_btn', function() {
-        let id = $(this).closest('li').attr('name');
+        let cardId = $(this).closest('li').attr('data-card-id');
         for (i in songs_temp) {
-            if (songs_temp[i].id == id) {
+            if (songs_temp[i]._cardId == cardId) {
                 songs_temp.splice(i,1);
                 break;
             }
@@ -1011,25 +1297,25 @@
         $.when( $.ajax( url ) ).then(function( data, textStatus, jqXHR ) {
 
             // Left Panel (Database Import)
-            let left = '<div class="sidebar-section-title"><h3>Import from another Database</h3></div>';
+            let left = '';
             for(let i=0; i<data['left'].length; i++) {
                 left += `
                     <div class="sidebar-song-item">
                         <button type="button" lang="${data['left'][i]['lang']}" db="${data['left'][i]['db']}" songid="${data['left'][i]['id']}" class="icon-button insert_btn" title="Import Song"><i class="fa-solid fa-cloud-arrow-down"></i></button>
                         <span class="song_title"><b>${highlight_keyword(keyword, data['left'][i]['title'])}</b></span> 
-                        ${lang_tag(data['left'][i]['lang'])}
+                        ${language_tags(data['left'][i]['lang'])}
                     </div>`;
             }
 
             // Right Panel (Available Songs)
-            let right = '<div class="sidebar-section-title"><h3>Available Songs</h3></div>';
+            let right = '';
             for(let i=0; i<data['right'].length; i++) {
                 right += `
                     <div songid="${data['right'][i]['id']}" class="sidebar-song-item">
                         <button type="button" class="icon-button insert_btn" title="Add Song"><i class="fa-solid fa-plus"></i></button>
                         <span class="song_title"><b>${highlight_keyword(keyword, data['right'][i]['title'])}</b></span> 
                         <span class="keynote">${data['right'][i]['key']}</span> 
-                        ${lang_tag(data['right'][i]['lang'])} ${lang_tag(data['right'][i]['lang_2'])}
+                        ${language_tags(data['right'][i]['lang'])}
                         ${get_links(data['right'][i]['video'], data['right'][i]['score'], data['right'][i]['abc'], data['right'][i]['id'])}
                     </div>`;
             }
@@ -1037,13 +1323,26 @@
             $("#right_content").html(left);
             $("#middle_content").html(right);
             $("#song_list").show();
+            showSongTab('middle');
             $('html,body').animate({scrollTop: $("#song_list").offset().top - headerOffset}, 'slow');
         });
     });
 
+    // Mobile tabs: CSS shows only the column matching data-tab
+    function showSongTab(tab) {
+        $('#song_list').attr('data-tab', tab);
+        $('.song-tab').removeClass('active').filter('[data-tab="' + tab + '"]').addClass('active');
+    }
+
+    $(document).on('click', '.song-tab', function() {
+        showSongTab($(this).data('tab'));
+    });
+
     // Add this helper function outside your click handler
-    function scrollToTarget(id) {
-        let $target = $('#worship li[name="' + id + '"]');
+    function scrollToTarget(id, cardId) {
+        let $target = cardId === undefined
+            ? $('#worship li[name="' + id + '"]')
+            : $('#worship li[data-card-id="' + cardId + '"]');
         if ($target.length === 0) $target = $('#worship li').last();
         let $scrollTarget = $target.length > 0 ? $target : $('#worship');
         
@@ -1096,17 +1395,22 @@
         // When songs in current dB is clicked, add it to panel
         else {
             get_song(id).done(function(data) {
-                if(songs_temp.find(o => o.title === data.title)) {
-                    alert('"' + data.title + '"is already in the set!');
-                    stopLoading();
-                    return false;
-                }
+                // Removing the duplicate check to allow adding the same song multiple times
+                // if(songs_temp.find(o => o.title === data.title)) {
+                //     alert('"' + data.title + '"is already in the set!');
+                //     stopLoading();
+                //     return false;
+                // }
+
                 data['date'] = worship_data.date;
+                data.language_version_order = get_language_version_order(data);
+                data.alt_sequence = data.sequence;
+                data._cardId = nextSongCardId++;
                 songs_temp.push(data);
                 
                 $.when(add_song_to_worship(worship)).then(function() {
                     // DOM is updated, now scroll to the new item
-                    scrollToTarget(id).done(() => {
+                    scrollToTarget(id, data._cardId).done(() => {
                         init();
                         checkActionButtons();
                         stopLoading();

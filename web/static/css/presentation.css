@@ -142,6 +142,10 @@ span.chunk:before {
     color: #ffd800;
 }
 
+.song.language-third {
+    color: oklab(0.42 0.11 -0.13);
+}
+
 html #top-left,
 html #top-right,
 html #bottom-left,

@@ -196,6 +196,34 @@
         return grid;
     }
 
+    function create_song_view(languages, name) {
+        let grid = document.createElement('div');
+        grid.setAttribute('name', name);
+        const languageClasses = ['origin', 'region', 'language-third'];
+        languages.forEach(function(language, index) {
+            let lyrics = document.createElement('div');
+            lyrics.setAttribute('class', 'song ' + languageClasses[index % languageClasses.length]);
+            lyrics.setAttribute('data-language', language.code);
+            if (mode == 'admin') {
+                lyrics.setAttribute('contentEditable', 'true');
+            }
+            lyrics.innerHTML = language.html;
+            grid.append(lyrics);
+        });
+        return grid;
+    }
+
+    function get_song_lyrics(content, language) {
+        if (typeof language !== 'string' || !language) {
+            return '';
+        }
+        if (typeof content[language] === 'string') {
+            return content[language];
+        }
+        let baseLanguage = language.split('-')[0];
+        return typeof content[baseLanguage] === 'string' ? content[baseLanguage] : '';
+    }
+
     // Helper function to safely extract lines from either a list or raw text
     function parseContent(htmlString) {
         if (!htmlString) return { isList: false, lines: [] };
@@ -255,7 +283,159 @@
         });
     }
 
-    function load_slides() {
+    function load_slides(lang) {
+        $('.slides').empty();
+        if (!slides.length) {
+            $('#slide_title, #slide_notes').empty();
+            document.dispatchEvent(new CustomEvent('presentation:slides-loaded'));
+            return;
+        }
+        pos = Math.max(0, Math.min(pos, slides.length - 1));
+        $('#slide_title').html(slides[pos].title);
+        $('#slide_notes').html(slides[pos].notes);
+        for(var i=0;i<slides.length;i++) {
+            data = slides[i];
+            bg_url = data.style.background;
+            let section = document.createElement('section');
+            if (bg_url) {
+                section.setAttribute('data-background-image', bg_url);
+                section.setAttribute('data-background-opacity', 1);
+                section.setAttribute('data-background-brightness', get_slide_background_brightness(data));
+            }
+            fragment = data.style.fragment;
+            if(data.type == 'info') {
+                if (Array.isArray(data.content)) {
+                    data.content.forEach(function(content, contentIndex) {
+                        let sub_section = document.createElement('section');
+                        sub_section.append(create_view(
+                            data.type,
+                            content.origin_text || '',
+                            content.region_text || '',
+                            content.name || 'info'
+                        ));
+                        sub_section.setAttribute('order', contentIndex);
+                        section.append(sub_section);
+                    });
+                }
+                else {
+                // SETTING: Tune these numbers based on your presentation font size!
+                //let max_lines_per_slide = 5;
+                let max_chars_per_slide = 120;
+
+                let parsedOrigin = parseContent(data.content.origin_text);
+                let parsedRegion = parseContent(data.content.region_text);
+
+                let origin_lines = parsedOrigin.lines;
+                let region_lines = parsedRegion.lines;
+                let isList = parsedOrigin.isList;
+
+                    // NEW: Dynamic chunking based on both character count and line count
+                    while (origin_lines.length > 0) {
+                        let current_chunk_o = [];
+                        let current_chunk_r = [];
+                        let current_char_count = 0;
+
+                        // Build the slide line-by-line
+                        while (origin_lines.length > 0) {
+                            let next_line_o = origin_lines[0];
+
+                            // Strip HTML tags to get an accurate count of visible characters
+                            let next_line_text_only = next_line_o.replace(/(<([^>]+)>)/gi, "");
+                            let next_line_length = next_line_text_only.length;
+
+                            // If we already have at least 1 line AND adding the next line
+                            // pushes us over the char limit OR the line limit, stop building this slide.
+                            if (current_chunk_o.length > 0 &&
+                               (current_char_count + next_line_length > max_chars_per_slide || current_chunk_o.length >= fragment)) {
+                                break;
+                            }
+
+                            // Safe to add! Remove the line from our master list and add it to the chunk
+                            current_chunk_o.push(origin_lines.shift());
+                            if (region_lines.length > 0) {
+                                current_chunk_r.push(region_lines.shift());
+                            }
+
+                            current_char_count += next_line_length;
+                        }
+
+                        // Reconstruct the HTML for this specific chunk
+                        let o_html = '';
+                        let r_html = '';
+
+                        if (isList) {
+                            o_html = '<ul>' + current_chunk_o.map(obj => '<li>' + obj + '</li>').join('') + '</ul>';
+                            r_html = current_chunk_r.length > 0 ? '<ul>' + current_chunk_r.map(obj => '<li>' + obj + '</li>').join('') + '</ul>' : '';
+                        }
+                        else {
+                            o_html = current_chunk_o.join('<br/>');
+                            r_html = current_chunk_r.join('<br/>');
+                        }
+
+                        let sub_section = document.createElement('section');
+                        sub_section.append(create_view(data.type, o_html, r_html, 'info'));
+                        section.append(sub_section);
+                    }
+                }
+            }
+		    else if (data.type == 'song') {
+			    for(var j=0;j<data.content.length;j++) {
+			        s_name = data.content[j].name;
+			        if (data.content[j].manual === true) {
+			            let sub_section = document.createElement('section');
+                        sub_section.classList.add('top-align');
+			            sub_section.append(create_view(data.type, data.content[j].origin_text || '', data.content[j].region_text || '', s_name));
+                        sub_section.setAttribute('order', j);
+                        section.append(sub_section);
+			        }
+			        else {
+			            let selectedLanguages = lang
+			                ? [lang]
+			                : (Array.isArray(data.lang) ? data.lang : []);
+			            let languageLines = selectedLanguages.map(function(language) {
+			                return {
+			                    code: language,
+			                    lines: get_song_lyrics(data.content[j], language)
+			                        .split(/\n/)
+			                        .filter(line => line)
+			                };
+			            });
+			            let maxLines = languageLines.reduce(
+			                (max, language) => Math.max(max, language.lines.length), 0);
+			            let linesPerPage = fragment > 0 ? fragment : Math.max(maxLines, 1);
+			            let pageCount = Math.max(1, Math.ceil(maxLines / linesPerPage));
+
+			            for (let page = 0; page < pageCount; page++) {
+			                let languageContent = languageLines.map(function(language) {
+			                    return {
+			                        code: language.code,
+			                        html: language.lines
+			                            .slice(page * linesPerPage, (page + 1) * linesPerPage)
+			                            .join('<br/>')
+			                    };
+			                });
+			                let sub_section = document.createElement('section');
+			                if (fragment > 0) {
+			                    sub_section.classList.add('top-align');
+			                }
+			                sub_section.append(create_song_view(languageContent, s_name));
+			                sub_section.setAttribute('order', j);
+			                section.append(sub_section);
+			            }
+			        }
+			    }
+		    }
+		    else if (data.type == 'media') {
+		        let sub_section = document.createElement('section');
+				sub_section.setAttribute('data-background-iframe', data.content.origin_text);
+  			    section.append(sub_section);
+		    }
+    		$('.slides').append(section);
+    	}
+        document.dispatchEvent(new CustomEvent('presentation:slides-loaded'));
+    }
+
+    function _load_slides() {
         $('.slides').empty();
         if (!slides.length) {
             $('#slide_title, #slide_notes').empty();

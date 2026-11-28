@@ -159,6 +159,10 @@
     color: #ffd800;
 }
 
+.matrix-thumbnail-canvas .song.language-third {
+    color: oklab(0.42 0.11 -0.13);
+}
+
 .matrix-media-label {
     max-width: 90%;
     overflow: hidden;
