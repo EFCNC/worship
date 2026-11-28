@@ -15,6 +15,7 @@ sys.path.insert(0, project_root)
 
 from flask import Flask, redirect, render_template, request, url_for
 from flask_socketio import SocketIO, emit
+from app import parser as Parser
 from app import utils as Utils
 from app import tools as Tools
 from web.api import api
@@ -385,19 +386,11 @@ def edit_song(id): # Renamed for clarity
 		}]
 
 		sequence = content.get('sequence') or ''
+		verse_count = len(sections.get('verse', {}).get('lyrics', []))
 		if sequence:
-			tokens = []
-			for token in sequence.split(','):
-				token = token.strip().lower()
-				numbered_verse = re.fullmatch(r'(?:verse\s*)?(\d+)', token)
-				if numbered_verse:
-					token = 'v' + numbered_verse.group(1)
-				elif token in section_aliases:
-					token = section_aliases[token]
-				tokens.append(token)
-			content['sequence'] = ', '.join(tokens)
+			content['sequence'] = Parser.normalize_import_sequence(sequence, verse_count)
 		elif sections:
-			content['sequence'] = ', '.join(section_aliases.get(name, name) for name in sections)
+			content['sequence'] = Parser.normalize_import_sequence(','.join(sections), verse_count)
 	else:
 		content = Utils.get_song_by_id(id)
 

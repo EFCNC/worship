@@ -1213,7 +1213,7 @@
         const tokens = $('#sequence_preview .sequence-preview-item').map(function() {
             return this.dataset.token;
         }).get();
-        document.querySelector('input[name="sequence"]').value = tokens.join(', ');
+        document.querySelector('input[name="sequence"]').value = tokens.join(',');
         renumberSequencePreview();
     }
 
@@ -1591,7 +1591,7 @@
             const sequenceInput = document.querySelector('input[name="sequence"]');
             const tokens = getSequenceTokens();
             tokens.push(this.dataset.token);
-            sequenceInput.value = tokens.join(', ');
+            sequenceInput.value = tokens.join(',');
             renderSequencePreview();
             sequenceInput.focus();
             sequenceInput.setSelectionRange(sequenceInput.value.length, sequenceInput.value.length);
@@ -1615,7 +1615,7 @@
         });
 
         // --- Unsaved Changes Warning ---
-        $(window).on('beforeunload', function() {
+        $(window).off('beforeunload.songEditorUnsavedChanges').on('beforeunload.songEditorUnsavedChanges', function() {
             const currentState = getCurrentState();
             const changedFields = getChangedFields(originalData, currentState);
 
@@ -1648,15 +1648,19 @@
 
         // Submit to API
         const url = '/API/song/' + songId;
+        const markSaved = function() {
+            originalData = JSON.parse(JSON.stringify(currentState));
+            alert("Song saved successfully!");
+        };
         
         submit_song(url, JSON.stringify(changedFields))
             .done(function(response) {
-                alert("Song saved successfully!");
+                markSaved();
                 //window.location.href = "/song/list";
             })
             .fail(function(jqXHR) {
                 if (jqXHR.status === 200) {
-                    alert("Song saved successfully!");
+                    markSaved();
                     //window.location.href = "/song/list";
                 } else {
                     alert("Error saving song: " + (jqXHR.responseText || "Unknown error"));

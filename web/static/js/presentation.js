@@ -403,7 +403,7 @@
 			            let maxLines = languageLines.reduce(
 			                (max, language) => Math.max(max, language.lines.length), 0);
 			            let linesPerPage = fragment > 0 ? fragment : Math.max(maxLines, 1);
-			            let pageCount = maxLines ? Math.ceil(maxLines / linesPerPage) : 0;
+			            let pageCount = Math.max(1, Math.ceil(maxLines / linesPerPage));
 
 			            for (let page = 0; page < pageCount; page++) {
 			                let languageContent = languageLines.map(function(language) {

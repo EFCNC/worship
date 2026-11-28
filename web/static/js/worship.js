@@ -429,6 +429,9 @@ function render_song(id, db, lang, num) {
         $("#dialog").dialog({
             title: dialog_title[num]['title'],
             width: 'auto',
+            close: function() {
+                $(window).off('beforeunload.songEditorUnsavedChanges');
+            },
             position: {
                 my: "center top",
                 at: "center top+50",
@@ -504,8 +507,6 @@ function render_song(id, db, lang, num) {
                                         let new_card_html = generate_song_card(updated_song_data, songIndex);
                                         
                                         $('#worship li[name="' + id + '"]').replaceWith(new_card_html);
-
-                                        init();
                                     }
                                 });
                             }
@@ -557,6 +558,7 @@ function render_song(id, db, lang, num) {
                                 console.log('song_data', data);
                                 data['date'] = worship_data.date;
                                 data.language_version_order = get_language_version_order(data);
+                                data.alt_sequence = data.sequence;
                                 songs_temp.push(data);
                                 
                                 $.when( add_song_to_worship(worship) ).then(function() {
