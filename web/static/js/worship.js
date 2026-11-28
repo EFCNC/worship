@@ -39,11 +39,12 @@ function language_tags(languages) {
 }
 
 function render_song_sequence_language(song, language) {
-    const $sequence = $('#sequence_' + song.id);
+    const cardId = song._cardId ?? song.id;
+    const $sequence = $('#sequence_' + cardId);
     if (!$sequence.length || !language) return;
 
     $sequence.children('.lyric-item').each(function() {
-        const token = this.id.slice(('song-' + song.id + '_').length);
+        const token = this.id.slice(('song-' + cardId + '_').length);
         const parsed = SEQUENCE_MAPPER.parseToken(token);
         const rawLyrics = SEQUENCE_MAPPER.getLyricText(
             song.content,
@@ -64,9 +65,11 @@ function render_song_sequence_language(song, language) {
 
 // Helper function to build a single song <li>
 function generate_song_card(data, index) {
+    const cardId = data._cardId ?? index;
     var list = document.createElement('li');
     list.setAttribute('class', 'ui-state-default');
     list.setAttribute('name', data.id);
+    list.setAttribute('data-card-id', cardId);
 
     if (data.type == 'song') {
         var activeSequence = data.alt_sequence || '';
@@ -115,7 +118,7 @@ function generate_song_card(data, index) {
             html += '</div>';
 
             html += `
-                <div class="language-priority-widget" data-song-id="${data.id}">
+                <div class="language-priority-widget" data-card-id="${cardId}">
                     <button type="button" class="language-priority-toggle" aria-expanded="false">
                         <i class="fa-solid fa-caret-right"></i>
                         <span>Languages</span>
@@ -138,7 +141,7 @@ function generate_song_card(data, index) {
                 <div class="song-notes-row">
                     <div class="notes-container" style="width: 100%;">
                         <label for="song-notes-${index}" style="display: block; margin-bottom: 5px; font-weight: bold;">Song Notes:</label>
-                        <textarea id="song-notes-${index}" name="song_notes" data-index="${index}" rows="2">${data.notes || ''}</textarea>
+                        <textarea id="song-notes-${index}" name="song_notes" data-card-id="${cardId}" rows="2">${data.notes || ''}</textarea>
                     </div>
                 </div>`;
 
@@ -155,7 +158,7 @@ function generate_song_card(data, index) {
                         
                         for (let i = 0; i < count; i++) {
                             let tag = SEQUENCE_MAPPER.getShortTag(c.name, i, count);
-                            paletteButtons += `<button type="button" class="btn-palette ${c.name}" data-sec="${tag}" data-id="${data.id}">[${tag}]</button>`;
+                            paletteButtons += `<button type="button" class="btn-palette ${c.name}" data-sec="${tag}" data-card-id="${cardId}">[${tag}]</button>`;
                         }
                     });
                 }
@@ -166,14 +169,14 @@ function generate_song_card(data, index) {
                     <div class="song_sequence_toggle" name="${data.id}" title="Click to arrange song sequence">
                         <i class="fa-solid fa-caret-right toggle-icon"></i>
                         <span class="song_sequence">Song Sequence: 
-                            <span class="sequence" id="song-${data.id}_alt">${activeSequence}</span>
+                            <span class="sequence" id="song-${cardId}_alt">${activeSequence}</span>
                         </span>
                     </div>
                     <div class="sequence-container" style="display: none;">
                         <div class="palette-container">
                             <label style="margin: 0; font-weight: bold;">Quick Add / Tools:</label>
                             <div class="palette-buttons">
-                                <button type="button" class="btn-lang-swap" title="Swap Language" data-id="${data.id}"${languageOrder.length > 1 ? '' : ' style="display: none;"'}><i class="fa-solid fa-language"></i></button>
+                                <button type="button" class="btn-lang-swap" title="Swap Language" data-card-id="${cardId}"${languageOrder.length > 1 ? '' : ' style="display: none;"'}><i class="fa-solid fa-language"></i></button>
                                 ${paletteButtons}
                             </div>
                         </div>
@@ -184,7 +187,7 @@ function generate_song_card(data, index) {
             list.innerHTML = html;
 
             var ul = document.createElement('ul');
-            ul.setAttribute('id', 'sequence_' + data.id);
+            ul.setAttribute('id', 'sequence_' + cardId);
             ul.setAttribute('class', 'lyrics');
             ul.setAttribute('data-current-language', primaryLanguage);
 
@@ -200,7 +203,7 @@ function generate_song_card(data, index) {
 
                 let list_1 = document.createElement('li');
                 list_1.setAttribute('class', 'ui-state-default lyric-item');
-                list_1.setAttribute('id', 'song-' + data.id + '_' + token);
+                list_1.setAttribute('id', 'song-' + cardId + '_' + token);
 
                 list_1.innerHTML =
                     '<div name="lyrics_parts" class="lyric-content ' + token + ' ' + parsed.sectionName + '">' +
@@ -231,14 +234,14 @@ function generate_song_card(data, index) {
 
 // --- Language Swap Button Handler ---
 $(document).on('click', '.btn-lang-swap', function() {
-    let id = $(this).data('id');
-    let song = songs_temp.find(item => item.id == id);
+    let cardId = $(this).data('card-id');
+    let song = songs_temp.find(item => item._cardId == cardId);
     if (!song) return;
 
     const languageOrder = get_language_version_order(song);
     if (languageOrder.length < 2) return;
 
-    const $sequence = $('#sequence_' + id);
+    const $sequence = $('#sequence_' + cardId);
     const currentLanguage = $sequence.attr('data-current-language');
     const currentIndex = languageOrder.indexOf(currentLanguage);
     const nextLanguage = languageOrder[(currentIndex + 1) % languageOrder.length];
@@ -248,20 +251,20 @@ $(document).on('click', '.btn-lang-swap', function() {
 // --- Quick Add Palette Button Handler ---
 $(document).on('click', '.btn-palette', function() {
     let tag = $(this).data('sec'); 
-    let songId = $(this).data('id');
+    let cardId = $(this).data('card-id');
     
-    let songData = songs_temp.find(s => s.id == songId);
+    let songData = songs_temp.find(s => s._cardId == cardId);
     if (!songData) return;
     
     let parsed = SEQUENCE_MAPPER.parseToken(tag);
     let languageOrder = get_language_version_order(songData);
-    let $sequenceContainer = $('#sequence_' + songId);
+    let $sequenceContainer = $('#sequence_' + cardId);
     let currentLanguage = $sequenceContainer.attr('data-current-language') || languageOrder[0] || '';
     let rawLyrics = SEQUENCE_MAPPER.getLyricText(songData.content, parsed.sectionName, parsed.index, currentLanguage, '');
     
     let formatted_lang1 = rawLyrics.lang1 ? rawLyrics.lang1.split("\n").join("<br />") : '<em>(No lyrics found)</em>';
     let newBlock = $(`
-        <li class="ui-state-default lyric-item" id="song-${songId}_${tag}">
+        <li class="ui-state-default lyric-item" id="song-${cardId}_${tag}">
             <div name="lyrics_parts" class="lyric-content ${tag} ${parsed.sectionName}">
                 <div class="lyrics_buttons_container">
                     <button type="button" class="btn-lyric btn-lyric-add add_sequence_btn" title="Add Section"><i class="fa-solid fa-plus"></i></button>
@@ -488,26 +491,25 @@ function render_song(id, db, lang, num) {
 
                                 // Fetch the newly saved song data from database
                                 return get_song(id).done(function(updated_song_data) {
-                                    let songIndex = songs_temp.findIndex(s => s.id == id);
-                                    
-                                    if (songIndex > -1) {
-                                        let old_song = songs_temp[songIndex];
-                                        
+                                    songs_temp.forEach((old_song, songIndex) => {
+                                        if (old_song.id != id) return;
+
                                         // Preserve the worship-specific data
-                                        updated_song_data.transpose = old_song.transpose;
-                                        updated_song_data.notes = old_song.notes;
-                                        updated_song_data.alt_sequence = old_song.alt_sequence;
-                                        updated_song_data.date = old_song.date;
-                                        updated_song_data.language_version_order = old_song.language_version_order || get_language_version_order(updated_song_data);
+                                        const refreshedSong = {
+                                            ...updated_song_data,
+                                            _cardId: old_song._cardId,
+                                            transpose: old_song.transpose,
+                                            notes: old_song.notes,
+                                            alt_sequence: old_song.alt_sequence,
+                                            date: old_song.date,
+                                            language_version_order: old_song.language_version_order || get_language_version_order(updated_song_data)
+                                        };
 
-                                        // Update songs_temp
-                                        songs_temp[songIndex] = updated_song_data;
+                                        songs_temp[songIndex] = refreshedSong;
 
-                                        // Generate the HTML for JUST this specific card
-                                        let new_card_html = generate_song_card(updated_song_data, songIndex);
-                                        
-                                        $('#worship li[name="' + id + '"]').replaceWith(new_card_html);
-                                    }
+                                        const newCard = generate_song_card(refreshedSong, songIndex);
+                                        $('#worship li[data-card-id="' + old_song._cardId + '"]').replaceWith(newCard);
+                                    });
                                 });
                             }
 
@@ -559,6 +561,7 @@ function render_song(id, db, lang, num) {
                                 data['date'] = worship_data.date;
                                 data.language_version_order = get_language_version_order(data);
                                 data.alt_sequence = data.sequence;
+                                data._cardId = nextSongCardId++;
                                 songs_temp.push(data);
                                 
                                 $.when( add_song_to_worship(worship) ).then(function() {

@@ -578,7 +578,9 @@
     ================================== */
     // Store worship set into object
     let songs = {{ songs|tojson|safe }};
+    let nextSongCardId = 0;
     songs.forEach(song => {
+        song._cardId = nextSongCardId++;
         if (song.type === 'song') song.language_version_order = get_language_version_order(song);
     });
     let songs_temp = JSON.parse(JSON.stringify(songs));
@@ -692,8 +694,9 @@
     });
 
     $(document).on('input', 'textarea[name="song_notes"]', function() {
-        let index = $(this).data('index');
-        songs_temp[index].notes = $(this).val();
+        let cardId = $(this).data('card-id');
+        let song = songs_temp.find(item => item._cardId == cardId);
+        if (song) song.notes = $(this).val();
         checkActionButtons();
     });
     
@@ -811,16 +814,16 @@
 
     function songs_have_changes() {
         let currentOrder = $('#songs').data('ui-sortable')
-            ? $('#songs').sortable('toArray', {attribute: 'name'})
-            : songs.map(item => String(item.id));
-        let originalOrder = songs.map(item => String(item.id));
+            ? $('#songs').sortable('toArray', {attribute: 'data-card-id'})
+            : songs.map(item => String(item._cardId));
+        let originalOrder = songs.map(item => String(item._cardId));
 
         if (JSON.stringify(currentOrder) !== JSON.stringify(originalOrder) || songs.length !== songs_temp.length) {
             return true;
         }
 
         return songs.some(function(song) {
-            let tempSong = songs_temp.find(s => s.id === song.id);
+            let tempSong = songs_temp.find(s => s._cardId === song._cardId);
             return !tempSong ||
                 (parseInt(song.transpose) || 0) !== (parseInt(tempSong.transpose) || 0) ||
                 song.notes != tempSong.notes ||
@@ -846,15 +849,15 @@
         const order = $activeList.children('[data-lang]').map(function() {
             return $(this).data('lang');
         }).get();
-        const songId = String($widget.data('song-id'));
-        const song = songs_temp.find(item => String(item.id) === songId);
+        const cardId = String($widget.data('card-id'));
+        const song = songs_temp.find(item => String(item._cardId) === cardId);
         if (song) {
             song.language_version_order = order;
-            const $sequence = $('#sequence_' + songId);
+            const $sequence = $('#sequence_' + cardId);
             const currentLanguage = $sequence.attr('data-current-language');
             const displayLanguage = order.includes(currentLanguage) ? currentLanguage : order[0];
             render_song_sequence_language(song, displayLanguage);
-            $('#songs li[name="' + songId + '"] .btn-lang-swap').toggle(order.length > 1);
+            $('#songs li[data-card-id="' + cardId + '"] .btn-lang-swap').toggle(order.length > 1);
         }
 
         $activeList.children('.language-priority-item').each(function(index) {
@@ -936,15 +939,15 @@
             console.log('content changed');
             content = JSON.parse(JSON.stringify(songs_temp));
         }
-        if(JSON.stringify(order) != JSON.stringify(songs.map(item=>String(item.id)))) {
+        if(JSON.stringify(order) != JSON.stringify(songs.map(item=>String(item._cardId)))) {
             console.log('order changed')
-            for (let id of order) {
+            for (let cardId of order) {
                 let entry;
                 if (content.length>0) {
-                    entry = content.find(o => o.id == id)
+                    entry = content.find(o => o._cardId == cardId)
                 }
                 else {
-                    entry = songs_temp.find(o => o.id == id)
+                    entry = songs_temp.find(o => o._cardId == cardId)
                 }
                 temp.push(entry)
             }
@@ -961,7 +964,7 @@
         Leaving the if else just in case
     */
     function save(id) {
-        let temp = is_changed($('#songs').sortable('toArray', {attribute: 'name'}), $('#lyrics').sortable('toArray', {attribute: 'name'}))
+        let temp = is_changed($('#songs').sortable('toArray', {attribute: 'data-card-id'}), $('#lyrics').sortable('toArray', {attribute: 'name'}))
         if (temp) {
             let changed = temp.map((item, i)=> ({
                 'song_order': i+1,
@@ -987,11 +990,11 @@
             	        alert("Worship Arrangement Saved!");
 
                         // Rebuild the 'songs' baseline to match the newly saved state!
-                        let newOrder = $('#songs').sortable('toArray', {attribute: 'name'});
+                        let newOrder = $('#songs').sortable('toArray', {attribute: 'data-card-id'});
                         let newBaseline = [];
                         
-                        for (let currentId of newOrder) {
-                            let songData = songs_temp.find(s => s.id == currentId);
+                        for (let cardId of newOrder) {
+                            let songData = songs_temp.find(s => s._cardId == cardId);
                             if (songData) {
                                 newBaseline.push(songData);
                             }
@@ -1107,12 +1110,12 @@
     // When the Key is changed
     $(document).on('change', '.key', function () {
         let transposeVal = keys.indexOf(this.value) - keys.indexOf($(this).attr('init'));
-        let id = $(this).closest('li').attr('name');
+        let cardId = $(this).closest('li').attr('data-card-id');
         
         $(this).attr('name', transposeVal); 
         
         for (let song of songs_temp) {
-            if (song.id == id) {
+            if (song._cardId == cardId) {
                 song.transpose = transposeVal;
                 break;
             }
@@ -1229,14 +1232,14 @@
             }
         });
         
-        // Extract song ID from the ul id (e.g., "sequence_123" -> "123")
-        let songId = listId.split('_')[1];
+        // Extract the card ID from the ul id (e.g., "sequence_123" -> "123")
+        let cardId = listId.slice('sequence_'.length);
         let sequenceStr = ids.join(',');
         
-        $('#song-' + songId + '_alt').html(sequenceStr);
+        $('#song-' + cardId + '_alt').html(sequenceStr);
         
         for (let song of songs_temp) {
-            if (song.id == songId) {
+            if (song._cardId == cardId) {
             song.alt_sequence = sequenceStr;
             break;
             }
@@ -1261,9 +1264,9 @@
     
     // Remove song from song set, when click save song_set table will be updated
     $(document).on('click', '.remove_btn', function() {
-        let id = $(this).closest('li').attr('name');
+        let cardId = $(this).closest('li').attr('data-card-id');
         for (i in songs_temp) {
-            if (songs_temp[i].id == id) {
+            if (songs_temp[i]._cardId == cardId) {
                 songs_temp.splice(i,1);
                 break;
             }
@@ -1336,8 +1339,10 @@
     });
 
     // Add this helper function outside your click handler
-    function scrollToTarget(id) {
-        let $target = $('#worship li[name="' + id + '"]');
+    function scrollToTarget(id, cardId) {
+        let $target = cardId === undefined
+            ? $('#worship li[name="' + id + '"]')
+            : $('#worship li[data-card-id="' + cardId + '"]');
         if ($target.length === 0) $target = $('#worship li').last();
         let $scrollTarget = $target.length > 0 ? $target : $('#worship');
         
@@ -1400,11 +1405,12 @@
                 data['date'] = worship_data.date;
                 data.language_version_order = get_language_version_order(data);
                 data.alt_sequence = data.sequence;
+                data._cardId = nextSongCardId++;
                 songs_temp.push(data);
                 
                 $.when(add_song_to_worship(worship)).then(function() {
                     // DOM is updated, now scroll to the new item
-                    scrollToTarget(id).done(() => {
+                    scrollToTarget(id, data._cardId).done(() => {
                         init();
                         checkActionButtons();
                         stopLoading();
